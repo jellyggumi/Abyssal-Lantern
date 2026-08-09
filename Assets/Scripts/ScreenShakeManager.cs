@@ -23,8 +23,16 @@ namespace CastleBusters
             if (Instance == this) Instance = null;
         }
 
+        /// <summary>Global damper on every shake in the game. Call sites keep their
+        /// relative weighting — a core hit still outshakes a chipped brick — but the
+        /// whole channel sits lower, because a board this dense reads worse when the
+        /// camera is constantly moving. Tune here, never per call site.</summary>
+        public const float IntensityScale = 0.55f;
+
         public void TriggerShake(float duration = 0.3f, float magnitude = 0.15f)
         {
+            magnitude *= IntensityScale;
+
             if (gameObject.activeInHierarchy && Application.isPlaying)
             {
                 var mainCamera = Camera.main;

@@ -43,8 +43,15 @@ namespace CastleBusters
             return gm.currentState == GameState.PlayerTurn || gm.currentState == GameState.AITurn;
         }
 
+        /// <summary>Global damper on every freeze. Stacked collapse chains fire hit stop
+        /// repeatedly, and at full strength the board reads as stuttering rather than
+        /// impactful. Tune here, never per call site.</summary>
+        public const float IntensityScale = 0.6f;
+
         public void TriggerHitStop(float duration = 0.05f)
         {
+            duration *= IntensityScale;
+
             if (!gameObject.activeInHierarchy || !Application.isPlaying) return;
             if (Time.timeScale <= 0f) return; // already frozen intentionally — do not fight it
             if (!GameplayIsLive()) return;

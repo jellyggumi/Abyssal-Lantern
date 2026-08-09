@@ -1,0 +1,10 @@
+{
+  "asset": "gimmick_wall_brick_cracked.png",
+  "tool": "god-tibo-imagen (gti) via Codex ChatGPT backend",
+  "model": "gpt-5.4 (default)",
+  "style_contract": "retro pixel-art single game asset, side-view orthographic, flat magenta (#FF00FF) background for keying, no text/shadow/scenery",
+  "postprocess": "ImageMagick -fuzz 18% -transparent magenta -trim +repage, then resized (perfectpixel's remove-background step done locally; ppgen itself cannot run here)",
+  "sha256": "2e35e078744ce384705fde7540db63d1734265ea7d08c9b61a3a9e6bdca9b110",
+  "generated": "2026-08-09",
+  "audited": "keyed alpha and silhouette checked; world size normalised in code so art cannot resize a gameplay object"
+}

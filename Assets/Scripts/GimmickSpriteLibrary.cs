@@ -17,6 +17,12 @@ namespace CastleBusters
         public const string Gate = "gimmick_gate";
         public const string Ram = "gimmick_ram";
         public const string Barrel = "gimmick_barrel";
+        public const string Cannon = "gimmick_cannon";
+        public const string CannonBarrel = "gimmick_cannon_barrel";
+        public const string Shell = "gimmick_shell";
+        public const string MuzzleFlash = "gimmick_muzzle_flash";
+        public const string WallBrick = "gimmick_wall_brick";
+        public const string WallBrickCracked = "gimmick_wall_brick_cracked";
         public const string Core = "gimmick_core";
         public const string ButtonCard = "ui_button_card";
         public const string LastStandButton = "last_stand_button";
@@ -85,6 +91,50 @@ namespace CastleBusters
             renderer.sprite = sprite;
             renderer.color = tint;
             return true;
+        }
+    }
+
+    /// <summary>
+    /// Cached access to optional Higgsfield-authored presentation art. Generated assets
+    /// are additive: callers retain their existing gameplay-safe fallback when a sprite
+    /// is absent or fails to import.
+    /// </summary>
+    public static class HiggsfieldSpriteLibrary
+    {
+        public const string Knight = "Knight";
+        public const string Archer = "Archer";
+        public const string Cannon = "Cannon";
+        public const string Barrel = "Barrel";
+        public const string Ram = "Ram";
+        public const string Trap = "Trap";
+
+        public const string Impact = "Impact";
+        public const string Wind = "Wind";
+        public const string CoreCrack = "CoreCrack";
+        public const string CollapseDust = "CollapseDust";
+
+        private static readonly Dictionary<string, Sprite> cache = new Dictionary<string, Sprite>();
+
+        public static Sprite LoadUi(string key)
+        {
+            return Load("UI", key);
+        }
+
+        public static Sprite LoadVfx(string key)
+        {
+            return Load("VFX", key);
+        }
+
+        private static Sprite Load(string folder, string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+
+            string path = $"Higgsfield/{folder}/{key}";
+            if (cache.TryGetValue(path, out var cached) && cached != null) return cached;
+
+            var sprite = Resources.Load<Sprite>(path);
+            cache[path] = sprite;
+            return sprite;
         }
     }
 }
