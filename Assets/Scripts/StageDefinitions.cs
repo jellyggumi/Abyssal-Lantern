@@ -178,7 +178,13 @@ namespace CastleBusters
                 new Vector3(11.5f, 0.5f, 0f),
                 new Vector3(15.0f, 0.5f, 0f),
             },
-            wallHeightBlocks: 2,
+            // Campaign redistribution: fortress height now rises 2 -> 3 -> 4 across the
+            // sequential unlock order. Stage3 previously kept Stage1's 2 — the only stage
+            // value carried over without a stated reason — which made the last stage the
+            // softest fortress in the game. Wind stays distance-derived (Stage2 lower,
+            // Stage3 higher) because that is physics, not progression, and pacing
+            // (obstacle cap and mutation cadence) stays each stage's identity.
+            wallHeightBlocks: 4,
             maxFieldObstacles: 7,
             mutateEveryNTurns: 4,
             backgroundTint: new Color(1.0f, 0.75f, 0.7f, 1f),
