@@ -14,7 +14,7 @@
 | 5 | llm-wiki project page `wiki/projects/castle-war/` + index link | production | done 2026-08-09 | docs |
 | 6 | wai-play install; verify Unity MCP + CLI control path | engineering | done 2026-08-09 (checkout `~/orca/wai-play`, doctor OK keyless; `unity-mcp-cli` + batch CLI verified) | web beat |
 | 7 | Faction-war design pack: worldview, core-loop model, presentation spec | design | done 2026-08-09 (G1/G7 draft + presentation spec + telemetry draft + resource manifest) | G1/G7/G6-ops draft |
-| 8 | WebGL build script (`Assets/Editor/`) + Pages deploy + menu link | engineering | in_progress (WebGL module installed; batch build running; pages `games/` menu authored) | web beat |
+| 8 | WebGL build script (`Assets/Editor/`) + Pages deploy + menu link | engineering | done 2026-08-09 — batch build Succeeded (70.8MB, 0 errors, `webgl-build.log`); deployed to `jellyggumi.github.io` gh-pages `e3ceeac` → https://jellyggumi.github.io/games/castle-war/ (menu: /games/, homepage GAMES link) | web beat |
 | 9 | BGM via Gemini(playwriter) → `Assets/Resources/Audio/` after audit | design | pending (playwriter 0.4.0 + Chrome relay verified live) | Stage 3 |
 | 10 | Codex art pass (faction key art, UI) → concept lane first | design | pending | Stage 3 |
 

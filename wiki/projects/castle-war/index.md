@@ -8,6 +8,11 @@ owner action. Public beat: WebGL build on the
 
 ## Status (2026-08-09)
 
+- **Playable on the web**: https://jellyggumi.github.io/games/castle-war/
+  (WebGL, gzip + decompression fallback; menu at /games/). Build via
+  `Assets/Editor/WebGLReleaseBuild.cs`, batch CLI, editor closed.
+- Concept prototype (faction-war reframe testbed) published as a Claude
+  artifact: war-bar HUD, drag-launch, ground-war validation.
 - Build carried in: 3 units (Knight/Archer/Bomber), 3 stages, 41 EditMode
   tests, balance at 50/50 win-rate (Phase 2 complete).
 - Cycle: Stage 1 concept pivot — see
