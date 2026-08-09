@@ -348,7 +348,7 @@ namespace CastleBusters
             label.rectTransform.pivot = new Vector2(0.5f, 1f);
             label.rectTransform.sizeDelta = new Vector2(800f, 26f);
             label.text = "전장 선택";
-            label.fontSize = 18f;
+            label.fontSize = 22f;
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(0.85f, 0.9f, 1f, 0.85f);
             label.outlineWidth = 0.14f;
@@ -417,8 +417,9 @@ namespace CastleBusters
             img.gameObject.AddComponent<GameButtonAnimator>();
 
             var text = CreateChild<TextMeshProUGUI>("Label", img.transform);
-            text.rectTransform.anchorMin = new Vector2(0.06f, 0.04f);
-            text.rectTransform.anchorMax = new Vector2(0.94f, 0.40f);
+            // Lift off the frame's bottom rail: at 0.04 the label sat on the carved edge.
+            text.rectTransform.anchorMin = new Vector2(0.08f, 0.10f);
+            text.rectTransform.anchorMax = new Vector2(0.92f, 0.44f);
             text.rectTransform.offsetMin = Vector2.zero;
             text.rectTransform.offsetMax = Vector2.zero;
             string cardName = ShortStageName(label);
@@ -452,9 +453,12 @@ namespace CastleBusters
             if (locked)
             {
                 // Always dim, never "selected" — a locked card can't be the active pick.
+                // Dim, but still a card: at 0.55 alpha the dark frame vanished into the
+                // bright key art and the label read as loose text floating on the sky,
+                // which looks like a layout bug rather than a locked stage.
                 image.color = cardLook
-                    ? new Color(0.32f, 0.32f, 0.35f, 0.55f)
-                    : new Color(0.18f, 0.2f, 0.24f, 0.5f);
+                    ? new Color(0.44f, 0.44f, 0.48f, 0.88f)
+                    : new Color(0.2f, 0.22f, 0.27f, 0.8f);
                 return;
             }
             image.color = cardLook
