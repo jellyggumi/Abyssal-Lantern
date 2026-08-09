@@ -10,6 +10,12 @@ public static class WebGLReleaseBuild
     [MenuItem("Build/WebGL Release (castle-war)")]
     public static void Build()
     {
+        // Hangul renders as tofu in WebGL without the bundled fallback asset.
+        KoreanFontAssetBuilder.Ensure();
+
+        // Dark siege-themed loading screen + canvas focus/touch handling (Assets/WebGLTemplates/CastleWar).
+        PlayerSettings.WebGL.template = "PROJECT:CastleWar";
+
         var scenes = EditorBuildSettings.scenes
             .Where(s => s.enabled)
             .Select(s => s.path)

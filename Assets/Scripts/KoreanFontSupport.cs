@@ -46,6 +46,19 @@ namespace CastleBusters
                 if (fallbacks.Any(SupportsHangul)) return; // live Hangul fallback already present
             }
 
+            // Bundled font first: WebGL (and any player build) has no OS font paths, so the
+            // serialized dynamic asset created by KoreanFontAssetBuilder is the only source
+            // of Hangul glyphs outside the editor.
+            var bundled = Resources.Load<TMP_FontAsset>("Fonts/NotoSansKR-Dynamic");
+            if (bundled != null && SupportsHangul(bundled))
+            {
+                if (fallbacks != null && !fallbacks.Contains(bundled))
+                {
+                    fallbacks.Add(bundled);
+                }
+                return;
+            }
+
             string[] osFontPaths;
             try { osFontPaths = Font.GetPathsToOSFonts(); }
             catch { osFontPaths = null; }

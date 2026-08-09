@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0c14">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --kr-font: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR",
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+        background: #05060a;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+
+      body {
+        font-family: var(--kr-font);
+      }
+
+      #unity-container {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #05060a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #0a0c14;
+        touch-action: none;
+        outline: none;
+      }
+
+      /* Dark siege loading screen */
+      #unity-loading-bar {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        background:
+          radial-gradient(ellipse at 50% 30%, rgba(70, 90, 140, 0.18) 0%, rgba(5, 6, 10, 0) 60%),
+          linear-gradient(180deg, #0a0c16 0%, #05060a 60%, #020204 100%);
+        z-index: 20;
+      }
+
+      #unity-loading-emblem {
+        font-size: 52px;
+        filter: drop-shadow(0 0 18px rgba(120, 160, 255, 0.35));
+        animation: castle-pulse 1.8s ease-in-out infinite;
+      }
+
+      @keyframes castle-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.92; }
+        50% { transform: scale(1.06); opacity: 1; }
+      }
+
+      #unity-loading-text {
+        font-family: var(--kr-font);
+        font-size: 16px;
+        letter-spacing: 0.02em;
+        color: #cfd8f0;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      }
+
+      #unity-progress-bar-empty {
+        width: min(320px, 70vw);
+        height: 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(140, 170, 255, 0.28);
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+
+      #unity-progress-bar-full {
+        width: 0%;
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #3a5bc7 0%, #6f9dff 60%, #a9c4ff 100%);
+        box-shadow: 0 0 10px rgba(111, 157, 255, 0.6);
+        transition: width 0.15s ease-out;
+      }
+
+      #unity-warning {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        font-family: var(--kr-font);
+        font-size: 13px;
+        pointer-events: none;
+      }
+
+      #unity-warning > div {
+        pointer-events: auto;
+        margin: 6px auto;
+        max-width: 90vw;
+        border-radius: 6px;
+        text-align: center;
+      }
+
+      #unity-footer {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-loading-emblem">🏰</div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+        <div id="unity-loading-text">불러오는 중…</div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var loadingText = document.querySelector("#unity-loading-text");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or a permanent
+      // error message on top of the canvas if type=='error'.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+        }
+        var div = document.createElement("div");
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == "error") div.style = "background: #7a1f1f; color: #ffe4e4; padding: 10px;";
+        else {
+          if (type == "warning") div.style = "background: #7a5a1f; color: #fff3d6; padding: 10px;";
+          setTimeout(function () {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: unityShowBanner,
+      };
+
+      // Keep keyboard input (1/2/3 unit select, etc.) flowing to the canvas as soon
+      // as it can receive focus, both on load and on every subsequent tap/click.
+      function focusCanvas() {
+        if (canvas) canvas.focus();
+      }
+      canvas.tabIndex = 1;
+      canvas.addEventListener("click", focusCanvas);
+      canvas.addEventListener("pointerdown", focusCanvas);
+
+      // Block the browser gestures that fight a full-screen touch siege game:
+      // page scroll/bounce, pinch-zoom, and the long-press context menu.
+      var preventDefaultTouch = function (e) { e.preventDefault(); };
+      canvas.addEventListener("touchstart", preventDefaultTouch, { passive: false });
+      canvas.addEventListener("touchmove", preventDefaultTouch, { passive: false });
+      canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+      document.addEventListener("gesturestart", preventDefaultTouch);
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        config.devicePixelRatio = 1;
+      }
+
+      loadingBar.style.display = "flex";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+          loadingBar.style.display = "none";
+          focusCanvas();
+        }).catch((message) => {
+          loadingText.textContent = "불러오지 못했습니다";
+          unityShowBanner(message, "error");
+        });
+      };
+
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>

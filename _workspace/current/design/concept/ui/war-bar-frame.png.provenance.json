@@ -1,0 +1,11 @@
+{
+  "file": "war-bar-frame.png",
+  "prompt": "Procedural PIL draw: ornate horizontal war-bar frame, beveled dark metal plate, gold inlay, rivets, diamond end caps, hollow transparent center for a runtime fill sprite.",
+  "tool": "PIL (Pillow) 12.2.0 procedural draw, script gen_ui_concept.py",
+  "generatedAt": "2026-08-09T06:32:21.677986+00:00",
+  "checksumSha256": "94ed792d0150664a2f34d9dde707b0e569a61c9bef4f6528814e70374cc9479e",
+  "runtimeEligible": false,
+  "notes": "Draft concept art for the UI resource-refresh pass. Not promoted to Assets/; requires design audit before any runtime use.",
+  "width": 640,
+  "height": 96
+}

@@ -68,8 +68,9 @@ namespace CastleBusters
         private string BuildControlGuideText()
         {
             // One compact line: playtest feedback flagged the old three-line bilingual block
-            // as HUD noise that pulled focus from the battlefield.
-            return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  <color=#87CEFA>1 기사 · 2 궁수 · 3 폭탄병</color>  ·  푸른 링에서 드래그 → 발사";
+            // as HUD noise that pulled focus from the battlefield. Numeral hints use the same
+            // gold as the selected unit-card border so the guide visually maps to the row above it.
+            return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  <color=#FFC73D>1 기사 · 2 궁수 · 3 폭탄병</color>  ·  푸른 링에서 드래그 → 발사";
         }
 
 
@@ -194,16 +195,16 @@ namespace CastleBusters
                     var go = new GameObject("ControlGuideText");
                     go.transform.SetParent(canvas.transform, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
-                    textComp.fontSize = 20;
+                    textComp.fontSize = 22;
                     textComp.color = new Color(0.8f, 0.95f, 1f, 0.95f);
-                    textComp.outlineWidth = 0.16f;
+                    textComp.outlineWidth = 0.18f;
                     textComp.outlineColor = new Color(0.02f, 0.015f, 0.01f, 0.95f);
                     textComp.alignment = TextAlignmentOptions.Left;
                     textComp.text = BuildControlGuideText();
 
                     var rectTransform = go.GetComponent<RectTransform>();
                     rectTransform.anchorMin = new Vector2(0.02f, 0.02f);
-                    rectTransform.anchorMax = new Vector2(0.78f, 0.02f);
+                    rectTransform.anchorMax = new Vector2(0.82f, 0.02f);
                     rectTransform.pivot = new Vector2(0f, 0f);
                     rectTransform.anchoredPosition = Vector2.zero;
                     rectTransform.sizeDelta = new Vector2(0f, 72f);
@@ -421,7 +422,9 @@ namespace CastleBusters
                 var sr = launchPointIndicatorInstance.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    float alpha = 0.5f + Mathf.Sin(Time.time * 8f) * 0.3f;
+                    // Drag-start affordance: raised the floor so the ring never dims below a
+                    // clearly-visible glow, keeping it legible as the "start here" hint at rest.
+                    float alpha = 0.58f + Mathf.Sin(Time.time * 8f) * 0.26f;
                     sr.color = new Color(0.35f, 0.9f, 1f, alpha);
                 }
             }

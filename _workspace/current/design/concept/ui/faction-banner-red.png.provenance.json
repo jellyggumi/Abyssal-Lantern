@@ -1,0 +1,12 @@
+{
+  "file": "faction-banner-red.png",
+  "prompt": "Procedural PIL draw: vertical siege pennant banner, red faction, gradient cloth, swallow-tail cut, gold rope trim, castle-crest disc emblem, wooden pole.",
+  "tool": "PIL (Pillow) 12.2.0 procedural draw, script gen_ui_concept.py",
+  "generatedAt": "2026-08-09T06:32:21.677825+00:00",
+  "checksumSha256": "c5ba55cecba056d42de8b18b23da52f68ef8c5c86c497ed6e4e45763864c4cb1",
+  "runtimeEligible": false,
+  "notes": "Draft concept art for the UI resource-refresh pass. Not promoted to Assets/; requires design audit before any runtime use.",
+  "width": 256,
+  "height": 512,
+  "label": "red faction pennant"
+}

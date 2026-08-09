@@ -1586,7 +1586,9 @@ namespace CastleBusters
             var rt = button.GetComponent<RectTransform>();
             if (rt != null)
             {
-                rt.localScale = isSelected ? new Vector3(1.08f, 1.08f, 1f) : Vector3.one;
+                // Selection feedback: slightly larger pop (was 1.08x) so the active unit card
+                // reads clearly against its neighbors at a glance.
+                rt.localScale = isSelected ? new Vector3(1.12f, 1.12f, 1f) : Vector3.one;
             }
         }
 
