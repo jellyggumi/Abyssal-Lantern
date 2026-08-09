@@ -153,7 +153,7 @@ namespace CastleBusters
             taglineRect.anchorMin = new Vector2(0.5f, 0.62f);
             taglineRect.anchorMax = new Vector2(0.5f, 0.62f);
             taglineRect.sizeDelta = new Vector2(1400f, 80f);
-            tagline.text = "발사하라, 부숴라, 무너뜨려라 — Launch. Break. Collapse.";
+            tagline.text = "발사하라 · 부숴라 · 무너뜨려라";
             tagline.fontSize = 40f;
             tagline.alignment = TextAlignmentOptions.Center;
             tagline.color = new Color(0.95f, 0.97f, 1f, 0.95f);
@@ -167,8 +167,9 @@ namespace CastleBusters
             howTo.rectTransform.anchorMin = new Vector2(0.5f, 0.30f);
             howTo.rectTransform.anchorMax = new Vector2(0.5f, 0.30f);
             howTo.rectTransform.sizeDelta = new Vector2(1500f, 120f);
-            howTo.text = "1/2/3/4 부대 선택 · 푸른 링에서 당겨서 발사 · 바람을 읽어라\n" +
-                         "Pick a unit (1-4) · Drag from the rally ring · Read the banner wind · Breach the core";
+            // One line, Korean only: the bilingual two-line version doubled the width and
+            // read as a manual, not an affordance. Wind and unit keys are taught in-match.
+            howTo.text = "유닛 선택 → 푸른 링에서 당겨 발사 → 적 코어 파괴";
             howTo.fontSize = 30f;
             howTo.alignment = TextAlignmentOptions.Center;
             howTo.color = new Color(0.85f, 0.92f, 1f, 0.9f);
@@ -215,11 +216,14 @@ namespace CastleBusters
             // range scale with the card so the label grows in step with the button.
             buttonLabel.rectTransform.offsetMin = new Vector2(24f, 14.4f);
             buttonLabel.rectTransform.offsetMax = new Vector2(-24f, -14.4f);
-            buttonLabel.text = "공성 개시  ·  START SIEGE";
+            // Korean only: the bilingual label overran the 9-sliced frame's right border
+            // even with auto-sizing, because fallback-font metrics are measured after the
+            // first fit pass. A short label keeps the text inside the wood at full size.
+            buttonLabel.text = "공성 개시";
             buttonLabel.enableWordWrapping = false;
             buttonLabel.enableAutoSizing = true;
             buttonLabel.fontSizeMin = 18f;
-            buttonLabel.fontSizeMax = 48f;
+            buttonLabel.fontSizeMax = 40f;
 
             buttonLabel.fontStyle = FontStyles.Bold;
             buttonLabel.alignment = TextAlignmentOptions.Center;
@@ -330,7 +334,7 @@ namespace CastleBusters
             label.rectTransform.anchorMax = new Vector2(0.5f, 1f);
             label.rectTransform.pivot = new Vector2(0.5f, 1f);
             label.rectTransform.sizeDelta = new Vector2(800f, 26f);
-            label.text = "전장 선택 · CHOOSE YOUR BATTLEFIELD";
+            label.text = "전장 선택";
             label.fontSize = 18f;
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(0.85f, 0.9f, 1f, 0.85f);
@@ -367,6 +371,16 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>Card face shows only the Korean half of a "ENGLISH / 한글" stage name.
+        /// The full bilingual string wrapped to three lines inside a 230x155 card and
+        /// collided with the frame art; StageDefinitions keeps the long name for logs.</summary>
+        private static string ShortStageName(string displayName)
+        {
+            if (string.IsNullOrEmpty(displayName)) return displayName;
+            int split = displayName.IndexOf('/');
+            return split >= 0 ? displayName.Substring(split + 1).Trim() : displayName.Trim();
+        }
+
         private Image CreateStageButton(RectTransform parent, StageId stage, Vector2 anchoredPos, string label, bool locked)
         {
             var img = CreateChild<Image>($"Stage_{stage}", parent);
@@ -394,7 +408,8 @@ namespace CastleBusters
             text.rectTransform.anchorMax = new Vector2(0.94f, 0.40f);
             text.rectTransform.offsetMin = Vector2.zero;
             text.rectTransform.offsetMax = Vector2.zero;
-            text.text = locked ? label + "\n(잠김 · LOCKED)" : label;
+            string cardName = ShortStageName(label);
+            text.text = locked ? cardName + "\n잠김" : cardName;
             text.enableAutoSizing = true;
             text.fontSizeMin = 7f;
             text.fontSizeMax = 16f;

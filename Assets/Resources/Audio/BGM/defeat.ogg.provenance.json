@@ -1,0 +1,11 @@
+{
+  "asset": "defeat.ogg",
+  "tool": "higgsfield CLI 1.1.23",
+  "model": "sonilo_music (Sonilo Music)",
+  "params": { "duration": 10 },
+  "postprocess": "ffmpeg -c:a libvorbis -q:a 4 -ar 44100 (m4a is not a Unity source format)",
+  "duration_seconds": 10.03,
+  "sha256": "8fcaba6ca4b4564387e625f2bd13ef03f7ac64aa7f43b35080d6952bfafc2b4f",
+  "generated": "2026-08-09",
+  "audited": "duration/format verified via ffprobe; promoted per CLAUDE.md 3"
+}

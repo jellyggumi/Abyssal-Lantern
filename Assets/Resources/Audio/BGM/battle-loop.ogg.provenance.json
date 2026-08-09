@@ -1,0 +1,13 @@
+{
+  "asset": "battle-loop.ogg",
+  "tool": "higgsfield CLI 1.1.23",
+  "model": "sonilo_music (Sonilo Music)",
+  "prompt": "Epic medieval castle siege battle loop for a 2D pixel-art artillery war game. 130 BPM, driving war drums, heroic brass fanfare, plucked strings, playful but tense, seamless loop, instrumental, no vocals",
+  "params": { "duration": 60 },
+  "source_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HaZuH3UivCvNs7JsnnYaOB72Rx/hf_20260809_133222_e1d873cf-1383-4bb3-adc8-3383ab841062.m4a",
+  "postprocess": "ffmpeg -c:a libvorbis -q:a 4 -ar 44100 (m4a is not a Unity source format)",
+  "duration_seconds": 60.02,
+  "sha256": "361667d9a4d71f7d0227de99bffe3e881e5c18dec32f4603567fd5661794973d",
+  "generated": "2026-08-09",
+  "audited": "duration/format verified via ffprobe; promoted to Assets after audit per CLAUDE.md 3"
+}

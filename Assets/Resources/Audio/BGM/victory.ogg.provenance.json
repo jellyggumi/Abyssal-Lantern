@@ -1,0 +1,11 @@
+{
+  "asset": "victory.ogg",
+  "tool": "higgsfield CLI 1.1.23",
+  "model": "sonilo_music (Sonilo Music)",
+  "params": { "duration": 10 },
+  "postprocess": "ffmpeg -c:a libvorbis -q:a 4 -ar 44100 (m4a is not a Unity source format)",
+  "duration_seconds": 10.03,
+  "sha256": "d51b9ab448a8f8260af66bb04b0740617d9f472ccc8c6293e76f4f2fa3948ea4",
+  "generated": "2026-08-09",
+  "audited": "duration/format verified via ffprobe; promoted per CLAUDE.md 3"
+}
