@@ -15,12 +15,12 @@
 |---|---|---|---|
 | 진영 배너/키아트 (청·홍) | Codex CLI | design/concept/ → Assets/Sprites/Factions/ | Stage 3 |
 | war-bar HUD 아트 | Codex CLI | design/concept/ → Assets/Sprites/UI/ | Stage 2–3 |
-| 인트로/메뉴 프리뷰 영상 | Higgsfield (**차단됨**) | pages `games/castle-war/` | 보류 |
-
-> 영상 보류 사유 [OBSERVED 2026-08-09]: Higgsfield 영상 잡은 유료 플랜
-> 전용이다(`seedance_2_0_mini` → `job_minimum_basic_plan_required`), 그리고
-> 무료 플랜 잔액(23.67)이 가장 싼 영상 잡(`gemini_omni` 24)에 못 미친다.
-> 플랜 업그레이드 전까지 영상은 생성 불가 — 대체 수단으로 넘기지 않는다.
+> 영상 경로 변경 [OBSERVED 2026-08-09]: Higgsfield 영상 잡은 유료 플랜
+> 전용이라 사용 불가다(`seedance_2_0_mini` → `job_minimum_basic_plan_required`;
+> 무료 잔액 23.67 < 최저가 영상 잡 `gemini_omni` 24). 대신 **프레임 합성**
+> 경로로 전환한다: 기존 11페이지 웹툰 프롤로그 시나리오를 샷 리스트로 삼아
+> `god-tibo-imagen`으로 패널 아트를 그리고, ffmpeg Ken Burns + BGM으로
+> 인트로 영상을 조립한다. AI 영상 모델 없이 같은 결과물에 도달한다.
 
 모든 생성 리소스는 `.provenance.json` 동반, 감사 전 `Assets/` 진입 금지.
 

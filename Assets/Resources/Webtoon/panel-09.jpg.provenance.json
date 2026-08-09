@@ -1,0 +1,11 @@
+{
+  "asset": "panel-09.jpg",
+  "tool": "god-tibo-imagen (gti) via Codex ChatGPT backend",
+  "model": "gpt-5.4 (default)",
+  "scene_source": "Assets/Scripts/WebtoonPrologueController.cs Pages[] — the shipped 11-page prologue scenario is the shot list",
+  "style_contract": "retro pixel-art webtoon panel, 16:9, limited palette, heavy dithering, no text/letters/speech bubbles/UI/watermark",
+  "postprocess": "ffmpeg scale=1600:896, JPEG q:v 3 (no alpha needed; 29MB PNG set -> 3.1MB)",
+  "sha256": "496a6c3aefce9409d002b0694b05f479b869c2ae553fe6e45e23ff1d7d30dc6f",
+  "generated": "2026-08-09",
+  "audited": "style proven on panel-01 before the set was generated, per CLAUDE.md 3; visually checked for baked-in text"
+}

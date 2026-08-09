@@ -271,9 +271,17 @@ namespace CastleBusters
             });
 
             var label = CreateChild<TextMeshProUGUI>("Label", image.transform);
+            // Inset from the 9-sliced frame: a stretched label with no padding printed
+            // straight over the card's carved border, which is what made the old
+            // two-line English text unreadable at the edges.
             Stretch(label.rectTransform);
-            label.text = "CHRONICLE\nEDITION";
-            label.fontSize = 20f;
+            label.rectTransform.offsetMin = new Vector2(20f, 12f);
+            label.rectTransform.offsetMax = new Vector2(-20f, -12f);
+            label.text = "연대기";
+            label.enableWordWrapping = false;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 14f;
+            label.fontSizeMax = 26f;
             label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(0.05f, 0.08f, 0.15f, 1f);
@@ -298,8 +306,13 @@ namespace CastleBusters
 
             var label = CreateChild<TextMeshProUGUI>("Label", image.transform);
             Stretch(label.rectTransform);
-            label.text = "PROLOGUE\nREPLAY";
-            label.fontSize = 20f;
+            label.rectTransform.offsetMin = new Vector2(20f, 12f);
+            label.rectTransform.offsetMax = new Vector2(-20f, -12f);
+            label.text = "프롤로그";
+            label.enableWordWrapping = false;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 14f;
+            label.fontSizeMax = 26f;
             label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(0.12f, 0.06f, 0.02f, 1f);

@@ -39,13 +39,13 @@ namespace CastleBusters
             new ProloguePage("01", "새벽 4시 · 북벽 외곽", "검은 성벽 너머, 적의 심장이 깨어난다.", "오늘은 성이 무너진다.", "KnightPrologue", "Core", new Color(0.18f, 0.16f, 0.22f, 1f), new Color(1f, 0.82f, 0.48f, 1f)),
             new ProloguePage("02", "전열 브리핑", "돌격병은 벽을 열고, 모든 각도를 몸으로 버틴다.", "정면은 내가 연다.", "Knight", null, new Color(0.16f, 0.18f, 0.24f, 1f), new Color(0.6f, 0.84f, 1f, 1f)),
             new ProloguePage("03", "풍향 확인", "궁수는 바람을 읽고, 곡선을 먼저 쏜다.", "동풍이야. 화살이 성벽을 돌아간다.", "Archer", null, new Color(0.14f, 0.17f, 0.21f, 1f), new Color(0.78f, 0.92f, 1f, 1f)),
-            new ProloguePage("04", "화약 적재", "폭탄병은 균열을 찾는다. 작은 틈이 성 전체를 무너뜨린다.", "한 번만 비면, 나머지는 연쇄다.", "Bomber", "Barrel", new Color(0.22f, 0.14f, 0.14f, 1f), new Color(1f, 0.65f, 0.36f, 1f)),
+            new ProloguePage("04", "화약 적재", "화약통은 균열을 찾는다. 작은 틈이 성 전체를 무너뜨린다.", "한 번만 비면, 나머지는 연쇄다.", "Barrel", "Knight", new Color(0.22f, 0.14f, 0.14f, 1f), new Color(1f, 0.65f, 0.36f, 1f)),
             new ProloguePage("05", "중앙 교전지", "전장에는 화약통과 기믹이 숨어 있다. 잘 쓰면 길이 되고, 잘못 건드리면 함정이 된다.", "저 통 하나가 성문보다 무서울 때가 있어.", "Knight", "Barrel", new Color(0.19f, 0.15f, 0.13f, 1f), new Color(1f, 0.76f, 0.42f, 1f)),
             new ProloguePage("06", "적 성심부", "적의 코어는 벽보다 깊숙이 숨었지만, 무너지기 시작한 성은 스스로 적을 배신한다.", "벽이 아니라 심장을 겨눠.", "Archer", "Core", new Color(0.16f, 0.13f, 0.18f, 1f), new Color(1f, 0.48f, 0.54f, 1f)),
-            new ProloguePage("07", "폭풍 전야", "바람은 매 턴 바뀐다. 같은 사격은 두 번 다시 없다.", "한 발 늦으면, 바람이 먼저 변해.", "Archer", "Bomber", new Color(0.13f, 0.18f, 0.22f, 1f), new Color(0.7f, 0.9f, 1f, 1f)),
-            new ProloguePage("08", "붕괴 계산", "벽돌 하나의 균열, 화약 하나의 폭발, 낙하 하나의 무게가 승부를 바꾼다.", "무너지는 건 블록이 아니라 균형이야.", "Bomber", "Knight", new Color(0.2f, 0.16f, 0.12f, 1f), new Color(1f, 0.78f, 0.52f, 1f)),
+            new ProloguePage("07", "폭풍 전야", "바람은 매 턴 바뀐다. 같은 사격은 두 번 다시 없다.", "한 발 늦으면, 바람이 먼저 변해.", "Archer", "Knight", new Color(0.13f, 0.18f, 0.22f, 1f), new Color(0.7f, 0.9f, 1f, 1f)),
+            new ProloguePage("08", "붕괴 계산", "벽돌 하나의 균열, 포탄 하나의 착탄, 낙하 하나의 무게가 승부를 바꾼다.", "무너지는 건 블록이 아니라 균형이야.", "Knight", "Barrel", new Color(0.2f, 0.16f, 0.12f, 1f), new Color(1f, 0.78f, 0.52f, 1f)),
             new ProloguePage("09", "성벽 위의 결의", "살아남은 병사는 다시 일어나고, 마지막 한 발은 언제나 역전을 꿈꾼다.", "끝까지 남으면, 마지막 한 발이 온다.", "Knight", "Archer", new Color(0.12f, 0.16f, 0.24f, 1f), new Color(0.84f, 0.92f, 1f, 1f)),
-            new ProloguePage("10", "돌입 직전", "선택하라. 돌격병, 궁수, 폭탄병, 그리고 전장을 바꾸는 기믹.", "누굴 먼저 쏘든, 목표는 하나야.", "Bomber", "Barrel", new Color(0.21f, 0.15f, 0.1f, 1f), new Color(1f, 0.74f, 0.4f, 1f)),
+            new ProloguePage("10", "돌입 직전", "선택하라. 돌격병, 궁수, 대포, 그리고 전장을 바꾸는 기믹.", "누굴 먼저 쏘든, 목표는 하나야.", "Knight", "Barrel", new Color(0.21f, 0.15f, 0.1f, 1f), new Color(1f, 0.74f, 0.4f, 1f)),
             new ProloguePage("11", "첫 포성", "성문을 넘어, 코어를 부수고, 성을 무너뜨려라.", "이제 — 공성을 시작한다.", "Knight", "Core", new Color(0.15f, 0.12f, 0.1f, 1f), new Color(1f, 0.88f, 0.56f, 1f)),
         };
 
@@ -235,6 +235,23 @@ namespace CastleBusters
             var matte = CreateChild<Image>("Matte", panel.transform);
             Stretch(matte.rectTransform);
             matte.color = page.tone;
+
+            // Painted panel art when the page has one, flat tone when it does not. The art
+            // is authored at the panel's own 16:9 aspect, so it fills without letterboxing,
+            // and a missing file degrades to exactly the previous look rather than a gap.
+            var art = Resources.Load<Sprite>($"Webtoon/panel-{page.pageNo}");
+            if (art != null)
+            {
+                matte.sprite = art;
+                matte.color = Color.white;
+
+                // Narration and dialogue sit directly on this art. Without a scrim the
+                // bright ember panels wash out their own text, which is a readability
+                // defect before it is an art one.
+                var scrim = CreateChild<Image>("ArtScrim", matte.transform);
+                Stretch(scrim.rectTransform);
+                scrim.color = new Color(0f, 0f, 0f, 0.32f);
+            }
 
             var tint = CreateChild<Image>("AccentWash", matte.transform);
             Stretch(tint.rectTransform);
@@ -619,7 +636,7 @@ namespace CastleBusters
                 case "Knight":
                 case "KnightPrologue":
                 case "Archer":
-                case "Bomber":
+                // "Bomber" art folder is retained for the prologue only; no roster unit uses it.
                     frames = Resources.LoadAll<Sprite>($"GeneratedUnitFrames/{actorKey}/Idle");
                     break;
                 case "Barrel":
@@ -643,7 +660,7 @@ namespace CastleBusters
                 case "Knight":
                 case "KnightPrologue":
                 case "Archer":
-                case "Bomber":
+                case "Bomber": // legacy prologue art key only — not a roster unit
                     fallback = Resources.Load<Sprite>($"GeneratedUnitFrames/{actorKey}/Idle/idle_000");
                     break;
                 case "Barrel":
