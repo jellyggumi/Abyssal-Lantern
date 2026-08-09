@@ -15,6 +15,16 @@ owner action. Public beat: WebGL build on the
   artifact: war-bar HUD, drag-launch, ground-war validation.
 - Build carried in: 3 units (Knight/Archer/Bomber), 3 stages, 41 EditMode
   tests, balance at 50/50 win-rate (Phase 2 complete).
+- **Roster now Knight / Archer / Cannon / Barrel** (2026-08-09): the Bomber was
+  removed and the Cannon added as a deploy-only installation, alongside a
+  Supply economy that allows creation *during* battle. 246/246 EditMode tests.
+  See [[wiki/projects/castle-war/deployment-economy]].
+- **Sound and prologue art** (2026-08-09): siege BGM with victory/defeat
+  stingers (Higgsfield `sonilo_music`), and painted webtoon panels for all 11
+  prologue pages (`god-tibo-imagen`), assembled into a 33s intro reel with
+  ffmpeg. Higgsfield's video models are paid-plan only, so the reel is
+  composited from stills rather than generated — see
+  `_workspace/current/engineering/resource-manifest.md`.
 - Cycle: Stage 1 concept pivot — see
   `_workspace/current/production/task-manifest.md` (live) for tasks.
 - Rule file: repository `CLAUDE.md` (AGENTS.md points to it).
@@ -24,6 +34,8 @@ owner action. Public beat: WebGL build on the
 - Reference analysis: `_workspace/current/design/trend-survey/archery-bastions-castle-war.md`
   (Archery Bastions: Castle War — adopt faction readability, differentiate on
   physics destruction + meta spine)
+- Deployment economy (roster overhaul, 대포 + 전투 중 생성):
+  [[wiki/projects/castle-war/deployment-economy]]
 - Legacy history: [[castle-busters-phase-1-analysis]],
   [[castle-busters-phase-2-completion]] (under `wiki/reports/`)
 
