@@ -1,0 +1,12 @@
+{
+  "file": "edge_s1.png",
+  "prompt": "Recovered prompt contract from castle-ruin-presentation-spec.md: modular dark-fantasy weathered-stone castle Edge tile, cracked state s1, matching the approved Face style anchor, neutral lighting, square source for keyed runtime extraction.",
+  "tool": "OpenAI image generation through the session generate_image surface; runtime conversion with ImageMagick 7.1.2-12",
+  "model": "backend model identifier was not exposed by the generation tool",
+  "generatedAt": "2026-08-09T07:20:47.115767Z",
+  "checksumSha256": "ab11a1efcbcc316581c55296aa95821845aab91998e0d36a82058291623d31c3",
+  "runtimeEligible": true,
+  "notes": "Exact original prompt text was not persisted; this records the pre-existing design brief rather than inventing a verbatim prompt. Audited in the shipped WebGL capture and covered by CastleSkinResourceTests.",
+  "width": 1254,
+  "height": 1254
+}

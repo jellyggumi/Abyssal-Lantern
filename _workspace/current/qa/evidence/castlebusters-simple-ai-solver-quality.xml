@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.1501671">
+  <test-suite type="TestSuite" id="1218" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="186" result="Passed" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.150167" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1402" name="Assembly-CSharp-Editor.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="175" result="Passed" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.126690" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="22202" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1403" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="175" result="Passed" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.123708" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1404" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="175" result="Passed" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.120532" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1261" name="GamePlayTests" fullname="CastleBusters.Tests.GamePlayTests" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" testcasecount="93" result="Passed" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.114564" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1351" name="SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim" fullname="CastleBusters.Tests.GamePlayTests.SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim" methodname="SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="449217316" result="Passed" start-time="2026-08-09 08:58:14Z" end-time="2026-08-09 08:58:14Z" duration="0.094076" asserts="0">
+              <properties />
+              <output><![CDATA[Solved closest distance 0.0060; legacy closest distance 17.6954
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

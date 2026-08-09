@@ -2,7 +2,7 @@
 
 - run-id: 20260809-castle-war-stage1
 - owner: game-designer lane
-- status: G7 draft — numeric model below; playtest repeat-rate pending QA [TARGET]
+- status: G7 implementation pass — precision/balance contract frozen; repeat-rate pending QA [TARGET]
 
 ## Loop 1 (mandatory): Volley → Collapse → Reward
 
@@ -14,7 +14,7 @@ Slice"); the pivot re-frames it as a faction exchange.
 | Period 30–180s | One turn cycle ≈ 12–25s (aim 4–10s, flight/impact 3–6s, enemy response 5–9s); loop = 2–4 turn cycles ≈ 45–100s | [OBSERVED] AutoPlayTest capture timings; re-measure in Stage 2 |
 | ≥3 actions/loop | select unit (1/2/3) → read wind → drag-aim → release → watch collapse ≥ 4 distinct player actions | [OBSERVED] input map |
 | ≥1 reward event/loop | Block collapse chain (BFS) + damage callouts + core HP delta every successful volley | [OBSERVED] DestructibleBlock/BFS system |
-| Repeat-rate ≥70% | pending QA playtest proxy | [TARGET] Stage 2 |
+| Repeat-rate >=70% | two-minute loop remains visually distinct and requires >=3 player decisions; automated proxy records two or more resolved turn cycles in one session | [TARGET] Stage 2. The 2026-08-09 focused runs prove only sub-cycle beats: 22.4 s natural player→AI handoff, plus 8.89 s and 5.39 s cannon/fuse contracts. No two-minute same-session capture exists, so G7 stays open. |
 
 ## Faction-war reframe (Stage 1 pivot work)
 
@@ -35,9 +35,37 @@ Stage picker (3 battlefields, sequential unlock) already exists; extend to a
 valley map with per-stage star goals so the economy has a sink. [TARGET,
 Stage 2 scope decision]
 
-## Numbers carried from the balanced build
+## Current roster balance contract
 
-Knight/Archer/Bomber at 50/50 win-rate, usage 31.9/36.2/31.9% (wiki/reports/
-castle-busters-phase-2-completion.md). The faction reframe must not touch
-unit stats without re-running the Phase-2 sim — presentation-only changes
-first (CLAUDE.md §2 sim/presentation boundary).
+The shipped roster is Knight, Archer, Cannon, and Barrel. The obsolete
+Knight/Archer/Bomber Phase-2 result is historical only and cannot support a
+current win-rate claim. The current deterministic role gate instead proves
+condition-dependent viability: Knight wins the close body fight, Archer wins
+the open body fight, the two-Cannon battery cap breaches 200 defense inside
+its 12 s deployment window, and Barrel has a lethal two-body cluster payoff
+with an explicit spacing/ranged-trigger counter. Full measurements and limits
+live in `../qa/current-roster-balance-gate.md`; full-match 45–55% win rate
+remains **not evaluated** until a symmetric card-choice/targeting/economy
+simulation exists.
+
+## Precision and feel contract (implemented 2026-08-09)
+
+- **Read → aim → release**: the preview runs for 3.0 s at the runtime physics
+  step (150 × 0.02 s), includes gravity and in-radius wind, and uses the
+  launched unit's runtime mass. A visible arc that disagrees with the shot is
+  a control defect, not player error.
+- **Impact hierarchy**: damage magnitude scales number size/color; impact,
+  core-hit, and core-destroyed feedback have distinct visual weights. Launch,
+  impact, and combo SFX are short mono cues with conservative per-shot volume
+  so multi-block collapse chains do not become a clipping wall.
+- **Turn readability**: the launch result remains visible through flight and
+  impact. Turn-change toasts cannot overwrite an active launch/combo banner;
+  combo state survives that suppression.
+- **Fair pressure ramp**: wind, AI accuracy, and storm probability reach their
+  final values over 15 turns. Last Stand arms at 35% core HP and caps each
+  buffed hit at 140. A separate 140-health pristine-turn budget stops barrel
+  chains or cloned projectiles from ending a full-health match in one volley;
+  the core remains fully defeatable after the turn advances.
+- **Tactical scale**: Stage 2 is a compressed, fast-mutating fortress duel;
+  Stage 3 is a wide, higher-wind gorge with a slower mutation cadence. Exact
+  values and probability boundaries live in `balance-sheet.md`.

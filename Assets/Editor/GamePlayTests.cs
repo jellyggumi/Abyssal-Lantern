@@ -1142,7 +1142,7 @@ namespace CastleBusters.Tests
                 var launchManager = managerGo.AddComponent<LaunchManager>();
                 launchManager.launchPoint = launchPointGo.transform;
                 launchManager.trajectoryLine = trajectoryLine;
-                launchManager.trajectoryResolution = 2;
+                launchManager.trajectoryResolution = 1;
                 launchManager.timeStep = 0.05f;
 
                 var drawTrajectory = typeof(LaunchManager).GetMethod(
@@ -1159,7 +1159,7 @@ namespace CastleBusters.Tests
                     start + (startingVelocity + Physics2D.gravity * launchManager.timeStep) * launchManager.timeStep;
 
                 Assert.AreEqual(2, trajectoryLine.positionCount,
-                    "A two-sample trajectory must expose its start and first integrated point.");
+                    "A one-step trajectory must expose its start and first integrated point.");
                 Vector3 actualFirstStep = trajectoryLine.GetPosition(1);
                 Assert.AreEqual(expectedFirstStep.x, actualFirstStep.x, 0.0001f);
                 Assert.AreEqual(expectedFirstStep.y, actualFirstStep.y, 0.0001f,
@@ -1318,11 +1318,11 @@ namespace CastleBusters.Tests
                 Vector2 startingVelocity = new Vector2(7f, 11f);
                 drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
 
-                Assert.AreEqual(launchManager.trajectoryResolution, trajectoryLine.positionCount,
-                    "An unobstructed preview must expose every requested fixed-step sample.");
+                Assert.AreEqual(launchManager.trajectoryResolution + 1, trajectoryLine.positionCount,
+                    "An unobstructed preview must expose its start and every requested fixed-step sample.");
                 Vector2 expectedPosition = launchManager.GetLaunchPosition();
                 Vector2 expectedVelocity = startingVelocity;
-                for (int step = 1; step < launchManager.trajectoryResolution; step++)
+                for (int step = 1; step <= launchManager.trajectoryResolution; step++)
                 {
                     expectedVelocity =
                         (expectedVelocity + Physics2D.gravity * launchManager.timeStep)
@@ -3020,6 +3020,130 @@ namespace CastleBusters.Tests
                 if (legacyBlockGo != null) Object.DestroyImmediate(legacyBlockGo);
                 Object.DestroyImmediate(castleGo);
                 Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void DestructibleBlock_DestroyEnemyCoreWithoutDamageOwner_CreditsPlayerBeforeGameOver()
+        {
+            const System.Reflection.BindingFlags instanceFlags =
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            const System.Reflection.BindingFlags staticFlags =
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static;
+            const int coreScore = 500;
+
+            var isPlayerTurnField = typeof(GameManager).GetField("isPlayerTurn", instanceFlags);
+            var playerScoreField = typeof(GameManager).GetField("playerScore", instanceFlags);
+            var playerCoreField = typeof(GameManager).GetField("playerCore", instanceFlags);
+            var enemyCoreField = typeof(GameManager).GetField("enemyCore", instanceFlags);
+            var seriesPlayerWinsField = typeof(GameManager).GetField("seriesPlayerWins", staticFlags);
+            var seriesEnemyWinsField = typeof(GameManager).GetField("seriesEnemyWins", staticFlags);
+            var seriesGamesPlayedField = typeof(GameManager).GetField("seriesGamesPlayed", staticFlags);
+            var seriesScoreTotalField = typeof(GameManager).GetField("seriesScoreTotal", staticFlags);
+            var gameManagerAwake = typeof(GameManager).GetMethod("Awake", instanceFlags);
+            var destroyBlock = typeof(DestructibleBlock).GetMethod("DestroyBlock", instanceFlags);
+
+            Assert.IsNotNull(isPlayerTurnField);
+            Assert.IsNotNull(playerScoreField);
+            Assert.IsNotNull(playerCoreField);
+            Assert.IsNotNull(enemyCoreField);
+            Assert.IsNotNull(seriesPlayerWinsField);
+            Assert.IsNotNull(seriesEnemyWinsField);
+            Assert.IsNotNull(seriesGamesPlayedField);
+            Assert.IsNotNull(seriesScoreTotalField);
+            Assert.IsNotNull(gameManagerAwake);
+            Assert.IsNotNull(destroyBlock);
+
+            int previousSeriesPlayerWins = (int)seriesPlayerWinsField.GetValue(null);
+            int previousSeriesEnemyWins = (int)seriesEnemyWinsField.GetValue(null);
+            int previousSeriesGamesPlayed = (int)seriesGamesPlayedField.GetValue(null);
+            int previousSeriesScoreTotal = (int)seriesScoreTotalField.GetValue(null);
+            float previousTimeScale = Time.timeScale;
+            var resultsBefore = new HashSet<ResultsScreenController>(
+                Object.FindObjectsOfType<ResultsScreenController>());
+            var managerGo = new GameObject("CoreScoreOrderingGameManager");
+            var playerCastleGo = new GameObject("CoreScoreOrderingPlayerCastle");
+            var enemyCastleGo = new GameObject("CoreScoreOrderingEnemyCastle");
+
+            try
+            {
+                seriesPlayerWinsField.SetValue(null, 0);
+                seriesEnemyWinsField.SetValue(null, 0);
+                seriesGamesPlayedField.SetValue(null, 0);
+                seriesScoreTotalField.SetValue(null, 0);
+                Time.timeScale = 1f;
+
+                var gameManager = managerGo.AddComponent<GameManager>();
+                gameManagerAwake.Invoke(gameManager, null);
+                Assert.AreSame(gameManager, GameManager.Instance,
+                    "The castle callback must resolve the fixture's GameManager singleton.");
+                var playerCastle = playerCastleGo.AddComponent<CastleController>();
+                playerCastle.isPlayerCastle = true;
+                var enemyCastle = enemyCastleGo.AddComponent<CastleController>();
+                enemyCastle.isPlayerCastle = false;
+
+                var playerCoreGo = new GameObject("CoreScoreOrderingPlayerCore");
+                playerCoreGo.transform.SetParent(playerCastleGo.transform);
+                var playerCore = playerCoreGo.AddComponent<CastleCoreGimmick>();
+                playerCore.isPlayerCore = true;
+
+                var enemyCoreGo = new GameObject("CoreScoreOrderingEnemyCore");
+                enemyCoreGo.transform.SetParent(enemyCastleGo.transform);
+                var enemyCore = enemyCoreGo.AddComponent<CastleCoreGimmick>();
+                enemyCore.isPlayerCore = false;
+                enemyCore.scoreValue = coreScore;
+                enemyCore.currentHP = 0f;
+
+                gameManager.playerCastle = playerCastle;
+                gameManager.enemyCastle = enemyCastle;
+                playerCoreField.SetValue(gameManager, playerCore);
+                enemyCoreField.SetValue(gameManager, enemyCore);
+                gameManager.currentState = GameState.PlayerTurn;
+                isPlayerTurnField.SetValue(gameManager, true);
+                playerCastle.RefreshBlockList();
+                enemyCastle.RefreshBlockList();
+
+                Assert.IsTrue(gameManager.IsPlayerTurn,
+                    "Precondition: omitted damage ownership must resolve to the active player turn.");
+
+                destroyBlock.Invoke(enemyCore, new object[] { null });
+
+                Assert.AreEqual(GameState.GameOver, gameManager.currentState,
+                    "Destroying the registered enemy core must reach GameOver through CastleController.");
+                Assert.AreEqual(coreScore, (int)playerScoreField.GetValue(gameManager),
+                    "The fatal enemy core must still award its scoreValue to the player.");
+                Assert.AreEqual(coreScore, (int)seriesScoreTotalField.GetValue(null),
+                    "EndGame must snapshot the credited core score, not the pre-destruction total.");
+
+                var results = Object.FindObjectOfType<ResultsScreenController>();
+                Assert.IsNotNull(results, "The core victory must create the results screen.");
+                TMPro.TextMeshProUGUI stats = null;
+                foreach (var label in results.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+                {
+                    if (label.name == "Stats")
+                    {
+                        stats = label;
+                        break;
+                    }
+                }
+                Assert.IsNotNull(stats, "The results screen must expose its score report.");
+                StringAssert.Contains($"점수 <b>{coreScore}</b>", stats.text,
+                    "The results UI must receive the score that was credited before GameOver.");
+            }
+            finally
+            {
+                foreach (var results in Object.FindObjectsOfType<ResultsScreenController>())
+                {
+                    if (!resultsBefore.Contains(results)) Object.DestroyImmediate(results.gameObject);
+                }
+                if (playerCastleGo != null) Object.DestroyImmediate(playerCastleGo);
+                if (enemyCastleGo != null) Object.DestroyImmediate(enemyCastleGo);
+                if (managerGo != null) Object.DestroyImmediate(managerGo);
+                seriesPlayerWinsField.SetValue(null, previousSeriesPlayerWins);
+                seriesEnemyWinsField.SetValue(null, previousSeriesEnemyWins);
+                seriesGamesPlayedField.SetValue(null, previousSeriesGamesPlayed);
+                seriesScoreTotalField.SetValue(null, previousSeriesScoreTotal);
+                Time.timeScale = previousTimeScale;
             }
         }
 

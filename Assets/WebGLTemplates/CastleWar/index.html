@@ -8,7 +8,30 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0c14">
-    <title>{{{ PRODUCT_NAME }}}</title>
+    <title>Castle War | 물리 공성전</title>
+    <meta name="description" content="영웅을 발사해 성벽을 무너뜨리고 적의 핵심 성채를 점령하는 2D 물리 공성전.">
+    <link rel="canonical" href="https://jellyggumi.github.io/games/castle-war/">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+
+    <meta property="og:title" content="Castle War — 캐슬 워">
+    <meta property="og:description" content="영웅을 발사해 성벽을 무너뜨리고 적의 핵심 성채를 점령하는 2D 물리 공성전.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jellyggumi.github.io/games/castle-war/">
+    <meta property="og:site_name" content="Castle War">
+    <meta property="og:locale" content="ko_KR">
+    <meta property="og:image" content="https://jellyggumi.github.io/games/castle-war/social-preview.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="공성 발사대에서 날아간 기사가 적 성벽을 무너뜨리는 Castle War 전장.">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Castle War — 캐슬 워">
+    <meta name="twitter:description" content="영웅을 발사해 성벽을 무너뜨리고 적의 핵심 성채를 점령하는 2D 물리 공성전.">
+    <meta name="twitter:image" content="https://jellyggumi.github.io/games/castle-war/social-preview.png">
+    <meta name="twitter:image:alt" content="공성 발사대에서 날아간 기사가 적 성벽을 무너뜨리는 Castle War 전장.">
     <style>
       :root {
         color-scheme: dark;
@@ -51,7 +74,12 @@
         display: block;
         background: #0a0c14;
         touch-action: none;
-        outline: none;
+        outline: 3px solid transparent;
+        outline-offset: -3px;
+      }
+
+      #unity-canvas:focus-visible {
+        outline-color: #f2c14f;
       }
 
       /* Dark siege loading screen */
@@ -133,7 +161,7 @@
   </head>
   <body>
     <div id="unity-container">
-      <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1" aria-label="Castle War gameplay canvas"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-loading-emblem">🏰</div>
         <div id="unity-progress-bar-empty">
@@ -190,12 +218,14 @@
         showBanner: unityShowBanner,
       };
 
-      // Keep keyboard input (1/2/3 unit select, etc.) flowing to the canvas as soon
-      // as it can receive focus, both on load and on every subsequent tap/click.
+      // Keep keyboard input (1/2/3 unit select, etc.) flowing to the canvas after
+      // boot and on every tap/click. tabindex=-1 keeps this single full-screen
+      // application surface out of normal document Tab order while preserving
+      // programmatic focus and the focus-visible treatment above.
       function focusCanvas() {
         if (canvas) canvas.focus();
       }
-      canvas.tabIndex = 1;
+      canvas.tabIndex = -1;
       canvas.addEventListener("click", focusCanvas);
       canvas.addEventListener("pointerdown", focusCanvas);
 
@@ -221,6 +251,9 @@
           progressBarFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           loadingBar.style.display = "none";
+          // Unity's loader resets the canvas tabindex; keep it programmatically
+          // focusable without adding a single application surface to Tab order.
+          canvas.tabIndex = -1;
           focusCanvas();
         }).catch((message) => {
           loadingText.textContent = "불러오지 못했습니다";

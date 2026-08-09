@@ -134,7 +134,7 @@ MonoBehaviour:
     type: 3}
   arrowPrefab: {fileID: 0}
   firePoint: {fileID: 0}
-  visualScale: 0.42
+  visualScale: 0.48
   colliderVisualCoverage: 0.82
   trailWidthScale: 0.18
 --- !u!212 &-6606300097172914775

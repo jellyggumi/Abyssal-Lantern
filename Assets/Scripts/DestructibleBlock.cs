@@ -36,6 +36,9 @@ namespace CastleBusters
         // once per damage state and the resulting sprite is cached in crackedSprite/heavilyCrackedSprite.
         private Func<Sprite> crackedSpriteFactory;
         private Func<Sprite> heavilyCrackedSpriteFactory;
+        // Castle-wide presentation wear floor (CastleFacadeDirector milestone ratchet): raises the
+        // *displayed* damage band without ever touching HP. 0 = own band only.
+        private int displayWearFloor;
 
         public bool IsFalling => isFalling;
 
@@ -121,6 +124,32 @@ namespace CastleBusters
             heavilyCrackedSpriteFactory = heavilyCrackedFactory;
         }
 
+        /// <summary>Assigns position-aware facade skins (CastleFacadeDirector). Presentation-only:
+        /// replaces the three damage-state sprites + mirrors the renderer, then re-resolves the
+        /// currently displayed band. Clears any lazy factories — the skin IS the damage art now.</summary>
+        public void SetSkinSprites(Sprite normal, Sprite cracked, Sprite heavy, bool flipX = false)
+        {
+            if (normal == null || cracked == null || heavy == null) return;
+            normalSprite = normal;
+            crackedSprite = cracked;
+            heavilyCrackedSprite = heavy;
+            crackedSpriteFactory = null;
+            heavilyCrackedSpriteFactory = null;
+            if (spriteRenderer != null) spriteRenderer.flipX = flipX;
+            ApplyPresentationScale();
+            UpdateVisuals();
+        }
+
+        /// <summary>Presentation-only floor on the displayed damage band (0..2). The facade
+        /// director ratchets this castle-wide at wholeness milestones; HP is never modified.</summary>
+        public void SetDisplayWearFloor(int floor)
+        {
+            int clamped = Mathf.Clamp(floor, 0, 2);
+            if (clamped == displayWearFloor) return;
+            displayWearFloor = clamped;
+            UpdateVisuals();
+        }
+
         // Rescales the (oversized) source sprite + its collider so the block renders at
         // 'targetWorldSize' world units, matching the ~1u castle grid spacing. Both the
         // SpriteRenderer and the BoxCollider2D end up at the same world size.
@@ -161,11 +190,17 @@ namespace CastleBusters
 
         public virtual void TakeDamage(float damage)
         {
+            TakeDamage(damage, null);
+        }
+
+        public virtual void TakeDamage(float damage, bool? damageFromPlayer)
+        {
             if (isFalling && currentHP <= 0) return;
+            float prevRatio = maxHP > 0f ? currentHP / maxHP : 0f;
             currentHP -= damage;
             Color feedbackColor = blockData != null ? blockData.blockColor : new Color(0.65f, 0.55f, 0.42f, 1f);
             GameFeelVfx.SpawnDamageNumber(transform.position, damage, new Color(1f, 0.85f, 0.25f, 1f));
-            GameFeelVfx.SpawnImpactBurst(transform.position, feedbackColor, Mathf.Clamp(damage / 35f, 0.45f, 1.8f), spriteRenderer != null ? spriteRenderer.sprite : null);
+            GameFeelVfx.SpawnImpactBurst(transform.position, feedbackColor, Mathf.Clamp(damage / 35f, 0.45f, 1.8f), spriteRenderer != null ? spriteRenderer.sprite : null, false);
             // Dedicated star-flash impact frames on top of the procedural burst; size tracks damage.
             FrameAnimEffect.Spawn(EffectSpriteLibrary.Spark, transform.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.15f),
                 Mathf.Clamp(0.6f + damage / 60f, 0.6f, 1.6f), Color.white, 20f);
@@ -189,15 +224,19 @@ namespace CastleBusters
                 if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.25f, shakeMagnitude);
             }
             UpdateVisuals();
-            if (currentHP <= 0) DestroyBlock();
+            // Interactive ruin feedback (crack decals, band-crossing crumble moments, castle
+            // wholeness milestones) — presentation-only observer, reads state, never writes it.
+            CastleRuinFx.NotifyBlockDamaged(this, damage, prevRatio, maxHP > 0f ? currentHP / maxHP : 0f);
+            if (currentHP <= 0) DestroyBlock(damageFromPlayer);
         }
 
         private void UpdateVisuals()
         {
             if (spriteRenderer == null) return;
             float ratio = currentHP / maxHP;
+            int band = CastleSkinLibrary.ComputeDisplayBand(ratio, displayWearFloor);
 
-            if (ratio <= 0.3f)
+            if (band >= 2)
             {
                 if (heavilyCrackedSprite == null && heavilyCrackedSpriteFactory != null)
                 {
@@ -206,7 +245,7 @@ namespace CastleBusters
                 }
                 spriteRenderer.sprite = heavilyCrackedSprite != null ? heavilyCrackedSprite : (crackedSprite != null ? crackedSprite : normalSprite);
             }
-            else if (ratio <= 0.7f)
+            else if (band == 1)
             {
                 if (crackedSprite == null && crackedSpriteFactory != null)
                 {
@@ -222,6 +261,9 @@ namespace CastleBusters
 
             if (blockData != null)
             {
+                // Tint tracks TRUE hp ratio (not the displayed band) so the wear-floor ratchet
+                // darkens nothing — a healthy block under a milestone floor shows worn art at
+                // healthy brightness, which reads as "aged", not "about to break".
                 Color baseColor = blockData.blockColor;
                 spriteRenderer.color = Color.Lerp(baseColor * 0.5f, baseColor, ratio);
             }
@@ -257,7 +299,7 @@ namespace CastleBusters
             }
         }
 
-        protected virtual void DestroyBlock()
+        protected virtual void DestroyBlock(bool? damageFromPlayer = null)
         {
             if (isDestroying) return;
             isDestroying = true;
@@ -267,35 +309,53 @@ namespace CastleBusters
             {
                 chariot.HandleGameplayDestruction();
             }
-            if (destructionEffectPrefab != null) Instantiate(destructionEffectPrefab, transform.position, Quaternion.identity);
-            GameFeelVfx.SpawnCollapseDust(transform.position, 1.5f, spriteRenderer != null ? spriteRenderer.sprite : null);
-            // Dedicated billowing dust-cloud frames make the break read even when debris is sparse.
-            FrameAnimEffect.Spawn(EffectSpriteLibrary.Dust, transform.position,
-                this is CastleCoreGimmick ? 2.6f : 1.7f, Color.white, 14f, 34);
-            GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.62f, 0.18f, 0.6f), 1.25f, 0.36f);
-            GameFeelVfx.SpawnFeedbackLabel(transform.position, "BREAK!", new Color(1f, 0.72f, 0.18f, 1f), 2.2f, 0.6f);
-            GameplayUxDirector.NotifyBreak(transform.position, this is CastleCoreGimmick);
-
-            if (DebrisPool.Instance != null)
+            // Ground/foundation tiles can disappear in large batches after one explosion.
+            // The explosion already owns that feedback; repeating the full structure-break
+            // stack per tile inflated combo results and multiplied transient VFX/hit-stop.
+            if (!isGroundAnchor)
             {
-                Color debrisColor = blockData != null ? blockData.blockColor : (spriteRenderer != null ? spriteRenderer.color : Color.white);
-                DebrisPool.Instance.SpawnDebrisBurst(transform.position, debrisColor, 8);
-            }
+                if (destructionEffectPrefab != null) Instantiate(destructionEffectPrefab, transform.position, Quaternion.identity);
+                GameFeelVfx.SpawnCollapseDust(transform.position, 1.5f, spriteRenderer != null ? spriteRenderer.sprite : null);
+                // Dedicated billowing dust-cloud frames make the break read even when debris is sparse.
+                FrameAnimEffect.Spawn(EffectSpriteLibrary.Dust, transform.position,
+                    this is CastleCoreGimmick ? 2.6f : 1.7f, Color.white, 14f, 34);
+                GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.62f, 0.18f, 0.6f), 1.25f, 0.36f);
+                GameFeelVfx.SpawnFeedbackLabel(transform.position, "BREAK!", new Color(1f, 0.72f, 0.18f, 1f), 2.2f, 0.6f);
+                GameplayUxDirector.NotifyBreak(transform.position, this is CastleCoreGimmick);
 
-            // Cycle 9 & 10: Scale hit-stop and screen shake on block destruction
-            float hitStopDuration = this is CastleCoreGimmick ? 0.18f : 0.08f;
-            float shakeMagnitude = this is CastleCoreGimmick ? 0.45f : 0.22f;
-            float shakeDuration = this is CastleCoreGimmick ? 0.75f : 0.45f;
-            if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(hitStopDuration);
-            if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(shakeDuration, shakeMagnitude);
+                if (DebrisPool.Instance != null)
+                {
+                    Color debrisColor = blockData != null ? blockData.blockColor : (spriteRenderer != null ? spriteRenderer.color : Color.white);
+                    DebrisPool.Instance.SpawnDebrisBurst(transform.position, debrisColor, 8);
+                }
+
+                // Cycle 9 & 10: Scale hit-stop and screen shake on block destruction.
+                float hitStopDuration = this is CastleCoreGimmick ? 0.18f : 0.08f;
+                float shakeMagnitude = this is CastleCoreGimmick ? 0.45f : 0.22f;
+                float shakeDuration = this is CastleCoreGimmick ? 0.75f : 0.45f;
+                if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(hitStopDuration);
+                if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(shakeDuration, shakeMagnitude);
+            }
+            // Resolve and award ownership before CastleController can end the match.
+            // EndGame snapshots the current score into the results card, so a fatal block
+            // must be credited before that transition.
+            var gameManager = GameManager.Instance;
+            bool? resolvedDamageFromPlayer = damageFromPlayer
+                ?? (gameManager != null ? gameManager.IsPlayerTurn : (bool?)null);
             var castle = GetComponentInParent<CastleController>();
             if (castle != null)
             {
-                castle.OnBlockDestroyed(this);
-                if (GameManager.Instance != null && castle.isPlayerCastle != GameManager.Instance.IsPlayerTurn)
+                DeploymentController.Instance?.CreditBlockDestroyed(castle.isPlayerCastle);
+                if (gameManager != null && resolvedDamageFromPlayer.HasValue)
                 {
-                    GameManager.Instance.AddScore(GameManager.Instance.IsPlayerTurn, scoreValue);
+                    bool attackerIsPlayer = resolvedDamageFromPlayer.Value;
+                    if (castle.isPlayerCastle != attackerIsPlayer)
+                    {
+                        gameManager.AddScore(attackerIsPlayer, scoreValue);
+                    }
                 }
+                castle.OnBlockDestroyed(this);
+                CastleRuinFx.NotifyBlockDestroyed(this, castle);
             }
 
             if (Application.isPlaying) Destroy(gameObject); else DestroyImmediate(gameObject);

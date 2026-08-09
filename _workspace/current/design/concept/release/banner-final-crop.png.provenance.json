@@ -1,0 +1,18 @@
+{
+  "file": "banner-final-crop.png",
+  "prompt": "Corrected banner crop replacing repeated letter-like marks with neutral faction medallion treatment.",
+  "tool": "ImageMagick 7.1.1 pixel draw",
+  "generatedAt": "2026-08-09T08:12:53.945Z",
+  "checksumSha256": "3905b41280742ac966d3a15f72f5ed060b011cc148925c22ac9d74c6116477f9",
+  "runtimeEligible": false,
+  "notes": "Intermediate correction evidence only.",
+  "width": 900,
+  "height": 800,
+  "audit": {
+    "reviewDate": "2026-08-09",
+    "evidence": "Independent release-art review found no visually apparent third-party marks; provenance and banner/favicon defects were then remediated.",
+    "status": "independent PASS — FinalReleaseArtReview",
+    "closedAt": "2026-08-09T08:16:29.819Z",
+    "result": "No remaining S1-S3 release-art findings; dimensions, exact asset SHA-256, crest remediation, icon legibility, metadata wiring, and keyboard focus treatment independently verified."
+  }
+}

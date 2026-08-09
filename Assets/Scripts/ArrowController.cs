@@ -162,7 +162,17 @@ namespace CastleBusters
                 GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.9f, 0.6f, 0.8f), 0.35f);
                 GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.9f, 0.45f, 0.55f), 0.45f, 0.22f);
                 GameFeelVfx.SpawnFeedbackLabel(transform.position, "HIT", new Color(1f, 0.95f, 0.45f, 1f), 1.7f, 0.45f);
-                unit.TakeDamage(damage * damageMultiplier);
+                unit.TakeDamage(damage * damageMultiplier, isPlayerArrow);
+                hasHit = true;
+                Destroy(gameObject);
+                return;
+            }
+
+            var explosive = collision.GetComponent<ExplosiveGimmick>();
+            if (explosive != null && unit == null)
+            {
+                explosive.SetDamageOwner(isPlayerArrow);
+                explosive.Explode();
                 hasHit = true;
                 Destroy(gameObject);
                 return;
@@ -174,7 +184,7 @@ namespace CastleBusters
                 GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.9f, 0.6f, 0.8f), 0.35f);
                 GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.9f, 0.45f, 0.55f), 0.45f, 0.22f);
                 GameFeelVfx.SpawnFeedbackLabel(transform.position, "HIT", new Color(1f, 0.95f, 0.45f, 1f), 1.7f, 0.45f);
-                block.TakeDamage(damage * damageMultiplier);
+                block.TakeDamage(damage * damageMultiplier, isPlayerArrow);
                 hasHit = true;
                 Destroy(gameObject);
                 return;

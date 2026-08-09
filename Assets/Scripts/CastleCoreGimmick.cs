@@ -12,6 +12,13 @@ namespace CastleBusters
         private Vector3 coreBaseScale = Vector3.one;
         private bool shieldTriggered;
         private float shieldHP;
+        // A pristine core always survives the first resolved volley. This closes the
+        // barrel/clone collapse loophole where one launch could consume the whole match.
+        private const float FullHealthVolleyDamageCap = 140f;
+        private int damageBudgetTurn = int.MinValue;
+        private float healthDamageThisTurn;
+        private bool turnStartedAtFullHealth;
+        private bool braceFeedbackShown;
         protected override void Awake()
         {
             maxHP = 150f;
@@ -81,6 +88,21 @@ namespace CastleBusters
 
         public override void TakeDamage(float damage)
         {
+            TakeDamage(damage, null);
+        }
+
+        public override void TakeDamage(float damage, bool? damageFromPlayer)
+        {
+            var gm = GameManager.Instance;
+            int turn = gm != null ? gm.TurnCount : int.MinValue;
+            if (gm != null && turn != damageBudgetTurn)
+            {
+                damageBudgetTurn = turn;
+                healthDamageThisTurn = 0f;
+                turnStartedAtFullHealth = currentHP >= maxHP - 0.01f;
+                braceFeedbackShown = false;
+            }
+
             if (shieldHP > 0f)
             {
                 float absorbed = Mathf.Min(damage, shieldHP);
@@ -93,12 +115,26 @@ namespace CastleBusters
                 }
             }
 
+            if (gm != null && turnStartedAtFullHealth)
+            {
+                float remainingHealthDamage = Mathf.Max(0f, FullHealthVolleyDamageCap - healthDamageThisTurn);
+                float uncappedDamage = damage;
+                damage = Mathf.Min(damage, remainingHealthDamage);
+                healthDamageThisTurn += damage;
+
+                if (damage + 0.01f < uncappedDamage && !braceFeedbackShown)
+                {
+                    braceFeedbackShown = true;
+                    GameFeelVfx.SpawnFeedbackLabel(transform.position + Vector3.up * 0.65f, "CORE BRACED!", new Color(1f, 0.78f, 0.25f, 1f), 2.1f, 0.5f);
+                }
+            }
+
             if (damage <= 0f) return;
 
             // Damage states own the renderer from here: stop the idle crystal loop.
             GetComponent<GimmickFrameAnimator>()?.Suspend();
 
-            base.TakeDamage(damage);
+            base.TakeDamage(damage, damageFromPlayer);
 
             // Cycle 20: Trigger shield when core drops below 50% HP (75 HP)
             if (!shieldTriggered && currentHP > 0f && currentHP <= maxHP * 0.5f)

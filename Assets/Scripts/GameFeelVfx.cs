@@ -788,22 +788,35 @@ namespace CastleBusters
             root.offsetMax = Vector2.zero;
 
             comboBackplate = CreatePanel("ComboBackplate", new Vector2(0.60f, 0.60f), new Vector2(0.5f, 0.5f), new Vector2(400f, 52f), new Color(0.09f, 0.045f, 0.01f, 0.46f));
-            toastBackplate = CreatePanel("ToastBackplate", new Vector2(0.78f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), new Color(0f, 0.05f, 0.1f, 0.58f));
+            toastBackplate = CreatePanel("ToastBackplate", new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), new Color(0f, 0.05f, 0.1f, 0.58f));
             toastBackplateRt = toastBackplate.GetComponent<RectTransform>();
             toastBackplateImg = toastBackplate.GetComponent<Image>();
 
-            // 0.78 anchor keeps the toast clear of the unit row at 960x600; combo remains
-            // lower at 0.60 to avoid overlap.
-            turnToastText = CreateText("TurnToastText", new Vector2(0.78f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), 28, TextAlignmentOptions.Center, Color.white);
+            // Keep the transient coaching lane vertically high without shifting it toward the
+            // right edge on narrower aspect ratios.
+            turnToastText = CreateText("TurnToastText", new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), 28, TextAlignmentOptions.Center, Color.white);
             turnToastRt = turnToastText.rectTransform;
             comboText = CreateText("ComboText", new Vector2(0.60f, 0.60f), new Vector2(0.5f, 0.5f), new Vector2(400f, 52f), 24, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.22f, 1f));
             comboBackplate.SetActive(false);
             if (toastBackplate != null) toastBackplate.SetActive(false);
 
-            var barBg = CreatePanel("TurnProgressBackground", new Vector2(0.5f, 0.925f), new Vector2(0.5f, 0.5f), new Vector2(620f, 10f), new Color(0f, 0f, 0f, 0.45f));
+            var barBg = CreatePanel("TurnProgressBackground", new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(620f, 10f), new Color(0f, 0f, 0f, 0.45f));
+            barBg.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -78f);
             var fillGo = CreatePanel("TurnProgressFill", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(620f, 10f), new Color(0.35f, 0.85f, 1f, 0.85f));
             fillGo.transform.SetParent(barBg.transform, false);
             turnProgressFill = fillGo.GetComponent<Image>();
+
+            // The serialized turn label occupies top offsets 20-70. Keep progress, wind, and
+            // countdown in successive fixed top bands so their spacing survives aspect changes.
+            var timerText = GameManager.Instance != null ? GameManager.Instance.timerText : null;
+            if (timerText != null)
+            {
+                var timerRt = timerText.rectTransform;
+                timerRt.anchorMin = timerRt.anchorMax = new Vector2(0.5f, 1f);
+                timerRt.pivot = new Vector2(0.5f, 1f);
+                timerRt.anchoredPosition = new Vector2(0f, -134f);
+                timerRt.sizeDelta = new Vector2(100f, 40f);
+            }
 
             playerCoreBadge = new CoreHealthBadge(root, "KEEP CORE", new Vector2(0.18f, 0.84f), new Color(0.25f, 0.75f, 1f, 1f));
             enemyCoreBadge = new CoreHealthBadge(root, "BREACH CORE", new Vector2(0.82f, 0.84f), new Color(1f, 0.62f, 0.18f, 1f));

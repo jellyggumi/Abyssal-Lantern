@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-08-09",
+  "sourceDirectory": "_workspace/current/design/concept/castle-skin",
+  "runtimeDirectory": "Assets/Resources/CastleSkin",
+  "check": "For each of 12 concept PNGs: companion JSON exists; checksumSha256 equals the file SHA-256; width and height equal the PNG IHDR; matching runtime PNG basename exists.",
+  "checked": 12,
+  "errors": [],
+  "files": [
+    "base_s0.png",
+    "base_s1.png",
+    "base_s2.png",
+    "crown_s0.png",
+    "crown_s1.png",
+    "crown_s2.png",
+    "edge_s0.png",
+    "edge_s1.png",
+    "edge_s2.png",
+    "face_s0.png",
+    "face_s1.png",
+    "face_s2.png"
+  ]
+}

@@ -194,7 +194,7 @@ namespace CastleBusters.Tests
             // Unit damage test
             Debug.Log("Testing unit damage values...");
 
-            List<string> unitNames = new List<string> { "Knight", "Archer", "Bomber" };
+            List<string> unitNames = new List<string> { "Knight", "Archer", "Cannon" };
             for (int i = 0; i < 3; i++)
             {
                 gameManager.SelectUnit(i);

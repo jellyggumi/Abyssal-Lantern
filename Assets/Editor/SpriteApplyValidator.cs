@@ -129,7 +129,10 @@ public static class SpriteApplyValidator
     private static string VerifyFrameSets(out int ok, out int total)
     {
         ok = 0; total = 0;
-        var units = new[] { "Knight", "Archer", "Bomber" };
+        // Roster units only. The "Bomber" frame set still ships for the prologue webtoon
+        // (WebtoonPrologueController) but is no longer a playable unit, so a missing/partial
+        // state there must not fail the runtime animation audit.
+        var units = new[] { "Knight", "Archer" };
         var states = new[] { "Idle", "Walk", "Attack", "Launch" };
         var rows = new List<string>();
         foreach (var u in units)

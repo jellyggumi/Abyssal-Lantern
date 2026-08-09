@@ -1,0 +1,12 @@
+{
+  "file": "base_s1.png",
+  "prompt": "Recovered prompt contract from castle-ruin-presentation-spec.md: modular dark-fantasy weathered-stone castle Base tile, cracked state s1, matching the approved castle-skin style, neutral lighting, square source for keyed runtime extraction.",
+  "tool": "OpenAI image generation through the session generate_image surface; runtime conversion with ImageMagick 7.1.2-12",
+  "model": "backend model identifier was not exposed by the generation tool",
+  "generatedAt": "2026-08-09T07:20:36.406123Z",
+  "checksumSha256": "eff225aa6a8c28ba4e0ccc5b9dde201767e3cc2f20fbba2eae376e282251f7e2",
+  "runtimeEligible": true,
+  "notes": "Exact original prompt text was not persisted; this records the pre-existing design brief rather than inventing a verbatim prompt. Audited in the shipped WebGL capture and covered by CastleSkinResourceTests.",
+  "width": 1254,
+  "height": 1254
+}

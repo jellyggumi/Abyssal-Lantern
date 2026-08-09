@@ -127,7 +127,7 @@ MonoBehaviour:
   moveSpeed: 2.5
   attackDamage: 20
   attackRange: 6
-  attackCooldown: 1.5
+  attackCooldown: 0.95
   explosionRadius: 1.6
   explosionDamage: 70
   explosionEffectPrefab: {fileID: 3580900068180056100, guid: 5fcf2c0caffc2482d912912b3eb7c094,
@@ -135,7 +135,7 @@ MonoBehaviour:
   arrowPrefab: {fileID: 7104704188693010305, guid: 02db9a978e95e42dd8d42fe20a19a802,
     type: 3}
   firePoint: {fileID: 0}
-  visualScale: 0.42
+  visualScale: 0.48
   colliderVisualCoverage: 0.82
   trailWidthScale: 0.18
 --- !u!212 &-5146974112870304171

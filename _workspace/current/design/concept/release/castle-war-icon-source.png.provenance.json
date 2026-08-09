@@ -1,0 +1,18 @@
+{
+  "file": "castle-war-icon-source.png",
+  "prompt": "Square hard-edged pixel-art Castle War app icon combining a crenellated castle, split blue/red faction field, and a centered gold knight helmet/shield silhouette; no text or third-party marks.",
+  "tool": "god-tibo-imagen (Codex-authenticated image generation)",
+  "generatedAt": "2026-08-09T08:12:53.945Z",
+  "checksumSha256": "58e63d40ad3c7e98020c76eac114a65249a8323a5e5fcc4674b2bd635e921134",
+  "runtimeEligible": true,
+  "notes": "Promotion source for 180/192/512 icon sizes; 32px favicon is purpose-drawn separately.",
+  "width": 1254,
+  "height": 1254,
+  "audit": {
+    "reviewDate": "2026-08-09",
+    "evidence": "Independent release-art review found no visually apparent third-party marks; provenance and banner/favicon defects were then remediated.",
+    "status": "independent PASS — FinalReleaseArtReview",
+    "closedAt": "2026-08-09T08:16:29.820Z",
+    "result": "No remaining S1-S3 release-art findings; dimensions, exact asset SHA-256, crest remediation, icon legibility, metadata wiring, and keyboard focus treatment independently verified."
+  }
+}

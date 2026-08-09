@@ -1,0 +1,12 @@
+{
+  "file": "crown_s1.png",
+  "prompt": "Recovered prompt contract from castle-ruin-presentation-spec.md: modular dark-fantasy weathered-stone castle Crown tile, cracked state s1, matching the approved Face style anchor, neutral lighting, square source for keyed runtime extraction.",
+  "tool": "OpenAI image generation through the session generate_image surface; runtime conversion with ImageMagick 7.1.2-12",
+  "model": "backend model identifier was not exposed by the generation tool",
+  "generatedAt": "2026-08-09T07:20:35.874602Z",
+  "checksumSha256": "79cbc7590efae30eb3be409c9f527c9b23bfca2cb08abef5b2e750f546d9b895",
+  "runtimeEligible": true,
+  "notes": "Exact original prompt text was not persisted; this records the pre-existing design brief rather than inventing a verbatim prompt. Audited in the shipped WebGL capture and covered by CastleSkinResourceTests.",
+  "width": 1254,
+  "height": 1254
+}

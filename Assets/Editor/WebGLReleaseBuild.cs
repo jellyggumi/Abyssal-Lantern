@@ -15,6 +15,9 @@ public static class WebGLReleaseBuild
 
         // Dark siege-themed loading screen + canvas focus/touch handling (Assets/WebGLTemplates/CastleWar).
         PlayerSettings.WebGL.template = "PROJECT:CastleWar";
+        // Diagnostic builds enable full stack traces; never let that persisted editor setting
+        // leak into an optimized release, where Unity 2022 WebGL can recurse in stack unwinding.
+        PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
 
         var scenes = EditorBuildSettings.scenes
             .Where(s => s.enabled)

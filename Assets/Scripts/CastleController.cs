@@ -15,6 +15,10 @@ namespace CastleBusters
         private readonly List<DestructibleBlock> allBlocks = new List<DestructibleBlock>();
         private Coroutine integrityCheckCoroutine;
 
+        /// <summary>Read-only view of the live block list for presentation observers
+        /// (CastleRuinFx aggregate-HP milestones). Never mutate through this.</summary>
+        public System.Collections.Generic.IReadOnlyList<DestructibleBlock> Blocks => allBlocks;
+
         private void Start() => RefreshBlockList();
 
         public void RefreshBlockList()
@@ -22,6 +26,10 @@ namespace CastleBusters
             allBlocks.Clear();
             allBlocks.AddRange(GetComponentsInChildren<DestructibleBlock>());
             AutoAssignFoundationAnchors();
+            // Position-aware facade skins (presentation-only; no-op until the generated
+            // CastleSkin tiles exist under Resources/). Runs after anchors so scene-authored
+            // castles, runtime walls and rebuilt lists all converge on the same look.
+            CastleFacadeDirector.ApplySkins(this, allBlocks);
         }
 
         // Castle blocks are hand-placed scene content; none of them carry isGroundAnchor=true by
@@ -164,5 +172,10 @@ namespace CastleBusters
                 }
             }
         }
+
+        /// <summary>Public read-only adjacency for presentation observers (CastleRuinFx
+        /// neighbor pulse). Same rules as the integrity BFS's GetNeighbors.</summary>
+        public void CollectNeighbors(DestructibleBlock block, List<DestructibleBlock> results) =>
+            GetNeighbors(block, results);
     }
 }

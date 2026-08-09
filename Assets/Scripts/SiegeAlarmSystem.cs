@@ -186,6 +186,11 @@ namespace CastleBusters
                 if (flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(false);
                 return;
             }
+            if (gm.IsPlayerTurn && !gm.IsResolvingTurn)
+            {
+                if (flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(false);
+                return;
+            }
             if (!flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(true);
 
             string text;
@@ -197,18 +202,11 @@ namespace CastleBusters
                 text = $"볼리 해결 중{new string('.', dots)}"; // no ⚔: glyph missing from base TMP font
                 color = new Color(1f, 0.82f, 0.35f, 1f);
             }
-            else if (!gm.IsPlayerTurn)
+            else
             {
                 int dots = 1 + (int)(Time.time * 2.5f) % 3;
                 text = $"적 포격 준비 중{new string('.', dots)}  ·  클릭: 벽돌 예약";
                 color = new Color(1f, 0.55f, 0.4f, 1f);
-            }
-            else
-            {
-                var lm = FindObjectOfType<LaunchManager>();
-                bool aiming = lm != null && lm.IsAiming;
-                text = aiming ? "조준 중 — 놓으면 발사" : "내 턴 — 링에서 드래그해 발사";
-                color = aiming ? new Color(0.7f, 1f, 0.75f, 1f) : new Color(0.6f, 0.9f, 1f, 1f);
             }
             flowStrip.text = text;
             flowStrip.color = color;

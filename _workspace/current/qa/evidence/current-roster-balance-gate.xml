@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.1307719">
+  <test-suite type="TestSuite" id="1220" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="188" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.130772" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1423" name="CastleBusters.EditModeTests.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/CastleBusters.EditModeTests.dll" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.087179" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="61495" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1424" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.086426" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1425" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.086014" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1409" name="CurrentRosterBalanceGateTests" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.084328" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1413" name="BarrelHazard_HasAClusterPayoffAndARangedCountercondition" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.BarrelHazard_HasAClusterPayoffAndARangedCountercondition" methodname="BarrelHazard_HasAClusterPayoffAndARangedCountercondition" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="2116259603" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.007176" asserts="0">
+              <properties />
+              <output><![CDATA[HAZARD|Barrel|damage=80.000|radius=2.200|fuse=2.000|two_archer_hp=160.000|two_target_damage=160.000
+HAZARD_COUNTER|trigger_distance=3.200|arrow_travel=0.320|outside_damage=0.000|fuse=2.000
+]]></output>
+            </test-case>
+            <test-case id="1410" name="DamageSurvivabilityAndCostMatrix_PreservesDistinctEfficientRoles" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.DamageSurvivabilityAndCostMatrix_PreservesDistinctEfficientRoles" methodname="DamageSurvivabilityAndCostMatrix_PreservesDistinctEfficientRoles" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1581139383" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.001611" asserts="0">
+              <properties />
+              <output><![CDATA[BALANCE_MATRIX|Knight|dps=20.000|dps_per_supply=4.000|hp_per_supply=20.000
+BALANCE_MATRIX|Archer|dps=25.263|dps_per_supply=4.211|hp_per_supply=13.333
+BALANCE_MATRIX|Cannon|single_dps=13.125|single_dps_per_supply=1.094|four_target_dps_per_supply=4.375|hp_per_supply=11.667
+THRESHOLD|body_dps_per_supply_delta=5.00 %|limit=15 %|cannon_four_target_delta=6.17 %
+]]></output>
+            </test-case>
+            <test-case id="1414" name="LastStand_ExtraDamageShare_DoesNotExceedThirtyPercentOfCoreDefensePool" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.LastStand_ExtraDamageShare_DoesNotExceedThirtyPercentOfCoreDefensePool" methodname="LastStand_ExtraDamageShare_DoesNotExceedThirtyPercentOfCoreDefensePool" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="807350634" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.003714" asserts="0">
+              <properties />
+              <output><![CDATA[REVERSAL|Knight|applicable=true|base=20.000|buffed=44.000|extra_defense_share=12.00 %
+REVERSAL|Archer|applicable=true|base=20.000|buffed=44.000|extra_defense_share=12.00 %
+REVERSAL|Barrel|applicable=true|base=80.000|buffed=140.000|extra_defense_share=30.00 %
+REVERSAL|Cannon|applicable=false|reason=deploy_only|runtime_extra_share=0.00%
+CORE_DEFENSE|runtime_component=CastleCoreGimmick|core_hp=150.000|shield_hp=50.000|defense_pool=200.000
+THRESHOLD|worst_reachable_role=Barrel|worst_extra_share=30.00 %|limit=30 %|defense_pool=200.000
+]]></output>
+            </test-case>
+            <test-case id="1411" name="ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable" methodname="ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1771051533" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.002990" asserts="0">
+              <properties />
+              <output><![CDATA[COUNTER|Knight_vs_Archer_close|distance=2.500|winner=Knight|ttk=3.640
+COUNTER|Knight_vs_Archer_open|distance=10.000|winner=Archer|ttk=4.690
+ROLE_OUTCOME|Cannon_siege|core_hp=150.000|shield_hp=50.000|defense_pool=200.000|one_battery_ttk=17.502|cap_batteries=2|cap_ttk=11.102|threshold=12.000
+]]></output>
+            </test-case>
+            <test-case id="1412" name="SeededRuntimeDeploymentFactionBranch_MirrorsPlayerAndAiLegalityWithinFifteenPercent" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.SeededRuntimeDeploymentFactionBranch_MirrorsPlayerAndAiLegalityWithinFifteenPercent" methodname="SeededRuntimeDeploymentFactionBranch_MirrorsPlayerAndAiLegalityWithinFifteenPercent" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1494605871" result="Passed" start-time="2026-08-09 09:41:48Z" end-time="2026-08-09 09:41:48Z" duration="0.002194" asserts="0">
+              <properties />
+              <output><![CDATA[FACTION_BRANCH|samples_per_side=8|seeds=104729,130363,155921,196613,262147,327673,393241,524287|player_own_half_legal=8|ai_own_half_legal=8|player_enemy_half_rejected=8|ai_enemy_half_rejected=8|acceptance_delta=0.000 %|limit=15 %
+WIN_RATE|not_claimed=true|reason=runtime_deployment_ownership_is_not_a_match_AI_decision_model
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

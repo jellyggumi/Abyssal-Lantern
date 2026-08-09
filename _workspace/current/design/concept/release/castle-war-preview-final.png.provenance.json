@@ -1,0 +1,18 @@
+{
+  "file": "castle-war-preview-final.png",
+  "prompt": "Audited Castle War preview source with repeated banner glyphs replaced by simple gold castle crests inside existing medallions.",
+  "tool": "ImageMagick 7.1.1 pixel draw",
+  "generatedAt": "2026-08-09T08:12:53.945Z",
+  "checksumSha256": "04d20066623c614f356352aed16aa76dcf7206e068e3e846d3928ea36df2ad07",
+  "runtimeEligible": true,
+  "notes": "Promotion source for the 1200x630 social preview.",
+  "width": 1672,
+  "height": 941,
+  "audit": {
+    "reviewDate": "2026-08-09",
+    "evidence": "Independent release-art review found no visually apparent third-party marks; provenance and banner/favicon defects were then remediated.",
+    "status": "independent PASS — FinalReleaseArtReview",
+    "closedAt": "2026-08-09T08:16:29.820Z",
+    "result": "No remaining S1-S3 release-art findings; dimensions, exact asset SHA-256, crest remediation, icon legibility, metadata wiring, and keyboard focus treatment independently verified."
+  }
+}

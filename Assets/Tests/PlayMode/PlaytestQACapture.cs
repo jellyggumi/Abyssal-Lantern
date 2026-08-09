@@ -50,11 +50,11 @@ namespace CastleBusters.Tests
             const float baseWidth = 82f, baseHeight = 54f;
             AssertButtonSize(GameManager.Instance.knightButton, baseWidth * 1.5f, baseHeight * 1.5f, "Knight");
             AssertButtonSize(GameManager.Instance.archerButton, baseWidth * 1.5f, baseHeight * 1.5f, "Archer");
-            AssertButtonSize(GameManager.Instance.bomberButton, baseWidth * 1.5f, baseHeight * 1.5f, "Bomber");
+            AssertButtonSize(GameManager.Instance.cannonButton, baseWidth * 1.5f, baseHeight * 1.5f, "Cannon");
             AssertButtonSize(GameManager.Instance.gimmickButton, baseWidth * 1.5f, baseHeight * 1.5f, "Gimmick");
             AssertNoOverlap(GameManager.Instance.knightButton, GameManager.Instance.archerButton);
-            AssertNoOverlap(GameManager.Instance.archerButton, GameManager.Instance.bomberButton);
-            AssertNoOverlap(GameManager.Instance.bomberButton, GameManager.Instance.gimmickButton);
+            AssertNoOverlap(GameManager.Instance.archerButton, GameManager.Instance.cannonButton);
+            AssertNoOverlap(GameManager.Instance.cannonButton, GameManager.Instance.gimmickButton);
 
             ScreenCapture.CaptureScreenshot("QA_SelectionRow.png");
 

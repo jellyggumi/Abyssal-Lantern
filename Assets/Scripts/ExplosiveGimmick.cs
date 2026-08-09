@@ -23,8 +23,21 @@ namespace CastleBusters
         private float baseExplosionRadius;
         private float baseExplosionDamage;
         private Coroutine potencyRevertRoutine;
+        private float temporaryPotencyMultiplier = 1f;
+        // Optional permanent-source ceiling. Only owners such as Last Stand opt in; ordinary
+        // barrels keep the uncapped base × temporary-gate composition.
+        [SerializeField, HideInInspector] private bool hasMaximumEffectiveDamage;
+        [SerializeField, HideInInspector] private float maximumEffectiveDamage;
         // Cached sibling body: OnDestroy previously did a GetComponent per destruction.
         private DestructibleBlock cachedBlock;
+        private bool? damageFromPlayer;
+
+        /// <summary>Assigns the side that caused this detonation so delayed chains keep ownership.</summary>
+        public void SetDamageOwner(bool? isPlayer)
+        {
+            damageFromPlayer = isPlayer;
+        }
+
 
         // Also called (idempotently) from ApplyTemporaryPotencyMultiplier: a barrel that gets
         // scaled by a gate before its own Awake has run (e.g. AddComponent<ExplosiveGimmick>()
@@ -37,6 +50,56 @@ namespace CastleBusters
             basePotencyCaptured = true;
             baseExplosionRadius = explosionRadius;
             baseExplosionDamage = explosionDamage;
+        }
+
+        public float PermanentExplosionRadius
+        {
+            get
+            {
+                CaptureBasePotency();
+                return baseExplosionRadius;
+            }
+        }
+
+        public float PermanentExplosionDamage
+        {
+            get
+            {
+                CaptureBasePotency();
+                return baseExplosionDamage;
+            }
+        }
+
+        /// <summary>
+        /// Replaces the permanent potency while preserving any active gate multiplier and cap.
+        /// Hero Growth uses this path so a later gate expiry cannot erase it.
+        /// </summary>
+        public void SetPermanentPotency(float damage, float radius)
+        {
+            CaptureBasePotency();
+            baseExplosionDamage = Mathf.Max(0f, damage);
+            baseExplosionRadius = Mathf.Max(0f, radius);
+            RefreshPotency();
+        }
+
+        /// <summary>
+        /// Replaces permanent potency and installs an effective-damage ceiling owned by the
+        /// permanent source. Temporary gates still scale radius, but cannot exceed the ceiling.
+        /// </summary>
+        public void SetPermanentPotency(float damage, float radius, float damageCap)
+        {
+            hasMaximumEffectiveDamage = true;
+            maximumEffectiveDamage = Mathf.Max(0f, damageCap);
+            SetPermanentPotency(damage, radius);
+        }
+
+        private void RefreshPotency()
+        {
+            float scaledDamage = baseExplosionDamage * temporaryPotencyMultiplier;
+            explosionDamage = hasMaximumEffectiveDamage
+                ? Mathf.Min(scaledDamage, maximumEffectiveDamage)
+                : scaledDamage;
+            explosionRadius = baseExplosionRadius * temporaryPotencyMultiplier;
         }
 
         private void Awake()
@@ -124,8 +187,8 @@ namespace CastleBusters
             }
 
 
-            explosionRadius = baseExplosionRadius * multiplier;
-            explosionDamage = baseExplosionDamage * multiplier;
+            temporaryPotencyMultiplier = Mathf.Max(0f, multiplier);
+            RefreshPotency();
 
             if (Application.isPlaying && duration > 0f)
             {
@@ -136,8 +199,8 @@ namespace CastleBusters
         private IEnumerator RevertPotencyAfter(float duration)
         {
             yield return new WaitForSeconds(duration);
-            explosionRadius = baseExplosionRadius;
-            explosionDamage = baseExplosionDamage;
+            temporaryPotencyMultiplier = 1f;
+            RefreshPotency();
             potencyRevertRoutine = null;
         }
 
@@ -157,7 +220,7 @@ namespace CastleBusters
                 var block = blocks[i];
                 if (block != null && block.gameObject != gameObject && Vector2.Distance(transform.position, block.transform.position) <= explosionRadius)
                 {
-                    block.TakeDamage(explosionDamage);
+                    block.TakeDamage(explosionDamage, damageFromPlayer);
                 }
             }
 
@@ -167,13 +230,25 @@ namespace CastleBusters
                 var unit = units[i];
                 if (unit != null && Vector2.Distance(transform.position, unit.transform.position) <= explosionRadius)
                 {
-                    unit.TakeDamage(explosionDamage);
+                    unit.TakeDamage(explosionDamage, damageFromPlayer);
                 }
+            }
+
+            // Propagate the original attacker through static-keg chains. Launched Barrels are
+            // handled by their UnitController HP/death path above and must not be forced early.
+            foreach (var other in FindObjectsOfType<ExplosiveGimmick>())
+            {
+                if (other == null || other == this || other.hasExploded) continue;
+                if (other.GetComponent<UnitController>() != null) continue;
+                if (Vector2.Distance(transform.position, other.transform.position) > explosionRadius) continue;
+                other.SetDamageOwner(damageFromPlayer);
+                other.Explode();
             }
 
             // Content hook: destroyed kegs can drop hero-growth loot (60% chance).
             ItemDropper.TrySpawn(transform.position);
-            if (GameManager.Instance != null) GameManager.Instance.AddScore(GameManager.Instance.IsPlayerTurn, 100);
+            if (GameManager.Instance != null && damageFromPlayer.HasValue)
+                GameManager.Instance.AddScore(damageFromPlayer.Value, 100);
         }
 
         private void SpawnExplosionVisual()

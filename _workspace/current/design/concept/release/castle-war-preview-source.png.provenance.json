@@ -1,0 +1,18 @@
+{
+  "file": "castle-war-preview-source.png",
+  "prompt": "Original high-resolution pixel-art Castle War siege preview: side-view trebuchet launch, airborne blue knight, breached red castle, sunset battlefield; derived from project-owned runtime key art and faction UI references.",
+  "tool": "god-tibo-imagen (Codex-authenticated image generation)",
+  "generatedAt": "2026-08-09T08:12:53.945Z",
+  "checksumSha256": "4d364e32e4b875ddbe091695477a48b76b7705bd91b3608adb91fdf5e023a7f0",
+  "runtimeEligible": false,
+  "notes": "Unedited generation source retained for audit; repeated letter-like banner glyphs are not approved for promotion.",
+  "width": 1672,
+  "height": 941,
+  "audit": {
+    "reviewDate": "2026-08-09",
+    "evidence": "Independent release-art review found no visually apparent third-party marks; provenance and banner/favicon defects were then remediated.",
+    "status": "independent PASS — FinalReleaseArtReview",
+    "closedAt": "2026-08-09T08:16:29.819Z",
+    "result": "No remaining S1-S3 release-art findings; dimensions, exact asset SHA-256, crest remediation, icon legibility, metadata wiring, and keyboard focus treatment independently verified."
+  }
+}

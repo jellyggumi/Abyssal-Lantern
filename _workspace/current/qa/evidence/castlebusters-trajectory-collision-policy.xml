@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.0852462">
+  <test-suite type="TestSuite" id="1210" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="179" result="Passed" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.085246" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1392" name="Assembly-CSharp-Editor.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="173" result="Passed" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.061679" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="91791" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1393" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="173" result="Passed" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.058884" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1394" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="173" result="Passed" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.056534" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1253" name="GamePlayTests" fullname="CastleBusters.Tests.GamePlayTests" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" testcasecount="91" result="Passed" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.050173" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1288" name="LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround" methodname="LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1732298698" result="Passed" start-time="2026-08-09 08:48:34Z" end-time="2026-08-09 08:48:34Z" duration="0.020209" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

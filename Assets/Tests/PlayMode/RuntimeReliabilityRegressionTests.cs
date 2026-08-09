@@ -115,6 +115,267 @@ namespace CastleBusters.Tests
         }
 
         [UnityTest]
+        public IEnumerator UnitController_Launch_UsesLaunchBurstWithoutClaimingImpactAudio()
+        {
+            int CountPresentationAudioHosts()
+            {
+                int count = 0;
+                foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+                {
+                    if (gameObject.name == "GameFeelVfxAudio") count++;
+                }
+                return count;
+            }
+
+            ParticleSystem FindBurstAt(Vector3 position)
+            {
+                foreach (var particleSystem in Object.FindObjectsOfType<ParticleSystem>())
+                {
+                    if ((particleSystem.transform.position - position).sqrMagnitude < 0.0001f)
+                    {
+                        return particleSystem;
+                    }
+                }
+                return null;
+            }
+
+            foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+            {
+                if (gameObject.name == "GameFeelVfxAudio") Object.Destroy(gameObject);
+            }
+            yield return null;
+            Assert.Zero(CountPresentationAudioHosts(),
+                "The launch/impact audio distinction requires an isolated presentation-audio boundary.");
+
+            GameObject unitGo = null;
+            ParticleSystem launchBurst = null;
+            ParticleSystem impactBurst = null;
+            try
+            {
+                var launchPosition = new Vector3(4321f, -1234f, 0f);
+                unitGo = new GameObject("LaunchBurstSemanticProbe");
+                unitGo.transform.position = launchPosition;
+                unitGo.AddComponent<Rigidbody2D>();
+                unitGo.AddComponent<BoxCollider2D>();
+                var unit = unitGo.AddComponent<UnitController>();
+
+                unit.Launch(new Vector2(5f, 3f));
+                launchBurst = FindBurstAt(launchPosition);
+
+                Assert.IsNotNull(launchBurst,
+                    "Launching a unit must retain immediate burst feedback at the launch position.");
+                Assert.Zero(CountPresentationAudioHosts(),
+                    "Launch feedback must not claim the impact-only audio channel.");
+
+                var impactPosition = launchPosition + Vector3.right * 10f;
+                GameFeelVfx.SpawnImpactBurst(impactPosition, Color.white, 0.28f);
+                impactBurst = FindBurstAt(impactPosition);
+
+                Assert.IsNotNull(impactBurst, "Real impact feedback must still spawn its burst.");
+                Assert.AreEqual(1, CountPresentationAudioHosts(),
+                    "Real impacts must retain the presentation-audio host reserved for impact SFX.");
+            }
+            finally
+            {
+                if (unitGo != null) Object.Destroy(unitGo);
+                if (launchBurst != null) Object.Destroy(launchBurst.gameObject);
+                if (impactBurst != null) Object.Destroy(impactBurst.gameObject);
+                foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+                {
+                    if (gameObject.name == "GameFeelVfxAudio") Object.Destroy(gameObject);
+                }
+            }
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator GameManager_ApplyLastStandOnLaunch_SpawnsVisualBurstWithoutImpactAudio()
+        {
+            int CountPresentationAudioHosts()
+            {
+                int count = 0;
+                foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+                {
+                    if (gameObject.name == "GameFeelVfxAudio") count++;
+                }
+                return count;
+            }
+
+            foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+            {
+                if (gameObject.name == "GameFeelVfxAudio") Object.Destroy(gameObject);
+            }
+            yield return null;
+            Assert.Zero(CountPresentationAudioHosts(),
+                "The LAST STAND audio assertion requires an isolated presentation-audio boundary.");
+
+            GameObject managerGo = null;
+            GameObject unitGo = null;
+            ParticleSystem lastStandBurst = null;
+            try
+            {
+                var gameManager = GameManager.Instance;
+                if (gameManager == null)
+                {
+                    managerGo = new GameObject("LastStandVisualOnlyGameManager");
+                    gameManager = managerGo.AddComponent<GameManager>();
+                }
+
+                Vector3 position = new Vector3(5678f, -4321f, 0f);
+                unitGo = new GameObject("LastStandVisualOnlyUnit");
+                unitGo.transform.position = position;
+                var unit = unitGo.AddComponent<UnitController>();
+                unit.isPlayerUnit = true;
+                gameManager.playerLastStand = LastStand.Phase.Active;
+
+                gameManager.ApplyLastStandOnLaunch(unit, new Vector2(4f, 3f));
+                foreach (var particleSystem in Object.FindObjectsOfType<ParticleSystem>())
+                {
+                    if ((particleSystem.transform.position - position).sqrMagnitude < 0.0001f)
+                    {
+                        lastStandBurst = particleSystem;
+                        break;
+                    }
+                }
+
+                Assert.IsNotNull(lastStandBurst,
+                    "Consuming LAST STAND must retain an immediate visual burst at the launched unit.");
+                Assert.Zero(CountPresentationAudioHosts(),
+                    "LAST STAND's decorative impact burst must not claim the real-impact audio channel.");
+            }
+            finally
+            {
+                if (lastStandBurst != null) Object.Destroy(lastStandBurst.gameObject);
+                if (unitGo != null) Object.Destroy(unitGo);
+                if (managerGo != null) Object.Destroy(managerGo);
+                foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+                {
+                    if (gameObject.name == "FeedbackLabel" || gameObject.name == "GameFeelVfxAudio")
+                    {
+                        Object.Destroy(gameObject);
+                    }
+                }
+            }
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator UnitController_FriendlyBodyContact_DoesNotSettleLaunchedUnit()
+        {
+            GameObject launchedGo = null;
+            GameObject teammateGo = null;
+            try
+            {
+                launchedGo = new GameObject("FriendlyContactLaunchedUnit");
+                launchedGo.transform.position = new Vector3(0f, 5f, 0f);
+                var launchedBody = launchedGo.AddComponent<Rigidbody2D>();
+                launchedBody.gravityScale = 0f;
+                launchedGo.AddComponent<BoxCollider2D>();
+                var launchedUnit = launchedGo.AddComponent<UnitController>();
+                launchedUnit.isPlayerUnit = true;
+
+                teammateGo = new GameObject("FriendlyContactGroundedUnit");
+                teammateGo.transform.position = launchedGo.transform.position;
+                var teammateBody = teammateGo.AddComponent<Rigidbody2D>();
+                teammateGo.AddComponent<BoxCollider2D>();
+                var teammate = teammateGo.AddComponent<UnitController>();
+                teammate.isPlayerUnit = true;
+                teammate.DeployGrounded();
+                teammateBody.bodyType = RigidbodyType2D.Kinematic;
+                float teammateHpBefore = teammate.currentHP;
+
+                yield return null;
+
+                launchedUnit.Launch(Vector2.right * 4f);
+                Physics2D.SyncTransforms();
+                yield return new WaitForFixedUpdate();
+
+                Assert.AreEqual(UnitState.Launched, launchedUnit.CurrentState,
+                    "Contact with a live friendly body must not consume the projectile's flight or settle it.");
+                Assert.AreEqual(teammateHpBefore, teammate.currentHP, 0.0001f,
+                    "Friendly contact must not apply the enemy-only impact damage path.");
+            }
+            finally
+            {
+                if (launchedGo != null) Object.Destroy(launchedGo);
+                if (teammateGo != null) Object.Destroy(teammateGo);
+                foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
+                {
+                    if (gameObject.name == "ImpactBurst") Object.Destroy(gameObject);
+                }
+            }
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator SimpleAI_PerformLaunch_ReplacesStaleWindOriginWithAiMuzzle()
+        {
+            var existingUnits = new System.Collections.Generic.HashSet<UnitController>(
+                Object.FindObjectsOfType<UnitController>());
+            var existingParticles = new System.Collections.Generic.HashSet<ParticleSystem>(
+                Object.FindObjectsOfType<ParticleSystem>());
+            GameObject managerGo = null;
+            var aiGo = new GameObject("WindOriginAi");
+            var launchPointGo = new GameObject("WindOriginAiLaunchPoint");
+            var prefabGo = new GameObject("WindOriginAiUnitPrefab");
+            var gameManager = GameManager.Instance;
+            Vector2 originalWindOrigin = gameManager != null ? gameManager.windEffectOrigin : Vector2.zero;
+            try
+            {
+                if (gameManager == null)
+                {
+                    managerGo = new GameObject("WindOriginGameManager");
+                    gameManager = managerGo.AddComponent<GameManager>();
+                }
+
+                Vector2 aiMuzzle = new Vector2(17f, 3f);
+                launchPointGo.transform.position = aiMuzzle;
+                prefabGo.transform.position = new Vector3(1000f, 1000f, 0f);
+                var prefabBody = prefabGo.AddComponent<Rigidbody2D>();
+                prefabBody.mass = 1f;
+                prefabBody.drag = 0.05f;
+                prefabGo.AddComponent<BoxCollider2D>();
+                var prefabUnit = prefabGo.AddComponent<UnitController>();
+                prefabUnit.isPlayerUnit = false;
+
+                var ai = aiGo.AddComponent<SimpleAI>();
+                ai.launchPoint = launchPointGo.transform;
+                ai.unitPrefabs = new[] { prefabGo };
+                ai.errorOffsetRange = 0f;
+
+                gameManager.windEffectOrigin = new Vector2(-900f, -700f);
+                var performLaunch = typeof(SimpleAI).GetMethod(
+                    "PerformLaunch",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(performLaunch);
+                var routine = (IEnumerator)performLaunch.Invoke(ai, null);
+                Assert.IsTrue(routine.MoveNext(), "PerformLaunch must first expose its authored aim delay.");
+                Assert.IsInstanceOf<WaitForSeconds>(routine.Current);
+                Assert.IsFalse(routine.MoveNext(), "The launch coroutine must complete after solving and spawning its shot.");
+
+                Assert.AreEqual(aiMuzzle, gameManager.windEffectOrigin,
+                    "The AI launch path must replace a stale player-shot wind origin with the AI muzzle before solving and launching.");
+            }
+            finally
+            {
+                if (gameManager != null) gameManager.windEffectOrigin = originalWindOrigin;
+                foreach (var unit in Object.FindObjectsOfType<UnitController>())
+                {
+                    if (!existingUnits.Contains(unit)) Object.Destroy(unit.gameObject);
+                }
+                foreach (var particle in Object.FindObjectsOfType<ParticleSystem>())
+                {
+                    if (!existingParticles.Contains(particle)) Object.Destroy(particle.gameObject);
+                }
+                if (prefabGo != null) Object.Destroy(prefabGo);
+                Object.Destroy(aiGo);
+                Object.Destroy(launchPointGo);
+                if (managerGo != null) Object.Destroy(managerGo);
+            }
+            yield return null;
+        }
+
+        [UnityTest]
         [Timeout(60000)]
         public IEnumerator ShockwaveRing_SpawnsWithRenderableSpriteAndCleansItselfUp()
         {
@@ -400,6 +661,66 @@ namespace CastleBusters.Tests
                 "Consuming Last Stand through a real launch must apply its documented player explosion radius effect");
         }
 
+
+        [UnityTest]
+        [Timeout(60000)]
+        public IEnumerator GameplayUxDirector_HudToastAndComboRectanglesUseSeparateLanesAt960x600()
+        {
+            yield return LoadAndBeginStage(StageId.Stage1);
+
+            var hud = GameObject.Find("GameplayUxDirectorHUD");
+            Assert.IsNotNull(hud, "A begun siege must expose the runtime gameplay HUD.");
+            var turnToastRect = hud.transform.Find("TurnToastText")?.GetComponent<RectTransform>();
+            var comboRect = hud.transform.Find("ComboText")?.GetComponent<RectTransform>();
+            Assert.IsNotNull(turnToastRect, "The launch toast must expose its runtime rectangle.");
+            Assert.IsNotNull(comboRect, "The combo banner must expose its runtime rectangle.");
+
+            Assert.AreEqual(0.78f, turnToastRect.anchorMin.y, 0.0001f);
+            Assert.AreEqual(0.78f, turnToastRect.anchorMax.y, 0.0001f);
+            Assert.AreEqual(new Vector2(800f, 64f), turnToastRect.sizeDelta);
+            Assert.AreEqual(0.60f, comboRect.anchorMin.y, 0.0001f);
+            Assert.AreEqual(0.60f, comboRect.anchorMax.y, 0.0001f);
+            Assert.AreEqual(new Vector2(400f, 52f), comboRect.sizeDelta);
+
+            var referenceViewport = new Vector2(960f, 600f);
+            Vector2 toastOrigin = Vector2.Scale(turnToastRect.anchorMin, referenceViewport)
+                + turnToastRect.anchoredPosition
+                - Vector2.Scale(turnToastRect.pivot, turnToastRect.sizeDelta);
+            Vector2 comboOrigin = Vector2.Scale(comboRect.anchorMin, referenceViewport)
+                + comboRect.anchoredPosition
+                - Vector2.Scale(comboRect.pivot, comboRect.sizeDelta);
+            var toastReferenceRect = new Rect(toastOrigin, turnToastRect.sizeDelta);
+            var comboReferenceRect = new Rect(comboOrigin, comboRect.sizeDelta);
+
+            Assert.IsFalse(toastReferenceRect.Overlaps(comboReferenceRect),
+                "At 960x600, the launch toast and combo banner must occupy separate vertical lanes.");
+        }
+
+        [UnityTest]
+        [Timeout(60000)]
+        public IEnumerator LaunchManager_ActiveLastStandToastReportsBuffedLaunchPower()
+        {
+            yield return LoadAndBeginStage(StageId.Stage1);
+
+            var gameManager = GameManager.Instance;
+            var launchManager = Object.FindObjectOfType<LaunchManager>();
+            Assert.IsNotNull(gameManager);
+            Assert.IsNotNull(launchManager);
+            Assert.IsNotNull(gameManager.knightPrefab);
+
+            gameManager.playerLastStand = LastStand.Phase.Active;
+            launchManager.SetSelectedUnit(gameManager.knightPrefab);
+            launchManager.SimulateLaunch(new Vector2(10f, 0f));
+
+            var toastText = GameObject.Find("GameplayUxDirectorHUD")
+                ?.transform.Find("TurnToastText")
+                ?.GetComponent<TMPro.TextMeshProUGUI>();
+            Assert.IsNotNull(toastText, "A public launch must report power through the visible runtime toast.");
+            Assert.AreEqual("CLEAN SIEGE ARC: Knight  52% / 0°", toastText.text,
+                "Launch reporting must use the actual 1.30x LAST STAND velocity, not the pre-buff aimed velocity.");
+            Assert.AreEqual(LastStand.Phase.Consumed, gameManager.playerLastStand,
+                "The launch whose buffed power was reported must consume the active one-shot phase.");
+        }
         [UnityTest]
         [Timeout(60000)]
         public IEnumerator LaunchToast_SuppressesConcurrentComboBannerWhileRetainingComboState()
@@ -422,6 +743,7 @@ namespace CastleBusters.Tests
             Assert.IsNotNull(toastBackplate, "Gameplay feedback must expose the toast backplate GameObject");
             Assert.IsNotNull(combo, "Gameplay feedback must expose the combo-banner GameObject");
             Assert.IsNotNull(comboBackplate, "Gameplay feedback must expose the combo-banner backplate GameObject");
+
 
             var turnToastText = turnToast.GetComponent<TMPro.TextMeshProUGUI>();
             var comboText = combo.GetComponent<TMPro.TextMeshProUGUI>();
@@ -778,6 +1100,192 @@ namespace CastleBusters.Tests
             yield return null;
             Assert.AreEqual(StageId.Stage1, GameManager.PendingStage,
                 "A visible Stage1 card pointer click must use the public stage selection route");
+        }
+
+        [UnityTest]
+        [Timeout(60000)]
+        public IEnumerator ExplosiveGimmick_TemporaryPotency_RestoresPermanentBaselineWithoutCompounding()
+        {
+            const float permanentDamage = 137f;
+            const float permanentRadius = 3.25f;
+            const float multiplier = 1.6f;
+            const float duration = 0.03f;
+            var barrelObject = new GameObject("TemporaryPotencyRegressionBarrel");
+
+            try
+            {
+                var barrel = barrelObject.AddComponent<ExplosiveGimmick>();
+                barrel.SetPermanentPotency(permanentDamage, permanentRadius);
+
+                Assert.AreEqual(permanentDamage, barrel.PermanentExplosionDamage, 0.0001f,
+                    "SetPermanentPotency must replace the damage baseline used after temporary effects expire.");
+                Assert.AreEqual(permanentRadius, barrel.PermanentExplosionRadius, 0.0001f,
+                    "SetPermanentPotency must replace the radius baseline used after temporary effects expire.");
+
+                barrel.ApplyTemporaryPotencyMultiplier(multiplier, duration);
+
+                Assert.AreEqual(permanentDamage * multiplier, barrel.explosionDamage, 0.0001f,
+                    "The temporary multiplier must affect live explosion damage immediately.");
+                Assert.AreEqual(permanentRadius * multiplier, barrel.explosionRadius, 0.0001f,
+                    "The temporary multiplier must affect live explosion radius immediately.");
+
+                barrel.ApplyTemporaryPotencyMultiplier(multiplier, duration);
+
+                Assert.AreEqual(permanentDamage * multiplier, barrel.explosionDamage, 0.0001f,
+                    "Restarting the temporary window must not multiply the already-scaled damage.");
+                Assert.AreEqual(permanentRadius * multiplier, barrel.explosionRadius, 0.0001f,
+                    "Restarting the temporary window must not multiply the already-scaled radius.");
+
+                yield return new WaitForSecondsRealtime(0.1f);
+                yield return null;
+
+                Assert.AreEqual(permanentDamage, barrel.explosionDamage, 0.0001f,
+                    "Temporary damage must restore the exact permanent baseline after expiry.");
+                Assert.AreEqual(permanentRadius, barrel.explosionRadius, 0.0001f,
+                    "Temporary radius must restore the exact permanent baseline after expiry.");
+            }
+            finally
+            {
+                if (barrelObject != null) Object.Destroy(barrelObject);
+            }
+        }
+
+        [UnityTest]
+        [Timeout(60000)]
+        public IEnumerator DeploymentController_TryDeploy_PaidBarrelArmsFuseAndDetonatesWithoutWalkingOrAttacking()
+        {
+            yield return LoadAndBeginStage(StageId.Stage1);
+
+            var gameManager = GameManager.Instance;
+            var deployment = DeploymentController.Instance;
+            Assert.IsNotNull(deployment, "The live gameplay bootstrap must expose the paid deployment controller.");
+            Assert.IsNotNull(gameManager.explosiveBarrelPrefab,
+                "The live gameplay manager must retain the Barrel prefab used by paid deployment.");
+
+            var turnCountField = typeof(GameManager).GetField(
+                "turnCount",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.IsNotNull(turnCountField, "The test must be able to establish the documented Barrel unlock turn.");
+            turnCountField.SetValue(gameManager, DeploymentRules.UnlockTurn(DeployCard.Barrel));
+
+            deployment.CreditKill(victimWasPlayerUnit: false);
+            deployment.CreditKill(victimWasPlayerUnit: false);
+
+            var unitsBeforeDeployment = Object.FindObjectsOfType<UnitController>();
+            var deployPosition = Vector2.zero;
+            var foundClearDeployPosition = false;
+            for (var x = -1f; x >= -12f && !foundClearDeployPosition; x -= 1f)
+            {
+                var candidatePosition = new Vector2(x, 0f);
+                if (!DeploymentRules.InDeployZone(candidatePosition, deployerIsPlayer: true)) continue;
+
+                var overlapsEnemy = false;
+                foreach (var hit in Physics2D.OverlapCircleAll(candidatePosition, DeploymentRules.EnemyOverlapRadius))
+                {
+                    var existingUnit = hit != null ? hit.GetComponent<UnitController>() : null;
+                    if (existingUnit != null &&
+                        !existingUnit.isPlayerUnit &&
+                        existingUnit.CurrentState != UnitState.Dead)
+                    {
+                        overlapsEnemy = true;
+                        break;
+                    }
+                }
+
+                if (overlapsEnemy) continue;
+                deployPosition = candidatePosition;
+                foundClearDeployPosition = true;
+            }
+            Assert.IsTrue(foundClearDeployPosition,
+                "The loaded production board must expose one legal, enemy-clear position on the player's half.");
+            var fuseStartedAt = Time.time;
+
+            var result = deployment.TryDeploy(DeployCard.Barrel, deployPosition, isPlayer: true);
+
+            Assert.AreEqual(DeployBlockReason.None, result,
+                "An unlocked, funded Barrel placed on the player's legal half must complete the paid deployment path.");
+
+            UnitController barrel = null;
+            foreach (var candidate in Object.FindObjectsOfType<UnitController>())
+            {
+                if (System.Array.IndexOf(unitsBeforeDeployment, candidate) < 0)
+                {
+                    barrel = candidate;
+                    break;
+                }
+            }
+
+            Assert.IsNotNull(barrel, "A successful paid deployment must create one new live unit.");
+            Assert.AreEqual(UnitType.Barrel, barrel.unitType,
+                "The Barrel card must create the powder-keg unit rather than another roster body.");
+            Assert.IsTrue(barrel.isPlayerUnit, "A player-paid Barrel must retain player ownership.");
+            Assert.IsTrue(barrel.IsFusePending,
+                "Paid Barrel deployment must arm the existing powder-keg fuse synchronously.");
+            Assert.AreEqual(UnitState.Grounded, barrel.CurrentState,
+                "An armed deployed Barrel must enter the grounded fuse state, never the walking or attacking state.");
+
+            var barrelBody = barrel.GetComponent<Rigidbody2D>();
+            Assert.IsNotNull(barrelBody, "The production Barrel prefab must retain its physics body.");
+            while (barrel != null && Time.time - fuseStartedAt < 0.5f)
+            {
+                yield return null;
+            }
+            Assert.IsTrue(barrel != null && barrel.IsFusePending,
+                "The paid Barrel must remain alive and fuse-armed while its placement collider settles.");
+
+            var settledX = barrel.transform.position.x;
+            for (var fixedStep = 0; fixedStep < 5; fixedStep++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+
+            Assert.AreEqual(settledX, barrel.transform.position.x, 0.01f,
+                "A fuse-armed Barrel must not walk after its placement collider has settled.");
+            Assert.AreEqual(0f, barrelBody.velocity.x, 0.01f,
+                "A settled fuse-armed Barrel must hold zero horizontal locomotion velocity.");
+
+            var targetObject = new GameObject("PaidBarrelAttackAndExplosionProbe");
+            var target = targetObject.AddComponent<UnitController>();
+            target.moveSpeed = 0f;
+            target.attackDamage = 0f;
+            target.InitializeUnit(isPlayer: false, UnitState.Grounded);
+            targetObject.transform.position = barrel.transform.position + Vector3.right;
+            var targetHpBeforeFuse = target.currentHP;
+
+            try
+            {
+                while (barrel != null && Time.time - fuseStartedAt < 1f)
+                {
+                    yield return null;
+                }
+
+                Assert.IsTrue(barrel != null && barrel.IsFusePending,
+                    "The paid Barrel must still be fuse-armed before its fuse duration elapses.");
+                Assert.AreEqual(UnitState.Grounded, barrel.CurrentState,
+                    "A nearby enemy must not make a fuse-armed Barrel enter its attack state.");
+                Assert.AreEqual(targetHpBeforeFuse, target.currentHP, 0.001f,
+                    "A fuse-armed Barrel must not perform a melee attack while waiting to explode.");
+
+                var destructionDeadline = fuseStartedAt + UnitCombos.BarrelFuseSeconds + 0.25f;
+                while (barrel != null && Time.time < destructionDeadline)
+                {
+                    yield return null;
+                }
+
+                var fuseElapsed = Time.time - fuseStartedAt;
+                Assert.IsTrue(barrel == null,
+                    "The paid Barrel must be destroyed by its own armed fuse.");
+                Assert.That(
+                    fuseElapsed,
+                    Is.InRange(UnitCombos.BarrelFuseSeconds - 0.02f, UnitCombos.BarrelFuseSeconds + 0.15f),
+                    "The paid Barrel must detonate at the documented fuse duration, within one tight frame allowance.");
+                Assert.Less(target.currentHP, targetHpBeforeFuse,
+                    "The nearby enemy must take explosion damage, proving disappearance came from detonation rather than cleanup.");
+            }
+            finally
+            {
+                if (targetObject != null) Object.Destroy(targetObject);
+            }
         }
 
         [UnityTest]
@@ -1300,8 +1808,8 @@ namespace CastleBusters.Tests
                 case UnitType.Archer:
                     prefab = gameManager.archerPrefab;
                     break;
-                case UnitType.Bomber:
-                    prefab = gameManager.bomberPrefab;
+                case UnitType.Barrel:
+                    prefab = gameManager.explosiveBarrelPrefab;
                     break;
                 default:
                     return null;
@@ -1332,5 +1840,76 @@ namespace CastleBusters.Tests
         }
 
         private static bool HasActiveChariot() => ActiveChariot() != null;
+    }
+
+    public sealed class HiggsfieldAccentLifecycleTests
+    {
+        private readonly System.Collections.Generic.List<GameObject> createdObjects =
+            new System.Collections.Generic.List<GameObject>();
+        private float originalTimeScale;
+
+        [SetUp]
+        public void SetUp()
+        {
+            originalTimeScale = Time.timeScale;
+            Time.timeScale = 1f;
+        }
+
+        [UnityTearDown]
+        public IEnumerator TearDown()
+        {
+            for (int i = createdObjects.Count - 1; i >= 0; i--)
+            {
+                if (createdObjects[i] != null)
+                {
+                    Object.Destroy(createdObjects[i]);
+                }
+            }
+
+            createdObjects.Clear();
+            Time.timeScale = originalTimeScale;
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator SpawnHiggsfieldAccent_Impact_CreatesRenderablePulseAndDestroysAfterLifetime()
+        {
+            var existingObjects = new System.Collections.Generic.HashSet<GameObject>(
+                Object.FindObjectsOfType<GameObject>());
+
+            GameFeelVfx.SpawnHiggsfieldAccent(
+                Vector3.zero,
+                HiggsfieldSpriteLibrary.Impact,
+                Color.white,
+                finalRadius: 0.5f,
+                lifetime: 0.08f,
+                sortingOrder: 36);
+
+            foreach (GameObject gameObject in Object.FindObjectsOfType<GameObject>())
+            {
+                if (!existingObjects.Contains(gameObject))
+                {
+                    createdObjects.Add(gameObject);
+                }
+            }
+
+            Assert.That(createdObjects, Has.Count.EqualTo(1),
+                "Spawning one Higgsfield accent must create exactly one runtime object.");
+            GameObject accent = createdObjects[0];
+            Assert.That(accent.name, Is.EqualTo("HiggsfieldImpactAccent"),
+                "The Impact accent must expose the stable runtime name used by presentation diagnostics.");
+
+            SpriteRenderer renderer = accent.GetComponent<SpriteRenderer>();
+            Assert.That(renderer, Is.Not.Null, "The Impact accent must expose a SpriteRenderer.");
+            Assert.That(renderer.sprite, Is.SameAs(HiggsfieldSpriteLibrary.LoadVfx(HiggsfieldSpriteLibrary.Impact)),
+                "The Impact accent renderer must use the sprite resolved by the public VFX library.");
+            Assert.That(accent.GetComponent<GameFeelRingPulse>(), Is.Not.Null,
+                "The Impact accent must use the pulse lifecycle that animates and removes it.");
+
+            yield return new WaitForSecondsRealtime(0.25f);
+
+            Assert.That(accent == null, Is.True,
+                "The Higgsfield accent must remove itself after its requested short lifetime.");
+        }
     }
 }

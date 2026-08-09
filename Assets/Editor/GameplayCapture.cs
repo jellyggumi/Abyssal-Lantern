@@ -31,10 +31,12 @@ public static class GameplayCapture
             var launchManager = Object.FindObjectOfType<LaunchManager>();
             if (gameManager != null && launchManager != null)
             {
-                gameManager.SelectUnit(2); // Bomber gives the clearest explosion/collapse capture.
+                // Slot 2 is now the deploy-only Cannon (it has no launch prefab), so the
+                // capture uses the powder keg — still the clearest explosion/collapse shot.
+                gameManager.SelectUnit(3);
                 launchManager.SimulateLaunch(new Vector2(12f, 10f));
                 hasSimulatedPlayerLaunch = true;
-                Debug.Log("GameplayCapture simulated a bomber launch.");
+                Debug.Log("GameplayCapture simulated a powder-keg launch.");
             }
         }
 

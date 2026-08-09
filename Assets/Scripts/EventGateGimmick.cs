@@ -22,6 +22,27 @@ namespace CastleBusters
         public float reduceVelocityMultiplier = 0.55f;
         public float reduceDamageSpeedMultiplier = 0.65f;
         public bool destroyOnReduce = false;
+        /// <summary>
+        /// Velocity change the original launched unit receives when it crosses this gate.
+        /// Prediction reads this without touching the gate's runtime one-shot bookkeeping.
+        /// Multiply only creates siblings for UnitController bodies, so the source keeps its speed.
+        /// </summary>
+        public float PreviewVelocityMultiplier
+        {
+            get
+            {
+                switch (effectType)
+                {
+                    case EventGateEffectType.Reduce:
+                    case EventGateEffectType.PowerDown:
+                        return reduceVelocityMultiplier;
+                    case EventGateEffectType.PowerUp:
+                        return velocityMultiplier;
+                    default:
+                        return 1f;
+                }
+            }
+        }
 
         [Header("Presentation")]
         public float pulseSpeed = 3.5f;
@@ -154,7 +175,7 @@ namespace CastleBusters
         // ApplyDebuff), instead of permanently compounding on every gate pass.
         private void ApplyExplosiveScaling(UnitController unit, float multiplier)
         {
-            var explosive = unit.GetComponent<ExplosiveGimmick>();
+            var explosive = unit != null ? unit.GetComponent<ExplosiveGimmick>() : null;
             if (explosive != null)
             {
                 explosive.ApplyTemporaryPotencyMultiplier(multiplier, effectDuration);

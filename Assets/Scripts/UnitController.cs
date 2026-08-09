@@ -5,19 +5,39 @@ using System.Linq;
 
 namespace CastleBusters
 {
-    public enum UnitType { Knight, Archer, Bomber }
+    /// <summary>
+    /// Roster/field body kinds. The old `Bomber` (launched bomb soldier) was removed with
+    /// the deployment overhaul (design/deployment-economy.md §2): its splash-at-range niche
+    /// is now the deploy-only <see cref="Cannon"/> installation. `Barrel` is the powder-keg
+    /// gimmick, which kept the fuse/detonate behaviour the bomber used to borrow.
+    /// </summary>
+    public enum UnitType { Knight, Archer, Barrel, Cannon }
     public enum UnitState { Idle, Launched, Grounded, Attacking, Dead }
 
     public class UnitController : MonoBehaviour
     {
-        // Awake() lightens every launched unit's Rigidbody2D so wind/knockback feel snappy.
-        // LaunchManager.DrawTrajectory previews the arc using the *prefab's* raw mass before
-        // this reduction is ever applied, so the two constants below are shared so the preview
-        // line always matches the mass the projectile actually flies with (otherwise wind pushes
-        // the real unit off the drawn trajectory).
+        // One flight-physics contract is shared by the runtime Rigidbody2D path and
+        // LaunchManager's predictive arc. Keeping the mass reduction and wind acceleration
+        // here prevents the real projectile from drifting away from the drawn trajectory.
         public const float RuntimeMassScale = 0.35f;
         public const float MinRuntimeMass = 0.15f;
-        // Shared ally/enemy multiply-tint for sprites. UnitSpriteAnimator (Knight/Archer/Bomber)
+        public const float DefaultHardCeilingY = 20f;
+        public const float DefaultLaunchSpawnHeight = 0.9f;
+
+        public static Vector2 CalculateWindAcceleration(
+            Vector2 position,
+            float mass,
+            float windForce,
+            Vector2 windOrigin,
+            float windRadius)
+        {
+            if (Mathf.Approximately(windForce, 0f) || windRadius <= 0f) return Vector2.zero;
+            if ((position - windOrigin).sqrMagnitude > windRadius * windRadius) return Vector2.zero;
+
+            return new Vector2(windForce / Mathf.Max(MinRuntimeMass, mass), 0f);
+        }
+        private const float ReferenceVisualScale = 0.42f;
+        // Shared ally/enemy multiply-tint for sprites. UnitSpriteAnimator (Knight/Archer)
         // and ExplosiveGimmick (the powder-keg gimmick, which owns its own sprite and does NOT
         // use UnitSpriteAnimator - see the isGimmickVisual check in Awake below) both read these
         // so every launched object reads as clearly player (cool blue) or enemy (warm red) at a
@@ -37,7 +57,7 @@ namespace CastleBusters
         public float attackDamage = 20f;
         public float attackRange = 1.5f;
         public float attackCooldown = 1.5f;
-        [Header("Bomber Specific")]
+        [Header("Barrel Specific (powder keg)")]
 
         public float explosionRadius = 1.6f;
         public float explosionDamage = 70f;
@@ -55,11 +75,11 @@ namespace CastleBusters
 
 
         [Header("Presentation Scale")]
-        public float visualScale = 0.42f; // prefabs serialize the same value; enlarged hero pass
+        public float visualScale = 0.48f; // prefabs serialize the same value; enlarged hero pass
         public float colliderVisualCoverage = 0.82f;
         public float trailWidthScale = 0.18f;
-
         [Header("QA Safeguards")]
+
         public Rect playableBounds = new Rect(-22f, -9.5f, 44f, 24f);
         public float stuckVelocityThreshold = 0.05f;
         public float stuckDuration = 1.25f;
@@ -73,7 +93,7 @@ namespace CastleBusters
         // MoveTowardsTarget/knight push below), and this hard ceiling is the backstop: no
         // matter what future code sets a stray positive rb.velocity.y, once a unit climbs
         // above this height gravity is guaranteed to win from then on (see EnforceHardCeiling).
-        public float hardCeilingY = 20f;
+        public float hardCeilingY = DefaultHardCeilingY;
 
         private UnitState currentState = UnitState.Idle;
 
@@ -84,8 +104,11 @@ namespace CastleBusters
         // AOS overhaul (§2): 1-based swing counter driving the 3/6 (knight) and 5/10
         // (archer) combo beats. Never reset — the modulo cycle repeats naturally.
         private int attackOrdinal;
-        // Bomber landing fuse: armed on touchdown, detonates BomberFuseSeconds later.
+        // Powder-keg landing fuse: armed on touchdown, detonates BarrelFuseSeconds later.
         private bool fuseArmed;
+        // Deployed artillery (대포): set by MakeStationaryInstallation() so the walk/chase/
+        // melee loop is skipped entirely and the battery holds its placed ground.
+        private bool isStationaryInstallation;
         private Transform target;
         private float stuckTimer;
         private float groundedStuckTimer;
@@ -101,8 +124,13 @@ namespace CastleBusters
         private float debuffTimer = 0f;
         private Color originalColor = Color.white;
         private bool hasStoredOriginalColor = false;
+        // Carries the side that caused the fatal hit through delayed Barrel detonation.
+        // Null means environmental/self-expiry with no external killer.
+        private bool? fatalDamageFromPlayer;
 
         public UnitState CurrentState => currentState;
+        /// <summary>True while this live powder keg is waiting for its armed fuse to resolve.</summary>
+        public bool IsFusePending => unitType == UnitType.Barrel && fuseArmed && currentState != UnitState.Dead;
         public float GetMaxHP() => maxHP;
 
         public static readonly List<UnitController> Active = new List<UnitController>();
@@ -152,7 +180,7 @@ namespace CastleBusters
                 attackDamage = unitData.attackDamage;
                 attackRange = unitData.attackRange;
                 attackCooldown = unitData.attackCooldown;
-                if (unitType == UnitType.Bomber)
+                if (unitType == UnitType.Barrel)
                 {
                     explosionRadius = unitData.explosionRadius;
                     explosionDamage = unitData.explosionDamage;
@@ -170,19 +198,6 @@ namespace CastleBusters
 
             }
 
-            // Cycle 17 & 18: Apply gameplay balance adjustments if no custom UnitData is assigned
-            if (unitData == null)
-            {
-                if (unitType == UnitType.Archer)
-                {
-                    attackCooldown = 0.95f; // Archer attacks faster (from 1.5s to 0.95s)
-                }
-                else if (unitType == UnitType.Bomber)
-                {
-                    explosionRadius = 1.85f; // Larger explosion radius (from 1.6 to 1.85)
-                    explosionDamage = 95f;   // Higher explosion damage (from 70 to 95)
-                }
-            }
 
             currentHP = maxHP;
             if (rb != null)
@@ -222,24 +237,80 @@ namespace CastleBusters
             if (sr != null && sr.sprite != null && box != null)
             {
                 Vector2 spriteSize = sr.sprite.bounds.size;
+                float referenceScaleRatio = ReferenceVisualScale / visualScale;
                 box.size = new Vector2(
-                    Mathf.Max(0.25f / visualScale, spriteSize.x * colliderVisualCoverage),
-                    Mathf.Max(0.25f / visualScale, spriteSize.y * colliderVisualCoverage));
+                    Mathf.Max(0.25f / visualScale, spriteSize.x * colliderVisualCoverage * referenceScaleRatio),
+                    Mathf.Max(0.25f / visualScale, spriteSize.y * colliderVisualCoverage * referenceScaleRatio));
                 box.offset = sr.sprite.bounds.center;
             }
         }
 
         /// <summary>
-        /// ApplyPlayableScaleAndCollider() (above) auto-fits this object's BoxCollider2D to its
-        /// sprite's bounds every time it's instantiated, centered on the transform. Launch spawn
-        /// points (LaunchManager.GetLaunchPosition / SimpleAI.launchPoint) are ground-level
-        /// markers, so without this correction roughly the bottom half of a full-height
-        /// character's collider spawns buried inside the ground/platform blocks beneath the pad.
-        /// The very first physics step after Launch() then fires OnCollisionEnter2D against that
-        /// ground/DestructibleBlock and immediately flips Launched -> Grounded before the unit
-        /// ever leaves the pad - it never visibly follows the drawn trajectory at all. Callers
-        /// must invoke this right after Instantiate (so Awake has already computed the real
-        /// collider bounds) and before Launch().
+        /// Predicts the collider bounds Awake produces, relative to the spawned root, without
+        /// instantiating a preview body. LaunchManager uses the same bounds for spawn clearance
+        /// and trajectory casts, so preview and runtime begin from one resolved root position.
+        /// </summary>
+        public static Bounds EstimateLaunchedWorldColliderBounds(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                return new Bounds(Vector3.zero, new Vector3(0.05f, 0.05f, 0f));
+            }
+
+            var spriteRenderer = prefab.GetComponentInChildren<SpriteRenderer>(true);
+            var sprite = spriteRenderer != null ? spriteRenderer.sprite : null;
+            var explosive = prefab.GetComponent<ExplosiveGimmick>();
+            if (explosive != null && sprite != null)
+            {
+                Vector2 native = sprite.bounds.size;
+                float maxNative = Mathf.Max(native.x, native.y);
+                if (maxNative > 0.0001f)
+                {
+                    float scale = Mathf.Max(0.05f, explosive.targetWorldSize) / maxNative;
+                    Vector2 center = sprite.bounds.center * scale;
+                    Vector2 size = native * scale;
+                    return new Bounds(center, new Vector3(size.x, size.y, 0f));
+                }
+            }
+
+            var unit = prefab.GetComponent<UnitController>();
+            if (unit != null && sprite != null)
+            {
+                float visualScale = Mathf.Max(0.01f, unit.visualScale);
+                Vector2 spriteSize = sprite.bounds.size;
+                Vector2 size = new Vector2(
+                    Mathf.Max(0.25f, spriteSize.x * unit.colliderVisualCoverage * ReferenceVisualScale),
+                    Mathf.Max(0.25f, spriteSize.y * unit.colliderVisualCoverage * ReferenceVisualScale));
+                Vector2 center = sprite.bounds.center * visualScale;
+                return new Bounds(center, new Vector3(size.x, size.y, 0f));
+            }
+
+            var box = prefab.GetComponent<BoxCollider2D>();
+            if (box != null)
+            {
+                Vector3 scale = prefab.transform.lossyScale;
+                Vector2 size = new Vector2(
+                    Mathf.Abs(box.size.x * scale.x),
+                    Mathf.Abs(box.size.y * scale.y));
+                Vector2 center = new Vector2(box.offset.x * scale.x, box.offset.y * scale.y);
+                return new Bounds(center, new Vector3(size.x, size.y, 0f));
+            }
+
+            return new Bounds(Vector3.zero, new Vector3(0.05f, 0.05f, 0f));
+        }
+
+        /// <summary>World-space size compatibility wrapper for trajectory footprint callers.</summary>
+        public static Vector2 EstimateLaunchedWorldColliderSize(GameObject prefab)
+        {
+            Bounds bounds = EstimateLaunchedWorldColliderBounds(prefab);
+            return new Vector2(bounds.size.x, bounds.size.y);
+        }
+
+        /// <summary>
+        /// Fallback for spawn paths that do not resolve prefab bounds before Instantiate.
+        /// SimpleAI still uses this after Awake computes the live collider. LaunchManager instead
+        /// resolves <see cref="EstimateLaunchedWorldColliderBounds"/> before spawning so its
+        /// preview and runtime root positions cannot diverge through a post-spawn correction.
         /// </summary>
         public static void SnapColliderAboveGround(GameObject go, float groundY)
         {
@@ -272,7 +343,19 @@ namespace CastleBusters
             growthApplied = true;
             float dmg = HeroGrowth.DamageMult(isPlayerUnit);
             attackDamage *= dmg;
-            explosionDamage *= dmg;
+            var explosive = GetComponent<ExplosiveGimmick>();
+            if (explosive != null)
+            {
+                explosive.SetPermanentPotency(
+                    explosive.PermanentExplosionDamage * dmg,
+                    explosive.PermanentExplosionRadius);
+                explosionDamage = explosive.explosionDamage;
+                explosionRadius = explosive.explosionRadius;
+            }
+            else
+            {
+                explosionDamage *= dmg;
+            }
             float hp = HeroGrowth.HpMult(isPlayerUnit);
             maxHP *= hp;
             currentHP = maxHP;
@@ -329,12 +412,12 @@ namespace CastleBusters
             trailRenderer = GetComponent<TrailRenderer>();
             if (trailRenderer == null) trailRenderer = gameObject.AddComponent<TrailRenderer>();
             trailRenderer.time = 0.5f;
-            float width = unitType == UnitType.Bomber ? 0.14f : 0.09f;
+            float width = unitType == UnitType.Barrel ? 0.14f : 0.09f;
             trailRenderer.startWidth = width * Mathf.Max(0.5f, trailWidthScale / 0.18f);
             trailRenderer.endWidth = 0f;
             trailRenderer.material = new Material(Shader.Find("Sprites/Default"));
             Color teamTint = isPlayerUnit ? new Color(0.45f, 0.85f, 1f, 0.75f) : new Color(1f, 0.35f, 0.25f, 0.75f);
-            if (unitType == UnitType.Bomber) teamTint = new Color(1f, 0.65f, 0.12f, 0.85f);
+            if (unitType == UnitType.Barrel) teamTint = new Color(1f, 0.65f, 0.12f, 0.85f);
             trailRenderer.startColor = teamTint;
             trailRenderer.endColor = new Color(teamTint.r, teamTint.g, teamTint.b, 0f);
             trailRenderer.emitting = false;
@@ -353,7 +436,7 @@ namespace CastleBusters
                 velocity = GameManager.Instance.ApplyLastStandOnLaunch(this, velocity);
             }
             GamePresentationDirector.Instance?.Focus(transform);
-            GameFeelVfx.SpawnImpactBurst(transform.position, isPlayerUnit ? new Color(0.45f, 0.85f, 1f, 0.7f) : new Color(1f, 0.35f, 0.25f, 0.7f), 0.28f);
+            GameFeelVfx.SpawnLaunchBurst(transform.position, isPlayerUnit ? new Color(0.45f, 0.85f, 1f, 0.7f) : new Color(1f, 0.35f, 0.25f, 0.7f), 0.28f);
             if (rb != null)
             {
                 rb.bodyType = RigidbodyType2D.Dynamic;
@@ -361,6 +444,33 @@ namespace CastleBusters
             }
             if (trailRenderer == null) SetupTrailRenderer();
             if (trailRenderer != null) trailRenderer.emitting = true;
+        }
+
+        /// <summary>
+        /// The second creation verb (design/deployment-economy.md §2): the body is PLACED on
+        /// the field already grounded and fighting, instead of being flung from the muzzle.
+        /// Skips the Launched flight state entirely — no trail, no arc, no landing contact —
+        /// so a deployed knight starts its walk on the frame it is paid for.
+        /// Hero growth still applies, so a deployed body and a launched body of the same type
+        /// are statistically identical; only the delivery differs.
+        /// </summary>
+        public void DeployGrounded()
+        {
+            currentState = UnitState.Grounded;
+            stuckTimer = 0f;
+            groundedStuckTimer = 0f;
+            ApplyHeroGrowth();
+            if (rb != null)
+            {
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            }
+            if (trailRenderer != null) trailRenderer.emitting = false;
+            // Deployment skips landing contact, so a paid Barrel must enter the same fuse
+            // state explicitly instead of falling through into the walking/melee loop.
+            if (unitType == UnitType.Barrel) BeginFuse();
         }
 
         private void FixedUpdate()
@@ -378,16 +488,19 @@ namespace CastleBusters
             {
                 if (GameManager.Instance != null)
                 {
-                    // Wind only affects launched units in-flight; grounded units are unaffected.
-                    // Wind effect is scoped to the wind effect radius.
+                    // Rigidbody2D applies gravity itself. Apply only the shared wind
+                    // acceleration so runtime flight and LaunchManager.DrawTrajectory use
+                    // the same radius, mass floor, and force-to-acceleration conversion.
                     var gm = GameManager.Instance;
-                    if (gm.currentWindForce != 0f)
+                    Vector2 windAcceleration = CalculateWindAcceleration(
+                        transform.position,
+                        rb.mass,
+                        gm.currentWindForce,
+                        gm.windEffectOrigin,
+                        gm.windEffectRadius);
+                    if (windAcceleration.sqrMagnitude > 0f)
                     {
-                        float distanceToWindOrigin = Vector2.Distance(transform.position, gm.windEffectOrigin);
-                        if (distanceToWindOrigin <= gm.windEffectRadius)
-                        {
-                            rb.AddForce(new Vector2(gm.currentWindForce, 0f), ForceMode2D.Force);
-                        }
+                        rb.AddForce(windAcceleration * rb.mass, ForceMode2D.Force);
                     }
                 }
 
@@ -503,6 +616,28 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>
+        /// Converts this body into a placed installation (대포): it holds the ground it was
+        /// deployed on and never walks, chases, or melees. CannonController owns the firing
+        /// loop instead. Kinematic so a shell blast or a passing knight cannot shove a
+        /// battery out of the position the player paid supply to choose.
+        /// </summary>
+        public void MakeStationaryInstallation()
+        {
+            isStationaryInstallation = true;
+            currentState = UnitState.Grounded;
+            target = null;
+            if (trailRenderer != null) trailRenderer.emitting = false;
+            if (rb == null) rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                rb.constraints = RigidbodyConstraints2D.FreezeAll;
+            }
+        }
+
         private void Update()
         {
             if (currentState == UnitState.Dead) return;
@@ -543,8 +678,12 @@ namespace CastleBusters
             }
 
 
-            // Fuse-armed bomber: no walking, no targeting — it sits and blows (§2).
+            // Fuse-armed powder keg: no walking, no targeting — it sits and blows (§2).
             if (fuseArmed) return;
+
+            // Placed installation (대포): CannonController drives aiming/firing; the walk,
+            // target-chase, and melee loop below must never run for it.
+            if (isStationaryInstallation) return;
 
             if (transform.position.y < ChariotRules.KillPlaneY)
             {
@@ -824,11 +963,11 @@ namespace CastleBusters
             if (block != null)
             {
                 if (unitType == UnitType.Knight) damage *= 1.8f;
-                block.TakeDamage(damage);
+                block.TakeDamage(damage, isPlayerUnit);
             }
             else
             {
-                target.GetComponent<UnitController>()?.TakeDamage(damage);
+                target.GetComponent<UnitController>()?.TakeDamage(damage, isPlayerUnit);
             }
         }
 
@@ -866,79 +1005,116 @@ namespace CastleBusters
             arrow.GetComponent<ArrowController>()?.Initialize(attackDamage * damageMultiplier, isPlayerUnit);
         }
 
-        public void TakeDamage(float damage)
+        public void TakeDamage(float damage, bool? damageFromPlayer = null)
         {
             if (currentState == UnitState.Dead) return;
             currentHP -= damage;
             GetComponent<UnitSpriteAnimator>()?.FlashHit();
             GameFeelVfx.SpawnDamageNumber(transform.position, damage, isPlayerUnit ? new Color(0.45f, 0.85f, 1f, 1f) : new Color(1f, 0.35f, 0.25f, 1f));
-            GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.2f, 0.2f, 0.8f), Mathf.Clamp(damage / 120f, 0.18f, 0.55f));
+            GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.2f, 0.2f, 0.8f), Mathf.Clamp(damage / 120f, 0.18f, 0.55f), null, false);
             GameplayUxDirector.NotifyDamage(transform.position, damage, false);
-            if (currentHP <= 0) Die();
+            if (currentHP <= 0)
+            {
+                fatalDamageFromPlayer = damageFromPlayer;
+                Die();
+            }
         }
 
         private void Die()
         {
             currentState = UnitState.Dead;
             GamePresentationDirector.Instance?.ClearFocus(transform);
-            if (unitType == UnitType.Bomber)
+            if (unitType == UnitType.Barrel)
             {
                 Explode();
                 return;
             }
             GameFeelVfx.SpawnCollapseDust(transform.position, 0.28f);
-            if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this);
+            if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this, fatalDamageFromPlayer);
             if (Application.isPlaying) Destroy(gameObject); else DestroyImmediate(gameObject);
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (currentState == UnitState.Launched)
-            {
-                if (collision.gameObject.CompareTag("Ground") || collision.gameObject.GetComponent<DestructibleBlock>() != null)
-                {
-                    var block = collision.gameObject.GetComponent<DestructibleBlock>();
-                    if (block != null)
-                    {
-                        float impactDamage = attackDamage * 1.5f;
-                        block.TakeDamage(impactDamage);
-                    }
-                    var enemyUnit = collision.gameObject.GetComponent<UnitController>();
-                    if (enemyUnit != null && enemyUnit.isPlayerUnit != isPlayerUnit)
-                    {
-                        float impactDamage = attackDamage * 1.5f;
-                        enemyUnit.TakeDamage(impactDamage);
-                    }
-                    if (unitType == UnitType.Bomber)
-                    {
-                        // AOS overhaul (§2): no contact detonation — the bomber lands, arms a
-                        // 2-second fuse with a blink telegraph, THEN blows. Dying early
-                        // (TakeDamage → Die) still explodes immediately.
-                        BeginFuse();
-                        return;
-                    }
+            if (currentState != UnitState.Launched) return;
 
-                    currentState = UnitState.Grounded;
-                    GamePresentationDirector.Instance?.ClearFocus(transform);
-                    if (unitType == UnitType.Knight && collision.gameObject.GetComponent<DestructibleBlock>() != null)
-                    {
-                        if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.05f);
-                        if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.1f, 0.05f);
-                    }
-                    if (trailRenderer != null) trailRenderer.emitting = false;
-                    if (rb != null)
-                    {
-                        rb.velocity = Vector2.zero;
-                        rb.angularVelocity = 0f;
-                        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-                    }
+            var otherUnit = collision.collider.GetComponentInParent<UnitController>();
+            if (otherUnit != null)
+            {
+                // Friendly bodies do not deal impact damage or force either unit to settle.
+                if (otherUnit == this || otherUnit.currentState == UnitState.Dead ||
+                    otherUnit.isPlayerUnit == isPlayerUnit)
+                {
+                    return;
                 }
+
+                float impactDamage = attackDamage * 1.5f;
+                otherUnit.TakeDamage(impactDamage, isPlayerUnit);
+                if (impactDamage > 0f)
+                {
+                    GameFeelVfx.PlayImpactSfx(Mathf.Clamp(impactDamage / 120f, 0.18f, 0.55f));
+                }
+                SettleLaunchedUnit();
+                return;
+            }
+
+            var explosive = collision.gameObject.GetComponent<ExplosiveGimmick>();
+            var block = collision.gameObject.GetComponent<DestructibleBlock>();
+            if (!collision.gameObject.CompareTag("Ground") && block == null && explosive == null) return;
+
+            if (explosive != null)
+            {
+                explosive.SetDamageOwner(isPlayerUnit);
+                explosive.Explode();
+            }
+
+            if (block != null)
+            {
+                float impactDamage = attackDamage * 1.5f;
+                block.TakeDamage(impactDamage, isPlayerUnit);
+                if (impactDamage > 0f)
+                {
+                    GameFeelVfx.PlayImpactSfx(Mathf.Clamp(impactDamage / 35f, 0.45f, 1.8f));
+                }
+            }
+
+            SettleLaunchedUnit();
+            if (unitType == UnitType.Knight && block != null)
+            {
+                if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.05f);
+                if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.1f, 0.05f);
+            }
+        }
+
+        private void SettleLaunchedUnit()
+        {
+            // Impact damage can synchronously kill this unit (for example, by detonating the
+            // opposing Barrel), so never transition a dead body back into a live state.
+            if (currentState != UnitState.Launched) return;
+
+            if (unitType == UnitType.Barrel)
+            {
+                // AOS overhaul (§2): no contact detonation — the keg lands, arms a
+                // 2-second fuse with a blink telegraph, THEN blows. Dying early
+                // (TakeDamage → Die) still explodes immediately.
+                BeginFuse();
+                return;
+            }
+
+            currentState = UnitState.Grounded;
+            GamePresentationDirector.Instance?.ClearFocus(transform);
+            if (trailRenderer != null) trailRenderer.emitting = false;
+            if (rb != null)
+            {
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
         }
 
         /// <summary>
-        /// Bomber landing fuse (§2): the bomb settles where it landed, blinks faster and
-        /// faster for BomberFuseSeconds, then detonates. Being killed first short-circuits
+        /// Powder-keg landing fuse (§2): the keg settles where it landed, blinks faster and
+        /// faster for BarrelFuseSeconds, then detonates. Being killed first short-circuits
         /// through Die() → Explode(), so the payoff can be denied but never skipped.
         /// </summary>
         private void BeginFuse()
@@ -963,7 +1139,7 @@ namespace CastleBusters
         {
             float t = 0f;
             var renderers = GetComponentsInChildren<SpriteRenderer>(true);
-            while (t < UnitCombos.BomberFuseSeconds)
+            while (t < UnitCombos.BarrelFuseSeconds)
             {
                 if (currentState == UnitState.Dead) yield break;
                 t += Time.deltaTime;
@@ -973,7 +1149,11 @@ namespace CastleBusters
                 foreach (var r in renderers) if (r != null) r.color = tint;
                 yield return null;
             }
-            if (currentState != UnitState.Dead) Die();
+            if (currentState != UnitState.Dead)
+            {
+                fatalDamageFromPlayer = isPlayerUnit;
+                Die();
+            }
         }
 
         private void Explode()
@@ -981,8 +1161,9 @@ namespace CastleBusters
             var expGimmick = GetComponent<ExplosiveGimmick>();
             if (expGimmick != null)
             {
+                expGimmick.SetDamageOwner(fatalDamageFromPlayer);
                 expGimmick.Explode();
-                if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this);
+                if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this, fatalDamageFromPlayer);
                 if (Application.isPlaying) Destroy(gameObject); else DestroyImmediate(gameObject);
                 return;
             }
@@ -1012,7 +1193,7 @@ namespace CastleBusters
                 var block = blocks[i];
                 if (block != null && Vector2.Distance(transform.position, block.transform.position) <= explosionRadius)
                 {
-                    block.TakeDamage(explosionDamage);
+                    block.TakeDamage(explosionDamage, fatalDamageFromPlayer);
                 }
             }
             var units = ActiveOrScene;
@@ -1021,7 +1202,7 @@ namespace CastleBusters
                 var unit = units[i];
                 if (unit != null && unit != this && Vector2.Distance(transform.position, unit.transform.position) <= explosionRadius)
                 {
-                    unit.TakeDamage(explosionDamage);
+                    unit.TakeDamage(explosionDamage, fatalDamageFromPlayer);
                 }
             }
 
@@ -1039,7 +1220,7 @@ namespace CastleBusters
                 body.AddForce((dir + Vector2.up * 0.6f).normalized * (9f * falloff), ForceMode2D.Impulse);
                 body.AddTorque(Random.Range(-4f, 4f) * falloff, ForceMode2D.Impulse);
             }
-            if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this);
+            if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this, fatalDamageFromPlayer);
             if (Application.isPlaying) Destroy(gameObject); else DestroyImmediate(gameObject);
         }
 
@@ -1137,8 +1318,8 @@ namespace CastleBusters
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = unitType == UnitType.Bomber ? Color.red : Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, unitType == UnitType.Bomber ? explosionRadius : attackRange);
+            Gizmos.color = unitType == UnitType.Barrel ? Color.red : Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, unitType == UnitType.Barrel ? explosionRadius : attackRange);
         }
     }
 }

@@ -1,0 +1,18 @@
+{
+  "file": "banner-edit-crop.png",
+  "prompt": "Audit crop of generated castle banners for identifying repeated letter-like marks.",
+  "tool": "ImageMagick 7.1.1 crop",
+  "generatedAt": "2026-08-09T08:12:53.945Z",
+  "checksumSha256": "b3ad22178a5bc6cc648f7e130f442ac3fddbd42115017f9d29e55758c0e731a9",
+  "runtimeEligible": false,
+  "notes": "Intermediate inspection crop only.",
+  "width": 900,
+  "height": 800,
+  "audit": {
+    "reviewDate": "2026-08-09",
+    "evidence": "Independent release-art review found no visually apparent third-party marks; provenance and banner/favicon defects were then remediated.",
+    "status": "independent PASS — FinalReleaseArtReview",
+    "closedAt": "2026-08-09T08:16:29.819Z",
+    "result": "No remaining S1-S3 release-art findings; dimensions, exact asset SHA-256, crest remediation, icon legibility, metadata wiring, and keyboard focus treatment independently verified."
+  }
+}

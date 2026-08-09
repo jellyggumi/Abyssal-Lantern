@@ -86,3 +86,8 @@ qa_captures/
 .vscode/
 .idea/
 Thumbs.db
+
+# Test-run output and tool checkouts (regenerated, not shared source)
+/TestResults/
+/.rfxgen-upstream/
+/GameplayCapture_*.png

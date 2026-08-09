@@ -13,14 +13,14 @@ namespace CastleBusters
         public float attackRange = 1.5f;
         public float attackCooldown = 1.5f;
 
-        [Header("Bomber Specific")]
+        [Header("Barrel Specific")]
         public float explosionRadius = 2.5f;
         public float explosionDamage = 80f;
 
-        // Knight/Archer previously had no per-prefab tunables at all (only Bomber did),
+        // Knight/Archer previously had no per-prefab tunables at all (only Barrel did),
         // even though UnitController.PerformMeleeCombo/TryMove already hardcode a knight
         // push-force multiplier, a combo-hit interval, an archer hop velocity, and a volley
-        // follow-up delay. Exposing them here mirrors the Bomber explosionRadius/explosionDamage
+        // follow-up delay. Exposing them here mirrors the Barrel explosionRadius/explosionDamage
         // precedent so a "Heavy Knight" or "Sniper Archer" variant prefab can be tuned without
         // touching code, instead of every unit of a type behaving identically.
         [Header("Knight Specific")]

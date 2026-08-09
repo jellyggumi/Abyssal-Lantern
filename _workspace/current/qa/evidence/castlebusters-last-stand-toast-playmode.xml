@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.2741057">
+  <test-suite type="TestSuite" id="1000" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.274106" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1049" name="CastleBusters.PlayModeTests.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.267406" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="96421" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1050" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.266216" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1051" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.265221" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1025" name="RuntimeReliabilityRegressionTests" fullname="CastleBusters.Tests.RuntimeReliabilityRegressionTests" classname="CastleBusters.Tests.RuntimeReliabilityRegressionTests" runstate="Runnable" testcasecount="23" result="Passed" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.263384" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1036" name="LaunchManager_ActiveLastStandToastReportsBuffedLaunchPower" fullname="CastleBusters.Tests.RuntimeReliabilityRegressionTests.LaunchManager_ActiveLastStandToastReportsBuffedLaunchPower" methodname="LaunchManager_ActiveLastStandToastReportsBuffedLaunchPower" classname="CastleBusters.Tests.RuntimeReliabilityRegressionTests" runstate="Runnable" seed="1891158642" result="Passed" start-time="2026-08-09 08:49:57Z" end-time="2026-08-09 08:50:02Z" duration="5.249616" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="60000" />
+              </properties>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

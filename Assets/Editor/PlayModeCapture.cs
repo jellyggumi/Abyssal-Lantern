@@ -50,7 +50,7 @@ public static class PlayModeCapture
             var lm = Object.FindObjectOfType<LaunchManager>();
             if (gm != null && lm != null)
             {
-                gm.SelectUnit(2); // Bomber: clearest explosion/collapse.
+                gm.SelectUnit(3); // powder keg: clearest explosion/collapse (slot 2 is the deploy-only Cannon)
                 lm.SimulateLaunch(new Vector2(12f, 10f));
                 launched = true;
             }

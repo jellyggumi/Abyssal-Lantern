@@ -10,14 +10,14 @@ namespace CastleBusters
         public Transform launchPoint;
         public float launchActivationRadius = 3.5f;
         public float maxDragDistance = 4.2f;
-        public float launchForceMultiplier = 6.0f;
-        public float maxLaunchVelocity = 32f;
-        public float minLaunchVelocity = 0.75f;
+        public float launchForceMultiplier = 6f;
+        public float maxLaunchVelocity = 25.2f;
+        public float minLaunchVelocity = 3f;
 
         [Header("Trajectory Line")]
         public LineRenderer trajectoryLine;
-        public int trajectoryResolution = 30;
-        public float timeStep = 0.1f;
+        public int trajectoryResolution = 150;
+        public float timeStep = 0.02f;
 
         [Header("Visuals")]
         public GameObject impactMarkerPrefab;
@@ -26,16 +26,27 @@ namespace CastleBusters
         public TMP_Text controlGuideText;
         public LineRenderer rubberBandLine;
 
+        private readonly List<Vector3> trajectoryPoints = new List<Vector3>(160);
+        private readonly RaycastHit2D[] trajectoryHits = new RaycastHit2D[16];
+        private readonly HashSet<int> previewCrossedGateIds = new HashSet<int>(8);
+
         private Vector2 dragStartPos;
         private Vector2 launchVelocity;
         private bool isDragging;
         private GameObject selectedUnitPrefab;
+        private Bounds selectedLaunchBodyBounds = new Bounds(Vector3.zero, new Vector3(0.05f, 0.05f, 0f));
+        private bool selectedUnitUsesDeployment;
 
         private GameObject impactMarkerInstance;
         private GameObject launchPointIndicatorInstance;
         private GameObject invalidStartMarkerInstance;
         private LineRenderer boundaryLine;
+        private const int BoundaryPointCount = 73;
+        private readonly Vector3[] boundaryPoints = new Vector3[BoundaryPointCount];
+        private Vector2 lastBoundaryCenter = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        private float lastBoundaryRadius = -1f;
         private float boundaryFlashTimer = 0f;
+        private int trajectoryCollisionMask;
         private float invalidStartMarkerTimer;
         private readonly Color boundaryNormalColor = new Color(0.2f, 0.6f, 1f, 0.35f);
         private readonly Color boundaryFlashColor = new Color(1f, 0.2f, 0.2f, 0.95f);
@@ -67,16 +78,20 @@ namespace CastleBusters
 
         private string BuildControlGuideText()
         {
-            // One compact line: playtest feedback flagged the old three-line bilingual block
-            // as HUD noise that pulled focus from the battlefield. Numeral hints use the same
-            // gold as the selected unit-card border so the guide visually maps to the row above it.
-            return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  <color=#FFC73D>1 기사 · 2 궁수 · 3 폭탄병</color>  ·  푸른 링에서 드래그 → 발사";
+            if (selectedUnitUsesDeployment)
+            {
+                return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 배치 준비  ·  전장 클릭 → 설치";
+            }
+
+            // One compact line: the unit cards already carry roster shortcuts, so this guide
+            // only preserves readiness plus the launch gesture the player must perform.
+            return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  푸른 링 드래그 → 발사";
         }
 
 
         public float GetPullTensionRatio(Vector2 pointerWorldPosition)
         {
-            float dragDistance = Vector2.Distance(GetLaunchPosition(), pointerWorldPosition);
+            float dragDistance = Vector2.Distance(GetLaunchAnchorPosition(), pointerWorldPosition);
             return Mathf.Clamp01(dragDistance / Mathf.Max(0.01f, maxDragDistance));
         }
 
@@ -266,27 +281,45 @@ namespace CastleBusters
         {
             if (boundaryLine == null) return;
 
-            boundaryLine.positionCount = 73;
-            Vector3[] points = new Vector3[73];
-            Vector2 center = GetLaunchPosition();
-            for (int i = 0; i <= 72; i++)
+            Vector2 center = GetLaunchAnchorPosition();
+            bool shapeChanged = boundaryLine.positionCount != BoundaryPointCount;
+            if (!shapeChanged
+                && center == lastBoundaryCenter
+                && Mathf.Approximately(launchActivationRadius, lastBoundaryRadius))
+            {
+                return;
+            }
+
+            boundaryLine.positionCount = BoundaryPointCount;
+            for (int i = 0; i < BoundaryPointCount; i++)
             {
                 float angle = i * 5f * Mathf.Deg2Rad;
-                points[i] = new Vector3(center.x + Mathf.Cos(angle) * launchActivationRadius, center.y + Mathf.Sin(angle) * launchActivationRadius, 0f);
+                boundaryPoints[i] = new Vector3(
+                    center.x + Mathf.Cos(angle) * launchActivationRadius,
+                    center.y + Mathf.Sin(angle) * launchActivationRadius,
+                    0f);
             }
-            boundaryLine.SetPositions(points);
+            boundaryLine.SetPositions(boundaryPoints);
+            lastBoundaryCenter = center;
+            lastBoundaryRadius = launchActivationRadius;
         }
 
         private void UpdateLaunchStats(Vector2 velocity)
         {
             if (launchStatsText == null) return;
+            bool canLaunch = velocity.magnitude >= minLaunchVelocity;
+            var gameManager = GameManager.Instance;
+            if (gameManager != null)
+            {
+                velocity = gameManager.PreviewLastStandLaunchVelocity(gameManager.IsPlayerTurn, velocity);
+            }
             float forcePercent = maxLaunchVelocity > 0f ? (velocity.magnitude / maxLaunchVelocity) * 100f : 0f;
 
             float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
             if (angle < 0) angle += 360f;
-            string ready = velocity.magnitude >= minLaunchVelocity ? "발사!" : "더 당기기";
+            string ready = canLaunch ? "발사!" : "더 당기기";
             launchStatsText.text = $"<b>{ready}</b>  ·  파워 {forcePercent:F0}% · 각도 {angle:F0}°";
-            launchStatsText.color = velocity.magnitude >= minLaunchVelocity ? new Color(0.92f, 0.98f, 1f, 1f) : new Color(1f, 0.72f, 0.24f, 1f);
+            launchStatsText.color = canLaunch ? new Color(0.92f, 0.98f, 1f, 1f) : new Color(1f, 0.72f, 0.24f, 1f);
             launchStatsText.gameObject.SetActive(true);
         }
 
@@ -303,7 +336,7 @@ namespace CastleBusters
             if (rubberBandLine == null) return;
 
             float tensionRatio = GetPullTensionRatio(pointerPos);
-            Vector2 anchor = GetLaunchPosition();
+            Vector2 anchor = GetLaunchAnchorPosition();
             Vector2 pull = Vector2.ClampMagnitude(pointerPos - anchor, maxDragDistance);
             Vector2 clampedPointer = anchor + pull;
 
@@ -344,7 +377,14 @@ namespace CastleBusters
             HideLaunchStats();
             HideRubberBand();
             UpdateImpactMarker(false);
+            if (launchAlertText != null) launchAlertText.text = "";
+            if (controlGuideText != null)
+            {
+                controlGuideText.text = BuildControlGuideText();
+                controlGuideText.color = new Color(0.8f, 0.95f, 1f, 0.95f);
+            }
         }
+
 
         private void OnDestroy()
         {
@@ -374,12 +414,23 @@ namespace CastleBusters
             }
         }
 
-        public void SetSelectedUnit(GameObject unitPrefab)
+        public void SetSelectedUnit(GameObject unitPrefab, DeployCard? selectedCard = null)
         {
             selectedUnitPrefab = unitPrefab;
-            selectedUnitName = ResolveSelectedUnitName(unitPrefab);
+            selectedUnitUsesDeployment = selectedCard.HasValue && DeploymentRules.IsDeployOnly(selectedCard.Value);
+            selectedUnitName = unitPrefab != null
+                ? ResolveSelectedUnitName(unitPrefab)
+                : selectedCard.HasValue
+                    ? DeploymentRules.DisplayName(selectedCard.Value)
+                    : ResolveSelectedUnitName(null);
+            selectedLaunchBodyBounds = UnitController.EstimateLaunchedWorldColliderBounds(unitPrefab);
             if (controlGuideText != null) controlGuideText.text = BuildControlGuideText();
-            if (launchPointHintLabel != null) launchPointHintLabel.text = $"▼ {selectedUnitName} 장전 ▼";
+            if (launchPointHintLabel != null)
+            {
+                launchPointHintLabel.text = selectedUnitUsesDeployment
+                    ? "▼ 전장에 설치 지점 선택 ▼"
+                    : $"▼ {selectedUnitName} 장전 ▼";
+            }
         }
 
         private string ResolveSelectedUnitName(GameObject unitPrefab)
@@ -399,7 +450,15 @@ namespace CastleBusters
 
         private void Update()
         {
-            if (GameManager.Instance?.IsPlayerTurn == true && selectedUnitPrefab != null) HandleInput();
+            // Aim and deploy are mutually exclusive verbs: while placement is armed the same
+            // click must not also start drawing the sling (design/deployment-economy.md §2).
+            bool deployArmed = DeploymentController.Instance != null && DeploymentController.Instance.DeployModeArmed;
+            if (deployArmed && isDragging) CancelAim();
+            var gameManager = GameManager.Instance;
+            bool canAim = gameManager != null
+                && gameManager.currentState == GameState.PlayerTurn
+                && gameManager.IsPlayerTurn;
+            if (canAim && selectedUnitPrefab != null && !deployArmed) HandleInput();
 
             // Cycle 13: Animate trajectory line color over time to make it feel alive
             if (isDragging && trajectoryLine != null && trajectoryLine.positionCount > 0)
@@ -411,13 +470,13 @@ namespace CastleBusters
                 trajectoryLine.endColor = endCol;
             }
 
-            bool isPlayerTurn = GameManager.Instance?.IsPlayerTurn == true;
+            bool isPlayerTurn = canAim;
 
             if (launchPointIndicatorInstance != null)
             {
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.18f;
                 launchPointIndicatorInstance.transform.localScale = new Vector3(pulse, pulse, 1f);
-                launchPointIndicatorInstance.SetActive(isPlayerTurn);
+                launchPointIndicatorInstance.SetActive(isPlayerTurn && !deployArmed);
 
                 var sr = launchPointIndicatorInstance.GetComponent<SpriteRenderer>();
                 if (sr != null)
@@ -431,9 +490,8 @@ namespace CastleBusters
 
             if (launchPointHintLabel != null)
             {
-                launchPointHintLabel.gameObject.SetActive(isPlayerTurn && !isDragging);
+                launchPointHintLabel.gameObject.SetActive(isPlayerTurn && !isDragging && !deployArmed);
                 launchPointHintLabel.transform.localPosition = new Vector3(0f, 1.45f + Mathf.Sin(Time.time * 7f) * 0.16f, 0f);
-                launchPointHintLabel.text = $"▼ {selectedUnitName} 장전 ▼";
             }
 
             UpdateBoundaryLineGeometry();
@@ -468,6 +526,19 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>
+        /// Drops any in-progress draw and clears its visuals without firing. Called when the
+        /// player arms deploy mode mid-aim so the drawn shot is abandoned, never spent.
+        /// </summary>
+        public void CancelAim()
+        {
+            if (!isDragging) return;
+            isDragging = false;
+            launchVelocity = Vector2.zero;
+            if (trajectoryLine != null) trajectoryLine.positionCount = 0;
+            CleanUpVisuals();
+        }
+
         private void HandleInput()
         {
             if (!TryReadPointer(out var pointerWorldPos, out var pressed, out var held, out var released)) return;
@@ -482,7 +553,7 @@ namespace CastleBusters
                     }
 
                     isDragging = true;
-                    dragStartPos = GetLaunchPosition();
+                    dragStartPos = GetLaunchAnchorPosition();
                     launchVelocity = Vector2.zero;
                     if (trajectoryLine != null) trajectoryLine.positionCount = trajectoryResolution;
                     if (launchAlertText != null) launchAlertText.text = "DRAW THE SIEGE LINE";
@@ -564,16 +635,25 @@ namespace CastleBusters
 
         public Vector2 CalculateLaunchVelocity(Vector2 pointerWorldPosition)
         {
-            Vector2 dragVector = pointerWorldPosition - GetLaunchPosition();
+            Vector2 dragVector = pointerWorldPosition - GetLaunchAnchorPosition();
             Vector2 clampedDrag = Vector2.ClampMagnitude(dragVector, maxDragDistance);
             Vector2 velocity = clampedDrag * launchForceMultiplier;
             float cappedMagnitude = Mathf.Min(maxLaunchVelocity, velocity.magnitude);
             return velocity.sqrMagnitude > 0.0001f ? velocity.normalized * cappedMagnitude : Vector2.zero;
         }
 
-        public Vector2 GetLaunchPosition()
+        public Vector2 GetLaunchAnchorPosition()
         {
             return launchPoint != null ? (Vector2)launchPoint.position : (Vector2)transform.position;
+        }
+
+        public Vector2 GetLaunchPosition()
+        {
+            Vector2 anchor = GetLaunchAnchorPosition();
+            float colliderBottomFromRoot = selectedLaunchBodyBounds.center.y - selectedLaunchBodyBounds.extents.y;
+            float clearedRootY = anchor.y - colliderBottomFromRoot;
+            float spawnY = Mathf.Max(anchor.y + UnitController.DefaultLaunchSpawnHeight, clearedRootY);
+            return new Vector2(anchor.x, spawnY);
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -638,58 +718,143 @@ namespace CastleBusters
         private void DrawTrajectory(Vector2 velocity)
         {
             if (trajectoryLine == null) return;
+
             Vector2 startPos = GetLaunchPosition();
             Vector2 gravity = Physics2D.gravity;
-            float wind = GameManager.Instance != null ? GameManager.Instance.currentWindForce : 0f;
+            var gameManager = GameManager.Instance;
+            float windForce = gameManager != null ? gameManager.currentWindForce : 0f;
+            if (gameManager != null)
+            {
+                velocity = gameManager.PreviewLastStandLaunchVelocity(gameManager.IsPlayerTurn, velocity);
+            }
+            float windRadius = gameManager != null ? gameManager.windEffectRadius : 0f;
+            Vector2 windOrigin = startPos;
+            float integrationStep = Mathf.Max(0.001f, timeStep);
+            UnitController prefabController = selectedUnitPrefab != null
+                ? selectedUnitPrefab.GetComponent<UnitController>()
+                : null;
+            bool addsControllerAtRuntime = prefabController == null
+                && selectedUnitPrefab != null
+                && selectedUnitPrefab.GetComponent<ExplosiveGimmick>() != null;
+            float hardCeilingY = prefabController != null
+                ? prefabController.hardCeilingY
+                : addsControllerAtRuntime
+                    ? UnitController.DefaultHardCeilingY
+                    : float.PositiveInfinity;
 
             float mass = 1f;
+            float linearDrag = 0f;
             if (selectedUnitPrefab != null && selectedUnitPrefab.TryGetComponent<Rigidbody2D>(out var prefabRb))
             {
-                // Match the runtime mass reduction UnitController.Awake() applies on spawn
-                // (see UnitController.RuntimeMassScale) so the previewed arc matches how the
-                // projectile actually flies once wind is factored in.
+                // Match the runtime mass reduction and linear damping applied to the launched
+                // Rigidbody2D so the preview uses the same fixed-step flight model.
                 mass = Mathf.Max(UnitController.MinRuntimeMass, prefabRb.mass * UnitController.RuntimeMassScale);
+                linearDrag = Mathf.Max(0f, prefabRb.drag);
             }
 
-            float windAccel = wind / mass;
-
+            Vector2 castSize = new Vector2(selectedLaunchBodyBounds.size.x, selectedLaunchBodyBounds.size.y);
+            Vector2 colliderCenterOffset = selectedLaunchBodyBounds.center;
             Vector2 prevPoint = startPos;
             bool hitDetected = false;
             Vector2 hitPoint = Vector2.zero;
-            List<Vector3> points = new List<Vector3>();
-            points.Add(new Vector3(startPos.x, startPos.y, 0));
+            Vector2 currentVelocity = velocity;
 
-            for (int i = 1; i < trajectoryResolution; i++)
+            previewCrossedGateIds.Clear();
+            trajectoryPoints.Clear();
+            trajectoryPoints.Add(new Vector3(startPos.x, startPos.y, 0f));
+
+            if (trajectoryCollisionMask == 0)
             {
-                float t = i * timeStep;
-                Vector2 point = startPos + velocity * t + 0.5f * (gravity + new Vector2(windAccel, 0f)) * (t * t);
+                // Project gameplay colliders currently share Default; layer-name masks cannot
+                // distinguish bodies. Use Unity's normal raycast mask and mirror the runtime's
+                // explicit same-team UnitController collision ignores below.
+                trajectoryCollisionMask = Physics2D.DefaultRaycastLayers;
+            }
+
+            for (int i = 0; i < trajectoryResolution; i++)
+            {
+                // UnitController enforces its ceiling at the start of FixedUpdate, before
+                // gravity/wind integration. Clamp against the previous step position so a
+                // crossing step completes and upward motion is stopped on the following step.
+                if (prevPoint.y > hardCeilingY && currentVelocity.y > 0f)
+                {
+                    currentVelocity = new Vector2(currentVelocity.x, 0f);
+                }
+
+                Vector2 acceleration = gravity + UnitController.CalculateWindAcceleration(
+                    prevPoint,
+                    mass,
+                    windForce,
+                    windOrigin,
+                    windRadius);
+
+                // Mirror Rigidbody2D's fixed-step semi-implicit integration: force changes
+                // velocity first, then the updated velocity advances the body.
+                currentVelocity += acceleration * integrationStep;
+                currentVelocity /= 1f + linearDrag * integrationStep;
+                Vector2 nextPoint = prevPoint + currentVelocity * integrationStep;
 
                 if (!hitDetected)
                 {
-                    int layerMask = LayerMask.GetMask("Ground", "PlayerCastle", "EnemyCastle");
-                    if (layerMask == 0)
+                    Vector2 segment = nextPoint - prevPoint;
+                    float segmentDistance = segment.magnitude;
+                    int hitCount = segmentDistance > 0.0001f
+                        ? Physics2D.BoxCastNonAlloc(
+                            prevPoint + colliderCenterOffset,
+                            castSize,
+                            0f,
+                            segment / segmentDistance,
+                            trajectoryHits,
+                            segmentDistance,
+                            trajectoryCollisionMask)
+                        : 0;
+                    bool previewIsPlayer = gameManager == null || gameManager.IsPlayerTurn;
+                    RaycastHit2D nearestHit = default;
+                    float nearestDistance = float.PositiveInfinity;
+                    for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
                     {
-                        layerMask = ~LayerMask.GetMask("PlayerUnit", "EnemyUnit");
+                        RaycastHit2D candidate = trajectoryHits[hitIndex];
+                        if (candidate.collider == null || candidate.collider.isTrigger) continue;
+                        UnitController hitUnit = candidate.collider.GetComponentInParent<UnitController>();
+                        if (hitUnit != null && hitUnit.isPlayerUnit == previewIsPlayer) continue;
+                        if (candidate.distance >= nearestDistance) continue;
+
+                        nearestHit = candidate;
+                        nearestDistance = candidate.distance;
                     }
 
-                    RaycastHit2D hit = Physics2D.Linecast(prevPoint, point, layerMask);
-                    if (hit.collider != null)
+                    // Triggers are passages, not impacts. Event gates are the one exception we
+                    // inspect: crossing one changes velocity for the next fixed-step sample,
+                    // exactly once per gate during this prediction, without mutating runtime state.
+                    for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
+                    {
+                        RaycastHit2D candidate = trajectoryHits[hitIndex];
+                        if (candidate.collider == null || !candidate.collider.isTrigger) continue;
+                        if (candidate.distance > nearestDistance) continue;
+
+                        var gate = candidate.collider.GetComponentInParent<EventGateGimmick>();
+                        if (gate == null || !previewCrossedGateIds.Add(gate.GetInstanceID())) continue;
+                        currentVelocity *= gate.PreviewVelocityMultiplier;
+                    }
+
+                    if (nearestHit.collider != null)
                     {
                         hitDetected = true;
-                        hitPoint = hit.point;
-                        points.Add(new Vector3(hitPoint.x, hitPoint.y, 0));
+                        hitPoint = nearestHit.point;
+                        Vector2 rootAtImpact = nearestHit.centroid - colliderCenterOffset;
+                        trajectoryPoints.Add(new Vector3(rootAtImpact.x, rootAtImpact.y, 0f));
                         break;
                     }
                 }
 
-                points.Add(new Vector3(point.x, point.y, 0));
-                prevPoint = point;
+                trajectoryPoints.Add(new Vector3(nextPoint.x, nextPoint.y, 0));
+                prevPoint = nextPoint;
             }
 
-            trajectoryLine.positionCount = points.Count;
-            for (int i = 0; i < points.Count; i++)
+            trajectoryLine.positionCount = trajectoryPoints.Count;
+            for (int i = 0; i < trajectoryPoints.Count; i++)
             {
-                trajectoryLine.SetPosition(i, points[i]);
+                trajectoryLine.SetPosition(i, trajectoryPoints[i]);
             }
 
             UpdateImpactMarker(hitDetected, hitPoint);
@@ -699,34 +864,26 @@ namespace CastleBusters
         {
             if (selectedUnitPrefab == null) return;
 
-            // AOS overhaul (§2): bomber volleys scale with the owner's turn ordinal —
-            // 2 bombs from the 3rd own turn, 4 from the 9th. Other units always fire one.
-            int volley = 1;
-            var gm = GameManager.Instance;
-            bool isBomber = selectedUnitPrefab.TryGetComponent<UnitController>(out var proto) && proto.unitType == UnitType.Bomber;
-            if (isBomber && gm != null)
+
+            Vector2 reportedVelocity = launchVelocity;
+            var gameManager = GameManager.Instance;
+            if (gameManager != null)
             {
-                volley = VolleyRules.BomberVolleyCount(VolleyRules.OwnTurnOrdinal(gm.TurnCount));
+                reportedVelocity = gameManager.PreviewLastStandLaunchVelocity(gameManager.IsPlayerTurn, reportedVelocity);
             }
 
             var firstUnit = SpawnAndLaunchOne(launchVelocity);
-            
+
             // Set wind effect origin and radius for this launch
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.windEffectOrigin = GetLaunchPosition();
                 GameManager.Instance.windEffectRadius = 10f;  // Radius of wind effect (adjust as needed)
             }
-            
-            if (volley > 1)
-            {
-                GameFeelVfx.SpawnFeedbackLabel(GetLaunchPosition() + Vector2.up * 1.0f,
-                    $"x{volley} VOLLEY!", new Color(1f, 0.75f, 0.25f, 1f), 2.2f, 0.6f);
-                StartCoroutine(LaunchVolleyRest(volley - 1));
-            }
 
-            float powerPercent = Mathf.Clamp01(launchVelocity.magnitude / Mathf.Max(0.01f, maxLaunchVelocity)) * 100f;
-            float angle = Mathf.Atan2(launchVelocity.y, launchVelocity.x) * Mathf.Rad2Deg;
+
+            float powerPercent = reportedVelocity.magnitude / Mathf.Max(0.01f, maxLaunchVelocity) * 100f;
+            float angle = Mathf.Atan2(reportedVelocity.y, reportedVelocity.x) * Mathf.Rad2Deg;
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);
             GameFeelVfx.SpawnShockwaveRing(GetLaunchPosition(), new Color(0.55f, 0.9f, 1f, 0.45f), 1.25f, 0.3f);
@@ -734,34 +891,22 @@ namespace CastleBusters
             if (GameManager.Instance != null) GameManager.Instance.OnUnitLaunched(firstUnit);
         }
 
-        private System.Collections.IEnumerator LaunchVolleyRest(int extraCount)
-        {
-            for (int i = 0; i < extraCount; i++)
-            {
-                yield return new WaitForSeconds(0.16f);
-                // Slight per-shot jitter so the salvo fans out instead of stacking.
-                Vector2 jitter = new Vector2(Random.Range(-0.06f, 0.06f), Random.Range(0f, 0.08f));
-                SpawnAndLaunchOne(launchVelocity + launchVelocity.magnitude * jitter);
-            }
-        }
 
         private UnitController SpawnAndLaunchOne(Vector2 velocity)
         {
-            var unitGo = Instantiate(selectedUnitPrefab, GetLaunchPosition(), Quaternion.identity);
+            Vector2 spawnPosition = GetLaunchPosition();
+            var unitGo = Instantiate(selectedUnitPrefab, spawnPosition, Quaternion.identity);
             var unit = unitGo.GetComponent<UnitController>();
             if (unit == null && unitGo.GetComponent<ExplosiveGimmick>() != null)
             {
                 unit = unitGo.AddComponent<UnitController>();
-                unit.unitType = UnitType.Bomber;
+                unit.unitType = UnitType.Barrel;
                 unit.maxHP = 20f;
                 unit.currentHP = 20f;
             }
-            // Awake() already auto-fit unitGo's collider to its sprite (see
-            // UnitController.ApplyPlayableScaleAndCollider), centered on the spawn transform.
-            // GetLaunchPosition() is a ground-level marker, so without this the unit spawns
-            // already embedded in the ground/platform and instantly "lands" - see
-            // UnitController.SnapColliderAboveGround for the full explanation.
-            UnitController.SnapColliderAboveGround(unitGo, GetLaunchPosition().y);
+            // GetLaunchPosition resolves the selected body's predicted Awake collider bounds
+            // against the launch anchor, so runtime and preview share this exact root position.
+            // No post-Instantiate snap is allowed here: that would move runtime away from the arc.
             if (unit != null)
 
             {

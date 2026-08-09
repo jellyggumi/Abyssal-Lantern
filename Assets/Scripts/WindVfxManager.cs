@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 namespace CastleBusters
@@ -8,8 +7,6 @@ namespace CastleBusters
         public static WindVfxManager Instance { get; private set; }
 
         private ParticleSystem windParticleSystem;
-        private TextMeshPro windDirectionLabel;
-        private TextMeshProUGUI windUiText;
         private float pulseTimer;
 
         private void Awake()
@@ -32,7 +29,6 @@ namespace CastleBusters
 
         private void SetupWindParticles()
         {
-            SetupWindUiText();
 
             var go = new GameObject("WindParticleSystem");
             go.transform.SetParent(transform);
@@ -66,39 +62,9 @@ namespace CastleBusters
             psr.sortingOrder = 6;
             psr.sharedMaterial = GameFeelVfx.GetParticleMaterial();
 
-            var labelGo = new GameObject("WorldWindDirectionLabel");
-            labelGo.transform.SetParent(transform);
-            labelGo.transform.position = new Vector3(0f, 7.0f, 0f);
-            windDirectionLabel = labelGo.AddComponent<TextMeshPro>();
-            windDirectionLabel.alignment = TextAlignmentOptions.Center;
-            windDirectionLabel.fontSize = 5.5f;
-            windDirectionLabel.sortingOrder = 20;
-            windDirectionLabel.color = new Color(0.65f, 0.9f, 1f, 0.75f);
-            windDirectionLabel.text = "WIND";
-
             windParticleSystem.Play();
         }
 
-        private void SetupWindUiText()
-        {
-            var canvas = FindObjectOfType<Canvas>();
-            if (canvas == null || windUiText != null) return;
-            MobileSafeArea.ConfigureCanvas(canvas);
-
-            var go = new GameObject("ScreenWindDirectionUI");
-            go.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
-            windUiText = go.AddComponent<TextMeshProUGUI>();
-            windUiText.fontSize = 22;
-            windUiText.color = new Color(0.65f, 0.9f, 1f, 0.9f);
-            windUiText.alignment = TextAlignmentOptions.Center;
-
-            var rectTransform = go.GetComponent<RectTransform>();
-            rectTransform.anchorMin = new Vector2(0.5f, 0.95f);
-            rectTransform.anchorMax = new Vector2(0.5f, 0.95f);
-            rectTransform.pivot = new Vector2(0.5f, 1f);
-            rectTransform.anchoredPosition = new Vector2(0f, -10f);
-            rectTransform.sizeDelta = new Vector2(460f, 54f);
-        }
 
         private void Update()
         {
@@ -121,30 +87,19 @@ namespace CastleBusters
                 ? new Color(1f, 0.78f, 0.25f, 0.45f)
                 : new Color(0.65f, 0.9f, 1f, 0.35f);
 
-            string arrow = windForce > 0.15f ? ">>>" : windForce < -0.15f ? "<<<" : "---";
-            string strength = absWind >= 3.5f ? "STRONG" : absWind >= 1.5f ? "MED" : "LIGHT";
-
-            if (windDirectionLabel != null)
-            {
-                windDirectionLabel.text = $"{arrow} WIND {absWind:F1} {arrow}";
-                windDirectionLabel.transform.localScale = Vector3.one * (pulseTimer > 0f ? 1.15f : 1f);
-                windDirectionLabel.color = absWind >= 3.5f
-                    ? new Color(1f, 0.78f, 0.25f, 0.9f)
-                    : new Color(0.65f, 0.9f, 1f, 0.75f);
-            }
-
-            if (windUiText != null)
-            {
-                windUiText.text = $"WIND / 바람  {arrow}  {strength} {absWind:F1}";
-                windUiText.color = absWind >= 3.5f
-                    ? new Color(1f, 0.78f, 0.25f, 0.95f)
-                    : new Color(0.65f, 0.9f, 1f, 0.9f);
-            }
         }
 
         public void PulseWindChange(float newWindForce)
         {
             pulseTimer = 0.7f;
+            float accentScale = Mathf.Clamp(0.38f + Mathf.Abs(newWindForce) * 0.045f, 0.38f, 0.68f);
+            GameFeelVfx.SpawnHiggsfieldAccent(
+                new Vector3(0f, 7.2f, 0f),
+                HiggsfieldSpriteLibrary.Wind,
+                new Color(0.9f, 1f, 1f, 0.82f),
+                accentScale,
+                0.5f,
+                33);
         }
     }
 }

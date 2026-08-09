@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-09T13:24:58.563745Z",
+  "provider": "Higgsfield CLI",
+  "accountAuth": "OAuth (credential value not recorded)",
+  "sourceJobs": [
+    {
+      "jobId": "b955a72c-e82f-4adb-bc89-6e9d3ebcfebc",
+      "model": "z_image",
+      "displayName": "Z Image",
+      "createdAt": "2026-08-09T13:24:18.613368Z",
+      "prompt": "A production-ready 2D game UI icon sprite sheet for a dark medieval physics siege game. Exactly six separate square emblems in a strict 3 columns by 2 rows grid with wide equal gutters: top row knight helmet, archer bow and arrow, cannon side profile; bottom row explosive barrel, shielded battering ram, spiked trap. Center each emblem, same visual scale, crisp at 64 pixels, chunky beveled brass and weathered ivory, restrained cyan highlights, dark charcoal outlines. Pure flat magenta #FF00FF background in every cell and gutter, no magenta in emblems. No text, letters, numbers, labels, frames, perspective scene, characters, or extra objects.",
+      "resultUrl": "https://d8j0nt1cm91z4.cloudfront.net/user_3HaZuH3UivCvNs7JsnnYa0B72Rx/hf_20260809_132418_b955a72c-e82f-4adb-bc89-6e9d3ebcfebc_min.webp",
+      "downloadedFile": "_workspace/current/design/ai/higgsfield/higgsfield-artillery-icons-sheet.png",
+      "cropProcess": "ImageMagick crops from 2048x1152 source, magenta color-to-alpha, trim/center on 512x512 transparent canvas",
+      "crops": {
+        "Knight": "590x550+55+25",
+        "Archer": "515x550+545+20",
+        "Cannon": "950x470+1060+65",
+        "Barrel": "590x550+55+575",
+        "Ram": "520x550+550+555",
+        "Trap": "900x520+1045+575"
+      }
+    },
+    {
+      "jobId": "b9231ec9-8d4d-47f9-b45d-bfda070346df",
+      "model": "z_image",
+      "displayName": "Z Image",
+      "createdAt": "2026-08-09T13:24:58.563745Z",
+      "prompt": "A production-ready 2D combat VFX sprite sheet for a dark medieval physics siege game. Exactly four isolated effects in a strict 2 columns by 2 rows grid with wide equal gutters: top left compact golden impact starburst with white-hot center; top right cyan wind gust spiral with arrow-like motion streaks; bottom left red core-crack shock ring with glowing fracture shards; bottom right stone collapse dust cloud with small debris chunks. Each effect centered, same scale, filling about 60 percent of a square cell, crisp at 96 pixels, bold layered silhouette, limited palette. Pure flat magenta #FF00FF background in every cell and gutter, no magenta in effects. No text, letters, numbers, labels, frames, scenery, or extra effects.",
+      "resultUrl": "https://d8j0nt1cm91z4.cloudfront.net/user_3HaZuH3UivCvNs7JsnnYa0B72Rx/hf_20260809_132458_b9231ec9-8d4d-47f9-b45d-bfda070346df_min.webp",
+      "downloadedFile": "_workspace/current/design/ai/higgsfield/higgsfield-combat-vfx-sheet.png",
+      "cropProcess": "ImageMagick crops from 2048x1152 source, magenta color-to-alpha, trim/center on 512x512 transparent canvas",
+      "crops": {
+        "Impact": "900x530+135+25",
+        "Wind": "900x530+1050+25",
+        "CoreCrack": "900x520+130+590",
+        "CollapseDust": "900x520+1050+590"
+      }
+    }
+  ],
+  "derivedAssets": [
+    {
+      "file": "Assets/Resources/Higgsfield/UI/Knight.png",
+      "sha256": "095aab20194fbf6830e51299b1c483292d63b9cd0846aae2a1ef1582e5c3d5b7",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/UI/Archer.png",
+      "sha256": "1d9df3377b430223ce79ae74b4fab07ce78ccd2890a6141672cad051ef8ed45c",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/UI/Cannon.png",
+      "sha256": "ea52bb7ef29f3ee5bdfa932b134ca6b664245faabb40a831996308d8ceb5b725",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/UI/Barrel.png",
+      "sha256": "b14eaf9243fdabd03159c78412b397806e897ef2305d4f3f8bf823b61e09e1a7",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/UI/Ram.png",
+      "sha256": "af72202be80ae048881b4aa2f72420700145f7a361630f3ef33990b52521eae5",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/UI/Trap.png",
+      "sha256": "0b53447fe66ecc429accd43bbe2c89705283e0f09645f6277731c593b22cdc55",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/VFX/Impact.png",
+      "sha256": "300272be128f1a48bb4bc22bfb1bde19202a22078509b6866d40725d4bb27010",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/VFX/Wind.png",
+      "sha256": "ad5cffe0290bbe039b71dad6d9617a36cb103a918fdaad9de7d4d23d4bf04175",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/VFX/CoreCrack.png",
+      "sha256": "461ea8a4b938c9ac66c29ecd016687b8bae5358fdca8bffac13637858794cb84",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    {
+      "file": "Assets/Resources/Higgsfield/VFX/CollapseDust.png",
+      "sha256": "5f3a061810ebcb097386ba7b218c75d2170da7684a13cb78a4df234a3b0b4be3",
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.105393">
+  <test-suite type="TestSuite" id="1234" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="198" result="Passed" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.105393" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1451" name="CastleBusters.EditModeTests.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/CastleBusters.EditModeTests.dll" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.086154" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="58060" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1452" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.085514" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1453" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.085148" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1423" name="CastleCoreVolleyCapTests" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.083728" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1424" name="CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests.CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth" methodname="CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" seed="1004644285" result="Passed" start-time="2026-08-09 10:43:34Z" end-time="2026-08-09 10:43:35Z" duration="0.071094" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1425" name="CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests.CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore" methodname="CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" seed="765275826" result="Passed" start-time="2026-08-09 10:43:35Z" end-time="2026-08-09 10:43:35Z" duration="0.002819" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1426" name="CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests.CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap" methodname="CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" seed="1746102059" result="Passed" start-time="2026-08-09 10:43:35Z" end-time="2026-08-09 10:43:35Z" duration="0.000439" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -552,13 +552,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   launchPoint: {fileID: 440275098}
   launchActivationRadius: 3.5
-  maxDragDistance: 3
-  launchForceMultiplier: 5
-  maxLaunchVelocity: 25
-  minLaunchVelocity: 0.75
+  maxDragDistance: 4.2
+  launchForceMultiplier: 6
+  maxLaunchVelocity: 25.2
+  minLaunchVelocity: 3
   trajectoryLine: {fileID: 83740686}
-  trajectoryResolution: 30
-  timeStep: 0.1
+  trajectoryResolution: 150
+  timeStep: 0.02
   impactMarkerPrefab: {fileID: 0}
   launchPointIndicatorPrefab: {fileID: 0}
   launchStatsText: {fileID: 0}
@@ -1478,20 +1478,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 0
   turnDuration: 15
-  difficultyRampTurns: 12
-  windCapStart: 2.5
+  difficultyRampTurns: 15
+  windCapStart: 2
   windCapEnd: 6.5
-  aiErrorStart: 2.2
-  aiErrorEnd: 0.6
-  stormChanceStart: 0.05
-  stormChanceEnd: 0.25
+  aiErrorStart: 2.5
+  aiErrorEnd: 0.8
+  stormChanceStart: 0.02
+  stormChanceEnd: 0.15
   playerCastle: {fileID: 359753119}
   enemyCastle: {fileID: 1914710606}
   knightPrefab: {fileID: 6573281129364223326, guid: e829e969bfe8a4c9785891be397bb254,
     type: 3}
   archerPrefab: {fileID: 1974663412398712130, guid: f4516a7d5c21346b9ba2a7652fa3853a,
-    type: 3}
-  bomberPrefab: {fileID: 970975094213197885, guid: 8ef624bb5713645e8b67acdc9ee65045,
     type: 3}
   explosiveBarrelPrefab: {fileID: 4217206857076650386, guid: 2b29f7b3cc4b4471b8fef8542a86ed2b,
     type: 3}
@@ -2887,8 +2885,7 @@ MonoBehaviour:
   unitPrefabs:
   - {fileID: 6573281129364223326, guid: e829e969bfe8a4c9785891be397bb254, type: 3}
   - {fileID: 1974663412398712130, guid: f4516a7d5c21346b9ba2a7652fa3853a, type: 3}
-  - {fileID: 970975094213197885, guid: 8ef624bb5713645e8b67acdc9ee65045, type: 3}
-  maxLaunchVelocity: 25
+  maxLaunchVelocity: 25.2
   errorOffsetRange: 1
 --- !u!4 &900142438
 Transform:

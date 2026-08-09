@@ -91,7 +91,14 @@ namespace CastleBusters
                 return;
             }
 
-            if (!hintShownThisTurn)
+            // Deploy mode owns the click while armed. Both systems listen for the same
+            // left-click during the ENEMY turn, so without this guard one click would BOTH
+            // deploy a unit and designate a brick — the player pays supply and silently
+            // burns a brick slot (design/deployment-economy.md §2: the two placement verbs
+            // are mutually exclusive).
+            bool deployArmed = DeploymentController.Instance != null && DeploymentController.Instance.DeployModeArmed;
+
+            if (!hintShownThisTurn && !deployArmed)
             {
                 hintShownThisTurn = true;
                 GameFeelVfx.SpawnFeedbackLabel(new Vector3(0f, 4.5f, 0f),
@@ -99,6 +106,7 @@ namespace CastleBusters
                     new Color(0.75f, 0.9f, 1f, 0.95f), 2.2f, 0.9f);
             }
 
+            if (deployArmed) return;
             if (!Input.GetMouseButtonDown(0)) return;
             if (UnityEngine.EventSystems.EventSystem.current != null &&
                 UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;

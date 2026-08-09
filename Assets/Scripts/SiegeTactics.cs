@@ -3,7 +3,7 @@ using UnityEngine;
 namespace CastleBusters
 {
     /// <summary>
-    /// Target selection policy: knights/archers/bombers hunt the opponent's INSTALLATIONS —
+    /// Target selection policy: knights/archers/cannons hunt the opponent's INSTALLATIONS —
     /// gimmicks the enemy placed and gimmicks stationed in their camp — never the floor.
     /// Candidates are ranked by weighted distance (lower score wins), so a slightly farther
     /// gimmick outranks a nearby plain wall block, but units never march across the whole
@@ -69,8 +69,8 @@ namespace CastleBusters
     /// </summary>
     public static class UnitCombos
     {
-        /// <summary>Bomber landing fuse: armed on touchdown, detonates this many seconds later.</summary>
-        public const float BomberFuseSeconds = 2f;
+        /// <summary>Powder-keg landing fuse: armed on touchdown, detonates this many seconds later.</summary>
+        public const float BarrelFuseSeconds = 2f;
 
         /// <summary>Knight melee: every 6th swing lands 3 hits, every 3rd lands 2, else 1.</summary>
         public static int KnightHits(int attackOrdinal)
@@ -117,26 +117,6 @@ namespace CastleBusters
         public static bool KnightShouldPush(float distToBlocker, float distToTarget, float attackRange)
         {
             return distToBlocker < attackRange * 0.9f && distToTarget > attackRange * 1.1f;
-        }
-    }
-
-    /// <summary>Launch multiplicity per own-side turn ordinal (1-based). §2 Bomber.</summary>
-    public static class VolleyRules
-    {
-        public static int BomberVolleyCount(int ownTurnOrdinal)
-        {
-            if (ownTurnOrdinal >= 9) return 4;
-            if (ownTurnOrdinal >= 3) return 2;
-            return 1;
-        }
-
-        /// <summary>
-        /// Own-side turn ordinal (1-based) from the global turn counter. Player turns are
-        /// even global counts (0, 2, 4...), AI turns odd — both map to 1, 2, 3...
-        /// </summary>
-        public static int OwnTurnOrdinal(int globalTurnCount)
-        {
-            return Mathf.Max(0, globalTurnCount) / 2 + 1;
         }
     }
 

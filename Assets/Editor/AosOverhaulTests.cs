@@ -67,33 +67,12 @@ namespace CastleBusters.Tests
             Assert.IsFalse(UnitCombos.ArcherShouldJump(2f, 0f), "target below → never jump");
         }
 
-        // ---- §2 Bomber ----
+        // ---- §2 Powder keg ----
 
         [Test]
-        public void BomberVolleyCount_ScalesAtThirdAndNinthOwnTurn()
+        public void BarrelFuse_IsTwoSeconds()
         {
-            Assert.AreEqual(1, VolleyRules.BomberVolleyCount(1));
-            Assert.AreEqual(1, VolleyRules.BomberVolleyCount(2));
-            Assert.AreEqual(2, VolleyRules.BomberVolleyCount(3), "3rd own turn → 2 bombs");
-            Assert.AreEqual(2, VolleyRules.BomberVolleyCount(8));
-            Assert.AreEqual(4, VolleyRules.BomberVolleyCount(9), "9th own turn → 4 bombs");
-            Assert.AreEqual(4, VolleyRules.BomberVolleyCount(20));
-        }
-
-        [Test]
-        public void OwnTurnOrdinal_MapsGlobalTurnsToPerSideOrdinals()
-        {
-            Assert.AreEqual(1, VolleyRules.OwnTurnOrdinal(0), "match opens on own turn 1");
-            Assert.AreEqual(1, VolleyRules.OwnTurnOrdinal(1));
-            Assert.AreEqual(2, VolleyRules.OwnTurnOrdinal(2));
-            Assert.AreEqual(3, VolleyRules.OwnTurnOrdinal(4));
-            Assert.AreEqual(9, VolleyRules.OwnTurnOrdinal(16), "global 16 = 9th own turn");
-        }
-
-        [Test]
-        public void BomberFuse_IsTwoSeconds()
-        {
-            Assert.AreEqual(2f, UnitCombos.BomberFuseSeconds);
+            Assert.AreEqual(2f, UnitCombos.BarrelFuseSeconds);
         }
 
         // ---- §3 Vent scheduling ----

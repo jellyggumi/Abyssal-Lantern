@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.1566101">
+  <test-suite type="TestSuite" id="1196" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="165" result="Passed" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.156610" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1364" name="Assembly-CSharp-Editor.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="159" result="Passed" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.126929" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="23953" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1365" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="159" result="Passed" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.124996" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1366" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="159" result="Passed" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.123334" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1239" name="GamePlayTests" fullname="CastleBusters.Tests.GamePlayTests" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" testcasecount="77" result="Passed" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.119850" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1275" name="LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn" methodname="LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="2104840845" result="Passed" start-time="2026-08-09 07:57:27Z" end-time="2026-08-09 07:57:27Z" duration="0.096072" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
