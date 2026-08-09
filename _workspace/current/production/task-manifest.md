@@ -39,3 +39,6 @@ Blocking notes:
 - Unity editor and batch builds are mutually exclusive (project lock);
   batch-launched builds also require the WebGL module, installed 2026-08-09
   via Unity Hub headless CLI.
+
+| 17 | 난이도 곡선 재설계 + 스테이지 재배치 | design + engineering + QA | done 2026-08-10 — `SmoothStep`이 15턴에서 1.0 고정·평탄화되던 것을 Hill 곡선 `n^p/(n^p+h^p)`(h=0.6×램프, p=1.8)로 교체해 매 턴 상승·점근하도록 함(`DifficultyCurve.cs`, 신규 테스트 5). 스테이지는 성벽 높이만 2/3/**4**로 재배치 — Stage3가 근거 없이 Stage1 기본값 2를 물려받아 마지막 해금이 가장 무른 요새였음. 바람(거리 종속)과 페이싱(전장 정체성)은 의도적으로 비단조 유지하고 그 이유를 `StageProgressionShapeTests`로 고정. 근거: `qa/evidence/editmode-stage-redistribution.xml` (273 중 269 통과, 실패 4는 D-004) | G2/G7 |
+| 18 | 최종 배포 | ops | done 2026-08-10 — castle-war `8f9edb8` → pages `275ce7a`. 라이브 검증: 페이지 오류 0, AudioContext running, 실제 매치 진입 (`qa/evidence/live-final-deploy.png`). https://jellyggumi.github.io/games/castle-war/ | web beat |
