@@ -140,8 +140,10 @@ namespace CastleBusters
         public float TurnTimeRemaining => turnTimer;
         public int TurnCount => turnCount;
 
-        // 0 -> 1 across the first difficultyRampTurns turns, smoothstepped.
-        public float DifficultyT => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(turnCount / (float)Mathf.Max(1, difficultyRampTurns)));
+        // Strictly rising, non-linear, and never flat: see DifficultyCurve. The old
+        // smoothstep hit 1.0 at difficultyRampTurns and stopped, which left long matches
+        // with an unchanging back half.
+        public float DifficultyT => DifficultyCurve.Evaluate(turnCount, difficultyRampTurns);
         public float CurrentWindCap => Mathf.Lerp(windCapStart, windCapEnd, DifficultyT);
         public float CurrentAiErrorOffset => Mathf.Lerp(aiErrorStart, aiErrorEnd, DifficultyT);
         public float CurrentStormChance => Mathf.Lerp(stormChanceStart, stormChanceEnd, DifficultyT);
@@ -271,20 +273,12 @@ namespace CastleBusters
             currentState = GameState.Intro;
             isPlayerTurn = false;
 
-            // Cold-open webtoon (title precursor): plays once per app session, before the
-            // title card, so the very first arrival gets the story beat instead of dropping
-            // straight onto the title. Subsequent Title/Rematch/RequestStage reloads within the
-            // same session skip straight to ShowTitleScreen() — replaying an 11-page cinematic
-            // on every "TITLE" click would be a UX regression, not a feature.
-            if (!webtoonIntroShown)
-            {
-                webtoonIntroShown = true;
-                ShowWebtoonPrologue();
-            }
-            else
-            {
-                ShowTitleScreen();
-            }
+            // Straight to the title card. The 11-page webtoon used to cold-open the very
+            // first session, which put a long read between arriving and playing a siege
+            // game — the worst place to spend a new player's patience. The prologue is
+            // still there, on the title screen's 프롤로그 button, for players who want it.
+            webtoonIntroShown = true;
+            ShowTitleScreen();
 
             // A hit-stop restore pending from the previous scene/turn must not thaw the
             // intro freeze 0.05s from now (rematch/title "game plays itself" bug).
@@ -1568,7 +1562,8 @@ namespace CastleBusters
             {
                 explosive.SetPermanentPotency(
                     LastStand.BuffedDamage(explosive.PermanentExplosionDamage, isPlayer),
-                    explosive.PermanentExplosionRadius * LastStand.RadiusMult(isPlayer));
+                    explosive.PermanentExplosionRadius * LastStand.RadiusMult(isPlayer),
+                    LastStand.SingleHitDamageCap);
                 unit.explosionDamage = explosive.explosionDamage;
                 unit.explosionRadius = explosive.explosionRadius;
             }
@@ -1828,6 +1823,7 @@ namespace CastleBusters
         private void EndGame(string result)
         {
             currentState = GameState.GameOver;
+            LaunchManagerRef?.CancelAim();
             RefreshLastStandButton();
             // Legacy scene game-over panel stays hidden: the ResultsScreenController card is
             // the single source of outcome UI — the old green banner bled through behind it.

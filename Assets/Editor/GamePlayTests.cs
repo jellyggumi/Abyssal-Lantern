@@ -57,12 +57,12 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void BomberUnit_ExplodesOnCollision_AndDealsAoEDamage()
+        public void PowderKegUnit_ExplodesOnCollision_AndDealsAoEDamage()
         {
             // Arrange
-            var bomberGo = new GameObject("BomberUnit");
+            var bomberGo = new GameObject("PowderKegUnit");
             var bomber = bomberGo.AddComponent<UnitController>();
-            bomber.unitType = UnitType.Bomber;
+            bomber.unitType = UnitType.Barrel;
             bomber.explosionRadius = 5f;
             bomber.explosionDamage = 50f;
             bomber.Launch(Vector2.zero);
@@ -136,7 +136,7 @@ namespace CastleBusters.Tests
         {
             // Arrange
             var unitData = ScriptableObject.CreateInstance<UnitData>();
-            unitData.unitType = UnitType.Bomber;
+            unitData.unitType = UnitType.Barrel;
             unitData.maxHP = 150f;
             unitData.moveSpeed = 4f;
             unitData.attackDamage = 35f;
@@ -154,7 +154,7 @@ namespace CastleBusters.Tests
             method.Invoke(unit, null);
 
             // Assert
-            Assert.AreEqual(UnitType.Bomber, unit.unitType);
+            Assert.AreEqual(UnitType.Barrel, unit.unitType);
             Assert.AreEqual(150f, unit.maxHP);
             Assert.AreEqual(150f, unit.currentHP);
             Assert.AreEqual(4f, unit.moveSpeed);
@@ -239,12 +239,12 @@ namespace CastleBusters.Tests
             // Load prefabs from Assets/Prefabs/
             var knightPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Knight.prefab");
             var archerPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Archer.prefab");
-            var bomberPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Bomber.prefab");
+            var cannonPrefabExists = System.IO.File.Exists("Assets/Prefabs/Bomber.prefab");
             var blockPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/DestructibleBlock.prefab");
 
             Assert.IsNotNull(knightPrefab, "Knight prefab is missing!");
             Assert.IsNotNull(archerPrefab, "Archer prefab is missing!");
-            Assert.IsNotNull(bomberPrefab, "Bomber prefab is missing!");
+            Assert.IsFalse(cannonPrefabExists, "Bomber.prefab must be deleted — the roster's 3rd slot is the deploy-only Cannon (design/deployment-economy.md §2)");
             Assert.IsNotNull(blockPrefab, "DestructibleBlock prefab is missing!");
 
             // Check Knight
@@ -259,11 +259,8 @@ namespace CastleBusters.Tests
             Assert.IsNotNull(archerPrefab.GetComponent<Rigidbody2D>(), "Archer prefab is missing Rigidbody2D!");
             Assert.IsNotNull(archerPrefab.GetComponent<Collider2D>(), "Archer prefab is missing Collider2D!");
 
-            // Check Bomber
-            var bomberUnit = bomberPrefab.GetComponent<UnitController>();
-            Assert.IsNotNull(bomberUnit, "Bomber prefab is missing UnitController!");
-            Assert.IsNotNull(bomberPrefab.GetComponent<Rigidbody2D>(), "Bomber prefab is missing Rigidbody2D!");
-            Assert.IsNotNull(bomberPrefab.GetComponent<Collider2D>(), "Bomber prefab is missing Collider2D!");
+            // The Bomber prefab is intentionally gone; the Cannon is built at deploy time by
+            // DeploymentController.SpawnCannon (no prefab), so there is nothing to load here.
 
             // Check DestructibleBlock
             var block = blockPrefab.GetComponent<DestructibleBlock>();
@@ -356,7 +353,7 @@ namespace CastleBusters.Tests
             Assert.IsNotNull(gm.backgroundSprite, "Background sprite should be assigned!");
             Assert.IsNotNull(gm.knightButton, "Knight button should be assigned!");
             Assert.IsNotNull(gm.archerButton, "Archer button should be assigned!");
-            Assert.IsNotNull(gm.bomberButton, "Bomber button should be assigned!");
+            Assert.IsNotNull(gm.cannonButton, "Cannon button should be assigned!");
         }
 
         [Test]
@@ -1067,6 +1064,624 @@ namespace CastleBusters.Tests
         }
 
         [Test]
+        public void LaunchManager_FullDrawProducesTunedVelocityAndFullTension()
+        {
+            var managerGo = new GameObject("FullDrawLaunchManager");
+            var launchPointGo = new GameObject("FullDrawLaunchPoint");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(2f, -1f, 0f);
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.maxDragDistance = 4.2f;
+                launchManager.launchForceMultiplier = 6f;
+                launchManager.maxLaunchVelocity = 25.2f;
+                launchManager.minLaunchVelocity = 3f;
+
+                Vector2 pointer = (Vector2)launchPointGo.transform.position + Vector2.left * 4.2f;
+                Vector2 velocity = launchManager.CalculateLaunchVelocity(pointer);
+
+                Assert.AreEqual(-25.2f, velocity.x, 0.001f,
+                    "A full leftward draw must preserve aim while reaching the tuned launch cap.");
+                Assert.AreEqual(0f, velocity.y, 0.001f);
+                Assert.AreEqual(25.2f, velocity.magnitude, 0.001f,
+                    "A 4.2-unit full draw must launch at 25.2 m/s.");
+                Assert.AreEqual(1f, launchManager.GetPullTensionRatio(pointer), 0.001f,
+                    "A full draw must report complete bowstring tension.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void LaunchManager_MinimumLaunchThresholdBoundaryRemainsContinuous()
+        {
+            var managerGo = new GameObject("ThresholdLaunchManager");
+            var launchPointGo = new GameObject("ThresholdLaunchPoint");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(-3f, 2f, 0f);
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.maxDragDistance = 4.2f;
+                launchManager.launchForceMultiplier = 6f;
+                launchManager.maxLaunchVelocity = 25.2f;
+                launchManager.minLaunchVelocity = 3f;
+
+                Vector2 belowThreshold = launchManager.CalculateLaunchVelocity(
+                    (Vector2)launchPointGo.transform.position + Vector2.up * 0.49f);
+                Vector2 atThreshold = launchManager.CalculateLaunchVelocity(
+                    (Vector2)launchPointGo.transform.position + Vector2.up * 0.50f);
+
+                Assert.AreEqual(2.94f, belowThreshold.magnitude, 0.001f);
+                Assert.Less(belowThreshold.magnitude, launchManager.minLaunchVelocity,
+                    "A 0.49-unit pull must remain below the 3 m/s launch threshold.");
+                Assert.AreEqual(3f, atThreshold.magnitude, 0.001f,
+                    "The exact 0.50-unit boundary must reach 3 m/s without an off-by-one dead zone.");
+                Assert.Greater(atThreshold.y, 0f, "Threshold handling must preserve the aimed direction.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_FirstStepUsesSemiImplicitIntegration()
+        {
+            var managerGo = new GameObject("TrajectoryIntegrationLaunchManager");
+            var launchPointGo = new GameObject("TrajectoryIntegrationLaunchPoint");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(1234f, -987f, 0f);
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 2;
+                launchManager.timeStep = 0.05f;
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory,
+                    "The EditMode fixture must be able to execute the trajectory integration path.");
+
+                Vector2 startingVelocity = new Vector2(7f, 11f);
+                drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
+
+                Vector2 start = launchManager.GetLaunchPosition();
+                Vector2 expectedFirstStep =
+                    start + (startingVelocity + Physics2D.gravity * launchManager.timeStep) * launchManager.timeStep;
+
+                Assert.AreEqual(2, trajectoryLine.positionCount,
+                    "A two-sample trajectory must expose its start and first integrated point.");
+                Vector3 actualFirstStep = trajectoryLine.GetPosition(1);
+                Assert.AreEqual(expectedFirstStep.x, actualFirstStep.x, 0.0001f);
+                Assert.AreEqual(expectedFirstStep.y, actualFirstStep.y, 0.0001f,
+                    "Trajectory preview must update velocity with gravity before advancing position.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_FirstPreviewPointMatchesElevatedRuntimeLaunchPosition()
+        {
+            var managerGo = new GameObject("TrajectoryOriginLaunchManager");
+            var launchPointGo = new GameObject("TrajectoryOriginLaunchPoint");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(4321f, -2100f, 0f);
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 2;
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory);
+
+                drawTrajectory.Invoke(launchManager, new object[] { Vector2.right });
+
+                Vector2 runtimeLaunchPosition = launchManager.GetLaunchPosition();
+                Vector3 previewStart = trajectoryLine.GetPosition(0);
+                Assert.AreEqual(runtimeLaunchPosition.x, previewStart.x, 0.0001f);
+                Assert.AreEqual(runtimeLaunchPosition.y, previewStart.y, 0.0001f,
+                    "The preview must originate at the same elevated position used to spawn the launched unit.");
+                Assert.AreEqual(
+                    UnitController.DefaultLaunchSpawnHeight,
+                    previewStart.y - launchPointGo.transform.position.y,
+                    0.0001f,
+                    "The first preview point must include the runtime launch body's spawn height above the anchor.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_BoxFootprintStopsAtOffCenterThinObstacle()
+        {
+            var managerGo = new GameObject("TrajectoryFootprintLaunchManager");
+            var launchPointGo = new GameObject("TrajectoryFootprintLaunchPoint");
+            var selectedPrefab = new GameObject("TrajectoryFootprintSelectedPrefab");
+            var obstacleGo = new GameObject("TrajectoryFootprintThinObstacle");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(6000f, 7000f, 0f);
+                selectedPrefab.transform.position = new Vector3(6500f, 7500f, 0f);
+                var selectedCollider = selectedPrefab.AddComponent<BoxCollider2D>();
+                selectedCollider.size = new Vector2(2f, 2f);
+
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 5;
+                launchManager.timeStep = 0.001f;
+                launchManager.SetSelectedUnit(selectedPrefab);
+
+                Vector2 previewStart = launchManager.GetLaunchPosition();
+                obstacleGo.transform.position = previewStart + new Vector2(3f, 0.75f);
+                var obstacleCollider = obstacleGo.AddComponent<BoxCollider2D>();
+                obstacleCollider.size = new Vector2(0.05f, 0.1f);
+                Physics2D.SyncTransforms();
+
+                Vector2 startingVelocity = new Vector2(1000f, 0f);
+                Vector2 firstVelocity = startingVelocity + Physics2D.gravity * launchManager.timeStep;
+                Vector2 firstStep = previewStart + firstVelocity * launchManager.timeStep;
+                Vector2 secondVelocity = firstVelocity + Physics2D.gravity * launchManager.timeStep;
+                Vector2 secondStep = firstStep + secondVelocity * launchManager.timeStep;
+                RaycastHit2D centerLineHit = Physics2D.Linecast(
+                    previewStart,
+                    secondStep,
+                    Physics2D.DefaultRaycastLayers);
+                Assert.IsNull(centerLineHit.collider,
+                    "Precondition: the obstacle must sit outside the preview body's center-line path.");
+
+                Vector2 footprint = UnitController.EstimateLaunchedWorldColliderSize(selectedPrefab);
+                Vector2 secondSegment = secondStep - firstStep;
+                RaycastHit2D footprintHit = Physics2D.BoxCast(
+                    firstStep,
+                    footprint,
+                    0f,
+                    secondSegment.normalized,
+                    secondSegment.magnitude,
+                    Physics2D.DefaultRaycastLayers);
+                Assert.AreSame(obstacleCollider, footprintHit.collider,
+                    "Precondition: the selected unit's full footprint must reach the off-center obstacle.");
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory);
+                drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
+
+                Assert.AreEqual(3, trajectoryLine.positionCount,
+                    "The preview must stop on the second segment instead of continuing through the thin obstacle.");
+                Vector3 previewEnd = trajectoryLine.GetPosition(trajectoryLine.positionCount - 1);
+                Assert.AreEqual(footprintHit.centroid.x, previewEnd.x, 0.001f);
+                Assert.AreEqual(footprintHit.centroid.y, previewEnd.y, 0.001f,
+                    "The preview endpoint must be the launched body's centroid at shape-cast contact.");
+                Assert.Less(previewEnd.x, obstacleCollider.bounds.min.x,
+                    "The full-sized launch body must stop before its center passes into the obstacle.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(obstacleGo);
+                Object.DestroyImmediate(selectedPrefab);
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_MatchesRuntimeLinearDragAcrossRepresentativeSteps()
+        {
+            var managerGo = new GameObject("TrajectoryDragLaunchManager");
+            var launchPointGo = new GameObject("TrajectoryDragLaunchPoint");
+            var unitTemplateGo = new GameObject("TrajectoryDragUnitTemplate");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(1234f, -987f, 0f);
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 8;
+                launchManager.timeStep = 0.02f;
+
+                var templateBody = unitTemplateGo.AddComponent<Rigidbody2D>();
+                templateBody.mass = 1f;
+                templateBody.drag = 0.05f;
+                unitTemplateGo.AddComponent<BoxCollider2D>();
+                unitTemplateGo.AddComponent<UnitController>();
+                launchManager.SetSelectedUnit(unitTemplateGo);
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory);
+                Vector2 startingVelocity = new Vector2(7f, 11f);
+                drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
+
+                Assert.AreEqual(launchManager.trajectoryResolution, trajectoryLine.positionCount,
+                    "An unobstructed preview must expose every requested fixed-step sample.");
+                Vector2 expectedPosition = launchManager.GetLaunchPosition();
+                Vector2 expectedVelocity = startingVelocity;
+                for (int step = 1; step < launchManager.trajectoryResolution; step++)
+                {
+                    expectedVelocity =
+                        (expectedVelocity + Physics2D.gravity * launchManager.timeStep)
+                        / (1f + templateBody.drag * launchManager.timeStep);
+                    expectedPosition += expectedVelocity * launchManager.timeStep;
+
+                    Vector3 actual = trajectoryLine.GetPosition(step);
+                    Assert.AreEqual(expectedPosition.x, actual.x, 0.0001f,
+                        $"Step {step} must retain Rigidbody2D-style linear damping on horizontal velocity.");
+                    Assert.AreEqual(expectedPosition.y, actual.y, 0.0001f,
+                        $"Step {step} must apply gravity, then linear damping, then advance position.");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(unitTemplateGo);
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround()
+        {
+            var managerGo = new GameObject("TrajectoryCollisionLaunchManager");
+            var launchPointGo = new GameObject("TrajectoryCollisionLaunchPoint");
+            var unitTemplateGo = new GameObject("TrajectoryCollisionUnitTemplate");
+            var friendlyGo = new GameObject("TrajectoryFriendlyBody");
+            var enemyGo = new GameObject("TrajectoryEnemyBody");
+            var groundGo = new GameObject("TrajectoryGround");
+            try
+            {
+                Vector3 start = new Vector3(2000f, 2000f, 0f);
+                launchPointGo.transform.position = start;
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 20;
+                launchManager.timeStep = 0.05f;
+
+                unitTemplateGo.AddComponent<Rigidbody2D>().gravityScale = 0f;
+                unitTemplateGo.AddComponent<BoxCollider2D>();
+                var templateUnit = unitTemplateGo.AddComponent<UnitController>();
+                templateUnit.isPlayerUnit = true;
+                launchManager.SetSelectedUnit(unitTemplateGo);
+
+                friendlyGo.transform.position = start + new Vector3(1f, 0f, 0f);
+                friendlyGo.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                var friendlyCollider = friendlyGo.AddComponent<BoxCollider2D>();
+                friendlyCollider.size = new Vector2(0.3f, 4f);
+                var friendlyUnit = friendlyGo.AddComponent<UnitController>();
+                friendlyUnit.isPlayerUnit = true;
+
+                enemyGo.transform.position = start + new Vector3(2f, 0f, 0f);
+                enemyGo.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                var enemyCollider = enemyGo.AddComponent<BoxCollider2D>();
+                enemyCollider.size = new Vector2(0.3f, 4f);
+                var enemyUnit = enemyGo.AddComponent<UnitController>();
+                enemyUnit.isPlayerUnit = false;
+
+                groundGo.transform.position = start + new Vector3(3f, 0f, 0f);
+                var groundCollider = groundGo.AddComponent<BoxCollider2D>();
+                groundCollider.size = new Vector2(0.3f, 4f);
+                Physics2D.SyncTransforms();
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory);
+                drawTrajectory.Invoke(launchManager, new object[] { new Vector2(10f, 0f) });
+
+                float enemyHitX = trajectoryLine.GetPosition(trajectoryLine.positionCount - 1).x;
+                Assert.Greater(enemyHitX, friendlyGo.transform.position.x + friendlyCollider.size.x * 0.5f,
+                    "The preview must pass through a same-team body even when every collider uses the Default layer.");
+                Assert.Less(enemyHitX, enemyGo.transform.position.x + enemyCollider.size.x * 0.5f,
+                    "The preview must still stop at the first enemy body after ignoring its teammate.");
+
+                enemyCollider.enabled = false;
+                Physics2D.SyncTransforms();
+                drawTrajectory.Invoke(launchManager, new object[] { new Vector2(10f, 0f) });
+                float groundHitX = trajectoryLine.GetPosition(trajectoryLine.positionCount - 1).x;
+                Assert.Greater(groundHitX, enemyGo.transform.position.x + enemyCollider.size.x * 0.5f);
+                Assert.Less(groundHitX, groundGo.transform.position.x + groundCollider.size.x * 0.5f,
+                    "Ignoring a friendly unit must not make the preview pass through the downstream ground structure.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(groundGo);
+                Object.DestroyImmediate(enemyGo);
+                Object.DestroyImmediate(friendlyGo);
+                Object.DestroyImmediate(unitTemplateGo);
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void UnitController_CalculateWindAcceleration_RespectsRadiusForceAndMassFloor()
+        {
+            Vector2 windOrigin = new Vector2(4f, -2f);
+            const float windRadius = 3f;
+            const float windForce = 6f;
+
+            Vector2 inside = UnitController.CalculateWindAcceleration(
+                windOrigin + Vector2.right * 2f, 2f, windForce, windOrigin, windRadius);
+            Vector2 outside = UnitController.CalculateWindAcceleration(
+                windOrigin + Vector2.right * 3.01f, 2f, windForce, windOrigin, windRadius);
+            Vector2 zeroRadius = UnitController.CalculateWindAcceleration(
+                windOrigin, 2f, windForce, windOrigin, 0f);
+            Vector2 zeroForce = UnitController.CalculateWindAcceleration(
+                windOrigin, 2f, 0f, windOrigin, windRadius);
+            Vector2 belowMassFloor = UnitController.CalculateWindAcceleration(
+                windOrigin, 0.01f, 3f, windOrigin, windRadius);
+            Vector2 atMassFloor = UnitController.CalculateWindAcceleration(
+                windOrigin, UnitController.MinRuntimeMass, 3f, windOrigin, windRadius);
+
+            Assert.AreEqual(3f, inside.x, 0.0001f,
+                "Wind inside the active radius must accelerate by force divided by mass.");
+            Assert.AreEqual(0f, inside.y, 0.0001f, "Wind must remain horizontal.");
+            Assert.AreEqual(Vector2.zero, outside, "Wind must not accelerate units outside its radius.");
+            Assert.AreEqual(Vector2.zero, zeroRadius, "A zero-radius wind field must be inactive.");
+            Assert.AreEqual(Vector2.zero, zeroForce, "A zero-force wind field must be inactive.");
+            Assert.AreEqual(atMassFloor.x, belowMassFloor.x, 0.0001f,
+                "Mass below the runtime floor must not produce unbounded wind acceleration.");
+            Assert.AreEqual(20f, belowMassFloor.x, 0.0001f);
+        }
+
+        [Test]
+        public void GameManager_PostImpactHold_RemainsShortAndObservable()
+        {
+            Assert.Greater(GameManager.PostImpactHoldSeconds, 0f,
+                "Resolved impacts need a nonzero readability beat before turn handoff.");
+            Assert.LessOrEqual(GameManager.PostImpactHoldSeconds, 0.5f,
+                "Post-impact feedback must not reintroduce a long input-blocking pause.");
+        }
+
+        [Test]
+        public void LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn()
+        {
+            var managerGo = new GameObject("CancelAimLaunchManager");
+            var trajectoryGo = new GameObject("CancelAimTrajectory");
+            var rubberBandGo = new GameObject("CancelAimRubberBand");
+            var impactMarker = new GameObject("CancelAimImpactMarker");
+            var unitTemplateGo = new GameObject("CancelAimUnitTemplate");
+            var gameManagerGo = new GameObject("CancelAimGameManager");
+            HashSet<UnitController> unitsBeforeCancellation = null;
+            try
+            {
+                var trajectoryLine = trajectoryGo.AddComponent<LineRenderer>();
+                trajectoryLine.positionCount = 4;
+                var rubberBandLine = rubberBandGo.AddComponent<LineRenderer>();
+                rubberBandLine.positionCount = 3;
+                impactMarker.SetActive(true);
+
+                unitTemplateGo.AddComponent<Rigidbody2D>();
+                unitTemplateGo.AddComponent<BoxCollider2D>();
+                unitTemplateGo.AddComponent<UnitController>();
+
+                var gameManager = gameManagerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var turnCountField = typeof(GameManager).GetField(
+                    "turnCount",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var isPlayerTurnField = typeof(GameManager).GetField(
+                    "isPlayerTurn",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var isResolvingTurnField = typeof(GameManager).GetField(
+                    "isResolvingTurn",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                Assert.IsNotNull(turnCountField);
+                Assert.IsNotNull(isPlayerTurnField);
+                Assert.IsNotNull(isResolvingTurnField);
+                gameManagerAwake.Invoke(gameManager, null);
+                gameManager.currentState = GameState.PlayerTurn;
+                turnCountField.SetValue(gameManager, 7);
+                isPlayerTurnField.SetValue(gameManager, true);
+                isResolvingTurnField.SetValue(gameManager, false);
+
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.rubberBandLine = rubberBandLine;
+                var isDraggingField = typeof(LaunchManager).GetField(
+                    "isDragging",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var launchVelocityField = typeof(LaunchManager).GetField(
+                    "launchVelocity",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var selectedUnitPrefabField = typeof(LaunchManager).GetField(
+                    "selectedUnitPrefab",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var impactMarkerField = typeof(LaunchManager).GetField(
+                    "impactMarkerInstance",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(isDraggingField);
+                Assert.IsNotNull(launchVelocityField);
+                Assert.IsNotNull(selectedUnitPrefabField);
+                Assert.IsNotNull(impactMarkerField);
+                isDraggingField.SetValue(launchManager, true);
+                launchVelocityField.SetValue(launchManager, new Vector2(10f, 5f));
+                selectedUnitPrefabField.SetValue(launchManager, unitTemplateGo);
+                impactMarkerField.SetValue(launchManager, impactMarker);
+
+                unitsBeforeCancellation = new HashSet<UnitController>(Object.FindObjectsOfType<UnitController>());
+                int turnCountBefore = gameManager.TurnCount;
+                GameState stateBefore = gameManager.currentState;
+                bool playerTurnBefore = gameManager.IsPlayerTurn;
+                bool resolvingBefore = gameManager.IsResolvingTurn;
+
+                launchManager.CancelAim();
+
+                Assert.IsFalse(launchManager.IsAiming, "Cancelling deploy-mode aim must leave no active draw.");
+                Assert.AreEqual(0, trajectoryLine.positionCount, "Cancelling aim must clear the trajectory preview.");
+                Assert.AreEqual(0, rubberBandLine.positionCount, "Cancelling aim must hide the rubber band.");
+                Assert.IsFalse(impactMarker.activeSelf, "Cancelling aim must hide the predicted impact marker.");
+                Assert.AreEqual(unitsBeforeCancellation.Count, Object.FindObjectsOfType<UnitController>().Length,
+                    "Cancelling aim must not instantiate the armed unit prefab.");
+                Assert.AreEqual(turnCountBefore, gameManager.TurnCount, "Cancelling aim must not advance the turn.");
+                Assert.AreEqual(stateBefore, gameManager.currentState, "Cancelling aim must not change turn state.");
+                Assert.AreEqual(playerTurnBefore, gameManager.IsPlayerTurn, "Cancelling aim must not hand control away.");
+                Assert.AreEqual(resolvingBefore, gameManager.IsResolvingTurn,
+                    "Cancelling aim must not enter launch-resolution flow.");
+            }
+            finally
+            {
+                if (unitsBeforeCancellation != null)
+                {
+                    foreach (var unit in Object.FindObjectsOfType<UnitController>())
+                    {
+                        if (!unitsBeforeCancellation.Contains(unit)) Object.DestroyImmediate(unit.gameObject);
+                    }
+                }
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(trajectoryGo);
+                Object.DestroyImmediate(rubberBandGo);
+                Object.DestroyImmediate(impactMarker);
+                Object.DestroyImmediate(unitTemplateGo);
+                Object.DestroyImmediate(gameManagerGo);
+            }
+        }
+
+
+        [Test]
+        public void ItemDropRules_ShouldDrop_ExcludesExactSixtyPercentBoundary()
+        {
+            Assert.IsTrue(ItemDropRules.ShouldDrop(0.6f - 0.000001f),
+                "A value immediately below 60% must still drop.");
+            Assert.IsFalse(ItemDropRules.ShouldDrop(0.6f),
+                "The exact 60% boundary must be excluded by the strict probability gate.");
+        }
+
+        [Test]
+        public void ItemDropRules_TypeForRoll_ChangesAtExactThirdBoundaries()
+        {
+            const float epsilon = 0.000001f;
+            float oneThird = 1f / 3f;
+            float twoThirds = 2f / 3f;
+
+            Assert.AreEqual(HeroItemType.Sword, ItemDropRules.TypeForRoll(oneThird - epsilon),
+                "The value immediately below one third must remain in the Sword bucket.");
+            Assert.AreEqual(HeroItemType.Shield, ItemDropRules.TypeForRoll(oneThird),
+                "The exact one-third boundary must enter the Shield bucket.");
+            Assert.AreEqual(HeroItemType.Shield, ItemDropRules.TypeForRoll(twoThirds - epsilon),
+                "The value immediately below two thirds must remain in the Shield bucket.");
+            Assert.AreEqual(HeroItemType.Boots, ItemDropRules.TypeForRoll(twoThirds),
+                "The exact two-thirds boundary must enter the Boots bucket.");
+        }
+
+        [Test]
+        public void UnitPrefabs_InitializeAtEnlargedScaleWithoutChangingColliderWorldFootprint()
+        {
+            var prefabPaths = new[]
+            {
+                "Assets/Prefabs/Knight.prefab",
+                "Assets/Prefabs/Archer.prefab"
+            };
+
+            foreach (string prefabPath in prefabPaths)
+            {
+                var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                Assert.IsNotNull(prefab, $"Required unit prefab could not be loaded: {prefabPath}");
+
+                GameObject instance = null;
+                try
+                {
+                    instance = Object.Instantiate(prefab);
+                    var unit = instance.GetComponent<UnitController>();
+                    var box = instance.GetComponent<BoxCollider2D>();
+                    var spriteRenderer = instance.GetComponentInChildren<SpriteRenderer>(true);
+                    Assert.IsNotNull(unit, $"{prefabPath} must initialize a UnitController.");
+                    Assert.IsNotNull(box, $"{prefabPath} must initialize a BoxCollider2D.");
+                    Assert.IsNotNull(spriteRenderer, $"{prefabPath} must initialize a SpriteRenderer.");
+                    Assert.IsNotNull(spriteRenderer.sprite, $"{prefabPath} must initialize with a coverage sprite.");
+
+                    var applyScaleAndCollider = typeof(UnitController).GetMethod(
+                        "ApplyPlayableScaleAndCollider",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    Assert.IsNotNull(applyScaleAndCollider,
+                        "The EditMode fixture must be able to execute the prefab initialization path.");
+                    applyScaleAndCollider.Invoke(unit, null);
+
+                    Physics2D.SyncTransforms();
+
+                    Assert.AreEqual(0.48f, instance.transform.localScale.x, 0.0001f,
+                        $"{prefabPath} must render at the enlarged 0.48 visual scale.");
+                    Assert.AreEqual(0.48f, instance.transform.localScale.y, 0.0001f,
+                        $"{prefabPath} must render uniformly at the enlarged visual scale.");
+
+                    Vector2 expectedOldWorldFootprint =
+                        spriteRenderer.sprite.bounds.size * (0.42f * unit.colliderVisualCoverage);
+                    Vector2 actualWorldFootprint = box.bounds.size;
+                    Assert.AreEqual(expectedOldWorldFootprint.x, actualWorldFootprint.x, 0.0001f,
+                        $"{prefabPath} collider width must preserve the old 0.42-scale sprite coverage.");
+                    Assert.AreEqual(expectedOldWorldFootprint.y, actualWorldFootprint.y, 0.0001f,
+                        $"{prefabPath} collider height must preserve the old 0.42-scale sprite coverage.");
+                }
+                finally
+                {
+                    if (instance != null) Object.DestroyImmediate(instance);
+                }
+            }
+        }
+
+        [Test]
+        public void KoreanFontSupport_BundledDynamicFont_LoadsAndSupportsHangul()
+        {
+            var bundledFont = Resources.Load<TMPro.TMP_FontAsset>("Fonts/NotoSansKR-Dynamic");
+
+            Assert.IsNotNull(bundledFont,
+                "The player-safe Korean font must load from Resources/Fonts/NotoSansKR-Dynamic.");
+            Assert.IsTrue(KoreanFontSupport.SupportsHangul(bundledFont),
+                "The bundled dynamic font must resolve Hangul without relying on OS font discovery.");
+        }
+
+        [Test]
+        public void GameAudio_BundledSfx_LoadAsShortMono44100HzClips()
+        {
+            var contracts = new[]
+            {
+                new { Path = "Audio/SFX/impact", MinimumLength = 0.17f, MaximumLength = 0.19f },
+                new { Path = "Audio/SFX/launch", MinimumLength = 0.24f, MaximumLength = 0.26f },
+                new { Path = "Audio/SFX/combo", MinimumLength = 0.26f, MaximumLength = 0.28f }
+            };
+
+            foreach (var contract in contracts)
+            {
+                var clip = Resources.Load<AudioClip>(contract.Path);
+                Assert.IsNotNull(clip, $"Bundled gameplay SFX must load from Resources/{contract.Path}.");
+                Assert.AreEqual(1, clip.channels, $"{contract.Path} must remain mono for predictable SFX mixing.");
+                Assert.AreEqual(44100, clip.frequency, $"{contract.Path} must remain at the authored 44.1 kHz rate.");
+                Assert.That(clip.length, Is.InRange(contract.MinimumLength, contract.MaximumLength),
+                    $"{contract.Path} must remain a short feedback clip, but was {clip.length:F3}s.");
+            }
+        }
+
+        [Test]
         public void EventGateGimmick_PowerUpUnit_MultipliesVelocity()
         {
             var unitGo = new GameObject("GateUnit");
@@ -1294,12 +1909,23 @@ namespace CastleBusters.Tests
             Assert.Less(midError, gm.aiErrorStart);
             Assert.Greater(midError, gm.aiErrorEnd);
 
-            // Past the ramp: clamped at the late-game plateau.
+            // Past the ramp: still rising, never plateaued. The ramp used to clamp at
+            // exactly 1.0 here, which froze wind, AI error and storm odds for the rest of
+            // the match; DifficultyCurve now approaches the endpoints asymptotically so a
+            // long siege keeps tightening. See DifficultyCurveTests for the curve's shape.
             turnCountField.SetValue(gm, gm.difficultyRampTurns * 3);
-            Assert.AreEqual(1f, gm.DifficultyT, 0.001f);
-            Assert.AreEqual(gm.windCapEnd, gm.CurrentWindCap, 0.001f);
-            Assert.AreEqual(gm.aiErrorEnd, gm.CurrentAiErrorOffset, 0.001f);
-            Assert.AreEqual(gm.stormChanceEnd, gm.CurrentStormChance, 0.001f);
+            float lateT = gm.DifficultyT;
+            float lateWind = gm.CurrentWindCap;
+            Assert.Greater(lateT, 0.85f, "Deep into a match the pressure must be near maximum.");
+            Assert.Less(lateT, 1f, "…but never exactly maximum, or it would stop moving.");
+            Assert.Greater(lateWind, midWind, "Wind must keep climbing past the ramp turn.");
+            Assert.Less(lateWind, gm.windCapEnd);
+            Assert.Less(gm.CurrentAiErrorOffset, midError, "AI must keep tightening past the ramp turn.");
+            Assert.Greater(gm.CurrentAiErrorOffset, gm.aiErrorEnd);
+            Assert.Less(gm.CurrentStormChance, gm.stormChanceEnd);
+
+            turnCountField.SetValue(gm, gm.difficultyRampTurns * 6);
+            Assert.Greater(gm.DifficultyT, lateT, "Even a very long match must keep escalating.");
 
             Object.DestroyImmediate(go);
         }
@@ -2004,6 +2630,784 @@ namespace CastleBusters.Tests
             Assert.AreEqual(-3f, rb.velocity.y, 0.001f, "A unit already falling past the ceiling must not be touched.");
 
             Object.DestroyImmediate(unitGo);
+        }
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_StopsClimbingAfterSelectedUnitHardCeiling()
+        {
+            var managerGo = new GameObject("HardCeilingTrajectoryLaunchManager");
+            var launchPointGo = new GameObject("HardCeilingTrajectoryLaunchPoint");
+            var selectedPrefab = new GameObject("HardCeilingTrajectoryUnit");
+            try
+            {
+                selectedPrefab.transform.position = new Vector3(2000f, 2000f, 0f);
+                selectedPrefab.AddComponent<Rigidbody2D>();
+                selectedPrefab.AddComponent<BoxCollider2D>();
+                var selectedUnit = selectedPrefab.AddComponent<UnitController>();
+                selectedUnit.hardCeilingY = 0.1f;
+                launchPointGo.transform.position = new Vector3(
+                    1234f,
+                    selectedUnit.hardCeilingY - UnitController.DefaultLaunchSpawnHeight - 0.2f,
+                    0f);
+
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 3;
+                launchManager.timeStep = 0.1f;
+                launchManager.SetSelectedUnit(selectedPrefab);
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory,
+                    "The fixture must execute the same trajectory path used by the launch preview.");
+
+                Vector2 startingVelocity = new Vector2(2f, 5f);
+                drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
+
+                Assert.AreEqual(3, trajectoryLine.positionCount);
+                Vector3 firstStep = trajectoryLine.GetPosition(1);
+                Vector3 secondStep = trajectoryLine.GetPosition(2);
+                float expectedFirstY =
+                    launchManager.GetLaunchPosition().y +
+                    (startingVelocity.y + Physics2D.gravity.y * launchManager.timeStep) * launchManager.timeStep;
+                float expectedSecondY =
+                    expectedFirstY + Physics2D.gravity.y * launchManager.timeStep * launchManager.timeStep;
+
+                Assert.Greater(firstStep.y, selectedUnit.hardCeilingY,
+                    "The representative first step must cross the selected unit's ceiling.");
+                Assert.AreEqual(expectedFirstY, firstStep.y, 0.0001f);
+                Assert.AreEqual(expectedSecondY, secondStep.y, 0.0001f,
+                    "Once the previous sample is above the ceiling, preview ascent must be clamped before gravity advances the next sample.");
+                Assert.Less(secondStep.y, firstStep.y,
+                    "The preview must begin descending instead of advertising a runtime-impossible climb.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+                Object.DestroyImmediate(selectedPrefab);
+            }
+        }
+
+        [Test]
+        public void DeploymentRules_CardsUnlockAtExactTurnBoundaries()
+        {
+            var cards = new[]
+            {
+                DeployCard.Knight,
+                DeployCard.Archer,
+                DeployCard.Barrel,
+                DeployCard.Cannon
+            };
+            var unlockTurns = new[] { 0, 1, 2, 3 };
+
+            for (int i = 0; i < cards.Length; i++)
+            {
+                Assert.IsFalse(DeploymentRules.IsUnlocked(cards[i], unlockTurns[i] - 1),
+                    $"{cards[i]} must remain locked immediately before turn {unlockTurns[i]}.");
+                Assert.IsTrue(DeploymentRules.IsUnlocked(cards[i], unlockTurns[i]),
+                    $"{cards[i]} must unlock exactly on turn {unlockTurns[i]}.");
+            }
+
+            Assert.IsTrue(DeploymentRules.IsUnlocked(DeployCard.Knight, 0));
+            Assert.IsFalse(DeploymentRules.IsUnlocked(DeployCard.Archer, 0));
+            Assert.IsFalse(DeploymentRules.IsUnlocked(DeployCard.Barrel, 0));
+            Assert.IsFalse(DeploymentRules.IsUnlocked(DeployCard.Cannon, 0),
+                "Turn zero must expose one immediately launchable card rather than a deploy-only or advanced option.");
+        }
+
+        [Test]
+        public void GameManager_StartGame_SelectsAndLaunchesKnightBeforeDeployOnlyCards()
+        {
+            var managerGo = new GameObject("OpeningSelectionGameManager");
+            var launchManagerGo = new GameObject("OpeningSelectionLaunchManager");
+            var launchPointGo = new GameObject("OpeningSelectionLaunchPoint");
+            UnitController launchedUnit = null;
+            try
+            {
+                var knightPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Knight.prefab");
+                Assert.IsNotNull(knightPrefab, "The opening launch contract requires the Knight prefab.");
+
+                launchPointGo.transform.position = new Vector3(1234f, 4321f, 0f);
+                var launchManager = launchManagerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+
+                var gameManager = managerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                gameManagerAwake.Invoke(gameManager, null);
+                var deploymentComponent = managerGo.GetComponent<DeploymentController>();
+                Assert.IsNotNull(deploymentComponent);
+                var deploymentAwake = typeof(DeploymentController).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(deploymentAwake);
+                deploymentAwake.Invoke(deploymentComponent, null);
+                gameManager.knightPrefab = knightPrefab;
+                var deployment = DeploymentController.Instance;
+                Assert.IsNotNull(deployment);
+
+                deployment.SetSelectedCard(DeployCard.Cannon);
+                Assert.IsTrue(deployment.DeployModeArmed,
+                    "Precondition: the deploy-only Cannon must have armed placement mode.");
+
+                gameManager.StartGame();
+
+                Assert.AreEqual(GameState.PlayerTurn, gameManager.currentState);
+                Assert.AreEqual(DeployCard.Knight, deployment.SelectedCard);
+                Assert.IsFalse(deployment.DeployModeArmed,
+                    "A fresh match must begin on a launchable card, not in Cannon placement mode.");
+
+                Object.DestroyImmediate(managerGo);
+                managerGo = null;
+
+                var beforeLaunch = new HashSet<UnitController>(Object.FindObjectsOfType<UnitController>());
+                launchManager.SimulateLaunch(new Vector2(4f, 3f));
+                foreach (var candidate in Object.FindObjectsOfType<UnitController>())
+                {
+                    if (!beforeLaunch.Contains(candidate))
+                    {
+                        launchedUnit = candidate;
+                        break;
+                    }
+                }
+
+                Assert.IsNotNull(launchedUnit,
+                    "The opening selection must produce a unit when the public launch path fires.");
+                Assert.AreEqual(UnitType.Knight, launchedUnit.unitType,
+                    "The first launch after StartGame must instantiate the Knight card selected for turn zero.");
+                Assert.AreEqual(UnitState.Launched, launchedUnit.CurrentState);
+            }
+            finally
+            {
+                if (launchedUnit != null) Object.DestroyImmediate(launchedUnit.gameObject);
+                if (managerGo != null) Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchManagerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void DeathHooks_CreditTheSideThatEarnedKillAndBlockDestruction()
+        {
+            var managerGo = new GameObject("DeathCreditGameManager");
+            var victimGo = new GameObject("PlayerVictim");
+            var playerCastleGo = new GameObject("PlayerCastle");
+            var blockGo = new GameObject("PlayerCastleBlock");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                gameManagerAwake.Invoke(gameManager, null);
+                var deploymentComponent = managerGo.GetComponent<DeploymentController>();
+                Assert.IsNotNull(deploymentComponent);
+                var deploymentAwake = typeof(DeploymentController).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(deploymentAwake);
+                deploymentAwake.Invoke(deploymentComponent, null);
+                var deployment = DeploymentController.Instance;
+                Assert.IsNotNull(deployment);
+                deployment.ResetEconomy();
+
+                float playerBefore = deployment.PlayerSupply;
+                float enemyBefore = deployment.EnemySupply;
+                var victim = victimGo.AddComponent<UnitController>();
+                victim.isPlayerUnit = true;
+
+                gameManager.OnUnitDied(victim, damageFromPlayer: false);
+
+                Assert.AreEqual(playerBefore, deployment.PlayerSupply, 0.0001f,
+                    "A player's death must not reward that same side.");
+                Assert.AreEqual(enemyBefore + SupplyRules.KillBonus, deployment.EnemySupply, 0.0001f,
+                    "GameManager's unit-death hook must credit the killer's opposing side.");
+
+                var playerCastle = playerCastleGo.AddComponent<CastleController>();
+                playerCastle.isPlayerCastle = true;
+                blockGo.transform.SetParent(playerCastleGo.transform);
+                var block = blockGo.AddComponent<DestructibleBlock>();
+                block.maxHP = 1f;
+                block.currentHP = 1f;
+
+                float enemyBeforeBlock = deployment.EnemySupply;
+                block.TakeDamage(1f);
+
+                Assert.AreEqual(playerBefore, deployment.PlayerSupply, 0.0001f,
+                    "Destroying a player's block must not credit the defending player.");
+                Assert.AreEqual(enemyBeforeBlock + SupplyRules.BlockBonus, deployment.EnemySupply, 0.0001f,
+                    "DestructibleBlock's destruction hook must credit the opposing side.");
+            }
+            finally
+            {
+                if (blockGo != null) Object.DestroyImmediate(blockGo);
+                Object.DestroyImmediate(playerCastleGo);
+                Object.DestroyImmediate(victimGo);
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void LaunchManager_DrawTrajectory_RuntimeAddedBarrelUsesDefaultHardCeiling()
+        {
+            var managerGo = new GameObject("BarrelHardCeilingTrajectoryLaunchManager");
+            var launchPointGo = new GameObject("BarrelHardCeilingTrajectoryLaunchPoint");
+            try
+            {
+                var barrelPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/ExplosiveBarrel.prefab");
+                Assert.IsNotNull(barrelPrefab);
+                Assert.IsNull(barrelPrefab.GetComponent<UnitController>(),
+                    "Precondition: this prefab acquires UnitController only when LaunchManager spawns it.");
+                Assert.IsNotNull(barrelPrefab.GetComponent<ExplosiveGimmick>());
+
+                launchPointGo.transform.position =
+                    new Vector3(
+                        2468f,
+                        UnitController.DefaultHardCeilingY - UnitController.DefaultLaunchSpawnHeight - 0.2f,
+                        0f);
+                var trajectoryLine = managerGo.AddComponent<LineRenderer>();
+                var launchManager = managerGo.AddComponent<LaunchManager>();
+                launchManager.launchPoint = launchPointGo.transform;
+                launchManager.trajectoryLine = trajectoryLine;
+                launchManager.trajectoryResolution = 3;
+                launchManager.timeStep = 0.1f;
+                launchManager.SetSelectedUnit(barrelPrefab);
+
+                var drawTrajectory = typeof(LaunchManager).GetMethod(
+                    "DrawTrajectory",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(drawTrajectory);
+
+                Vector2 startingVelocity = new Vector2(2f, 5f);
+                drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
+
+                Assert.AreEqual(3, trajectoryLine.positionCount);
+                Vector3 firstStep = trajectoryLine.GetPosition(1);
+                Vector3 secondStep = trajectoryLine.GetPosition(2);
+                float expectedFirstY =
+                    launchManager.GetLaunchPosition().y +
+                    (startingVelocity.y + Physics2D.gravity.y * launchManager.timeStep) * launchManager.timeStep;
+                float expectedSecondY =
+                    expectedFirstY + Physics2D.gravity.y * launchManager.timeStep * launchManager.timeStep;
+
+                Assert.Greater(firstStep.y, UnitController.DefaultHardCeilingY,
+                    "The representative first sample must cross the runtime-added controller's ceiling.");
+                Assert.AreEqual(expectedSecondY, secondStep.y, 0.0001f,
+                    "A selected ExplosiveBarrel must preview the same hard ceiling enforced after UnitController is added at spawn.");
+                Assert.Less(secondStep.y, firstStep.y,
+                    "The barrel preview must not use an infinite ceiling and continue a runtime-impossible climb.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void GameManager_ApplyLastStandOnLaunch_MirrorsBuffIntoExplosiveGimmick()
+        {
+            var managerGo = new GameObject("ExplosiveLastStandGameManager");
+            var barrelGo = new GameObject("ExplosiveLastStandBarrel");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                gameManager.playerLastStand = LastStand.Phase.Active;
+
+                var explosive = barrelGo.AddComponent<ExplosiveGimmick>();
+                explosive.explosionDamage = 72f;
+                explosive.explosionRadius = 1.8f;
+                var unit = barrelGo.AddComponent<UnitController>();
+                unit.unitType = UnitType.Barrel;
+                unit.isPlayerUnit = true;
+                unit.explosionDamage = 11f;
+                unit.explosionRadius = 0.4f;
+
+                float expectedDamage = LastStand.BuffedDamage(explosive.explosionDamage, true);
+                float expectedRadius = explosive.explosionRadius * LastStand.RadiusMult(true);
+                Vector2 velocity = new Vector2(6f, 8f);
+
+                Vector2 buffedVelocity = gameManager.ApplyLastStandOnLaunch(unit, velocity);
+
+                Assert.AreEqual(expectedDamage, explosive.explosionDamage, 0.0001f,
+                    "The component that actually resolves barrel explosions must receive the LAST STAND damage buff.");
+                Assert.AreEqual(expectedRadius, explosive.explosionRadius, 0.0001f,
+                    "The component that actually resolves barrel explosions must receive the LAST STAND radius buff.");
+                Assert.AreEqual(explosive.explosionDamage, unit.explosionDamage, 0.0001f,
+                    "Unit and attached explosive potency must remain synchronized after the one-shot buff.");
+                Assert.AreEqual(explosive.explosionRadius, unit.explosionRadius, 0.0001f);
+                Assert.AreEqual(velocity * LastStand.SpeedMult(true), buffedVelocity);
+                Assert.AreEqual(LastStand.Phase.Consumed, gameManager.playerLastStand,
+                    "Applying the mirrored buff must still consume the one-shot player LAST STAND.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(barrelGo);
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void DestructibleBlock_DamageOwnerScoresOffTurn_AndUnattributedDamageUsesCurrentTurn()
+        {
+            var managerGo = new GameObject("DamageOwnerScoreGameManager");
+            var castleGo = new GameObject("DamageOwnerEnemyCastle");
+            var attributedBlockGo = new GameObject("PlayerAttributedBlock");
+            var legacyBlockGo = new GameObject("LegacyTurnAttributedBlock");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                gameManagerAwake.Invoke(gameManager, null);
+                var isPlayerTurnField = typeof(GameManager).GetField(
+                    "isPlayerTurn",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var playerScoreField = typeof(GameManager).GetField(
+                    "playerScore",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var enemyScoreField = typeof(GameManager).GetField(
+                    "enemyScore",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(isPlayerTurnField);
+                Assert.IsNotNull(playerScoreField);
+                Assert.IsNotNull(enemyScoreField);
+
+                var enemyCastle = castleGo.AddComponent<CastleController>();
+                enemyCastle.isPlayerCastle = false;
+
+                attributedBlockGo.transform.SetParent(castleGo.transform);
+                var attributedBlock = attributedBlockGo.AddComponent<DestructibleBlock>();
+                attributedBlock.maxHP = 1f;
+                attributedBlock.currentHP = 1f;
+                attributedBlock.scoreValue = 17;
+
+                isPlayerTurnField.SetValue(gameManager, false);
+                Assert.IsFalse(gameManager.IsPlayerTurn,
+                    "Precondition: owner attribution is exercised while the AI turn is active.");
+                attributedBlock.TakeDamage(1f, damageFromPlayer: true);
+
+                Assert.AreEqual(17, (int)playerScoreField.GetValue(gameManager),
+                    "A player-owned hit must award the player even when it resolves during the AI turn.");
+                Assert.AreEqual(0, (int)enemyScoreField.GetValue(gameManager));
+
+                legacyBlockGo.transform.SetParent(castleGo.transform);
+                var legacyBlock = legacyBlockGo.AddComponent<DestructibleBlock>();
+                legacyBlock.maxHP = 1f;
+                legacyBlock.currentHP = 1f;
+                legacyBlock.scoreValue = 19;
+
+                isPlayerTurnField.SetValue(gameManager, true);
+                legacyBlock.TakeDamage(1f);
+
+                Assert.AreEqual(36, (int)playerScoreField.GetValue(gameManager),
+                    "The unattributed overload path must retain legacy current-turn score ownership.");
+                Assert.AreEqual(0, (int)enemyScoreField.GetValue(gameManager));
+            }
+            finally
+            {
+                if (attributedBlockGo != null) Object.DestroyImmediate(attributedBlockGo);
+                if (legacyBlockGo != null) Object.DestroyImmediate(legacyBlockGo);
+                Object.DestroyImmediate(castleGo);
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void GameManager_PreviewLastStandLaunchVelocity_BuffsOnlyActivePhaseWithoutConsumingIt()
+        {
+            var managerGo = new GameObject("LastStandPreviewGameManager");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                Vector2 aimedVelocity = new Vector2(10f, 4f);
+
+                gameManager.playerLastStand = LastStand.Phase.Active;
+                Vector2 activePreview = gameManager.PreviewLastStandLaunchVelocity(true, aimedVelocity);
+
+                Assert.AreEqual(aimedVelocity * 1.3f, activePreview,
+                    "An active player LAST STAND must preview the same 1.30x launch velocity that runtime applies.");
+                Assert.AreEqual(LastStand.Phase.Active, gameManager.playerLastStand,
+                    "Previewing a shot must not consume the one-shot LAST STAND before launch.");
+
+                gameManager.playerLastStand = LastStand.Phase.Locked;
+                Assert.AreEqual(aimedVelocity,
+                    gameManager.PreviewLastStandLaunchVelocity(true, aimedVelocity),
+                    "A locked LAST STAND must not alter the preview.");
+
+                gameManager.playerLastStand = LastStand.Phase.Consumed;
+                Assert.AreEqual(aimedVelocity,
+                    gameManager.PreviewLastStandLaunchVelocity(true, aimedVelocity),
+                    "A consumed LAST STAND must not continue altering later previews.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+
+        [Test]
+        public void GameManager_ActiveAiPreparationAndPreview_ReturnDesiredVelocityWithoutConsumingPhase()
+        {
+            var managerGo = new GameObject("LastStandInverseVelocityGameManager");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                Vector2 desiredFinalVelocity = new Vector2(-14.75f, 8.25f);
+                gameManager.aiLastStand = LastStand.Phase.Active;
+
+                Vector2 preparedVelocity =
+                    gameManager.PrepareLastStandLaunchVelocity(false, desiredFinalVelocity);
+                float multiplier = LastStand.SpeedMult(false);
+                Assert.AreEqual(desiredFinalVelocity.x / multiplier, preparedVelocity.x, 0.0001f,
+                    "Active AI preparation must remove the pending Last Stand speed multiplier.");
+                Assert.AreEqual(desiredFinalVelocity.y / multiplier, preparedVelocity.y, 0.0001f);
+
+                Vector2 previewedVelocity =
+                    gameManager.PreviewLastStandLaunchVelocity(false, preparedVelocity);
+                Assert.AreEqual(desiredFinalVelocity.x, previewedVelocity.x, 0.0001f);
+                Assert.AreEqual(desiredFinalVelocity.y, previewedVelocity.y, 0.0001f,
+                    "Preparing and previewing an active AI shot must compose to the intended final velocity.");
+                Assert.AreEqual(LastStand.Phase.Active, gameManager.aiLastStand,
+                    "Inverse preparation and preview are calculations only and must not consume the AI one-shot phase.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void GameManager_InactiveAiPreparation_ReturnsDesiredVelocityAndPreservesPhase()
+        {
+            var managerGo = new GameObject("InactiveLastStandPreparationGameManager");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                Vector2 desiredFinalVelocity = new Vector2(-12.5f, 6.75f);
+                var inactivePhases = new[]
+                {
+                    LastStand.Phase.Locked,
+                    LastStand.Phase.Armed,
+                    LastStand.Phase.Consumed
+                };
+
+                foreach (LastStand.Phase phase in inactivePhases)
+                {
+                    gameManager.aiLastStand = phase;
+
+                    Assert.AreEqual(
+                        desiredFinalVelocity,
+                        gameManager.PrepareLastStandLaunchVelocity(false, desiredFinalVelocity),
+                        $"AI preparation must be identity while Last Stand is {phase}.");
+                    Assert.AreEqual(phase, gameManager.aiLastStand,
+                        $"Preparing an inactive AI shot must preserve the {phase} phase.");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+        [Test]
+        public void SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim()
+        {
+            var managerGo = new GameObject("AiSolverGameManager");
+            var aiGo = new GameObject("AiSolver");
+            var launchPointGo = new GameObject("AiSolverLaunchPoint");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                gameManagerAwake.Invoke(gameManager, null);
+
+                Vector2 launchAnchor = new Vector2(12f, 2f);
+                Vector2 runtimeStart = launchAnchor + Vector2.up * UnitController.DefaultLaunchSpawnHeight;
+                Vector2 target = new Vector2(-8f, 2f);
+                const float mass = 0.35f;
+                const float linearDrag = 0.05f;
+                const float hardCeilingY = 20f;
+                const float windForce = 6f;
+                const float windRadius = 7f;
+                float fixedStep = Time.fixedDeltaTime;
+
+                launchPointGo.transform.position = launchAnchor;
+                var ai = aiGo.AddComponent<SimpleAI>();
+                ai.launchPoint = launchPointGo.transform;
+                ai.maxLaunchVelocity = 25.2f;
+                gameManager.currentWindForce = windForce;
+                gameManager.windEffectOrigin = runtimeStart;
+                gameManager.windEffectRadius = windRadius;
+
+                var calculateVelocity = typeof(SimpleAI).GetMethod(
+                    "CalculateLaunchVelocity",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(calculateVelocity);
+                Vector2 solvedVelocity = (Vector2)calculateVelocity.Invoke(
+                    ai,
+                    new object[] { target, mass, linearDrag, hardCeilingY });
+
+                float ClosestRuntimeDistance(Vector2 initialVelocity)
+                {
+                    Vector2 position = runtimeStart;
+                    Vector2 velocity = initialVelocity;
+                    float closestDistanceSquared = (target - runtimeStart).sqrMagnitude;
+                    int maxSteps = Mathf.CeilToInt(8f / fixedStep);
+                    for (int step = 0; step < maxSteps; step++)
+                    {
+                        if (position.y > hardCeilingY && velocity.y > 0f)
+                        {
+                            velocity = new Vector2(velocity.x, 0f);
+                        }
+
+                        Vector2 windAcceleration = (position - runtimeStart).sqrMagnitude <= windRadius * windRadius
+                            ? new Vector2(windForce / Mathf.Max(UnitController.MinRuntimeMass, mass), 0f)
+                            : Vector2.zero;
+                        velocity += (Physics2D.gravity + windAcceleration) * fixedStep;
+                        velocity /= 1f + linearDrag * fixedStep;
+                        Vector2 nextPosition = position + velocity * fixedStep;
+
+                        Vector2 segment = nextPosition - position;
+                        float segmentLengthSquared = segment.sqrMagnitude;
+                        float along = segmentLengthSquared > 0.000001f
+                            ? Mathf.Clamp01(Vector2.Dot(target - position, segment) / segmentLengthSquared)
+                            : 0f;
+                        Vector2 closest = position + segment * along;
+                        closestDistanceSquared = Mathf.Min(
+                            closestDistanceSquared,
+                            (target - closest).sqrMagnitude);
+                        position = nextPosition;
+                    }
+                    return Mathf.Sqrt(closestDistanceSquared);
+                }
+
+                Vector2 displacement = target - runtimeStart;
+                float angleRadians = 45f * Mathf.Deg2Rad;
+                float cos = Mathf.Cos(angleRadians);
+                float absX = Mathf.Abs(displacement.x);
+                float denominator =
+                    2f * cos * cos * (absX * Mathf.Tan(angleRadians) - displacement.y);
+                float legacySpeed = Mathf.Clamp(
+                    Mathf.Sqrt(Mathf.Abs(Physics2D.gravity.y) * absX * absX / denominator),
+                    5f,
+                    ai.maxLaunchVelocity);
+                Vector2 legacyVelocity = new Vector2(
+                    Mathf.Sign(displacement.x) * legacySpeed * cos,
+                    legacySpeed * Mathf.Sin(angleRadians));
+
+                float solvedDistance = ClosestRuntimeDistance(solvedVelocity);
+                float legacyDistance = ClosestRuntimeDistance(legacyVelocity);
+                TestContext.WriteLine(
+                    $"Solved closest distance {solvedDistance:F4}; legacy closest distance {legacyDistance:F4}");
+
+                Assert.Less(solvedDistance, 0.5f,
+                    "The bounded solver must place the runtime-equivalent drag-and-localized-wind arc honestly close to its target.");
+                Assert.Greater(legacyDistance - solvedDistance, 1f,
+                    "The drag-aware localized-wind solve must materially improve on the old no-drag analytic shot with stale wind origin.");
+                Assert.Less(solvedDistance, legacyDistance * 0.35f,
+                    "The refined solution must reduce the legacy closest-approach error by at least 65%.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(aiGo);
+                Object.DestroyImmediate(launchPointGo);
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void SimpleAI_Solver_DegenerateTargets_ReturnFiniteBoundedVelocity()
+        {
+            var aiGo = new GameObject("DegenerateAiSolver");
+            var launchPointGo = new GameObject("DegenerateAiLaunchPoint");
+            try
+            {
+                Vector2 start = new Vector2(3f, 4f);
+                launchPointGo.transform.position = start;
+                var ai = aiGo.AddComponent<SimpleAI>();
+                ai.launchPoint = launchPointGo.transform;
+                ai.maxLaunchVelocity = 25.2f;
+
+                var calculateVelocity = typeof(SimpleAI).GetMethod(
+                    "CalculateLaunchVelocity",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(calculateVelocity);
+
+                foreach (Vector2 target in new[] { start, start + new Vector2(0.01f, 8f) })
+                {
+                    Vector2 velocity = (Vector2)calculateVelocity.Invoke(
+                        ai,
+                        new object[] { target, 0.35f, 0.05f, 20f });
+                    Assert.IsFalse(float.IsNaN(velocity.x) || float.IsInfinity(velocity.x));
+                    Assert.IsFalse(float.IsNaN(velocity.y) || float.IsInfinity(velocity.y),
+                        $"The solver must return finite components for degenerate target {target}.");
+                    Assert.GreaterOrEqual(velocity.magnitude, 5f - 0.0001f);
+                    Assert.LessOrEqual(velocity.magnitude, ai.maxLaunchVelocity + 0.0001f,
+                        $"The solver must keep degenerate target {target} inside its legal speed bounds.");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(aiGo);
+                Object.DestroyImmediate(launchPointGo);
+            }
+        }
+
+        [Test]
+        public void UnitController_FatalDamage_CreditsOnlyOpposingKiller_NotSelfOrUnownedBarrelDeath()
+        {
+            var managerGo = new GameObject("FatalDamageCreditGameManager");
+            var enemyVictimGo = new GameObject("EnemyVictim");
+            var selfOwnedBarrelGo = new GameObject("SelfOwnedBarrel");
+            var unownedBarrelGo = new GameObject("UnownedBarrel");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                gameManagerAwake.Invoke(gameManager, null);
+                var deploymentComponent = managerGo.GetComponent<DeploymentController>();
+                Assert.IsNotNull(deploymentComponent);
+                var deploymentAwake = typeof(DeploymentController).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(deploymentAwake);
+                deploymentAwake.Invoke(deploymentComponent, null);
+                var deployment = DeploymentController.Instance;
+                deployment.ResetEconomy();
+
+                float playerBefore = deployment.PlayerSupply;
+                float enemyBefore = deployment.EnemySupply;
+                enemyVictimGo.transform.position = new Vector3(1000f, 1000f, 0f);
+                var enemyVictim = enemyVictimGo.AddComponent<UnitController>();
+                enemyVictim.isPlayerUnit = false;
+                enemyVictim.maxHP = 1f;
+                enemyVictim.currentHP = 1f;
+
+                enemyVictim.TakeDamage(1f, damageFromPlayer: true);
+
+                Assert.AreEqual(playerBefore + SupplyRules.KillBonus, deployment.PlayerSupply, 0.0001f,
+                    "Fatal player-owned damage to an enemy unit must credit the player's supply.");
+                Assert.AreEqual(enemyBefore, deployment.EnemySupply, 0.0001f);
+
+                selfOwnedBarrelGo.transform.position = new Vector3(2000f, 2000f, 0f);
+                selfOwnedBarrelGo.AddComponent<ExplosiveGimmick>();
+                var selfOwnedBarrel = selfOwnedBarrelGo.AddComponent<UnitController>();
+                selfOwnedBarrel.unitType = UnitType.Barrel;
+                selfOwnedBarrel.isPlayerUnit = true;
+                selfOwnedBarrel.maxHP = 1f;
+                selfOwnedBarrel.currentHP = 1f;
+                float enemyBeforeSelfDeath = deployment.EnemySupply;
+
+                selfOwnedBarrel.TakeDamage(1f, damageFromPlayer: true);
+
+                Assert.AreEqual(enemyBeforeSelfDeath, deployment.EnemySupply, 0.0001f,
+                    "A player barrel's self-owned detonation must not be misreported as an enemy kill.");
+
+                unownedBarrelGo.transform.position = new Vector3(3000f, 3000f, 0f);
+                unownedBarrelGo.AddComponent<ExplosiveGimmick>();
+                var unownedBarrel = unownedBarrelGo.AddComponent<UnitController>();
+                unownedBarrel.unitType = UnitType.Barrel;
+                unownedBarrel.isPlayerUnit = true;
+                unownedBarrel.maxHP = 1f;
+                unownedBarrel.currentHP = 1f;
+                float enemyBeforeUnownedDeath = deployment.EnemySupply;
+
+                unownedBarrel.TakeDamage(1f);
+
+                Assert.AreEqual(enemyBeforeUnownedDeath, deployment.EnemySupply, 0.0001f,
+                    "A natural or otherwise unattributed barrel death must not manufacture an opposing kill bonus.");
+            }
+            finally
+            {
+                if (enemyVictimGo != null) Object.DestroyImmediate(enemyVictimGo);
+                if (selfOwnedBarrelGo != null) Object.DestroyImmediate(selfOwnedBarrelGo);
+                if (unownedBarrelGo != null) Object.DestroyImmediate(unownedBarrelGo);
+                Object.DestroyImmediate(managerGo);
+            }
+        }
+
+        [Test]
+        public void ExplosiveGimmick_DamageOwnerPropagatesThroughChainIntoBlockScore()
+        {
+            var managerGo = new GameObject("ExplosiveOwnerGameManager");
+            var castleGo = new GameObject("ExplosiveOwnerEnemyCastle");
+            var blockGo = new GameObject("ExplosiveOwnerScoredBlock");
+            var rootGo = new GameObject("ExplosiveOwnerRoot");
+            var chainedGo = new GameObject("ExplosiveOwnerChain");
+            try
+            {
+                var gameManager = managerGo.AddComponent<GameManager>();
+                var gameManagerAwake = typeof(GameManager).GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(gameManagerAwake);
+                gameManagerAwake.Invoke(gameManager, null);
+                var playerScoreField = typeof(GameManager).GetField(
+                    "playerScore",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var enemyScoreField = typeof(GameManager).GetField(
+                    "enemyScore",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(playerScoreField);
+                Assert.IsNotNull(enemyScoreField);
+
+                var enemyCastle = castleGo.AddComponent<CastleController>();
+                enemyCastle.isPlayerCastle = false;
+                blockGo.transform.SetParent(castleGo.transform);
+                blockGo.transform.position = new Vector3(2.5f, 0f, 0f);
+                var block = blockGo.AddComponent<DestructibleBlock>();
+                block.maxHP = 1f;
+                block.currentHP = 1f;
+                block.scoreValue = 23;
+
+                rootGo.transform.position = Vector3.zero;
+                var root = rootGo.AddComponent<ExplosiveGimmick>();
+                root.explosionRadius = 1.2f;
+                root.explosionDamage = 2f;
+
+                chainedGo.transform.position = new Vector3(1f, 0f, 0f);
+                var chained = chainedGo.AddComponent<ExplosiveGimmick>();
+                chained.explosionRadius = 2f;
+                chained.explosionDamage = 2f;
+
+                Assert.Greater(Vector2.Distance(rootGo.transform.position, blockGo.transform.position),
+                    root.explosionRadius,
+                    "Precondition: only the chained explosion can reach the scored block.");
+                root.SetDamageOwner(true);
+
+                root.Explode();
+
+                Assert.IsTrue(blockGo == null,
+                    "The owner-attributed chained explosion must reach and destroy the downstream block.");
+                Assert.AreEqual(223, (int)playerScoreField.GetValue(gameManager),
+                    "The player owner must carry through both explosions (100 each) and the downstream block score (23).");
+                Assert.AreEqual(0, (int)enemyScoreField.GetValue(gameManager));
+            }
+            finally
+            {
+                if (blockGo != null) Object.DestroyImmediate(blockGo);
+                Object.DestroyImmediate(chainedGo);
+                Object.DestroyImmediate(rootGo);
+                Object.DestroyImmediate(castleGo);
+                Object.DestroyImmediate(managerGo);
+            }
         }
     }
 }
