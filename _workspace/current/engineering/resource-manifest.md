@@ -4,10 +4,10 @@
 
 ## Carried in (existing, audited by usage in build) [OBSERVED]
 
-- `Assets/Sprites/` 픽셀아트 유닛/블록/배경 세트 (3 유닛 × 팀 틴트)
-- `Assets/Prefabs/` 유닛/블록/기믹 프리팹 (SpikeTrap, EruptionVent 등)
+- `Assets/Sprites/` 픽셀아트 Knight/Archer 본체, 블록, 배경 세트 (청/홍 팀 틴트)
+- `Assets/Prefabs/` Knight/Archer 본체 + Cannon/Barrel 전용 실루엣 + SpikeTrap/EruptionVent 기믹
 - `Assets/Resources/GeneratedUnitFrames/` 런타임 애니메이션 프레임
-- TextMesh Pro + KoreanFontSupport 동적 폰트
+- TextMesh Pro + bundled Noto Sans KR static SDF atlas (`Assets/Resources/Fonts/`) for WebGL-safe Korean glyph coverage
 
 ## To produce (owner per CLAUDE.md §3)
 
@@ -15,10 +15,26 @@
 |---|---|---|---|
 | 진영 배너/키아트 (청·홍) | Codex CLI | design/concept/ → Assets/Sprites/Factions/ | Stage 3 |
 | war-bar HUD 아트 | Codex CLI | design/concept/ → Assets/Sprites/UI/ | Stage 2–3 |
-| BGM 전장 루프 + 스팅어 2종 | Gemini (playwriter) | Assets/Resources/Audio/BGM/ | Stage 3 |
-| SFX 발사/명중/붕괴 세트 | rfxgen | Assets/Resources/Audio/SFX/ | Stage 3 |
+| 인트로/메뉴 프리뷰 영상 | Higgsfield (**차단됨**) | pages `games/castle-war/` | 보류 |
+
+> 영상 보류 사유 [OBSERVED 2026-08-09]: Higgsfield 영상 잡은 유료 플랜
+> 전용이다(`seedance_2_0_mini` → `job_minimum_basic_plan_required`), 그리고
+> 무료 플랜 잔액(23.67)이 가장 싼 영상 잡(`gemini_omni` 24)에 못 미친다.
+> 플랜 업그레이드 전까지 영상은 생성 불가 — 대체 수단으로 넘기지 않는다.
 
 모든 생성 리소스는 `.provenance.json` 동반, 감사 전 `Assets/` 진입 금지.
+
+
+## Produced in Stage 1 release-art pass
+
+| Resource | Owner tool | Runtime target | Evidence |
+|---|---|---|---|
+| Social siege preview | god-tibo-imagen + ImageMagick audit/crop | `Assets/WebGLTemplates/CastleWar/social-preview.png` | `.provenance.json` companion; 1200×630; banner glyphs replaced with neutral castle crests |
+| PWA/app icon family | god-tibo-imagen + ImageMagick point-resize | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` | Per-file `.provenance.json`; square audited icon source retained under `design/concept/release/` |
+| 32 px favicon | ImageMagick purpose-drawn pixel primitives | `Assets/WebGLTemplates/CastleWar/favicon-32.png` | `.provenance.json`; authored directly at 32×32 |
+| 발사/명중/콤보 SFX | rfxgen | `Assets/Resources/Audio/SFX/{launch,impact,combo}.wav` | Imported with Unity `.meta`; focused test confirms short mono 44.1 kHz clips |
+| BGM 전장 루프 + 승리/패배 스팅어 | Higgsfield CLI `sonilo_music` + ffmpeg(libvorbis) | `Assets/Resources/Audio/BGM/{battle-loop,victory,defeat}.ogg` | 파일별 `.provenance.json`(프롬프트/모델/SHA-256); ffprobe 측정 60.02s / 10.03s / 10.03s; m4a→OGG 변환 이유는 Unity가 m4a를 소스 포맷으로 받지 않기 때문 |
+| Castle facade skin family (Face/Crown/Edge/Base × intact/cracked/heavy) | OpenAI image generation + ImageMagick key/crop | `Assets/Resources/CastleSkin/{role}_{s0|s1|s2}.png` | 12 concept-source `.provenance.json` companions with SHA-256; runtime resolver and facade-neutrality EditMode checks; final WebGL gameplay capture |
 
 ## Build artifacts (gitignored here, deployed to pages repo)
 
