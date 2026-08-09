@@ -1,0 +1,6 @@
+  + gen Bomber/Attack/attack_000.png
+  + gen Bomber/Attack/attack_001.png
+  + gen Bomber/Launch/launch_000.png
+  + gen Bomber/Launch/launch_001.png
+
+DONE total=4 generated=4 skipped=0 failed=0

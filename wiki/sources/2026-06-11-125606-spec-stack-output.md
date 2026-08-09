@@ -1,0 +1,48 @@
+---
+type: "source-summary"
+source_type: "assistant-output"
+captured_at: "2026-06-11T12:56:06.039314+00:00"
+raw_path: "raw/sources/outputs/2026/06/11/125606-52dd9a23-75d-spec-stack.md"
+session_id: "52dd9a23-75d2-4469-ba27-aeb83df8"
+rtk_method: "rtk"
+rtk_original_chars: 1970
+rtk_compressed_chars: 1970
+rtk_saved_pct: 0.0
+---
+
+# `spec-stack` 스킬 생성과 문서 동기화가 모두 완료되고 검증되었습니다.
+
+- Raw output: [[raw/sources/outputs/2026/06/11/125606-52dd9a23-75d-spec-stack]]
+- Filed report: [[wiki/reports/2026-06-11-125606-spec-stack-answer]]
+- rtk compression: rtk (1970→1970 chars, -0.0%)
+
+## Compressed Output (rtk)
+
+```text
+`spec-stack` 스킬 생성과 문서 동기화가 모두 완료되고 검증되었습니다.
+
+## 생성된 스킬: `.agent-skills/spec-stack/`
+
+| 파일 | 내용 |
+|------|------|
+| `SKILL.md` (8.9K) | 라우팅-퍼스트 조합 래퍼 — 3-레이어 표(spec-kit=명세 / ooo=동결+루프 / cli-anything=도구), 3패턴(full-stack / loop-only / docs-only), Step 0~6 워크플로, Routing Brief 출력 포맷, 안티패턴 포함 베스트 프랙티스. frontmatter 트리거: `spec-stack`, `write freeze run`, `speckit + ooo` 등 |
+| `references/commands.md` | 3개 도구 커맨드 크로스워크 + **핸드오프 맵**(spec.md → seed.yaml → harness `--json` 증거, 단방향 흐름) + 안티패턴 4종 |
+| `scripts/install.sh` (실행권한 +x, `bash -n` 통과) | uv → pipx → pip 순 감지로 `specify-cli` + `cli-anything-hub` 설치, PEP 668-safe. ooo는 `SPEC_STACK_OOO=1`로 옵트인(Claude Code는 플러그인 경로 안내) |
+
+핵심 설계는 이전 턴의 조합 가이드 그대로입니다: **"spec-kit writes, ooo freezes and loops, cli-anything is the hands"** — 단일 규칙과 이중 SSOT 방지, registry-first, seed 없는 ralph 금지를 스킬 본문에 명문화했습니다.
+
+## 문서 동기화 (spec-kit/cli-anything 커밋 컨벤션 동일 적용)
+
+- **README.md / README.ko.md**: 배지·헤더·본문 카운트 135 → 136, What's New v2026-06-11 테이블에 spec-stack 행 추가, Core Orchestration (14) → (15) + spec-kit 다음에 키워드 행 추가
+- **setup-all-skills-prompt.md**: Skill Inventory (135 → 136), Core Orchestration 인벤토리, Core Skill Keyword Reference 행, Core Skill Check 루프에 `spec-stack` 추가
+- **skills-lock.json**: ooo↔survey 사이에 알파벳순 삽입, `extensions`로 spec-kit(required)·ooo(required)·cli-anything(recommended)·plannotator(optional) 의존 관계 명시. JSON 유효성 검증 통과
+
+검증 완료: SKILL.md frontmatter YAML 파싱 OK, lock JSON 파싱 OK, 모든 카운트/헤더 grep 확인, installer 문법 체크 통과.
+
+## 참고 사항 두 가지
+
+1. **`fix_frontmatter.py`와 `flatten_skills.py`가 제 작업과 무관하게 modified 상태**입니다 (`list_to_csv` → `unquote`/`yaml_list_to_delimited` 리팩터). 다른 세션의 미커밋 작업으로 보이니 커밋 시 분리하시는 게 좋겠습니다.
+2. `npx skills add …oh-my-skills --skill spec-stack` 설치는 **GitHub에 push된 후**에 동작합니다. 로컬 즉시 테스트는 `.agent-skills/spec-stack/`을 `~/.claude/skills/spec-stack/`으로 복사하면 됩니다.
+
+원하시면 spec-stack 변경분만 골라 컨벤션에 맞춘 커밋(`feat(spec-stack): add spec-kit × ooo × cli-anything composition skill (plugin-installable)`)을 만들어 드리겠습니다.
+```

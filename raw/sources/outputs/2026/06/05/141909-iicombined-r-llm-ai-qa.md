@@ -1,0 +1,14 @@
+---
+type: "assistant-output"
+session_id: "iicombined-resume-job"
+captured_at: "2026-06-05T14:19:09.578903+00:00"
+report: "[[wiki/reports/2026-06-05-141909-llm-ai-qa-answer]]"
+---
+
+# 핵심역량에 LLM 기반 AI 에이전트 내러티브 콘텐츠 자동화 및 게임 자동 QA 관련 내용을 추가하여 이력서_정장…
+
+## Output
+
+```text
+핵심역량에 LLM 기반 AI 에이전트 내러티브 콘텐츠 자동화 및 게임 자동 QA 관련 내용을 추가하여 이력서_정장영_아이아이컴바인드.docx 파일을 성공적으로 재생성 및 업데이트 완료했습니다.
+```

@@ -1,0 +1,27 @@
+---
+title: "terrain-fx 계약 정렬이 완료됐습니다:"
+created_at: "2026-08-07T15:00:18.979851+00:00"
+section: "reports"
+status: "captured"
+session_id: "f40d2c84-4012-4f97-bf8c-1ec02651"
+raw_output: "[[raw/sources/outputs/2026/08/07/150018-f40d2c84-401-terrain-fx]]"
+source_summary: "[[wiki/sources/2026-08-07-150018-terrain-fx-output]]"
+---
+
+# terrain-fx 계약 정렬이 완료됐습니다:
+
+## Answer Output (rtk-compressed)
+
+terrain-fx 계약 정렬이 완료됐습니다:
+
+- **경로**: `Assets/Resources/Terrain/terrain-fx-{lava,ice,shift}-sheet.png` 3종 (구 위치 삭제·provenance 기록)
+- **그레이스케일**: PNG mode L 순수 패턴 마스크 — max(R,G,B) 채널 변환(루미넌스 대신 택한 근거 타당: 시안 발광 보존), lava 균열 발광 / ice 대각 스윕 결정 / shift 수직 드리프트 밴드
+- **그리드**: 4×4·row-major·frame0 좌상단·완전 루프 — vfx-lane `TerrainFlipbook` 소비 스펙과 정확히 일치
+- wrapMode Clamp의 `.meta` 반영만 통합 단계 follow-up (Unity 미실행 제약)
+
+잔여는 **잿불휴식 배경 1건** — asset-lane이 B항(terrain-fx)만 처리하고 A항(ui-lane 계약: `Icons/ui-ember-rest-bg.png` 1024×694 + Sprite `.meta`)이 남아 재지시했습니다. 이것이 끝나면 자산 레인 완료이고, 곧바로 통합 단계(게이트 연결 → 코드 배선 5건 → 폰트 재생성 → EditMode 통합 실행)로 들어갑니다.
+
+## Evidence and Citations
+
+- [[wiki/sources/2026-08-07-150018-terrain-fx-output]]
+- [[raw/sources/outputs/2026/08/07/150018-f40d2c84-401-terrain-fx]]

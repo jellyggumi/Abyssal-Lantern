@@ -1,27 +1,3 @@
 advisors: 
   - name: default
     model: anthropic/claude-fable-5:xhigh
-    tools: 
-      - read
-      - bash
-      - edit
-      - ast_grep
-      - ast_edit
-      - ask
-      - eval
-      - github
-      - glob
-      - grep
-      - lsp
-      - inspect_image
-      - vision_verify
-      - browser
-      - checkpoint
-      - rewind
-      - task
-      - job
-      - irc
-      - subagent
-      - todo
-      - web_search
-      - write

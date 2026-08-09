@@ -1,0 +1,19 @@
+{
+    "name": "CastleBusters",
+    "rootNamespace": "CastleBusters",
+  "references": [
+    "Unity.TextMeshPro",
+    "UnityEngine.UI",
+    "Unity.Purchasing",
+    "Unity.Purchasing.Stores"
+  ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

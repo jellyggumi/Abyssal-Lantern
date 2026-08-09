@@ -1,0 +1,30 @@
+---
+title: "설치와 후속 정리까지 완료했습니다. 작업 트리가 완전히 깨끗해졌고 origin/main과 동기화 상태입니다."
+created_at: "2026-06-11T09:54:33.650763+00:00"
+section: "reports"
+status: "captured"
+session_id: "b133d257-c741-478d-b124-4905d8bb"
+raw_output: "[[raw/sources/outputs/2026/06/11/095433-b133d257-c74-origin-main]]"
+source_summary: "[[wiki/sources/2026-06-11-095433-origin-main-output]]"
+---
+
+# 설치와 후속 정리까지 완료했습니다. 작업 트리가 완전히 깨끗해졌고 origin/main과 동기화 상태입니다.
+
+## Answer Output (rtk-compressed)
+
+설치와 후속 정리까지 완료했습니다. 작업 트리가 완전히 깨끗해졌고 origin/main과 동기화 상태입니다.
+
+## 결과 요약
+
+**1. 설치 성공** — `skills add`가 프로젝트 설치 모드로 동작해 저장소 내 감지된 30개 에이전트 디렉터리(`.claude/`, `.agents/`, `.codex/`, `.windsurf/`, `skills/` 등)에 cli-anything 스킬을 복사했습니다. `.claude/skills/cli-anything`과 `.agents/skills/cli-anything`의 3개 파일(SKILL.md, references/commands.md, scripts/install.sh)이 `.agent-skills/` 원본과 **완전 일치**함을 diff로 확인했습니다.
+
+**2. 부수 효과 2가지를 점검 후 정리** (커밋 `847edd8`로 푸시):
+- **`skills-lock.json` 재작성** — 설치 CLI가 lock 파일을 크게 고쳐 써서(-200/+120줄) 데이터 손실 여부를 검증했습니다. 결과: 기존 8개 항목은 필드까지 그대로 보존(omc 항목 전후 비교로 확인), 키 알파벳 정렬 + `cli-anything` 항목 추가뿐이었습니다. 문서화된 `skills restore` 흐름에서 cli-anything이 복원 대상이 되도록 커밋했습니다.
+- **`.gitignore` 확장** — 설치가 만든 28개 신규 에이전트 디렉터리(`.adal/`, `.augment/`, `.roo/`, `.kiro/` 등)와 루트 `skills/`, `.serena/` MCP 캐시를 기존 "live session state 커밋 금지" 블록과 같은 방식으로 ignore 처리했습니다. 원본은 계속 `.agent-skills/`만 추적합니다.
+
+cli-anything 스킬이 이제 이 프로젝트의 모든 에이전트에서 사용 가능합니다. 실제 사용은 `cli-hub` 설치(`bash .claude/skills/cli-anything/scripts/install.sh`)부터 시작하면 됩니다 — opik 때처럼 인스톨러 실행 검증까지 원하시면 말씀해주세요.
+
+## Evidence and Citations
+
+- [[wiki/sources/2026-06-11-095433-origin-main-output]]
+- [[raw/sources/outputs/2026/06/11/095433-b133d257-c74-origin-main]]

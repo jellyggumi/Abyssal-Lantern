@@ -1,366 +1,1042 @@
 # Log
 
-Append-only timeline of meaningful wiki operations.
+## [2026-07-21 12:30:48] query | # Fetch the delegation guide and hand it to your agent
+- Raw capture: [[raw/sources/prompts/2026/07/21/123048-f0917766-2cd-fetch-the-delegation-guide-and-hand-it-to-your-a]]
+- Source note: [[wiki/sources/2026-07-21-123048-fetch-the-delegation-guide-and-hand-it-to-your-a]]
+- Query note: [[wiki/queries/2026-07-21-123048-fetch-the-delegation-guide-and-hand-it-to-your-a]]
 
-Use headings in this format:
+## 2026-07-21 12:34:36 UTC — I've now seen the real script (1968 lines). Confirmation of wha…
+- Raw output: [[raw/sources/outputs/2026/07/21/123436-5fb36489-39c-i-ve-now-seen-the-real-script-1968-lines-confirm]]
+- Source note: [[wiki/sources/2026-07-21-123436-i-ve-now-seen-the-real-script-1968-lines-confirm-output]]
+- Report note: [[wiki/reports/2026-07-21-123436-i-ve-now-seen-the-real-script-1968-lines-confirm-answer]]
+- rtk compression: rtk (2293→2293 chars, -0.0%)
 
-```md
-## [YYYY-MM-DD] ingest | Source title
-## [YYYY-MM-DD] query  | Question title
-## [YYYY-MM-DD] lint   | Pass summary
-```
+## [2026-07-21 12:36:12] query | 어떻게 동작하는 흐름인지 설명해줘
+- Raw capture: [[raw/sources/prompts/2026/07/21/123612-5fb36489-39c-prompt]]
+- Source note: [[wiki/sources/2026-07-21-123612-prompt]]
+- Query note: [[wiki/queries/2026-07-21-123612-prompt]]
 
-Each entry should list the files touched, the reason for the change, and any follow-up work.
+## 2026-07-21 12:37:12 UTC — 이 문서는 두 개의 서로 다른 "흐름"을 담고 있습니다 — ① 설치 스크립트 자체가 실행되는 순서, ② 설치가 끝…
+- Raw output: [[raw/sources/outputs/2026/07/21/123712-5fb36489-39c-assistant-output]]
+- Source note: [[wiki/sources/2026-07-21-123712-assistant-output-output]]
+- Report note: [[wiki/reports/2026-07-21-123712-assistant-output-answer]]
+- rtk compression: rtk (2646→2646 chars, -0.0%)
 
-## [2026-07-29] report | Natural rest-pose motion library
+## [2026-07-21 12:39:21] query | semble 은 언제동작해?
+- Raw capture: [[raw/sources/prompts/2026/07/21/123921-5fb36489-39c-semble]]
+- Source note: [[wiki/sources/2026-07-21-123921-semble]]
+- Query note: [[wiki/queries/2026-07-21-123921-semble]]
 
-- Added `wiki/reports/2026-07-29-natural-rest-pose-motion-library.md` to record the 11-asset natural bind-pose cutover, its evidence, and its focused regression gates.
-- Updated `index.md` so the report is discoverable from the vault entry point.
+## 2026-07-21 12:40:11 UTC — semble이 "언제" 발동하는지는 자동 훅이 아니라 **역할 기반 규칙**으로 정해져 있어요.
+- Raw output: [[raw/sources/outputs/2026/07/21/124010-5fb36489-39c-semble]]
+- Source note: [[wiki/sources/2026-07-21-124010-semble-output]]
+- Report note: [[wiki/reports/2026-07-21-124010-semble-answer]]
+- rtk compression: rtk (1187→1187 chars, -0.0%)
 
-## [2026-07-30] ingest | Motion generation + encounter pattern research
+## [2026-07-25 13:05:56] query | Run exactly this bash command: echo PROBE_OK_12345. Then reply with only the li…
+- Raw capture: [[raw/sources/prompts/2026/07/25/130556-db82163a-6a7-run-exactly-this-bash-command-echo-probe-ok-1234]]
+- Source note: [[wiki/sources/2026-07-25-130556-run-exactly-this-bash-command-echo-probe-ok-1234]]
+- Query note: [[wiki/queries/2026-07-25-130556-run-exactly-this-bash-command-echo-probe-ok-1234]]
 
-- Added `raw/sources/2026-07-30-motion-generation-and-encounter-pattern-research.md` (immutable
-  capture of MDM arXiv:2209.14916, T2M-GPT arXiv:2301.06052, the three.js animation-system docs and
-  the Game Developer behaviour-tree article).
-- Added `wiki/sources/2026-07-30-motion-generation-and-encounter-pattern-research.md` summarising
-  what each source settles and what it does not.
-- Added `wiki/concepts/motion-generation-for-runtime-rigs.md` (method comparison, the Blender
-  retarget pipeline we run, and the concretised motion prompt templates) and
-  `wiki/concepts/attack-pattern-presets-and-ai-response.md` (three-phase step structure, authored
-  presets, and the four AI response patterns).
-- Updated `index.md` so both concepts and the source note are reachable from the vault entry point.
-- Follow-up: the generative path (S1/S2) has not been executed; the prompt templates exist for the
-  case where a beat is missing from `assets/motion/bench`, and any output must clear the
-  provenance/audit gate in `CLAUDE.md` §3 before it can be referenced at runtime.
+## 2026-07-25 13:06:01 UTC — PROBE_OK_12345
+- Raw output: [[raw/sources/outputs/2026/07/25/130601-db82163a-6a7-probe-ok-12345]]
+- Source note: [[wiki/sources/2026-07-25-130601-probe-ok-12345-output]]
+- Report note: [[wiki/reports/2026-07-25-130601-probe-ok-12345-answer]]
+- rtk compression: rtk (14→14 chars, -0.0%)
 
-## [2026-07-31] report | Stage 1 cinder-span ash gatehouse (phase 1)
+## [2026-07-25 13:06:48] query | List the exact names of every tool you have available. Output only a comma-sepa…
+- Raw capture: [[raw/sources/prompts/2026/07/25/130648-8fce28b1-708-list-the-exact-names-of-every-tool-you-have-avai]]
+- Source note: [[wiki/sources/2026-07-25-130648-list-the-exact-names-of-every-tool-you-have-avai]]
+- Query note: [[wiki/queries/2026-07-25-130648-list-the-exact-names-of-every-tool-you-have-avai]]
 
-- Ran `prompts/approved/00` → `03` → `02` → `01` → `06` for `cinder-span` on top of the cycle-10
-  layout pass (`origin/main` @ `012ea15d`), with every bound coordinate frozen.
-- Collision detour: an earlier draft of this work re-placed three props into a full doorway lattice
-  before cycle 10 landed the same idea by promoting frozen props in place. That draft was dropped
-  rather than merged over another session's work; the shipped change is additive to it.
-- `stage-world-catalog.js`: obstacles 6 → 8. Two background props (`south-forge-teeth-prop`,
-  `north-ash-talon-prop`) become the ash gatehouse pillars at (7800, 3000) r840 and (7600, 8000)
-  r740, the one doorway the promoted debris does not provide (gap 3424). Prop count stays 12 and the
-  pinned pack-node list is unchanged. One landmark added.
-- `defense-catalog.js`: `mapVariant` v1 → v2 listing the `ash-gatehouse` module. No balance value
-  changed — the measurement showed identical bot pacing, so nothing motivated a retune.
-- Added `scripts/search-stage-dungeon-layout.mjs` (seeded module search, flood fill, five clearance
-  filters; 11/12 seeds survived, seed 42 curated) and `scripts/measure-stage-pacing.mjs`.
-- Evidence: focused suites 101/101; full `node --test 'tests/**/*.test.mjs'` 607 tests, 577 pass,
-  5 fail — all five reproduced red on a pristine `origin/main` worktree, so this branch adds no
-  failure. Browser proof green on all three stages, 12 props each, zero console errors.
-- Digest gates repinned for cinder-span only; `abyss-chancel`, `echo-throne` and all three
-  rng-at-3000 fixtures re-measured unchanged.
-## [2026-07-31] report | Stage 2 abyss-chancel composition + a validator blind spot
+## 2026-07-25 13:06:52 UTC — Read, Edit, Bash, Agent, ReportFindings, ScheduleWakeup, Skill,…
+- Raw output: [[raw/sources/outputs/2026/07/25/130652-8fce28b1-708-read-edit-bash-agent-reportfindings-schedulewake]]
+- Source note: [[wiki/sources/2026-07-25-130652-read-edit-bash-agent-reportfindings-schedulewake-output]]
+- Report note: [[wiki/reports/2026-07-25-130652-read-edit-bash-agent-reportfindings-schedulewake-answer]]
+- rtk compression: rtk (91→91 chars, -0.0%)
 
-- Executed the authored chancel composition (`_workspace/current/design/stage-dungeon-composition-spec.md`
-  §2.2/§3.3/§5.2/§6) as the atomic unit the cycle-10 retrospective specified: props, landmarks,
-  anchors, obstacles and routes in one commit. 13 props (7 obstacles), 6 landmarks, 4 motivated
-  lights, 4 fog breaks, critical route re-threaded through both objective points, detour moved to
-  the northern mirror aisle. Bound coordinates untouched.
-- Found and fixed a defect the spec would have shipped: two obstacles sat on
-  `STAGE_ENCOUNTER_ROUTES` spawn approaches (`narthex-debris` −453 over `chancel-south-entry`,
-  `nave-seal` −54 over `chancel-nave-north`). `validateProfile` never checks those paths, so the
-  module imported cleanly and every suite stayed green while a measured run collapsed from 81 spawns
-  / 7 cleared waves to 27 / 1. After the minimal correction: 83 spawns, 10 waves, boss reached.
-- Durable fix: `scripts/search-stage-dungeon-layout.mjs` gained the spawn-approach clearance filter
-  and a `--verify` mode that runs the whole filter set against an authored profile. Recorded in
-  `prompts/approved/03-procedural-layout.md` v2 and in the concept page.
-- The verifier then found two more overlaps on `echo-throne` (`fractured-dais` −19,
-  `gallery-debris` −75); both corrected, with measured runs unchanged (60 spawns, 9 waves, boss on
-  both builds).
-- Pacing: chancel now completes on every measured seed (199-204 s) where `origin/main` never
-  completed (bot capped at 325 s in gate-defense). Doctrine window is 180-360 s.
-- Evidence: focused suites 64/64 plus gate checks 11/11; full `node --test 'tests/**/*.test.mjs'`
-  607 tests, 577 pass, 5 fail — the same five pre-existing failures verified red on a pristine
-  `origin/main` worktree. Browser proof green on all three stages (chancel now 13 props).
-- Digest gates needed no repin: the pinned `abyss-chancel` and `echo-throne` windows re-measured
-  byte-identical, consistent with the cycle-10 finding that those windows never reach the changed
-  circles.
+## [2026-07-25 13:14:50] query | Use the Skill tool to load the skill named "game-studio-harness". Then reply wi…
+- Raw capture: [[raw/sources/prompts/2026/07/25/131450-3b829494-199-use-the-skill-tool-to-load-the-skill-named-game]]
+- Source note: [[wiki/sources/2026-07-25-131450-use-the-skill-tool-to-load-the-skill-named-game]]
+- Query note: [[wiki/queries/2026-07-25-131450-use-the-skill-tool-to-load-the-skill-named-game]]
 
-## [2026-07-31] report | Stage 3 echo-throne composition — the spec's last stage lands
+## 2026-07-25 13:15:18 UTC — It looks like both my Bash and Read attempts to inspect the ski…
+- Raw output: [[raw/sources/outputs/2026/07/25/131518-3b829494-199-it-looks-like-both-my-bash-and-read-attempts-to]]
+- Source note: [[wiki/sources/2026-07-25-131518-it-looks-like-both-my-bash-and-read-attempts-to-output]]
+- Report note: [[wiki/reports/2026-07-25-131518-it-looks-like-both-my-bash-and-read-attempts-to-answer]]
+- rtk compression: rtk (537→537 chars, -0.0%)
 
-- Executed the authored throne composition (`stage-dungeon-composition-spec.md` §2.3/§3.4/§5.3/§5.4)
-  as one atomic change: 13 props (7 obstacles), 6 landmarks, 4 motivated lights, 5 fog breaks, and
-  both routes re-authored. Bound coordinates untouched.
-- Critical route now runs the mirror axis with both intermediate waypoints on the encounter
-  objective points; the detour enters the north gallery, cuts the aisle at (10100, 6000) and exits
-  south, so the optional path physically performs the stage's mirror.
-- `fractured-dais-prop` moves to (19200, 7600) and shrinks r900 -> r700. The cycle-10 retrospective
-  flagged this as load-bearing: keeping r900 there fails the critical route by -700. At r700 it
-  clears by 200, reproducing the spec's claimed +200.00 exactly.
-- `--verify` now passes for all three stages: cinder 50, chancel 419, throne 200 route margin,
-  every spawn approach clear.
-- Pacing unchanged and inside band (209-222 s vs 209-217 s baseline, complete on every seed).
-- Evidence: focused suites 54/54 plus gate checks 11/11 with no digest repin needed; full
-  `node --test 'tests/**/*.test.mjs'` 607 tests, 577 pass, 5 fail — the same five pre-existing
-  failures. Browser proof green on all three stages (12 / 13 / 13 props).
+## [2026-07-25 13:15:40] query | Do these three things with no commentary:
+- Raw capture: [[raw/sources/prompts/2026/07/25/131540-ace7f04c-ff3-do-these-three-things-with-no-commentary]]
+- Source note: [[wiki/sources/2026-07-25-131540-do-these-three-things-with-no-commentary]]
+- Query note: [[wiki/queries/2026-07-25-131540-do-these-three-things-with-no-commentary]]
 
-## [2026-07-31] report | Terrain tiles: the floor contract becomes machine-checked
+## 2026-07-25 13:15:52 UTC — OK: 2
+- Raw output: [[raw/sources/outputs/2026/07/25/131552-ace7f04c-ff3-ok-2]]
+- Source note: [[wiki/sources/2026-07-25-131552-ok-2-output]]
+- Report note: [[wiki/reports/2026-07-25-131552-ok-2-answer]]
+- rtk compression: rtk (27→27 chars, -0.0%)
 
-- Authored `gameplay.terrainTiles` for all three stages (3 / 4 / 5 slabs) matching the slab quads
-  the promoted terrain GLBs already ship, and re-authored the support mesh from one bounds-spanning
-  quad into two triangles per tile, in tile order.
-- Added the spec §6.1 validator extension: slab ids now pass through `claimId` (closing spec risk
-  R8, where a slab id could silently duplicate a route or prop id), rects must be integer and inside
-  bounds, tiles may not overlap, `Σ tileArea` must equal the bounds area exactly, the support mesh
-  must carry two triangles per tile, and each tile's triangles must lie inside its own rect.
-- Added `tests/stage-terrain-tiles-contract.test.mjs` (4 tests): exact tiling, per-tile triangle
-  ownership, every `plateNode` resolving inside the shipped GLB, and three negative controls that
-  import mutated copies of the real catalog and assert each new clause rejects.
-- Evidence: new suite 4/4; focused stage suites 54/54; gate checks 11/11 with no digest movement
-  (partitioning a flat quad changes its description, not its geometry); full
-  `node --test 'tests/**/*.test.mjs'` 611 tests, 581 pass, 5 fail — the same five pre-existing
-  failures. Browser proof green with `terrainIntegrity.meshCount` 4 / 5 / 6, matching 3 / 4 / 5
-  slabs plus one apron per stage.
-- Not included: gimmicks (spec §4), seam inlay geometry (R11), per-slab material merge.
-  `materialId` is authored but unread — recorded so the renderer has a source of truth later.
+## [2026-07-25 13:17:06] query | Do these three things with no commentary:
+- Raw capture: [[raw/sources/prompts/2026/07/25/131706-a1373a89-16e-do-these-three-things-with-no-commentary]]
+- Source note: [[wiki/sources/2026-07-25-131706-do-these-three-things-with-no-commentary]]
+- Query note: [[wiki/queries/2026-07-25-131706-do-these-three-things-with-no-commentary]]
 
-## [2026-07-31] report | Gimmick catalog: the spatial half lands with its gates
+## 2026-07-25 13:17:14 UTC — OK:
+- Raw output: [[raw/sources/outputs/2026/07/25/131714-a1373a89-16e-ok]]
+- Source note: [[wiki/sources/2026-07-25-131714-ok-output]]
+- Report note: [[wiki/reports/2026-07-25-131714-ok-answer]]
+- rtk compression: rtk (11→11 chars, -0.0%)
 
-- Authored `gameplay.gimmicks[]` for all three stages (4 / 4 / 5 = 13) exactly per spec §4.2-4.4,
-  ids frozen because `EncounterPacing`, `VfxCueDesign` and `AudioFeedbackDesign` already address
-  them verbatim. Multi-point gimmicks keep the ruled single-`placement` shape and carry their extra
-  footprints in `satellitePlacements`.
-- Additive validator clauses: `claimId` on every gimmick, class enum, per-class telegraph tier
-  (deformation 180 / gate 120 or 90 / mirror 90 / hazard 60), `slabId` naming a real terrain tile
-  **and the footprint sitting inside that tile's rect**, `objectiveId` naming a real objective,
-  a declared narrowing never widening, every objective covered, and **V17**: any corridor change
-  must leave >= 900, since COMMANDER.radius 360 means the commander's diameter is 720 while the
-  generic corridor floor is only 600.
-- Added `tests/stage-gimmick-catalog.test.mjs` (5 tests): coverage and ordering, the V17 floor read
-  from `COMMANDER.radius` rather than hardcoded, per-slab containment, ring gimmicks matching their
-  occupation geometry, and four negative controls importing mutated copies of the real catalog.
-- Nothing at runtime reads the new field yet, and the report says so: the simulation half (arming,
-  the `gimmickRng` stream, the GIMMICK_* events, the R12 `event.type` dispatch discipline) is owned
-  by the lane currently working `defense-run-simulation.js`.
-- Evidence: new suite 5/5; stage suites 50/50; gate checks 11/11 with no digest movement; full
-  `node --test 'tests/**/*.test.mjs'` 616 tests, 586 pass, 5 fail -- the same five pre-existing
-  failures.
-## [2026-07-31] ingest | Stage map / 3D dungeon / stage composition skill catalog
+## [2026-07-25 13:24:11] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/132411-d66e9b89-a79-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-132411-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-132411-abyssal-surge]]
 
-- Added `raw/sources/2026-07-31-stage-map-composition-skill-catalog.md` (immutable capture of the
-  operator's skill/tool catalog, the prompts.chat README, and the three CC0 `prompts.csv` seed rows
-  used as prompt scaffolding).
-- Added `wiki/sources/2026-07-31-stage-map-composition-skill-catalog.md` recording what each capture
-  settles and what it does not — notably that both prompts.chat PCG rows assume runtime infinite
-  generation, the opposite of this repository's static authored-data contract.
-- Added `wiki/concepts/stage-map-composition-pipeline.md`: the canonical band grid observed across
-  the three shipped stages, the executable map contract transcribed from `validateProfile`
-  (`stage-world-catalog.js:382-563`), per-tool applicability verdicts under `CLAUDE.md` §2/§3, and
-  the seven-step pipeline.
-- Added the prompt library `prompts/README.md`, `prompts/VERSIONS.md`, `prompts/drafts/README.md`
-  and `prompts/approved/00`–`07` — one C.R.A.F.T. prompt per pipeline step, each with the numeric
-  invariants and its own regression gate inlined.
-- Updated `index.md` so the source, the concept page, and the prompt library are reachable from the
-  vault entry point.
-- Evidence: `node --test` over `stage-world-quest-points`,
-  `stage-world-encounter-routing-contract`, `world-presentation-contract`,
-  `defense-stage-world-movement`, `stage-terrain-environment-contract`,
-  `stage-framing-and-motion-profile`, `stage-wave-doctrine` — 55 tests, 55 pass, 0 fail.
-- Fixed on the way: `tests/stage-wave-doctrine.test.mjs` asserted that every passive rank-up raises
-  `basicDamage`. `applySkillRankEffects` banks the stat the passive authors (`eclipse-edge` →
-  `basicDamage`, `soul-magnet` → `pickupRange`, `ward-binder` → `maxIntegrity`), so the assertion
-  was wrong, not the simulation. It now checks the authored stat per passive; the suite was
-  deterministically red twice before the change and is 10/10 green after.
-- Follow-up: no stage data changed in this session. The prompts are the applied artifact; the next
-  stage map revision enters at `prompts/approved/00` and must re-clear the same suites.
+## 2026-07-25 13:40:07 UTC — Pass #1 complete. One completed control-feel improvement, shipp…
+- Raw output: [[raw/sources/outputs/2026/07/25/134007-d66e9b89-a79-pass-1-complete-one-completed-control-feel-impro]]
+- Source note: [[wiki/sources/2026-07-25-134007-pass-1-complete-one-completed-control-feel-impro-output]]
+- Report note: [[wiki/reports/2026-07-25-134007-pass-1-complete-one-completed-control-feel-impro-answer]]
+- rtk compression: rtk (1435→1435 chars, -0.0%)
 
-## [2026-07-31] lint   | Authored vault clean after the stage-map ingest
+## [2026-07-25 15:00:35] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/150035-44c1379b-292-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-150035-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-150035-abyssal-surge]]
 
-- `bash scripts/wiki-sync.sh --lint`: 8 pages, no structural issues.
-- The pre-existing orphan `wiki/reports/2026-07-29-natural-rest-pose-motion-library` is now linked
-  from its parent concept `wiki/concepts/motion-generation-for-runtime-rigs.md` §7.
+## [2026-07-25 16:00:07] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/160007-ef190820-a80-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-160007-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-160007-abyssal-surge]]
 
-## [2026-07-31] report | Stage 1-3 runbook: placeholders resolved from code
+## [2026-07-25 17:00:07] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/170007-dfb16e45-7e1-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-170007-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-170007-abyssal-surge]]
 
-- Added `prompts/RUNBOOK.md` — identity, presentation, encounter, quest, reward and fixture-seed
-  tables for the three canonical stages, so `${stageId}` and every other placeholder in
-  `prompts/approved/*` resolves without reading the catalogs again. Stage 1 `cinder-span`,
-  stage 2 `abyss-chancel`, stage 3 `echo-throne`.
-- Cross-checked every runbook number against `STAGES`, `STAGE_TACTICS`, `STAGE_ENCOUNTER_ROUTES` and
-  `STAGE_WORLD_PROFILES` with a one-off Node script: caps, objective ids/points/radii, occupation
-  and extraction geometry, the four quest-point placements, silhouette profiles, VFX effect ids,
-  walkable bounds and obstacle/prop/landmark counts all match.
-- Corrected two transcription defects found by that check: `echo-throne` caps were recorded as
-  `9 / — / —` in `prompts/approved/01` (actual `10 / 26-8-4 / 15`) and its objective radii were
-  missing; the objective-2 radius range in `prompts/approved/00` and
-  `wiki/concepts/stage-map-composition-pipeline.md` was `1400-1500` (actual `1400-1550`), and the
-  west-entry x was `6200` (actual `6000-6200`).
+## [2026-07-25 18:00:02] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/180002-c9eb1161-6a4-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-180002-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-180002-abyssal-surge]]
 
-## [2026-07-31] ingest | Game 3D VFX / animation / cinematic skill catalog + presentation prompt track
+## 2026-07-25 18:15:48 UTC — Pass #5 complete. Everything committed, working tree clean, sta…
+- Raw output: [[raw/sources/outputs/2026/07/25/181548-c9eb1161-6a4-pass-5-complete-everything-committed-working-tre]]
+- Source note: [[wiki/sources/2026-07-25-181548-pass-5-complete-everything-committed-working-tre-output]]
+- Report note: [[wiki/reports/2026-07-25-181548-pass-5-complete-everything-committed-working-tre-answer]]
+- rtk compression: rtk (1699→1699 chars, -0.0%)
 
-- Added `raw/sources/2026-07-31-game-vfx-animation-cinematic-skill-catalog.md` — immutable verbatim
-  capture of the operator's presentation skill/tool catalog (9 sections) plus the same session's
-  second requirement (knockback, and parallel / encircling / ground-emergence / sky-drop enemy
-  arrival instead of a serial column).
-- Added `wiki/sources/2026-07-31-game-vfx-animation-cinematic-skill-catalog.md`. All 14 repository
-  paths named in the capture's §9 verified present with `find`. The capture's own eight-step order
-  contains no number, so on its own it cannot pass `CLAUDE.md` §6; the numbers were recovered from
-  the runtime instead.
-- Added `wiki/concepts/runtime-presentation-and-arrival-choreography.md` — the executable
-  presentation contract: `MAX_VISUAL_EFFECTS 40` with per-family live budgets
-  `drop 3 / buff 2 / spawn 4 / deform 1`, 88 `VFX_MODELS` event ids, 17 eviction-exempt types, the
-  `resolveVfxLifetimeTicks` precedence, `TARGET_HEIGHT` and the `motionProfileFor` bounds, the
-  per-stage camera clamps and intro dolly lengths, the contact-feel constants, and the four
-  requested arrival patterns decomposed across the simulation/renderer boundary.
-- Two findings established from code, neither present in the capture:
-  - **Knockback is presentation-only.** `grep -n knockback defense-run-simulation.js` returns
-    nothing. The whole model is four renderer constants (`battle-realtime-three.js:1057-1060`,
-    160/260 ms and 0.12/0.26 world units) applied as an offset that `updateActorFollow()` pulls back
-    every frame. Authoritative knockback does not exist and adding it is a digest-visible change.
-  - **The graded-arrival hook is dead.** `ENEMY_SPAWNED` has exactly one emit site
-    (`defense-run-simulation.js:1036`) and its payload carries neither `grade` nor `telegraphTicks`,
-    while the renderer branches on both (`isCriticalVfxEvent`, `resolveVfxLifetimeTicks`). So the
-    SHADOW pool exemption and the 60-tick arrival telegraph are unreachable in production, and every
-    arrival resolves to the 30-tick fallback and stays evictable.
-- Added `prompts/approved/10`–`19`, the presentation track: cue spec, arrival choreography, impact
-  and knockback feel, motion source/retarget, runtime VFX, camera and cinematic, audio cue layer,
-  frame budget recovery, regression proof, capture and release. Each is C.R.A.F.T. plus
-  `HARD CONSTRAINTS` / `DONE WHEN`, with the numeric invariants above inlined.
-- Updated `prompts/README.md` (two tracks, the `05` vs `10`–`14` ownership boundary, a new authoring
-  rule that the simulation boundary is a hard constraint), `prompts/VERSIONS.md` (10 rows plus 5
-  limitations), and `index.md`.
-- Evidence: the ten presentation suites run in one command —
-  `node --test tests/combat-presentation-contract.test.mjs tests/world-presentation-contract.test.mjs
-  tests/stage-framing-and-motion-profile.test.mjs tests/realtime-motion-routing.test.mjs
-  tests/ingame-motion-pack.test.mjs tests/runtime-visual-assets.test.mjs
-  tests/aoe-burst-wide-hit-contract.test.mjs tests/audio-feedback-runtime.test.mjs
-  tests/audio-sample-hybrid.test.mjs tests/battle-session-cutscene-audio.test.mjs`
-  — **129 tests, 129 pass, 0 fail, 19836 ms**. Recorded as the baseline inside
-  `prompts/approved/18`.
-- No runtime code changed in this session. The prompts and the concept page are the applied
-  artifact; the arrival and knockback work itself enters at `prompts/approved/11` and `12`, and
-  `11` is blocked on a simulation-owner decision about whether an arrival formation may draw from
-  the seeded RNG (`defense-run-simulation.js:1518`).
+## [2026-07-25 19:00:06] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/190006-e809d7ff-c21-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-190006-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-190006-abyssal-surge]]
 
-## [2026-07-31] ingest + change | Stage pattern / difficulty / system diversification catalog, the systems prompt track, and the `echo-throne` doctrine retune
+## 2026-07-25 19:18:03 UTC — Pass #6 complete. All artifacts committed and verified.
+- Raw output: [[raw/sources/outputs/2026/07/25/191803-e809d7ff-c21-pass-6-complete-all-artifacts-committed-and-veri]]
+- Source note: [[wiki/sources/2026-07-25-191803-pass-6-complete-all-artifacts-committed-and-veri-output]]
+- Report note: [[wiki/reports/2026-07-25-191803-pass-6-complete-all-artifacts-committed-and-veri-answer]]
+- rtk compression: rtk (1337→1337 chars, -0.0%)
 
-- Added `raw/sources/2026-07-31-stage-pattern-difficulty-system-variation-skill-catalog.md` —
-  immutable verbatim capture of the operator's third catalog (9 sections: encounter design, numeric
-  balance, diversification axes, simulation tuning, QA gates, planning frameworks, external theory,
-  external tooling, repository mapping).
-- Added `wiki/sources/2026-07-31-stage-pattern-difficulty-system-variation-skill-catalog.md`. §9's
-  three data owners and eight scripts verified present. One correction filed: the capture's
-  regression table lists `tests/stage-wave-doctrine.test.mjs`, which `prompts/VERSIONS.md` still
-  carried as a known pre-existing failure — re-measured this session at **10 tests / 10 pass / 0
-  fail / 22885 ms**, so that limitation row is stale and was corrected in place.
-- Added `wiki/concepts/stage-difficulty-and-system-variation.md` — the executable contract: the
-  clear-budget derivation (`PLAYER_BASELINE_DPS 2250` = COMMANDER 900 dmg / 24 t at `TICK_RATE 60`,
-  `WAVE_PRESSURE_BP 5500`, ramp 10000→13000 bp, `WAVE_KIND_PROFILE` 10000/17500/5000,
-  `MIDBOSS_PROFILE` hp 6000 bp of one cadence budget), the per-stage doctrine and measured
-  budget ratios, the four archetypes with their attack-pattern phase timings and the four AI
-  response windows, the `ABYSS_DEPTH_PACKAGES` rule packages, the 20 variation axes, and the G2/G3/
-  G5/G6/G7/G8 thresholds transcribed verbatim from `scripts/evaluate-stage1b-gates.mjs`.
-- **Measured defect, then fixed.** Built `scripts/scan-stage-variation.mjs` (catalog-only,
-  deterministic) to turn the capture's core discipline — 난이도는 요구되는 대응의 종류 수 — into a
-  number. It failed on the shipped catalog: response types ran **16 → 17 → 16** while HP `scale`
-  ran 100 → 115 → 130, because `echo-throne` fielded three enemy classes against `abyss-chancel`'s
-  four and copied `cinder-span`'s mid-boss class (`guardian`), pressure lane (`chokepath`) and
-  wave-kind rhythm (`n n b m …`).
-- Retuned the `echo-throne` doctrine row in `defense-catalog.js` — and only that row:
-  `classes` → `flanker > ranged > guardian > rusher` (all four classes), `kindCycle` →
-  `normal, mid, normal, big, normal` (a 5-slot rhythm no other stage uses),
-  `midbossEnemy` → `ranged` (a wall that must be closed on, not out-traded). Hold, cadence, wave
-  count, caps, coordinates and `scale` untouched. Response types now **16 → 17 → 17**; worst
-  pairwise shared-axis ratio **3/20 = 0.15**.
-- Added `tests/stage-variation-doctrine.test.mjs` (6 tests / 6 pass): shared-axis ratchet ≤ 0.20,
-  stage-unique rhythm/mid-boss/class-rotation, HP scale climbing **and** response types never
-  falling with the last stage strictly above the first, final-stage class coverage, mid-boss
-  authorship. The ratchet is set at the shipped worst pair plus one axis of headroom.
-- Evidence, isolated in sandboxes because another session is concurrently editing
-  `defense-run-simulation.js` (arrival choreography):
-  - `node scripts/run-defense-balance-sim.mjs --strict` — `pass: true`, 0 failures, before and
-    after. `cinder-span` and `abyss-chancel` digests **byte-identical**; `echo-throne`
-    FINAL_COMPLETION on all three seeds, @12614/@12685/@12781 → @12640/@12517/@12783.
-  - `node scripts/measure-stage-playtime.mjs --seeds 3` — `echo-throne` median 210.08 s → 209.68 s
-    (208.48–213.28), 3/3 victories, 3/3 in the 180–360 s target; stages 1–2 numerically unchanged.
-  - `node scripts/scan-stage-variation.mjs --strict` — exit 0, `worstSharedRatio 0.15`.
-  - `node --test tests/stage-wave-doctrine.test.mjs tests/stage2-balance-retune.test.mjs
-    tests/stage-world-encounter-routing-contract.test.mjs tests/stage-world-quest-points.test.mjs
-    tests/stage-story-progression.test.mjs tests/defense-stage-world-movement.test.mjs
-    tests/defense-expansion-contract.test.mjs` — **64 tests / 62 pass / 2 fail / 156055 ms**. Both
-    failures are the single assertion `gate pressure advances toward the gate`, isolated to the
-    other session's in-flight simulation: HEAD sim + HEAD catalog 17/17, HEAD sim + this session's
-    catalog 17/17, working sim + either catalog 15/17.
-  - `node --test tests/defense-run-simulation.test.mjs` — first run **40 / 39 / 1**: the pinned
-    `echo-throne/12/500 bare` digest fixture. It was invalidated twice over at that moment — by this
-    doctrine retune and, independently, by the concurrent arrival work (which then produced
-    `3e523f9e…` for all three pinned stages). Re-measured an hour later the arrival work had become
-    digest-neutral at every pinned checkpoint (`cinder-span/71/500` and `abyss-chancel/9/500` back to
-    their `HEAD` values), so the remaining delta was attributable to this retune alone and the row
-    was recomputed with `probe-digest.mjs` to
-    `01972547729aa402735cb70eef54c126a816ec062bc2e165a511e04de825107a` — the same value the HEAD
-    simulation sandbox produced for this catalog. Re-run: **40 / 40 / 0**. The other three fixture
-    rows are byte-identical, which is what proves the retune stayed inside one stage.
-  - The five `stage1b-*` suites exceeded a 20-minute budget and were not run to completion. They are
-    `cinder-span`-only and that stage's digests were shown byte-identical.
-- Added `prompts/approved/20`–`29`, the systems/difficulty/variation track: encounter pattern brief,
-  enemy behaviour policy, difficulty budget, doctrine write, variation package, balance simulation,
-  gate evaluation, monotony scan, systems regression proof, changelog and release. C.R.A.F.T. plus
-  `HARD CONSTRAINTS` / `DONE WHEN`, with the numeric invariants above inlined.
-- Updated `prompts/README.md` (three tracks, the `01` vs `22`–`23` geometry/pressure boundary, a new
-  authoring rule that difficulty is a response-type count), `prompts/VERSIONS.md` (11 rows, 5 new
-  limitations, 1 corrected), `prompts/RUNBOOK.md` (six systems entry points + the systems doctrine
-  table), and `index.md`.
-- Evidence artifacts and the digest probe are kept at
-  `_workspace/current/qa/stage-variation-retune-20260731/` with a README naming the command behind
-  each file; the throwaway module sandboxes were deleted. Nothing was committed by this session.
+## [2026-07-25 20:00:07] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/200007-89396109-8e8-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-200007-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-200007-abyssal-surge]]
 
-## [2026-07-31] execution | echo-throne 리튠 격리 커밋 + 게이트·심연 뎁스 실측 (브랜치 `retune/echo-throne-response-types`)
+## 2026-07-25 20:12:50 UTC — Pass #7 complete. Clean tree (only the `node_modules` symlink u…
+- Raw output: [[raw/sources/outputs/2026/07/25/201250-89396109-8e8-pass-7-complete-clean-tree-only-the-node-modules]]
+- Source note: [[wiki/sources/2026-07-25-201250-pass-7-complete-clean-tree-only-the-node-modules-output]]
+- Report note: [[wiki/reports/2026-07-25-201250-pass-7-complete-clean-tree-only-the-node-modules-answer]]
+- rtk compression: rtk (1376→1376 chars, -0.0%)
 
-- deep-interview(17라운드, 모호도 5%) → ralplan 합의(3차 반복, Architect/Critic APPROVE_WITH_CHANGES)
-  → 사용자 승인 후 실행. 스펙 `.gjc/_session-019fb61e-.../specs/deep-interview-stage-systems-remaining-work.md`,
-  계획 `.gjc/_session-019fb61e-.../plans/ralplan/.../stage-03-planner.md`.
-- 격리: `git worktree add -b retune/echo-throne-response-types ../abyssal-retune HEAD` + `node_modules` 심볼릭 링크.
-  원 트리는 무변형이며 상대 세션(arrival choreography)의 미커밋 6파일은 그대로 남아 있다. 되돌림 태그
-  `pre-retune-worktree-20260731`.
-- 커밋 3개: ① 리튠+다변화 래칫+세 트랙 문서(55파일) ② `measure-stage-playtime.mjs`에 `--depth`/`--seed-list`/
-  `minGateIntegrity` ③ 증거.
-- **[OBSERVED] 아키타입 밸런스 붕괴가 처음 측정됨.** `stage1b-symmetric-trials-v1` 아티팩트는 저장소에 존재한
-  적이 없었다(qa/evidence 전역 검색 0건). 정규 생산자로 생성(100행/21.5초)하니 G2 임계 9-11/20 대비
-  striker 20/20, conductor 15/20, gambit 6/20, bulwark 5/20, rift 4/20. 깨끗한 HEAD 워크트리에서 동일 결과 →
-  이번 리튠과 무관한 사전 결함.
-- **[OBSERVED] 심연 뎁스는 규칙을 바꾸지만 난이도를 바꾸지 않는다.** cinder-span × 시드 401-405 × depth 0/1/2/3
-  = 20런에서 게이트 무결성 바닥값 중앙이 1580 / 1580 / 1577 / 1588, 플레이타임 192.58 / 193.33 / 192.33 /
-  193.73 s. 전 구간 5/5 승리·5/5 목표 내. 델타 최대 0.7%로 노이즈 수준이라 AC-10(모든 depth>0 < depth0,
-  그리고 depth2 ≤ depth3 ≤ depth1) **FAIL**. 측정 유효성은 별도 확인 — `snapshot.abyssDepth`, 회복캡
-  0.25/0.12/0.20, 정책 분포(추격 3 / 봉쇄 2+측면 2 / 측면 4)가 설계대로 전환된다. 계획대로 롤백하지 않고
-  설계-수치 불일치로 기록.
-- **[OBSERVED] 게이트 verdict 생성됨, disposition BLOCKED.** `qa/evidence/gates/stage1b-verdict.json`.
-  G6/G7/G8은 인자 미공급에 따른 자동 BLOCKED(사람 실측 종속), G2는 readiness BLOCKED(pressure 15런 샘플플랜
-  불완전, 보존 필드 누락), G3 FAIL 3건. 기존 pressure/persistence 아티팩트도 현재 evaluator 스키마를
-  만족하지 못한다.
-- 저비용 3수트: 63 tests / 62 pass / 1 fail / 119961 ms. 실패 1건(`stage1b-persistence`의 exporter 시맨틱
-  digest 불일치)은 깨끗한 HEAD에서도 10/11로 동일 실패 → 사전 결함.
-- Phase D(브라우저 미드보스 증거) 미착수. 이번에 확인한 사실: `app.js`에 `midboss`/`bossSpawned` 문자열이 없어
-  미드보스 스폰은 DOM에 아무 신호를 남기지 않고 렌더러(`battle-realtime-three.js:1315`)만 소비한다. 자동 판정에는
-  `tests/stage-runtime-proof-browser.test.mjs:96`의 `INSTALL_RUNTIME_PROBE` 재사용이 선행돼야 하며, 검증되지 않은
-  스크립트를 커밋하지 않기 위해 착수하지 않았다.
-- AC-12(고비용 exporters) 미실행: `git log -1 -- defense-run-simulation.js` = `9ba2aa39` ≠ HEAD `c139b508`,
-  상대 세션 변경이 아직 미커밋이라 트리거 미충족.
-- 푸시하지 않음. Phase D 미완 상태이며 체인지로그·푸시는 계획상 브라우저 증명 이후 단계다.
+## [2026-07-25 21:00:07] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/210007-78abb2c6-751-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-210007-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-210007-abyssal-surge]]
 
-## [2026-08-04] report | 병합 후 시스템 상태 — cycle 9·10 통합 + 진입 라우팅 피벗
+## 2026-07-25 21:13:09 UTC — Pass #8 complete. Clean tree (only the `node_modules` symlink u…
+- Raw output: [[raw/sources/outputs/2026/07/25/211309-78abb2c6-751-pass-8-complete-clean-tree-only-the-node-modules]]
+- Source note: [[wiki/sources/2026-07-25-211309-pass-8-complete-clean-tree-only-the-node-modules-output]]
+- Report note: [[wiki/reports/2026-07-25-211309-pass-8-complete-clean-tree-only-the-node-modules-answer]]
+- rtk compression: rtk (1479→1479 chars, -0.0%)
 
-- `origin/main`(176 커밋)을 `feature/first_lee`로 fast-forward 병합(685파일, 충돌 0). 로컬
-  `main`은 stale(244 behind)이라 대상이 아니었다. 병합이 cycle 9(코어 루프)·cycle 10(스테이지
-  던전)과 회고에 없던 진입 라우팅 피벗을 현재 브랜치로 가져왔다.
-- 코드에서 재분석해 `wiki/reports/2026-08-04-post-merge-system-state.md`를 추가하고 `index.md`
-  Overview·Reports를 갱신했다.
-- **가장 큰 구조 변화 [OBSERVED]**: Pages 루트(`index.html`)가 Three.js 캠페인에서 2.5D 스프라이트
-  아레나(`sprite-2-5d.js`)로 피벗. 기존 캠페인은 `campaign.html`(`app.js`)로 이동해 보존. 오타본
-  `abbysal-oneline.html`은 정본으로 리다이렉트. 시드 `intake/seed-sprite25d-entry-routing.md`.
-- **신규 런타임 모듈 3종 [OBSERVED]**: `sprite-2-5d.js`(무자산 2D 캔버스 아레나, 절차적 오디오,
-  종료 시 `abyssal-oneline.html`로 전환), `defense-speech-bubble.js`(캠페인 서사를 음성→월드
-  말풍선으로 교체, `defense-audio.js` 이벤트 집합과 동일 불변식), `sealbound.js`(독립 프로토타입
-  라우트 `sealbound.html`).
-- **게이트 [carried]**: 두 회고 모두 어떤 게이트도 PASS로 만들지 않았다 — 설계·자산은 측정이
-  아니며 G4/G7/G8은 사람 플레이 판정 대기. drop/buff 스펙 §9 결정성 7체크 종결 여부는 이 세션이
-  재측정하지 않았다.
-- **이 세션 실측 [OBSERVED]**: 정적 서버(127.0.0.1:8000)에서 `/`·`/campaign.html`·`/sprite-2-5d.js`·
-  `/sealbound.html` 모두 200; 서빙된 루트가 `src="sprite-2-5d.js"` 참조; 루트 브라우저 부팅 시
-  console/page 에러 0, `<canvas>` 1개, `hasThree:false`. 이 절 밖의 수치는 모두 [carried]다.
-- 커밋·푸시하지 않음. 볼트 문서(reports/index/log)만 갱신했다.
+## [2026-07-25 22:00:07] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/220007-1bd2f318-6a7-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-220007-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-220007-abyssal-surge]]
+
+## 2026-07-25 22:09:35 UTC — Pass #9 complete. Clean tree (only the `node_modules` symlink u…
+- Raw output: [[raw/sources/outputs/2026/07/25/220935-1bd2f318-6a7-pass-9-complete-clean-tree-only-the-node-modules]]
+- Source note: [[wiki/sources/2026-07-25-220935-pass-9-complete-clean-tree-only-the-node-modules-output]]
+- Report note: [[wiki/reports/2026-07-25-220935-pass-9-complete-clean-tree-only-the-node-modules-answer]]
+- rtk compression: rtk (1438→1438 chars, -0.0%)
+
+## [2026-07-25 23:00:04] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/230004-96feac17-dc4-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-230004-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-230004-abyssal-surge]]
+
+## 2026-07-25 23:16:28 UTC — Pass #10 complete. Summary:
+- Raw output: [[raw/sources/outputs/2026/07/25/231628-96feac17-dc4-pass-10-complete-summary]]
+- Source note: [[wiki/sources/2026-07-25-231628-pass-10-complete-summary-output]]
+- Report note: [[wiki/reports/2026-07-25-231628-pass-10-complete-summary-answer]]
+- rtk compression: rtk (2304→2304 chars, -0.0%)
+
+## [2026-07-25 23:21:40] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/232140-c5029d00-7f8-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-232140-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-232140-abyssal-surge]]
+
+## [2026-07-25 23:28:04] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/232804-355250b5-e52-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-232804-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-232804-abyssal-surge]]
+
+## [2026-07-25 23:32:35] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/25/233235-3f8f8f64-901-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-25-233235-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-25-233235-abyssal-surge]]
+
+## [2026-07-26 00:00:05] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/000005-41542727-b53-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-000005-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-000005-abyssal-surge]]
+
+## [2026-07-26 01:00:04] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/010004-f6bb7571-791-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-010004-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-010004-abyssal-surge]]
+
+## [2026-07-26 02:00:05] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/020005-a1fa6c72-1c6-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-020005-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-020005-abyssal-surge]]
+
+## [2026-07-26 03:00:07] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/030007-e92af526-2f3-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-030007-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-030007-abyssal-surge]]
+
+## [2026-07-26 04:00:05] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/040005-460f3764-ec9-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-040005-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-040005-abyssal-surge]]
+
+## 2026-07-26 04:06:35 UTC — Pass #14 complete. Clean tree (only `node_modules` symlink untr…
+- Raw output: [[raw/sources/outputs/2026/07/26/040635-460f3764-ec9-pass-14-complete-clean-tree-only-node-modules-sy]]
+- Source note: [[wiki/sources/2026-07-26-040635-pass-14-complete-clean-tree-only-node-modules-sy-output]]
+- Report note: [[wiki/reports/2026-07-26-040635-pass-14-complete-clean-tree-only-node-modules-sy-answer]]
+- rtk compression: rtk (1507→1507 chars, -0.0%)
+
+## [2026-07-26 05:00:04] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/050004-a7e7e1cd-6be-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-050004-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-050004-abyssal-surge]]
+
+## 2026-07-26 05:13:32 UTC — Pass #15 complete. Clean tracked tree, two independently-mergea…
+- Raw output: [[raw/sources/outputs/2026/07/26/051332-a7e7e1cd-6be-pass-15-complete-clean-tracked-tree-two-independ]]
+- Source note: [[wiki/sources/2026-07-26-051332-pass-15-complete-clean-tracked-tree-two-independ-output]]
+- Report note: [[wiki/reports/2026-07-26-051332-pass-15-complete-clean-tracked-tree-two-independ-answer]]
+- rtk compression: rtk (1382→1382 chars, -0.0%)
+
+## [2026-07-26 06:00:04] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/060004-3abebf0f-d92-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-060004-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-060004-abyssal-surge]]
+
+## 2026-07-26 06:14:25 UTC — Pass #16 complete. Working tree clean (only the expected `node_…
+- Raw output: [[raw/sources/outputs/2026/07/26/061425-3abebf0f-d92-pass-16-complete-working-tree-clean-only-the-exp]]
+- Source note: [[wiki/sources/2026-07-26-061425-pass-16-complete-working-tree-clean-only-the-exp-output]]
+- Report note: [[wiki/reports/2026-07-26-061425-pass-16-complete-working-tree-clean-only-the-exp-answer]]
+- rtk compression: rtk (1397→1397 chars, -0.0%)
+
+## [2026-07-26 07:00:04] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/070004-c975ab47-1a9-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-070004-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-070004-abyssal-surge]]
+
+## 2026-07-26 07:12:17 UTC — Pass #17 complete. Clean tree (only the expected `node_modules`…
+- Raw output: [[raw/sources/outputs/2026/07/26/071217-c975ab47-1a9-pass-17-complete-clean-tree-only-the-expected-no]]
+- Source note: [[wiki/sources/2026-07-26-071217-pass-17-complete-clean-tree-only-the-expected-no-output]]
+- Report note: [[wiki/reports/2026-07-26-071217-pass-17-complete-clean-tree-only-the-expected-no-answer]]
+- rtk compression: rtk (1427→1427 chars, -0.0%)
+
+## [2026-07-26 08:00:03] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/080003-bb6d44e4-d3e-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-080003-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-080003-abyssal-surge]]
+
+## 2026-07-26 08:13:56 UTC — Pass #18 complete. Clean tree (only the `node_modules` symlink…
+- Raw output: [[raw/sources/outputs/2026/07/26/081356-bb6d44e4-d3e-pass-18-complete-clean-tree-only-the-node-module]]
+- Source note: [[wiki/sources/2026-07-26-081356-pass-18-complete-clean-tree-only-the-node-module-output]]
+- Report note: [[wiki/reports/2026-07-26-081356-pass-18-complete-clean-tree-only-the-node-module-answer]]
+- rtk compression: rtk (1293→1293 chars, -0.0%)
+
+## [2026-07-26 09:00:06] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/26/090006-2cf08e74-7c8-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-26-090006-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-26-090006-abyssal-surge]]
+
+## 2026-07-26 09:13:13 UTC — Pass #19 complete. Clean tree (only the `node_modules` symlink…
+- Raw output: [[raw/sources/outputs/2026/07/26/091313-2cf08e74-7c8-pass-19-complete-clean-tree-only-the-node-module]]
+- Source note: [[wiki/sources/2026-07-26-091313-pass-19-complete-clean-tree-only-the-node-module-output]]
+- Report note: [[wiki/reports/2026-07-26-091313-pass-19-complete-clean-tree-only-the-node-module-answer]]
+- rtk compression: rtk (1548→1548 chars, -0.0%)
+
+## [2026-07-26 09:37:00] query | Use the Agent tool exactly once. Ask a general-purpose subagent to reply with t…
+- Raw capture: [[raw/sources/prompts/2026/07/26/093700-95fa9026-07e-use-the-agent-tool-exactly-once-ask-a-general-pu]]
+- Source note: [[wiki/sources/2026-07-26-093700-use-the-agent-tool-exactly-once-ask-a-general-pu]]
+- Query note: [[wiki/queries/2026-07-26-093700-use-the-agent-tool-exactly-once-ask-a-general-pu]]
+
+## [2026-07-26 09:39:15] query | Use the Agent tool exactly once. Ask a general-purpose subagent to run Bash com…
+- Raw capture: [[raw/sources/prompts/2026/07/26/093915-ad7ff3f6-68d-use-the-agent-tool-exactly-once-ask-a-general-pu]]
+- Source note: [[wiki/sources/2026-07-26-093915-use-the-agent-tool-exactly-once-ask-a-general-pu]]
+- Query note: [[wiki/queries/2026-07-26-093915-use-the-agent-tool-exactly-once-ask-a-general-pu]]
+
+## [2026-07-26 09:40:06] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/07/26/094006-ad7ff3f6-68d-task-notification]]
+- Source note: [[wiki/sources/2026-07-26-094006-task-notification]]
+- Query note: [[wiki/queries/2026-07-26-094006-task-notification]]
+
+## [2026-07-28 09:00:03] query | # 상임 지시 — Abyssal Surge 시간별 개선 패스
+- Raw capture: [[raw/sources/prompts/2026/07/28/090003-2de6d982-a61-abyssal-surge]]
+- Source note: [[wiki/sources/2026-07-28-090003-abyssal-surge]]
+- Query note: [[wiki/queries/2026-07-28-090003-abyssal-surge]]
+
+## [2026-08-07 14:13:32] query | codex plugin 설치해줘
+- Raw capture: [[raw/sources/prompts/2026/08/07/141332-1adf985a-10d-codex-plugin]]
+- Source note: [[wiki/sources/2026-08-07-141332-codex-plugin]]
+- Query note: [[wiki/queries/2026-08-07-141332-codex-plugin]]
+
+## 2026-08-07 14:13:53 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/07/141353-1adf985a-10d-tool-use]]
+- Source note: [[wiki/sources/2026-08-07-141353-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-07-141353-tool-use-answer]]
+- rtk compression: rtk (176→176 chars, -0.0%)
+
+## [2026-08-07 14:16:28] query | interview 아티팩트로 게임기획서 내용 정리해서 알려줘
+- Raw capture: [[raw/sources/prompts/2026/08/07/141628-f40d2c84-401-interview]]
+- Source note: [[wiki/sources/2026-08-07-141628-interview]]
+- Query note: [[wiki/queries/2026-08-07-141628-interview]]
+
+## 2026-08-07 14:18:37 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/07/141837-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-07-141837-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-07-141837-tool-use-answer]]
+- rtk compression: rtk (197→197 chars, -0.0%)
+
+## [2026-08-07 14:20:32] query | interview 미구현 부분은 opus5 모델을 이용한 서브에이전트로 구현하고, 자산은 codex 이용해서 부족한 리소스는 충족하자. ui…
+- Raw capture: [[raw/sources/prompts/2026/08/07/142032-f40d2c84-401-interview-opus5-codex-ui]]
+- Source note: [[wiki/sources/2026-08-07-142032-interview-opus5-codex-ui]]
+- Query note: [[wiki/queries/2026-08-07-142032-interview-opus5-codex-ui]]
+
+## 2026-08-07 14:25:21 UTC — 확정·승인 처리 완료. 현재 상태:
+- Raw output: [[raw/sources/outputs/2026/08/07/142521-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-07-142521-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-07-142521-assistant-output-answer]]
+- rtk compression: rtk (923→923 chars, -0.0%)
+
+## [2026-08-07 14:26:03] query | interview 다음스테이지로 넘어가는 잿불휴식 팝업 이미지도 코댁스로 리소스 생성하고 적용해줘. 화산이나 빙하, 움직이는 지형 같은 경우도…
+- Raw capture: [[raw/sources/prompts/2026/08/07/142603-f40d2c84-401-interview]]
+- Source note: [[wiki/sources/2026-08-07-142603-interview]]
+- Query note: [[wiki/queries/2026-08-07-142603-interview]]
+
+## 2026-08-07 14:28:15 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/07/142815-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-07-142815-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-07-142815-tool-use-answer]]
+- rtk compression: rtk (356→356 chars, -0.0%)
+
+## 2026-08-07 14:34:02 UTC — 자산 레인 1차분(W12/W13/W14)이 완료됐습니다. 블로커 없음.
+- Raw output: [[raw/sources/outputs/2026/08/07/143402-f40d2c84-401-1-w12-w13-w14]]
+- Source note: [[wiki/sources/2026-08-07-143402-1-w12-w13-w14-output]]
+- Report note: [[wiki/reports/2026-08-07-143402-1-w12-w13-w14-answer]]
+- rtk compression: rtk (955→955 chars, -0.0%)
+
+## [2026-08-07 14:35:51] query | Generate an image of "Cinematic dark fantasy 2.5D beat-em-up interlude scene: E…
+- Raw capture: [[raw/sources/prompts/2026/08/07/143551-019fdca6-b44-generate-an-image-of-cinematic-dark-fantasy-2-5d]]
+- Source note: [[wiki/sources/2026-08-07-143551-generate-an-image-of-cinematic-dark-fantasy-2-5d]]
+- Query note: [[wiki/queries/2026-08-07-143551-generate-an-image-of-cinematic-dark-fantasy-2-5d]]
+
+## [2026-08-07 14:38:26] query | Generate an image of "Cinematic dark fantasy 2.5D beat-em-up interlude scene: E…
+- Raw capture: [[raw/sources/prompts/2026/08/07/143826-019fdca9-1c2-generate-an-image-of-cinematic-dark-fantasy-2-5d]]
+- Source note: [[wiki/sources/2026-08-07-143826-generate-an-image-of-cinematic-dark-fantasy-2-5d]]
+- Query note: [[wiki/queries/2026-08-07-143826-generate-an-image-of-cinematic-dark-fantasy-2-5d]]
+
+## [2026-08-07 14:41:27] query | Generate an image of "Seamless tileable game texture, molten volcanic basalt te…
+- Raw capture: [[raw/sources/prompts/2026/08/07/144127-019fdcab-dd5-generate-an-image-of-seamless-tileable-game-text]]
+- Source note: [[wiki/sources/2026-08-07-144127-generate-an-image-of-seamless-tileable-game-text]]
+- Query note: [[wiki/queries/2026-08-07-144127-generate-an-image-of-seamless-tileable-game-text]]
+
+## [2026-08-07 14:44:35] query | Generate an image of "Seamless tileable game texture, frozen glacier terrain su…
+- Raw capture: [[raw/sources/prompts/2026/08/07/144435-019fdcae-c70-generate-an-image-of-seamless-tileable-game-text]]
+- Source note: [[wiki/sources/2026-08-07-144435-generate-an-image-of-seamless-tileable-game-text]]
+- Query note: [[wiki/queries/2026-08-07-144435-generate-an-image-of-seamless-tileable-game-text]]
+
+## [2026-08-07 14:47:52] query | Generate an image of "Seamless tileable game texture, shifting abyssal current…
+- Raw capture: [[raw/sources/prompts/2026/08/07/144752-019fdcb1-ba1-generate-an-image-of-seamless-tileable-game-text]]
+- Source note: [[wiki/sources/2026-08-07-144752-generate-an-image-of-seamless-tileable-game-text]]
+- Query note: [[wiki/queries/2026-08-07-144752-generate-an-image-of-seamless-tileable-game-text]]
+
+## 2026-08-07 14:50:51 UTC — asset-lane 상태 정리:
+- Raw output: [[raw/sources/outputs/2026/08/07/145051-f40d2c84-401-asset-lane]]
+- Source note: [[wiki/sources/2026-08-07-145051-asset-lane-output]]
+- Report note: [[wiki/reports/2026-08-07-145051-asset-lane-answer]]
+- rtk compression: rtk (412→412 chars, -0.0%)
+
+## 2026-08-07 14:52:46 UTC — MV-D3 우려는 해소됐습니다 — `ViewWorld.Scale = 0.0125f`는 다른 세션이 이미 커밋한 값…
+- Raw output: [[raw/sources/outputs/2026/08/07/145246-f40d2c84-401-mv-d3-viewworld-scale-0-0125f]]
+- Source note: [[wiki/sources/2026-08-07-145246-mv-d3-viewworld-scale-0-0125f-output]]
+- Report note: [[wiki/reports/2026-08-07-145246-mv-d3-viewworld-scale-0-0125f-answer]]
+- rtk compression: rtk (1545→1545 chars, -0.0%)
+
+## 2026-08-07 14:55:53 UTC — VFX 레인 완료** (리포트: `_workspace/current/engineering/vfx-lane-w9-v…
+- Raw output: [[raw/sources/outputs/2026/08/07/145553-f40d2c84-401-vfx-workspace-current-engineering-vfx-lane-w9-v]]
+- Source note: [[wiki/sources/2026-08-07-145553-vfx-workspace-current-engineering-vfx-lane-w9-v-output]]
+- Report note: [[wiki/reports/2026-08-07-145553-vfx-workspace-current-engineering-vfx-lane-w9-v-answer]]
+- rtk compression: rtk (1225→1225 chars, -0.0%)
+
+## 2026-08-07 14:57:32 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/07/145732-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-07-145732-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-07-145732-tool-use-answer]]
+- rtk compression: rtk (1474→1474 chars, -0.0%)
+
+## 2026-08-07 15:00:19 UTC — terrain-fx 계약 정렬이 완료됐습니다:
+- Raw output: [[raw/sources/outputs/2026/08/07/150018-f40d2c84-401-terrain-fx]]
+- Source note: [[wiki/sources/2026-08-07-150018-terrain-fx-output]]
+- Report note: [[wiki/reports/2026-08-07-150018-terrain-fx-answer]]
+- rtk compression: rtk (624→624 chars, -0.0%)
+
+## [2026-08-07 15:02:54] query | 작업중이야?
+- Raw capture: [[raw/sources/prompts/2026/08/07/150254-f40d2c84-401-prompt]]
+- Source note: [[wiki/sources/2026-08-07-150254-prompt]]
+- Query note: [[wiki/queries/2026-08-07-150254-prompt]]
+
+## 2026-08-07 15:09:57 UTC — 통합 배선이 끝났고 Unity 검증이 백그라운드로 돌기 시작했습니다.
+- Raw output: [[raw/sources/outputs/2026/08/07/150957-f40d2c84-401-unity]]
+- Source note: [[wiki/sources/2026-08-07-150957-unity-output]]
+- Report note: [[wiki/reports/2026-08-07-150957-unity-answer]]
+- rtk compression: rtk (1109→1109 chars, -0.0%)
+
+## [2026-08-07 15:10:15] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/151015-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-151015-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-151015-task-notification]]
+
+## 2026-08-07 15:14:57 UTC — EditMode 전량 테스트가 열려 있는 에디터에서 실행 중입니다 (백그라운드). 지금까지의 통합 검증 경과:
+- Raw output: [[raw/sources/outputs/2026/08/07/151457-f40d2c84-401-editmode]]
+- Source note: [[wiki/sources/2026-08-07-151457-editmode-output]]
+- Report note: [[wiki/reports/2026-08-07-151457-editmode-answer]]
+- rtk compression: rtk (487→487 chars, -0.0%)
+
+## [2026-08-07 15:15:16] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/151516-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-151516-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-151516-task-notification]]
+
+## 2026-08-07 15:15:43 UTC — EditMode 전량 테스트를 올바른 타임아웃(15분)으로 재실행 중입니다. 테스트 스위트가 300개 이상이라 수…
+- Raw output: [[raw/sources/outputs/2026/08/07/151543-f40d2c84-401-editmode-15-300]]
+- Source note: [[wiki/sources/2026-08-07-151543-editmode-15-300-output]]
+- Report note: [[wiki/reports/2026-08-07-151543-editmode-15-300-answer]]
+- rtk compression: rtk (125→125 chars, -0.0%)
+
+## 2026-08-07 15:16:21 UTC — 자산 레인 전체 완료 확인 — W12~W16 산출물이 모두 소비자 계약에 정렬됐고, `.meta`(Sprite 설…
+- Raw output: [[raw/sources/outputs/2026/08/07/151621-f40d2c84-401-w12-w16-meta-sprite]]
+- Source note: [[wiki/sources/2026-08-07-151621-w12-w16-meta-sprite-output]]
+- Report note: [[wiki/reports/2026-08-07-151621-w12-w16-meta-sprite-answer]]
+- rtk compression: rtk (456→456 chars, -0.0%)
+
+## [2026-08-07 15:16:40] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/151640-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-151640-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-151640-task-notification]]
+
+## 2026-08-07 15:20:58 UTC — 6건 실패의 수정 내역 정리 (재실행 진행 중):
+- Raw output: [[raw/sources/outputs/2026/08/07/152058-f40d2c84-401-6]]
+- Source note: [[wiki/sources/2026-08-07-152058-6-output]]
+- Report note: [[wiki/reports/2026-08-07-152058-6-answer]]
+- rtk compression: rtk (806→806 chars, -0.0%)
+
+## [2026-08-07 15:21:16] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/152116-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-152116-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-152116-task-notification]]
+
+## 2026-08-07 15:21:40 UTC — 재실행 중입니다 — 완료 통지가 오면 결과를 파싱해 보고드리겠습니다.
+- Raw output: [[raw/sources/outputs/2026/08/07/152140-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-07-152140-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-07-152140-assistant-output-answer]]
+- rtk compression: rtk (38→38 chars, -0.0%)
+
+## [2026-08-07 15:22:16] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/152216-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-152216-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-152216-task-notification]]
+
+## 2026-08-07 15:23:19 UTC — 잔여 2건 수정 완료 — ① 테스트의 525 핀 자체가 dotnet double 산술로 작성돼 있어 런타임과 같은…
+- Raw output: [[raw/sources/outputs/2026/08/07/152319-f40d2c84-401-2-525-dotnet-double]]
+- Source note: [[wiki/sources/2026-08-07-152319-2-525-dotnet-double-output]]
+- Report note: [[wiki/reports/2026-08-07-152319-2-525-dotnet-double-answer]]
+- rtk compression: rtk (249→249 chars, -0.0%)
+
+## [2026-08-07 15:23:45] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/152345-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-152345-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-152345-task-notification]]
+
+## 2026-08-07 15:24:07 UTC — 도메인 리로드 정착 대기(30초) 후 재실행하도록 백그라운드에 걸었습니다. 결과가 나오는 대로 파싱해 최종 보고드…
+- Raw output: [[raw/sources/outputs/2026/08/07/152407-f40d2c84-401-30]]
+- Source note: [[wiki/sources/2026-08-07-152407-30-output]]
+- Report note: [[wiki/reports/2026-08-07-152407-30-answer]]
+- rtk compression: rtk (69→69 chars, -0.0%)
+
+## [2026-08-07 15:25:03] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/152503-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-152503-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-152503-task-notification]]
+
+## 2026-08-07 15:26:33 UTC — 통합 완료 — EditMode 666/666 전량 통과 ✅
+- Raw output: [[raw/sources/outputs/2026/08/07/152633-f40d2c84-401-editmode-666-666]]
+- Source note: [[wiki/sources/2026-08-07-152633-editmode-666-666-output]]
+- Report note: [[wiki/reports/2026-08-07-152633-editmode-666-666-answer]]
+- rtk compression: rtk (1169→1169 chars, -0.0%)
+
+## [2026-08-07 23:03:58] query | ㅇㅇ
+- Raw capture: [[raw/sources/prompts/2026/08/07/230358-f40d2c84-401-prompt]]
+- Source note: [[wiki/sources/2026-08-07-230358-prompt]]
+- Query note: [[wiki/queries/2026-08-07-230358-prompt]]
+
+## 2026-08-07 23:06:25 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/07/230625-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-07-230625-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-07-230625-tool-use-answer]]
+- rtk compression: rtk (786→786 chars, -0.0%)
+
+## [2026-08-07 23:06:47] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/230647-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-230647-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-230647-task-notification]]
+
+## 2026-08-07 23:07:11 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/07/230711-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-07-230711-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-07-230711-tool-use-answer]]
+- rtk compression: rtk (715→715 chars, -0.0%)
+
+## [2026-08-07 23:10:51] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/231051-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-231051-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-231051-task-notification]]
+
+## 2026-08-07 23:11:32 UTC — Unity 에디터 프로세스는 살아 있고 빌드 진행 중으로 보입니다. 올바른 경로(`build-webgl/Build…
+- Raw output: [[raw/sources/outputs/2026/08/07/231132-f40d2c84-401-unity-build-webgl-build]]
+- Source note: [[wiki/sources/2026-08-07-231132-unity-build-webgl-build-output]]
+- Report note: [[wiki/reports/2026-08-07-231132-unity-build-webgl-build-answer]]
+- rtk compression: rtk (280→280 chars, -0.0%)
+
+## [2026-08-07 23:18:18] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/231818-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-231818-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-231818-task-notification]]
+
+## 2026-08-07 23:19:53 UTC — 빌드가 에디터 메인 루프에 정상 예약됐고, 산출물 폴링이 백그라운드로 돌고 있습니다 (완료 판정: wasm 갱신…
+- Raw output: [[raw/sources/outputs/2026/08/07/231953-f40d2c84-401-wasm]]
+- Source note: [[wiki/sources/2026-08-07-231953-wasm-output]]
+- Report note: [[wiki/reports/2026-08-07-231953-wasm-answer]]
+- rtk compression: rtk (140→140 chars, -0.0%)
+
+## [2026-08-07 23:28:18] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/232818-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-232818-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-232818-task-notification]]
+
+## 2026-08-07 23:30:51 UTC — 원인이 확정됐습니다 — **열려 있는 에디터에서는 WebGL 빌드가 구조적으로 불가**합니다:
+- Raw output: [[raw/sources/outputs/2026/08/07/233051-f40d2c84-401-webgl]]
+- Source note: [[wiki/sources/2026-08-07-233051-webgl-output]]
+- Report note: [[wiki/reports/2026-08-07-233051-webgl-answer]]
+- rtk compression: rtk (859→859 chars, -0.0%)
+
+## 2026-08-07 23:42:00 UTC — 에디터 종료 완료 → 프로젝트 락 해제 확인(프로세스 0개) → **배치모드 WebGL 빌드가 detached로…
+- Raw output: [[raw/sources/outputs/2026/08/07/234200-f40d2c84-401-0-webgl-detached]]
+- Source note: [[wiki/sources/2026-08-07-234200-0-webgl-detached-output]]
+- Report note: [[wiki/reports/2026-08-07-234200-0-webgl-detached-answer]]
+- rtk compression: rtk (262→262 chars, -0.0%)
+
+## [2026-08-07 23:43:58] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/234358-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-234358-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-234358-task-notification]]
+
+## 2026-08-07 23:44:25 UTC — 폴링 2차 창(9분)을 걸었습니다. 빌드 스크립트가 종료되는 즉시 로그 말미와 함께 결과를 보고드리겠습니다.
+- Raw output: [[raw/sources/outputs/2026/08/07/234425-f40d2c84-401-2-9]]
+- Source note: [[wiki/sources/2026-08-07-234425-2-9-output]]
+- Report note: [[wiki/reports/2026-08-07-234425-2-9-answer]]
+- rtk compression: rtk (60→60 chars, -0.0%)
+
+## [2026-08-07 23:47:21] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/234721-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-234721-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-234721-task-notification]]
+
+## 2026-08-07 23:48:28 UTC — 빌드 재시도가 실행 중입니다 (PID 43226). Bee 내부 오류는 재시도 시 이전 진행분을 이어받아 통과하는…
+- Raw output: [[raw/sources/outputs/2026/08/07/234828-f40d2c84-401-pid-43226-bee]]
+- Source note: [[wiki/sources/2026-08-07-234828-pid-43226-bee-output]]
+- Report note: [[wiki/reports/2026-08-07-234828-pid-43226-bee-answer]]
+- rtk compression: rtk (140→140 chars, -0.0%)
+
+## [2026-08-07 23:49:22] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/234922-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-234922-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-234922-task-notification]]
+
+## 2026-08-07 23:50:21 UTC — 사이클 완료 — 전 항목 검증 통과 🎉
+- Raw output: [[raw/sources/outputs/2026/08/07/235021-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-07-235021-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-07-235021-assistant-output-answer]]
+- rtk compression: rtk (1043→1043 chars, -0.0%)
+
+## [2026-08-07 23:51:37] query | 진행해
+- Raw capture: [[raw/sources/prompts/2026/08/07/235137-f40d2c84-401-prompt]]
+- Source note: [[wiki/sources/2026-08-07-235137-prompt]]
+- Query note: [[wiki/queries/2026-08-07-235137-prompt]]
+
+## 2026-08-07 23:53:15 UTC — push·배포는 완료됐고, CDN 반영 확인이 백그라운드로 돌고 있습니다 (배포된 index.html이 로컬 빌드…
+- Raw output: [[raw/sources/outputs/2026/08/07/235315-f40d2c84-401-push-cdn-index-html]]
+- Source note: [[wiki/sources/2026-08-07-235315-push-cdn-index-html-output]]
+- Report note: [[wiki/reports/2026-08-07-235315-push-cdn-index-html-answer]]
+- rtk compression: rtk (210→210 chars, -0.0%)
+
+## [2026-08-07 23:53:38] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/07/235338-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-07-235338-task-notification]]
+- Query note: [[wiki/queries/2026-08-07-235338-task-notification]]
+
+## 2026-08-07 23:54:02 UTC — 배포 실측 완료 — 전체 사이클 마감입니다.
+- Raw output: [[raw/sources/outputs/2026/08/07/235402-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-07-235402-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-07-235402-assistant-output-answer]]
+- rtk compression: rtk (881→881 chars, -0.0%)
+
+## [2026-08-08 01:04:40] query | 남은부분완료하자
+- Raw capture: [[raw/sources/prompts/2026/08/08/010440-f40d2c84-401-prompt]]
+- Source note: [[wiki/sources/2026-08-08-010440-prompt]]
+- Query note: [[wiki/queries/2026-08-08-010440-prompt]]
+
+## 2026-08-08 01:07:41 UTC — 이월분 4개 레인이 가동됐습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/010741-f40d2c84-401-4]]
+- Source note: [[wiki/sources/2026-08-08-010741-4-output]]
+- Report note: [[wiki/reports/2026-08-08-010741-4-answer]]
+- rtk compression: rtk (1016→1016 chars, -0.0%)
+
+## 2026-08-08 01:17:52 UTC — 자산 레인(asset-lane2)이 첫 번째로 완료됐습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/011752-f40d2c84-401-asset-lane2]]
+- Source note: [[wiki/sources/2026-08-08-011752-asset-lane2-output]]
+- Report note: [[wiki/reports/2026-08-08-011752-asset-lane2-answer]]
+- rtk compression: rtk (744→744 chars, -0.0%)
+
+## 2026-08-08 01:18:28 UTC — asset-lane2의 혼선을 정리했습니다 — task #10에 자산 범위와 통합 범위를 한 항목으로 묶어 적었던…
+- Raw output: [[raw/sources/outputs/2026/08/08/011828-f40d2c84-401-asset-lane2-task-10]]
+- Source note: [[wiki/sources/2026-08-08-011828-asset-lane2-task-10-output]]
+- Report note: [[wiki/reports/2026-08-08-011828-asset-lane2-task-10-answer]]
+- rtk compression: rtk (308→308 chars, -0.0%)
+
+## 2026-08-08 01:18:54 UTC — asset-lane2 정상 종료 확인. 나머지 3개 레인(sim-lane2 · view-lane2 · webgl-…
+- Raw output: [[raw/sources/outputs/2026/08/08/011854-f40d2c84-401-asset-lane2-3-sim-lane2-view-lane2-webgl]]
+- Source note: [[wiki/sources/2026-08-08-011854-asset-lane2-3-sim-lane2-view-lane2-webgl-output]]
+- Report note: [[wiki/reports/2026-08-08-011854-asset-lane2-3-sim-lane2-view-lane2-webgl-answer]]
+- rtk compression: rtk (173→173 chars, -0.0%)
+
+## 2026-08-08 01:24:44 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/012444-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-012444-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-012444-tool-use-answer]]
+- rtk compression: rtk (74→74 chars, -0.0%)
+
+## 2026-08-08 01:30:18 UTC — sim-lane2 (W6 보스 다양화) 완료** — AMENDMENT #16, 리포트: `_workspace/cu…
+- Raw output: [[raw/sources/outputs/2026/08/08/013018-f40d2c84-401-sim-lane2-w6-amendment-16-workspace-cu]]
+- Source note: [[wiki/sources/2026-08-08-013018-sim-lane2-w6-amendment-16-workspace-cu-output]]
+- Report note: [[wiki/reports/2026-08-08-013018-sim-lane2-w6-amendment-16-workspace-cu-answer]]
+- rtk compression: rtk (1143→1143 chars, -0.0%)
+
+## 2026-08-08 01:34:22 UTC — 통합 파이프라인이 돌기 시작했습니다. 현재 상태:
+- Raw output: [[raw/sources/outputs/2026/08/08/013422-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-013422-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-013422-assistant-output-answer]]
+- rtk compression: rtk (736→736 chars, -0.0%)
+
+## [2026-08-08 01:35:33] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/013533-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-013533-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-013533-task-notification]]
+
+## 2026-08-08 01:37:13 UTC — 허용오차 수정 2건 반영 완료, EditMode 전량 재실행이 백그라운드로 돌고 있습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/013713-f40d2c84-401-2-editmode]]
+- Source note: [[wiki/sources/2026-08-08-013713-2-editmode-output]]
+- Report note: [[wiki/reports/2026-08-08-013713-2-editmode-answer]]
+- rtk compression: rtk (407→407 chars, -0.0%)
+
+## [2026-08-08 01:37:58] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/013758-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-013758-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-013758-task-notification]]
+
+## 2026-08-08 01:38:28 UTC — WebGL 빌드가 배치모드로 실행 중입니다. 완료되면 결과 확인 → 이월분 커밋(레인별 분할) → push → g…
+- Raw output: [[raw/sources/outputs/2026/08/08/013828-f40d2c84-401-webgl-push-g]]
+- Source note: [[wiki/sources/2026-08-08-013828-webgl-push-g-output]]
+- Report note: [[wiki/reports/2026-08-08-013828-webgl-push-g-answer]]
+- rtk compression: rtk (95→95 chars, -0.0%)
+
+## [2026-08-08 01:41:23] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/014123-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-014123-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-014123-task-notification]]
+
+## 2026-08-08 01:43:36 UTC — push·배포 완료, CDN 반영 검증이 백그라운드로 돌고 있습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/014336-f40d2c84-401-push-cdn]]
+- Source note: [[wiki/sources/2026-08-08-014336-push-cdn-output]]
+- Report note: [[wiki/reports/2026-08-08-014336-push-cdn-answer]]
+- rtk compression: rtk (723→723 chars, -0.0%)
+
+## [2026-08-08 01:43:56] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/014356-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-014356-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-014356-task-notification]]
+
+## 2026-08-08 01:45:10 UTC — 이월분 사이클 완전 마감 🎉
+- Raw output: [[raw/sources/outputs/2026/08/08/014510-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-014510-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-014510-assistant-output-answer]]
+- rtk compression: rtk (1230→1230 chars, -0.0%)
+
+## [2026-08-08 02:23:05] query | 아이탬 획득시 팝업 나오도록하고 지도 유아이 개선해야해. 우측에 이정표를 빼던가 중복되지않도록하고, elevenlabs api 이용해서 효과음…
+- Raw capture: [[raw/sources/prompts/2026/08/08/022305-f40d2c84-401-elevenlabs-api]]
+- Source note: [[wiki/sources/2026-08-08-022305-elevenlabs-api]]
+- Query note: [[wiki/queries/2026-08-08-022305-elevenlabs-api]]
+
+## 2026-08-08 02:25:15 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/022515-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-022515-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-022515-tool-use-answer]]
+- rtk compression: rtk (1279→1279 chars, -0.0%)
+
+## 2026-08-08 02:27:17 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/022717-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-022717-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-022717-tool-use-answer]]
+- rtk compression: rtk (75→75 chars, -0.0%)
+
+## 2026-08-08 02:27:38 UTC — asset-lane3 정상 종료 확인. ui-lane3(획득 팝업 + 지도 이정표 정리 + 사운드 배선) 완료를…
+- Raw output: [[raw/sources/outputs/2026/08/08/022738-f40d2c84-401-asset-lane3-ui-lane3]]
+- Source note: [[wiki/sources/2026-08-08-022738-asset-lane3-ui-lane3-output]]
+- Report note: [[wiki/reports/2026-08-08-022738-asset-lane3-ui-lane3-answer]]
+- rtk compression: rtk (140→140 chars, -0.0%)
+
+## 2026-08-08 02:54:39 UTC — 통합 파이프라인(EditMode 전량 → WebGL 빌드 체인)이 백그라운드로 실행 중입니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/025439-f40d2c84-401-editmode-webgl]]
+- Source note: [[wiki/sources/2026-08-08-025439-editmode-webgl-output]]
+- Report note: [[wiki/reports/2026-08-08-025439-editmode-webgl-answer]]
+- rtk compression: rtk (832→832 chars, -0.0%)
+
+## 2026-08-08 02:55:13 UTC — ui-lane3 정상 종료 확인 (태스크는 이미 완료 정리됨). 모든 레인이 닫혔고, EditMode → WebG…
+- Raw output: [[raw/sources/outputs/2026/08/08/025513-f40d2c84-401-ui-lane3-editmode-webg]]
+- Source note: [[wiki/sources/2026-08-08-025513-ui-lane3-editmode-webg-output]]
+- Report note: [[wiki/reports/2026-08-08-025513-ui-lane3-editmode-webg-answer]]
+- rtk compression: rtk (126→126 chars, -0.0%)
+
+## [2026-08-08 02:55:59] query | 빌드 배포까지다한거야?
+- Raw capture: [[raw/sources/prompts/2026/08/08/025559-f40d2c84-401-prompt]]
+- Source note: [[wiki/sources/2026-08-08-025559-prompt]]
+- Query note: [[wiki/queries/2026-08-08-025559-prompt]]
+
+## 2026-08-08 02:56:39 UTC — 빌드 완료 폴링을 걸어뒀습니다. 끝나면 바로 커밋 → push → 배포 → 실측을 이어서 진행하고, 완료 시점에…
+- Raw output: [[raw/sources/outputs/2026/08/08/025639-f40d2c84-401-push]]
+- Source note: [[wiki/sources/2026-08-08-025639-push-output]]
+- Report note: [[wiki/reports/2026-08-08-025639-push-answer]]
+- rtk compression: rtk (76→76 chars, -0.0%)
+
+## [2026-08-08 02:56:54] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/025654-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-025654-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-025654-task-notification]]
+
+## 2026-08-08 02:58:47 UTC — 네, 이제 빌드·커밋·push·배포까지 끝냈습니다. CDN 반영 대조만 백그라운드에서 돌고 있습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/025847-f40d2c84-401-push-cdn]]
+- Source note: [[wiki/sources/2026-08-08-025847-push-cdn-output]]
+- Report note: [[wiki/reports/2026-08-08-025847-push-cdn-answer]]
+- rtk compression: rtk (1153→1153 chars, -0.0%)
+
+## [2026-08-08 02:59:00] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/025900-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-025900-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-025900-task-notification]]
+
+## 2026-08-08 02:59:25 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/025925-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-025925-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-025925-tool-use-answer]]
+- rtk compression: rtk (183→183 chars, -0.0%)
+
+## [2026-08-08 03:04:24] query | pr 머지해서 반영후 빌드하고 깃푸시, 깃페이지도 반영해
+- Raw capture: [[raw/sources/prompts/2026/08/08/030424-f40d2c84-401-pr]]
+- Source note: [[wiki/sources/2026-08-08-030424-pr]]
+- Query note: [[wiki/queries/2026-08-08-030424-pr]]
+
+## 2026-08-08 03:08:59 UTC — PR 머지와 합류가 끝났고, 검증·빌드가 돌고 있습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/030859-f40d2c84-401-pr]]
+- Source note: [[wiki/sources/2026-08-08-030859-pr-output]]
+- Report note: [[wiki/reports/2026-08-08-030859-pr-answer]]
+- rtk compression: rtk (712→712 chars, -0.0%)
+
+## [2026-08-08 03:11:14] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/031114-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-031114-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-031114-task-notification]]
+
+## 2026-08-08 03:12:28 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/031228-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-031228-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-031228-tool-use-answer]]
+- rtk compression: rtk (551→551 chars, -0.0%)
+
+## [2026-08-08 03:12:47] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/031247-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-031247-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-031247-task-notification]]
+
+## 2026-08-08 03:13:08 UTC — 전부 완료됐습니다.** 배포 실측까지 통과했습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/031308-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-031308-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-031308-assistant-output-answer]]
+- rtk compression: rtk (889→889 chars, -0.0%)
+
+## [2026-08-08 06:27:18] query | pr 확인하고 머지해서 바녕후 배포하자.
+- Raw capture: [[raw/sources/prompts/2026/08/08/062718-f40d2c84-401-pr]]
+- Source note: [[wiki/sources/2026-08-08-062718-pr]]
+- Query note: [[wiki/queries/2026-08-08-062718-pr]]
+
+## 2026-08-08 06:28:10 UTC — 확인 결과 **머지·배포할 것이 남아 있지 않습니다.** 방금 전 턴에서 이미 다 처리된 상태입니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/062810-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-062810-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-062810-assistant-output-answer]]
+- rtk compression: rtk (701→701 chars, -0.0%)
+
+## [2026-08-08 07:42:55] query | Pr머지하고 배포 빌드해서 깃페이지 배포하자
+- Raw capture: [[raw/sources/prompts/2026/08/08/074255-f40d2c84-401-pr]]
+- Source note: [[wiki/sources/2026-08-08-074255-pr]]
+- Query note: [[wiki/queries/2026-08-08-074255-pr]]
+
+## 2026-08-08 07:45:06 UTC — PR #5 머지와 반영이 끝났고 검증·빌드가 돌고 있습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/074506-f40d2c84-401-pr-5]]
+- Source note: [[wiki/sources/2026-08-08-074506-pr-5-output]]
+- Report note: [[wiki/reports/2026-08-08-074506-pr-5-answer]]
+- rtk compression: rtk (466→466 chars, -0.0%)
+
+## [2026-08-08 07:47:18] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/074718-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-074718-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-074718-task-notification]]
+
+## 2026-08-08 07:48:30 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/074830-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-074830-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-074830-tool-use-answer]]
+- rtk compression: rtk (658→658 chars, -0.0%)
+
+## [2026-08-08 07:48:47] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/074847-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-074847-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-074847-task-notification]]
+
+## 2026-08-08 07:49:08 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/074908-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-074908-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-074908-tool-use-answer]]
+- rtk compression: rtk (183→183 chars, -0.0%)
+
+## [2026-08-08 08:23:31] query | 다음 제출문 docs 폴더에 만들자. 매시는 이미지 창장물로 rodin 으로 만드로 maximo 모션을 이용해서 사용햇기때문에 타 ip문제없음…
+- Raw capture: [[raw/sources/prompts/2026/08/08/082331-f40d2c84-401-docs-rodin-maximo-ip]]
+- Source note: [[wiki/sources/2026-08-08-082331-docs-rodin-maximo-ip]]
+- Query note: [[wiki/queries/2026-08-08-082331-docs-rodin-maximo-ip]]
+
+## 2026-08-08 08:27:22 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/082722-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-082722-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-082722-tool-use-answer]]
+- rtk compression: rtk (5799→5799 chars, -0.0%)
+
+## 2026-08-08 08:35:30 UTC — 게임 소개 문서(제출물 3)가 완성됐고, 제가 가장 틀리기 쉬운 부분인 **조작키를 코드와 직접 대조**했습니다…
+- Raw output: [[raw/sources/outputs/2026/08/08/083530-f40d2c84-401-3]]
+- Source note: [[wiki/sources/2026-08-08-083530-3-output]]
+- Report note: [[wiki/reports/2026-08-08-083530-3-answer]]
+- rtk compression: rtk (555→555 chars, -0.0%)
+
+## 2026-08-08 08:39:20 UTC — 제출 문서 세트 완료
+- Raw output: [[raw/sources/outputs/2026/08/08/083920-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-083920-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-083920-assistant-output-answer]]
+- rtk compression: rtk (1273→1273 chars, -0.0%)
+
+## [2026-08-08 08:53:40] query | 한번에 push하자
+- Raw capture: [[raw/sources/prompts/2026/08/08/085340-f40d2c84-401-push]]
+- Source note: [[wiki/sources/2026-08-08-085340-push]]
+- Query note: [[wiki/queries/2026-08-08-085340-push]]
+
+## 2026-08-08 08:53:50 UTC — 알겠습니다. YouTube 링크를 받으면 TODO 2곳 채우고 PDF 재빌드 → 그때 한 번에 push하겠습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/085350-f40d2c84-401-youtube-todo-2-pdf-push]]
+- Source note: [[wiki/sources/2026-08-08-085350-youtube-todo-2-pdf-push-output]]
+- Report note: [[wiki/reports/2026-08-08-085350-youtube-todo-2-pdf-push-answer]]
+- rtk compression: rtk (339→339 chars, -0.0%)
+
+## [2026-08-08 08:54:44] query | /playwriter 이용해서 영상촬영하고 영상만들어. /compresso 로 압축까지
+- Raw capture: [[raw/sources/prompts/2026/08/08/085444-f40d2c84-401-playwriter-compresso]]
+- Source note: [[wiki/sources/2026-08-08-085444-playwriter-compresso]]
+- Query note: [[wiki/queries/2026-08-08-085444-playwriter-compresso]]
+
+## 2026-08-08 09:20:05 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/092005-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-092005-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-092005-tool-use-answer]]
+- rtk compression: rtk (248→248 chars, -0.0%)
+
+## 2026-08-08 09:23:19 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/092319-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-092319-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-092319-tool-use-answer]]
+- rtk compression: rtk (150→150 chars, -0.0%)
+
+## [2026-08-08 09:23:59] query | Generate an image of "Cinematic dark fantasy dungeon stage-entry scene, 55-degr…
+- Raw capture: [[raw/sources/prompts/2026/08/08/092359-019fe0af-897-generate-an-image-of-cinematic-dark-fantasy-dung]]
+- Source note: [[wiki/sources/2026-08-08-092359-generate-an-image-of-cinematic-dark-fantasy-dung]]
+- Query note: [[wiki/queries/2026-08-08-092359-generate-an-image-of-cinematic-dark-fantasy-dung]]
+
+## 2026-08-08 09:29:19 UTC — 나머지 9장 생성이 백그라운드로 돌고 있습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/092919-f40d2c84-401-9]]
+- Source note: [[wiki/sources/2026-08-08-092919-9-output]]
+- Report note: [[wiki/reports/2026-08-08-092919-9-answer]]
+- rtk compression: rtk (699→699 chars, -0.0%)
+
+## [2026-08-08 09:29:35] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/092935-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-092935-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-092935-task-notification]]
+
+## [2026-08-08 09:30:34] query | Generate an image of "Dark fantasy game loading-screen key art, painterly conce…
+- Raw capture: [[raw/sources/prompts/2026/08/08/093034-019fe0b5-a5b-generate-an-image-of-dark-fantasy-game-loading-s]]
+- Source note: [[wiki/sources/2026-08-08-093034-generate-an-image-of-dark-fantasy-game-loading-s]]
+- Query note: [[wiki/queries/2026-08-08-093034-generate-an-image-of-dark-fantasy-game-loading-s]]
+
+## [2026-08-08 09:32:45] query | Generate an image of "WIDE LANDSCAPE 3:2 horizontal banner composition (much wi…
+- Raw capture: [[raw/sources/prompts/2026/08/08/093245-019fe0b7-a5e-generate-an-image-of-wide-landscape-3-2-horizont]]
+- Source note: [[wiki/sources/2026-08-08-093245-generate-an-image-of-wide-landscape-3-2-horizont]]
+- Query note: [[wiki/queries/2026-08-08-093245-generate-an-image-of-wide-landscape-3-2-horizont]]
+
+## [2026-08-08 09:35:31] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/093531-019fe0ba-301-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-093531-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-093531-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## 2026-08-08 09:35:43 UTC — 생성 배치를 다시 돌렸습니다. 진행 상황을 정리하면:
+- Raw output: [[raw/sources/outputs/2026/08/08/093543-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-093543-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-093543-assistant-output-answer]]
+- rtk compression: rtk (710→710 chars, -0.0%)
+
+## [2026-08-08 09:37:46] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/093746-019fe0bc-3e1-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-093746-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-093746-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:40:06] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/094006-019fe0be-5f8-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-094006-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-094006-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:42:03] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/094203-019fe0c0-207-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-094203-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-094203-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:44:14] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/094414-019fe0c2-29c-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-094414-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-094414-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:46:21] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/094621-019fe0c4-1a9-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-094621-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-094621-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:48:20] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/094820-019fe0c5-ec2-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-094820-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-094820-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:50:19] query | Generate an image of "WIDE LANDSCAPE horizontal banner composition, much wider…
+- Raw capture: [[raw/sources/prompts/2026/08/08/095019-019fe0c7-b0f-generate-an-image-of-wide-landscape-horizontal-b]]
+- Source note: [[wiki/sources/2026-08-08-095019-generate-an-image-of-wide-landscape-horizontal-b]]
+- Query note: [[wiki/queries/2026-08-08-095019-generate-an-image-of-wide-landscape-horizontal-b]]
+
+## [2026-08-08 09:52:42] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/095242-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-095242-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-095242-task-notification]]
+
+## 2026-08-08 09:54:13 UTC — 스테이지별 컷씬 프레임 10장이 전부 완성됐습니다.
+- Raw output: [[raw/sources/outputs/2026/08/08/095413-f40d2c84-401-10]]
+- Source note: [[wiki/sources/2026-08-08-095413-10-output]]
+- Report note: [[wiki/reports/2026-08-08-095413-10-answer]]
+- rtk compression: rtk (812→812 chars, -0.0%)
+
+## [2026-08-08 09:56:22] query | <task-notification>
+- Raw capture: [[raw/sources/prompts/2026/08/08/095622-f40d2c84-401-task-notification]]
+- Source note: [[wiki/sources/2026-08-08-095622-task-notification]]
+- Query note: [[wiki/queries/2026-08-08-095622-task-notification]]
+
+## 2026-08-08 09:58:02 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/08/095802-f40d2c84-401-tool-use]]
+- Source note: [[wiki/sources/2026-08-08-095802-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-08-095802-tool-use-answer]]
+- rtk compression: rtk (1724→1724 chars, -0.0%)
+
+## [2026-08-08 14:23:33] query | session 아이디일려줘
+- Raw capture: [[raw/sources/prompts/2026/08/08/142333-f40d2c84-401-session]]
+- Source note: [[wiki/sources/2026-08-08-142333-session]]
+- Query note: [[wiki/queries/2026-08-08-142333-session]]
+
+## 2026-08-08 14:23:57 UTC — ```
+- Raw output: [[raw/sources/outputs/2026/08/08/142357-f40d2c84-401-assistant-output]]
+- Source note: [[wiki/sources/2026-08-08-142357-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-08-142357-assistant-output-answer]]
+- rtk compression: rtk (171→171 chars, -0.0%)
+
+## [2026-08-08 15:15:39] query | /playwriter akillness38@gmail.com 계정 연동된 장치 mac,ios 연동된 장치외에는 모두 로그아웃및 초기화하도록 설…
+- Raw capture: [[raw/sources/prompts/2026/08/08/151539-f40d2c84-401-playwriter-akillness38-gmail-com-mac-ios]]
+- Source note: [[wiki/sources/2026-08-08-151539-playwriter-akillness38-gmail-com-mac-ios]]
+- Query note: [[wiki/queries/2026-08-08-151539-playwriter-akillness38-gmail-com-mac-ios]]
+
+## 2026-08-08 15:17:55 UTC — Chrome은 실행 중이지만(pid 717) Playwriter 브리지 연결이 끊겨 있어, 목록을 열려면 **직접…
+- Raw output: [[raw/sources/outputs/2026/08/08/151755-f40d2c84-401-chrome-pid-717-playwriter]]
+- Source note: [[wiki/sources/2026-08-08-151755-chrome-pid-717-playwriter-output]]
+- Report note: [[wiki/reports/2026-08-08-151755-chrome-pid-717-playwriter-answer]]
+- rtk compression: rtk (1108→1108 chars, -0.0%)
+
+## [2026-08-09 02:50:15] query | /scrapling https://github.com/waiterve/wai-play 스킬만들거야. 스킬표준화, 레퍼론스, 스크립트 참조해서…
+- Raw capture: [[raw/sources/prompts/2026/08/09/025015-68414a86-a75-scrapling-https-github-com-waiterve-wai-play]]
+- Source note: [[wiki/sources/2026-08-09-025015-scrapling-https-github-com-waiterve-wai-play]]
+- Query note: [[wiki/queries/2026-08-09-025015-scrapling-https-github-com-waiterve-wai-play]]
+
+## 2026-08-09 03:05:06 UTC — tool_use
+- Raw output: [[raw/sources/outputs/2026/08/09/030506-68414a86-a75-tool-use]]
+- Source note: [[wiki/sources/2026-08-09-030506-tool-use-output]]
+- Report note: [[wiki/reports/2026-08-09-030506-tool-use-answer]]
+- rtk compression: rtk (574→574 chars, -0.0%)
+
+## [2026-08-09 04:13:42] query | 설치되엇어?
+- Raw capture: [[raw/sources/prompts/2026/08/09/041342-68414a86-a75-prompt]]
+- Source note: [[wiki/sources/2026-08-09-041342-prompt]]
+- Query note: [[wiki/queries/2026-08-09-041342-prompt]]
+
+## 2026-08-09 04:14:05 UTC — 네, 설치 완료됐습니다.
+- Raw output: [[raw/sources/outputs/2026/08/09/041405-68414a86-a75-assistant-output]]
+- Source note: [[wiki/sources/2026-08-09-041405-assistant-output-output]]
+- Report note: [[wiki/reports/2026-08-09-041405-assistant-output-answer]]
+- rtk compression: rtk (823→823 chars, -0.0%)

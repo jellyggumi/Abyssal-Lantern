@@ -1,0 +1,19 @@
+{
+  "name": "CastleBusters.PlayModeTests",
+  "rootNamespace": "CastleBusters.Tests",
+  "references": [
+    "CastleBusters",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

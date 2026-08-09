@@ -1,0 +1,30 @@
+seed:
+  title: Castle Busters vertical-slice quality pass
+  source_spec: docs/specs/castle-busters-vertical-slice-quality.md
+  scope:
+    - Restore clean Unity compilation and focused PlayMode observability.
+    - Preserve the wind-aware launch, destructible structural-collapse, and player-versus-AI loop.
+    - Improve stability, stage visual differentiation, rematch integrity, and build configuration.
+  non_goals:
+    - Real-time PvP, eight-unit deck-building, ads, IAP, gacha, energy timers, and backend services.
+    - Balancing changes without a measured player-build performance or playtest packet.
+  constraints:
+    - Modify serialized scenes only through safe configuration edits; do not manually rewrite scene YAML.
+    - Use resource paths that work in a player build; do not depend on UnityEditor.AssetDatabase at runtime.
+    - Treat all unexpected PlayMode errors and residual teardown objects as failures.
+    - New and modified tests assert behavior rather than private implementation details.
+  acceptance:
+    - Unity test assemblies compile with no obsolete CastleController.GetBlockCount call.
+    - Focused PlayMode intro-to-launch flow passes without ignored unexpected errors.
+    - Shockwave VFX is shader-safe and self-cleaning.
+    - Scene teardown cannot spawn chariot reward or respawn work.
+    - Fresh match units never inherit HeroGrowth stacks.
+    - Stage backgrounds resolve distinctly through player-build Resources paths.
+    - Build Settings has exactly one enabled SampleScene.
+    - Animated unit resource frame sets resolve for all shipped unit states.
+    - Twenty evidence-backed QA cycles are recorded.
+  evidence:
+    - Focused Unity EditMode and PlayMode XML reports.
+    - Targeted compilation/build result.
+    - Resource and configuration regression tests.
+    - QA cycle ledger.

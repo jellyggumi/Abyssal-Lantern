@@ -1,21 +1,5 @@
 {
-  "name": "abyssal-lantern",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": "22.x"
-  },
-  "packageManager": "npm@10.9.2",
-  "scripts": {
-    "agentation:build": "esbuild agentation-toolbar-entry.jsx --bundle --minify --format=esm --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\" --outfile=agentation-toolbar.js",
-    "agentation:serve": "npx -y agentation-mcp server"
-  },
-  "devDependencies": {
-    "agentation": "1.1.0",
-    "esbuild": "^0.25.12",
-    "playwright": "1.52.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "three": "0.185.1"
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
   }
 }

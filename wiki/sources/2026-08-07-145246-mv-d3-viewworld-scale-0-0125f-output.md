@@ -1,0 +1,40 @@
+---
+type: "source-summary"
+source_type: "assistant-output"
+captured_at: "2026-08-07T14:52:46.133841+00:00"
+raw_path: "raw/sources/outputs/2026/08/07/145246-f40d2c84-401-mv-d3-viewworld-scale-0-0125f.md"
+session_id: "f40d2c84-4012-4f97-bf8c-1ec02651"
+rtk_method: "rtk"
+rtk_original_chars: 1545
+rtk_compressed_chars: 1545
+rtk_saved_pct: 0.0
+---
+
+# MV-D3 우려는 해소됐습니다 — `ViewWorld.Scale = 0.0125f`는 다른 세션이 이미 커밋한 값…
+
+- Raw output: [[raw/sources/outputs/2026/08/07/145246-f40d2c84-401-mv-d3-viewworld-scale-0-0125f]]
+- Filed report: [[wiki/reports/2026-08-07-145246-mv-d3-viewworld-scale-0-0125f-answer]]
+- rtk compression: rtk (1545→1545 chars, -0.0%)
+
+## Compressed Output (rtk)
+
+```text
+MV-D3 우려는 해소됐습니다 — `ViewWorld.Scale = 0.0125f`는 다른 세션이 이미 커밋한 값(9a3c7a9 "derive scene scale from ViewWorld")이고, 제 레인들은 건드리지 않았습니다(vfx-lane의 ViewWorld 수정은 파티클 시드 클론 헬퍼 추가뿐, 규약 준수). 시드 문서의 "0.01f 불변" 문구가 구버전 수치였을 뿐입니다.
+
+**Sim 레인 완료** — W4/W5에 더해 W-MV까지 3건 전부 (리포트: `_workspace/current/engineering/sim-lane-w4-w5-report.md`)
+
+- **W4 (AMENDMENT #13)**: 웨이브 포인트 예산 `min(600, 100+(w−1)×26)` — 몸부터 사고(스폰 4~14) 남는 예산은 체력 배율(≤2.68), 정예 배정 ≤3. DDA는 HP 분율/소요 시간/피격 3신호 → 웨이브당 ±1밴드, ±2 클램프, 전부 정수 산술
+- **W5 (#14)**: Basic/Fine/Epic 3등급 — 정수 해시 롤 22%/8% + pity 2중 (Basic 6연속·non-Epic 19연속 불가, 4000드롭 실측으로 상한 타이트 확인). 보스는 Epic 확정·원장 밖
+- **W-MV (#15)**: 실측 결과 던전도 아레나와 같은 520×270 반축 사용, 플레이어 도달 면적이 그려진 플레이트의 **24.6%** 뿐이었음 → 확장 554×418 (기믹 span·플레이트가 허용하는 최대), 면적 ×1.70, 재의 벽/조류 커버리지 정확히 유지
+- **안전성**: FROZEN 파일 무수정, 게이트 OFF 시 코드 경로 무분기 — pre/post 다이제스트 224행 완전 일치, 순수-Sim 테스트 **232/232 그린** (기존 212 + 신규 28종 중 dotnet 실행분), RNG 0건
+
+**주의 — 통합 시 필수 항목 2건** (sim-lane이 정확히 짚음):
+1. 게이트는 전부 opt-in이라 `GameDirector` 던전 진입에서 `DungeonProgressionConfig`를 켜는 한 줄이 없으면 완전 비활성 — 통합 단계에서 제가 연결
+2. **W-MV는 벽 링 동기가 필수**: 클램프만 넓히면 플레이어가 벽 링을 통과합니다. `EnvironmentBuilder`의 반축 상수를 심 게시값으로 전환해야 하는데, 이 파일은 **다른 세션이 수정 중**이라 통합 시점에 충돌 없이 처리해야 합니다 (이것 때문에 bounds는 `All` 프리셋에서 분리돼 있음 — 안전한 설계)
+
+**사람 판단 대기 항목** (기본값으로 진행하되 확인 요망):
+- 초반 난이도: 게이트 ON 시 웨이브 1–6 적 HP가 86 고정(대신 스폰 6→12) — 초반 절대 난이도가 살짝 낮아짐. `BudgetBase` 상향으로 조정 가능
+- Epic 장비 파편 랭크스텝은 보수적으로 2 채택 (`{1,1,2}`)
+
+ui-lane·vfx-lane도 리포트 파일이 이미 생성돼 있어 완료 보고가 곧 도착할 것으로 보입니다. 전 레인 수신 후 통합(게이트 연결·코드 배선 5건·EditMode 통합 실행)으로 넘어갑니다.
+```

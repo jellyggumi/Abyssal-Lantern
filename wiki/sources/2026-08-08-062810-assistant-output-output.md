@@ -1,0 +1,36 @@
+---
+type: "source-summary"
+source_type: "assistant-output"
+captured_at: "2026-08-08T06:28:10.050292+00:00"
+raw_path: "raw/sources/outputs/2026/08/08/062810-f40d2c84-401-assistant-output.md"
+session_id: "f40d2c84-4012-4f97-bf8c-1ec02651"
+rtk_method: "rtk"
+rtk_original_chars: 701
+rtk_compressed_chars: 701
+rtk_saved_pct: 0.0
+---
+
+# 확인 결과 **머지·배포할 것이 남아 있지 않습니다.** 방금 전 턴에서 이미 다 처리된 상태입니다.
+
+- Raw output: [[raw/sources/outputs/2026/08/08/062810-f40d2c84-401-assistant-output]]
+- Filed report: [[wiki/reports/2026-08-08-062810-assistant-output-answer]]
+- rtk compression: rtk (701→701 chars, -0.0%)
+
+## Compressed Output (rtk)
+
+```text
+확인 결과 **머지·배포할 것이 남아 있지 않습니다.** 방금 전 턴에서 이미 다 처리된 상태입니다.
+
+| 확인 항목 | 상태 |
+|---|---|
+| 열린 PR | **0건** (PR #4는 03:05에 머지 완료, #3·#1은 그 이전) |
+| `main` / `akillness/main` / 로컬 HEAD | 전부 **`f9e5063`** 로 동일 — ahead 0, behind 0 |
+| gh-pages | `c45417e` — 제가 배포한 그 커밋 |
+| 배포된 index.html | 로컬 빌드와 **md5 일치** (`d63e528a…`) |
+
+즉 PR #4 머지 → 합류 → EditMode 800/800 → 빌드 → push(양 브랜치) → gh-pages 배포까지가 이미 끝났고, 지금 서비스 중인 빌드가 그 결과물입니다. 같은 작업을 다시 하면 내용이 동일한 빈 배포가 될 뿐이라 진행하지 않았습니다.
+
+워킹트리에 남은 건 `main.slnx` 1줄 변경뿐인데, Unity 배치 실행이 자동 재생성한 솔루션 파일이라 커밋할 내용이 아닙니다 (원하시면 커밋하겠습니다).
+
+**새로 머지할 것이 생기려면** 다른 세션이 PR을 올려야 합니다. 혹시 특정 브랜치를 PR로 올려 머지하길 원하셨던 거라면 어느 브랜치인지 알려주세요 — 예를 들어 지금 `akillness/main`은 이미 `main`과 동일해서 PR을 만들 수 없습니다.
+```

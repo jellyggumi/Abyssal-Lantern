@@ -1,0 +1,24 @@
+---
+title: "/skill-autoresearch"
+created_at: "2026-05-31T15:22:32.853713+00:00"
+section: "queries"
+status: "submitted"
+session_id: "65b284be-4c99-4465-83fe-881d3fe881c3"
+raw_prompt: "[[raw/sources/prompts/2026/05/31/152232-65b284be-4c9-skill-autoresearch]]"
+source_summary: "[[wiki/sources/2026-05-31-152232-skill-autoresearch]]"
+---
+
+# /skill-autoresearch
+
+## Question
+
+/skill-autoresearch
+
+## Answer
+
+- [ ] Fill this after the answer becomes worth keeping
+
+## Evidence and Citations
+
+- [[wiki/sources/2026-05-31-152232-skill-autoresearch]]
+- [[raw/sources/prompts/2026/05/31/152232-65b284be-4c9-skill-autoresearch]]

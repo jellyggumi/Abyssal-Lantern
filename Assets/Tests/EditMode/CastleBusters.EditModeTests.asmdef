@@ -1,0 +1,22 @@
+{
+  "name": "CastleBusters.EditModeTests",
+  "rootNamespace": "CastleBusters.Tests",
+  "references": [
+    "CastleBusters",
+    "Unity.TextMeshPro",
+    "Unity.Purchasing"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
