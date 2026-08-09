@@ -12,6 +12,10 @@ namespace CastleBusters
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
+        // Briefly hold the impact result on screen, then hand control back. The former
+        // unconditional 2-second pause made resolved shots feel like input lag.
+        public const float PostImpactHoldSeconds = 0.35f;
+
 
         public GameState currentState = GameState.Setup;
         public float turnDuration = 15f;
@@ -33,7 +37,7 @@ namespace CastleBusters
         // part of the curve (slow onboarding, accelerating pressure, plateaued endgame).
         public int difficultyRampTurns = 15;
         public float windCapStart = 2.0f;
-        public float windCapEnd = 5.5f;
+        public float windCapEnd = 6.5f;
         public float aiErrorStart = 2.5f;
         public float aiErrorEnd = 0.8f;
         public float stormChanceStart = 0.02f;
@@ -54,7 +58,6 @@ namespace CastleBusters
         [Header("Prefabs")]
         public GameObject knightPrefab;
         public GameObject archerPrefab;
-        public GameObject bomberPrefab;
         public GameObject explosiveBarrelPrefab;
 
         [Header("UI References")]
@@ -66,7 +69,11 @@ namespace CastleBusters
         public TMPro.TextMeshProUGUI scoreText;
         public UnityEngine.UI.Button knightButton;
         public UnityEngine.UI.Button archerButton;
-        public UnityEngine.UI.Button bomberButton;
+        // Slot 3 became the Cannon card when the Bomber was removed
+        // (design/deployment-economy.md §2). FormerlySerializedAs keeps the existing
+        // SampleScene wiring attached instead of silently nulling the button reference.
+        [UnityEngine.Serialization.FormerlySerializedAs("bomberButton")]
+        public UnityEngine.UI.Button cannonButton;
         public UnityEngine.UI.Button gimmickButton;
         [System.NonSerialized] public UnityEngine.UI.Button lastStandButton;
 
@@ -170,6 +177,10 @@ namespace CastleBusters
             if (GetComponent<DebrisPool>() == null)
             {
                 gameObject.AddComponent<DebrisPool>();
+            }
+            if (DeploymentController.Instance == null && FindObjectOfType<DeploymentController>() == null)
+            {
+                gameObject.AddComponent<DeploymentController>();
             }
         }
 
@@ -734,7 +745,7 @@ namespace CastleBusters
         {
             knightButton?.onClick.AddListener(() => SelectUnit(0));
             archerButton?.onClick.AddListener(() => SelectUnit(1));
-            bomberButton?.onClick.AddListener(() => SelectUnit(2));
+            cannonButton?.onClick.AddListener(() => SelectUnit(2));
             gimmickButton?.onClick.AddListener(() => SelectUnit(3));
 
             // Selection-row sizing (playtest QA pass): character cards run 1.5x the original
@@ -751,17 +762,17 @@ namespace CastleBusters
 
             StyleSelectionButton(knightButton, "Knight", 0, characterSize);
             StyleSelectionButton(archerButton, "Archer", 1, characterSize);
-            StyleSelectionButton(bomberButton, "Bomber", 2, characterSize);
+            StyleSelectionButton(cannonButton, "Cannon", 2, characterSize);
             StyleSelectionButton(gimmickButton, "ExplosiveBarrel", 3, gimmickSize);
 
             LayoutSelectionRow(
-                new[] { knightButton, archerButton, bomberButton, gimmickButton },
+                new[] { knightButton, archerButton, cannonButton, gimmickButton },
                 new[] { characterSize, characterSize, characterSize, gimmickSize },
                 -96f, 16f);
 
             if (knightButton != null && knightButton.GetComponent<GameButtonAnimator>() == null) knightButton.gameObject.AddComponent<GameButtonAnimator>();
             if (archerButton != null && archerButton.GetComponent<GameButtonAnimator>() == null) archerButton.gameObject.AddComponent<GameButtonAnimator>();
-            if (bomberButton != null && bomberButton.GetComponent<GameButtonAnimator>() == null) bomberButton.gameObject.AddComponent<GameButtonAnimator>();
+            if (cannonButton != null && cannonButton.GetComponent<GameButtonAnimator>() == null) cannonButton.gameObject.AddComponent<GameButtonAnimator>();
             if (gimmickButton != null && gimmickButton.GetComponent<GameButtonAnimator>() == null) gimmickButton.gameObject.AddComponent<GameButtonAnimator>();
             SetupLastStandButton();
         }
@@ -891,9 +902,11 @@ namespace CastleBusters
             float scale = size.y / 54f; // relative to the original 82x54 face
 
 
-            // Resolve the unit's portrait sprite.
-            Sprite unitSprite = null;
-            if (unitName == "ExplosiveBarrel")
+            // Prefer the high-contrast Higgsfield selection glyphs, but keep the existing
+            // unit/gimmick art as a gameplay-safe fallback when optional art is unavailable.
+            string higgsfieldKey = unitName == "ExplosiveBarrel" ? HiggsfieldSpriteLibrary.Barrel : unitName;
+            Sprite unitSprite = HiggsfieldSpriteLibrary.LoadUi(higgsfieldKey);
+            if (unitSprite == null && unitName == "ExplosiveBarrel")
             {
                 unitSprite = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.Barrel);
                 if (unitSprite == null && explosiveBarrelPrefab != null)
@@ -902,7 +915,7 @@ namespace CastleBusters
                     if (sr != null) unitSprite = sr.sprite;
                 }
             }
-            else
+            else if (unitSprite == null)
             {
                 unitSprite = Resources.Load<Sprite>($"GeneratedUnitFrames/{unitName}/Idle/idle_000");
             }
@@ -970,7 +983,7 @@ namespace CastleBusters
             var text = button.GetComponentInChildren<TMPro.TextMeshProUGUI>();
             if (text != null)
             {
-                string role = unitName == "Knight" ? "BREACH" : unitName == "Archer" ? "ARC" : unitName == "Bomber" ? "BLAST" : "HAZARD";
+                string role = unitName == "Knight" ? "BREACH" : unitName == "Archer" ? "ARC" : unitName == "Cannon" ? "SIEGE" : "HAZARD";
                 string callSign = unitName == "ExplosiveBarrel" ? "POWDER KEG" : unitName.ToUpperInvariant();
                 text.text = $"{index + 1}  {callSign}\n{role}";
                 // Auto-size inside the card so long call signs (POWDER KEG) can never
@@ -1339,15 +1352,18 @@ namespace CastleBusters
             // stale bornTurn ages, and the danger heartbeat must not bleed into a fresh
             // match (review P2 #4).
             GimmickFieldDirector.Instance?.ResetField();
+            // Ruin-presentation state (crack-decal counts, wholeness milestones) is keyed by
+            // block/castle object identity; a scene reload spawns fresh objects, so stale keys
+            // from the previous match are dead weight — clear them with the same cadence.
+            CastleRuinFx.ResetForNewMatch();
             BrickPlacementController.Instance?.ClearPending();
             HeroGrowth.Reset();
             GameplayUxDirector.SetDangerState(false);
+            DeploymentController.Instance?.ResetEconomy();
             currentState = GameState.PlayerTurn;
             isPlayerTurn = true;
             turnTimer = turnDuration;
-            selectedUnitPrefab = knightPrefab;
-            FindObjectOfType<LaunchManager>()?.SetSelectedUnit(selectedUnitPrefab);
-            UpdateButtonVisuals(0);
+            SelectUnit(0);
             UpdateUI();
             RefreshLastStandButton();
             GameplayUxDirector.NotifyTurnChanged(true);
@@ -1511,6 +1527,27 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>Returns the visible launch velocity without consuming an active Last Stand.</summary>
+        public Vector2 PreviewLastStandLaunchVelocity(bool isPlayer, Vector2 velocity)
+        {
+            LastStand.Phase phase = isPlayer ? playerLastStand : aiLastStand;
+            return phase == LastStand.Phase.Active ? velocity * LastStand.SpeedMult(isPlayer) : velocity;
+        }
+
+        /// <summary>
+        /// Converts a desired final velocity into the pre-buff velocity UnitController.Launch
+        /// must receive. Previewing the result and then applying the active Last Stand returns
+        /// the intended trajectory instead of making AI aim overshoot by the speed multiplier.
+        /// </summary>
+        public Vector2 PrepareLastStandLaunchVelocity(bool isPlayer, Vector2 desiredFinalVelocity)
+        {
+            LastStand.Phase phase = isPlayer ? playerLastStand : aiLastStand;
+            if (phase != LastStand.Phase.Active) return desiredFinalVelocity;
+
+            float speedMultiplier = LastStand.SpeedMult(isPlayer);
+            return speedMultiplier > 0f ? desiredFinalVelocity / speedMultiplier : desiredFinalVelocity;
+        }
+
         /// <summary>
         /// Launch chokepoint: units call in right before their velocity is applied. Consumes an
         /// Active LAST STAND for the owning side and returns the buff multipliers exactly once.
@@ -1526,21 +1563,57 @@ namespace CastleBusters
             RefreshLastStandButton();
             // Capped: one buffed hit must never erase a full 150-HP core (see LastStand notes).
             unit.attackDamage = LastStand.BuffedDamage(unit.attackDamage, isPlayer);
-            unit.explosionDamage = LastStand.BuffedDamage(unit.explosionDamage, isPlayer);
-            unit.explosionRadius *= LastStand.RadiusMult(isPlayer);
+            var explosive = unit.GetComponent<ExplosiveGimmick>();
+            if (explosive != null)
+            {
+                explosive.SetPermanentPotency(
+                    LastStand.BuffedDamage(explosive.PermanentExplosionDamage, isPlayer),
+                    explosive.PermanentExplosionRadius * LastStand.RadiusMult(isPlayer));
+                unit.explosionDamage = explosive.explosionDamage;
+                unit.explosionRadius = explosive.explosionRadius;
+            }
+            else
+            {
+                unit.explosionDamage = LastStand.BuffedDamage(unit.explosionDamage, isPlayer);
+                unit.explosionRadius *= LastStand.RadiusMult(isPlayer);
+            }
 
-            GameFeelVfx.SpawnImpactBurst(unit.transform.position, new Color(1f, 0.3f, 0.15f, 0.95f), 1.1f);
+            GameFeelVfx.SpawnImpactBurst(unit.transform.position, new Color(1f, 0.3f, 0.15f, 0.95f), 1.1f, null, false);
             GameFeelVfx.SpawnFeedbackLabel(unit.transform.position,
-                isPlayer ? "LAST STAND! / 일발역전!" : "DESPERATION!",
+                isPlayer ? "일발역전!" : "적의 발악!",
                 new Color(1f, 0.42f, 0.2f, 1f), 2.8f, 0.9f);
             return velocity * LastStand.SpeedMult(isPlayer);
         }
 
         public void SelectUnit(int unitTypeIndex)
         {
-            selectedUnitPrefab = unitTypeIndex == 0 ? knightPrefab : unitTypeIndex == 1 ? archerPrefab : unitTypeIndex == 2 ? bomberPrefab : explosiveBarrelPrefab;
-            
-            FindObjectOfType<LaunchManager>()?.SetSelectedUnit(selectedUnitPrefab);
+            DeployCard card;
+            switch (unitTypeIndex)
+            {
+                case 0:
+                    card = DeployCard.Knight;
+                    selectedUnitPrefab = knightPrefab;
+                    break;
+                case 1:
+                    card = DeployCard.Archer;
+                    selectedUnitPrefab = archerPrefab;
+                    break;
+                case 2:
+                    card = DeployCard.Cannon;
+                    selectedUnitPrefab = null;
+                    break;
+                case 3:
+                    card = DeployCard.Barrel;
+                    selectedUnitPrefab = explosiveBarrelPrefab;
+                    break;
+                default:
+                    return;
+            }
+
+            var deployment = DeploymentController.Instance;
+            if (card != DeployCard.Cannon) deployment?.DisarmDeployMode();
+            deployment?.SetSelectedCard(card);
+            LaunchManagerRef?.SetSelectedUnit(selectedUnitPrefab, card);
             UpdateButtonVisuals(unitTypeIndex);
         }
 
@@ -1548,7 +1621,7 @@ namespace CastleBusters
         {
             StyleButtonState(knightButton, selectedIndex == 0);
             StyleButtonState(archerButton, selectedIndex == 1);
-            StyleButtonState(bomberButton, selectedIndex == 2);
+            StyleButtonState(cannonButton, selectedIndex == 2);
             StyleButtonState(gimmickButton, selectedIndex == 3);
         }
 
@@ -1600,9 +1673,13 @@ namespace CastleBusters
             StartCoroutine(WaitAndEndTurn(unit));
         }
 
-        public void OnUnitDied(UnitController unit)
+        public void OnUnitDied(UnitController unit, bool? damageFromPlayer = null)
         {
             activeUnits.RemoveAll(u => u == unit || u == null);
+            if (unit != null && damageFromPlayer.HasValue && damageFromPlayer.Value != unit.isPlayerUnit)
+            {
+                DeploymentController.Instance?.CreditKill(unit.isPlayerUnit);
+            }
             CheckVictoryConditions();
         }
 
@@ -1611,9 +1688,11 @@ namespace CastleBusters
             var lm = FindObjectOfType<LaunchManager>();
             if (lm != null) lm.enabled = false;
 
-            // Wait until all units in the scene are no longer in the Launched state.
-            // Hard 12s watchdog: a projectile wedged in an unforeseen state must never
-            // freeze the match ("멈춰있는 것처럼 보임" flow-clarity pass) — the turn resolves.
+            // Wait until every launched body and every armed Barrel fuse has resolved. A Barrel
+            // becomes Grounded while its telegraph runs, but handing the turn over at that point
+            // misattributes its delayed explosion to the opponent.
+            // Hard 12s watchdog: a projectile or fuse wedged in an unforeseen state must never
+            // freeze the match ("멈춰있는 것처럼 보임" flow-clarity pass).
             float launchedWait = 0f;
             bool anyLaunched = true;
             while (anyLaunched && launchedWait < 12f)
@@ -1622,12 +1701,12 @@ namespace CastleBusters
                 for (int i = 0; i < UnitController.Active.Count; i++)
                 {
                     var u = UnitController.Active[i];
-                    if (u != null && u.CurrentState == UnitState.Launched) { anyLaunched = true; break; }
+                    if (u != null && (u.CurrentState == UnitState.Launched || u.IsFusePending)) { anyLaunched = true; break; }
                 }
                 launchedWait += Time.deltaTime;
                 yield return null;
             }
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(PostImpactHoldSeconds);
 
 
             float settleTimer = 0f;
@@ -1659,6 +1738,9 @@ namespace CastleBusters
         private void EndTurn()
         {
             if (currentState == GameState.GameOver) return;
+            // Every handoff owns aim cleanup. A lost pointer or expired grace must not carry
+            // drag state, trajectory, or rubber-band visuals through the AI turn.
+            LaunchManagerRef?.CancelAim();
             turnCount++;
             isPlayerTurn = !isPlayerTurn;
             currentState = isPlayerTurn ? GameState.PlayerTurn : GameState.AITurn;
@@ -1908,7 +1990,11 @@ namespace CastleBusters
                 .ToList();
 
             int count = Mathf.Min(3, topBlocks.Count);
-            var prefabs = new GameObject[] { knightPrefab, archerPrefab, bomberPrefab };
+            // Garrison composition: Knight/Archer only. The Bomber slot it used to cycle
+            // through was removed with the deployment overhaul, and the Cannon is a paid
+            // deploy — handing every side two free batteries at match start would erase the
+            // supply cost that makes siting one a decision.
+            var prefabs = new GameObject[] { knightPrefab, archerPrefab };
 
             for (int i = 0; i < count; i++)
             {

@@ -8,6 +8,87 @@ namespace CastleBusters
     public static class GameFeelVfx
     {
         private static Sprite cachedRingSprite;
+        private static AudioSource presentationAudioSource;
+        private static GameObject presentationAudioHost;
+        private static AudioClip impactSfx;
+        private static AudioClip launchSfx;
+        private static AudioClip comboSfx;
+        private const string impactSfxPath = "Audio/SFX/impact";
+        private const string launchSfxPath = "Audio/SFX/launch";
+        private const string comboSfxPath = "Audio/SFX/combo";
+
+        private static AudioSource GetPresentationAudioSource()
+        {
+            if (!Application.isPlaying) return null;
+
+            if (presentationAudioSource != null) return presentationAudioSource;
+            if (presentationAudioHost == null)
+            {
+                presentationAudioHost = new GameObject("GameFeelVfxAudio");
+                Object.DontDestroyOnLoad(presentationAudioHost);
+            }
+
+            presentationAudioSource = presentationAudioHost.AddComponent<AudioSource>();
+            presentationAudioSource.playOnAwake = false;
+            presentationAudioSource.spatialBlend = 0f;
+            presentationAudioSource.pitch = 1f;
+            presentationAudioSource.loop = false;
+            return presentationAudioSource;
+        }
+
+        private static AudioClip LoadImpactClip()
+        {
+            if (impactSfx == null) impactSfx = Resources.Load<AudioClip>(impactSfxPath);
+            return impactSfx;
+        }
+
+        private static AudioClip LoadLaunchClip()
+        {
+            if (launchSfx == null) launchSfx = Resources.Load<AudioClip>(launchSfxPath);
+            return launchSfx;
+        }
+
+        private static AudioClip LoadComboClip()
+        {
+            if (comboSfx == null) comboSfx = Resources.Load<AudioClip>(comboSfxPath);
+            return comboSfx;
+        }
+
+        private static void PlayOneShotPresentationSfx(AudioClip clip, float volume)
+        {
+            if (!Application.isPlaying || clip == null) return;
+
+            var source = GetPresentationAudioSource();
+            if (source == null) return;
+
+            source.pitch = 1f;
+            source.PlayOneShot(clip, Mathf.Clamp01(volume));
+        }
+
+        public static void PlayImpactSfx(float intensity)
+        {
+            if (!Application.isPlaying) return;
+            var clip = LoadImpactClip();
+            float volume = Mathf.Lerp(0.28f, 0.58f, Mathf.Clamp01(intensity / 1.8f));
+            PlayOneShotPresentationSfx(clip, volume);
+        }
+
+        public static void PlayLaunchSfx(float powerPercent)
+        {
+            if (!Application.isPlaying) return;
+            var clip = LoadLaunchClip();
+            float volume = Mathf.Lerp(0.35f, 0.72f, Mathf.Clamp01(powerPercent / 100f));
+            PlayOneShotPresentationSfx(clip, volume);
+        }
+
+        public static void PlayComboSfx(int comboCount)
+        {
+            if (!Application.isPlaying) return;
+            var clip = LoadComboClip();
+            float comboScale = Mathf.Clamp01((comboCount - 1f) / 6f);
+            float volume = Mathf.Lerp(0.2f, 0.4f, comboScale);
+            PlayOneShotPresentationSfx(clip, volume);
+        }
 
         public static void SpawnDamageNumber(Vector3 position, float amount, Color color)
         {
@@ -56,10 +137,32 @@ namespace CastleBusters
             animator.lifetime = lifetime;
             animator.riseDistance = 0.85f;
         }
-
-        public static void SpawnImpactBurst(Vector3 position, Color color, float intensity = 1f, Sprite sprite = null)
+        /// <summary>
+        /// Visual launch puff only. Launch audio is emitted by NotifyLaunch; impact audio is
+        /// reserved for actual damage so one bow release never plays both sound identities.
+        /// </summary>
+        public static void SpawnLaunchBurst(Vector3 position, Color color, float intensity = 1f, Sprite sprite = null)
         {
             SpawnImpactBurstCore(position, color, intensity, sprite);
+        }
+
+        /// <summary>
+        /// Spawns impact visuals and, by default, one impact sound for the owning gameplay
+        /// event. Damage receivers that are called from an already-audible event pass
+        /// <paramref name="playAudio"/> false so splash/melee hits do not stack one-shots
+        /// once per victim.
+        /// </summary>
+        public static void SpawnImpactBurst(Vector3 position, Color color, float intensity = 1f, Sprite sprite = null, bool playAudio = true)
+        {
+            if (playAudio) PlayImpactSfx(intensity);
+            SpawnImpactBurstCore(position, color, intensity, sprite);
+            SpawnHiggsfieldAccent(
+                position,
+                HiggsfieldSpriteLibrary.Impact,
+                new Color(1f, 1f, 1f, 0.9f),
+                Mathf.Lerp(0.34f, 0.68f, Mathf.Clamp01(intensity / 1.8f)),
+                0.2f,
+                36);
 
             // Playtest note: at high intensity (core hits, breaks) a single burst read as
             // "thin" next to the hit-stop + screen shake it's paired with. Layer a smaller,
@@ -155,6 +258,32 @@ namespace CastleBusters
 
         private static GameFeelVfxCoroutineRunner secondaryBurstRunner;
 
+        public static void SpawnHiggsfieldAccent(
+            Vector3 position,
+            string key,
+            Color color,
+            float finalRadius,
+            float lifetime,
+            int sortingOrder = 36)
+        {
+            if (!Application.isPlaying) return;
+
+            Sprite sprite = HiggsfieldSpriteLibrary.LoadVfx(key);
+            if (sprite == null) return;
+
+            var go = new GameObject($"Higgsfield{key}Accent");
+            go.transform.position = position + new Vector3(0f, 0f, -0.015f);
+            var renderer = go.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = color;
+            renderer.sortingOrder = sortingOrder;
+
+            var pulse = go.AddComponent<GameFeelRingPulse>();
+            pulse.lifetime = Mathf.Max(0.08f, lifetime);
+            pulse.finalRadius = Mathf.Max(0.05f, finalRadius);
+            pulse.startColor = color;
+        }
+
 
         public static void SpawnShockwaveRing(Vector3 position, Color color, float finalRadius = 1.2f, float lifetime = 0.35f)
         {
@@ -177,6 +306,13 @@ namespace CastleBusters
         {
             if (sprite == null) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleSmoke);
             SpawnImpactBurst(position, new Color(0.72f, 0.62f, 0.48f, 0.85f), intensity, sprite);
+            SpawnHiggsfieldAccent(
+                position,
+                HiggsfieldSpriteLibrary.CollapseDust,
+                new Color(1f, 1f, 1f, 0.88f),
+                Mathf.Clamp(0.48f * intensity, 0.4f, 0.85f),
+                0.42f,
+                35);
         }
 
         private static Sprite GetRingSprite()
@@ -315,7 +451,7 @@ namespace CastleBusters
         {
             EnsureHud();
             RefreshCoreReferences();
-            ShowToast("BREACH THE ENEMY CORE", new Color(1f, 0.86f, 0.25f, 1f), 2.2f);
+            ShowToast("적 코어를 부숴라", new Color(1f, 0.86f, 0.25f, 1f), 2.2f);
         }
 
         private void Update()
@@ -417,21 +553,21 @@ namespace CastleBusters
             Instance.dangerActive = active;
             if (active)
             {
-                Instance.ShowToast("KEEP CORE CRITICAL — 위기! R로 일발역전 대기", new Color(1f, 0.35f, 0.2f, 1f), 2.4f);
+                Instance.ShowToast("위기! R로 일발역전 대기", new Color(1f, 0.35f, 0.2f, 1f), 2.4f);
             }
         }
 
         public static void NotifyLastStandArmed(bool isPlayer)
         {
             Instance?.ShowToast(isPlayer
-                ? "LAST STAND READY — PRESS R / 일발역전 준비 완료 — R"
-                : "ENEMY DESPERATION RISES / 적이 필사적입니다",
+                ? "일발역전 준비 완료 — R"
+                : "적이 필사적입니다",
                 isPlayer ? new Color(1f, 0.55f, 0.15f, 1f) : new Color(1f, 0.4f, 0.45f, 1f), 2.6f);
         }
 
         public static void NotifyLastStandActive()
         {
-            Instance?.ShowToast("LAST STAND! NEXT VOLLEY x2.2 / 일발역전! 다음 발사 강화", new Color(1f, 0.42f, 0.12f, 1f), 2.4f);
+            Instance?.ShowToast("일발역전! 다음 발사 ×2.2", new Color(1f, 0.42f, 0.12f, 1f), 2.4f);
         }
 
         private void UpdateDangerVignette()
@@ -472,11 +608,12 @@ namespace CastleBusters
 
         public static void NotifyTurnChanged(bool isPlayerTurn)
         {
-            Instance?.ShowToast(isPlayerTurn ? "YOUR SIEGE TURN — DRAW FROM THE BLUE RALLY RING" : "ENEMY BATTERY — BRACE THE KEEP", isPlayerTurn ? new Color(0.55f, 0.9f, 1f, 1f) : new Color(1f, 0.45f, 0.28f, 1f), 1.7f);
+            Instance?.ShowToast(isPlayerTurn ? "내 턴" : "적 턴", isPlayerTurn ? new Color(0.55f, 0.9f, 1f, 1f) : new Color(1f, 0.45f, 0.28f, 1f), 1.7f);
         }
 
         public static void NotifyLaunch(string unitName, float powerPercent, float angle)
         {
+            GameFeelVfx.PlayLaunchSfx(powerPercent);
             Instance?.ShowLaunchToast(unitName, powerPercent, angle);
         }
 
@@ -488,6 +625,13 @@ namespace CastleBusters
             {
                 GameFeelVfx.SpawnShockwaveRing(position, new Color(1f, 0.72f, 0.18f, 0.55f), 1.9f, 0.42f);
                 GameFeelVfx.SpawnFeedbackLabel(position + Vector3.up * 0.35f, "CORE HIT!", new Color(1f, 0.72f, 0.18f, 1f), 2.5f, 0.7f);
+                GameFeelVfx.SpawnHiggsfieldAccent(
+                    position,
+                    HiggsfieldSpriteLibrary.CoreCrack,
+                    new Color(1f, 1f, 1f, 0.94f),
+                    0.62f,
+                    0.36f,
+                    37);
             }
         }
 
@@ -495,7 +639,7 @@ namespace CastleBusters
         {
             if (Instance == null) return;
             Instance.RegisterCombo(isCore ? "CORE BREAK" : "BLOCK BREAK", isCore ? new Color(1f, 0.3f, 0.12f, 1f) : new Color(1f, 0.78f, 0.25f, 1f));
-            if (isCore) Instance.ShowToast("CORE DESTROYED!", new Color(1f, 0.35f, 0.12f, 1f), 2f);
+            if (isCore) Instance.ShowToast("코어 파괴!", new Color(1f, 0.35f, 0.12f, 1f), 2f);
         }
 
         public static void NotifyImpact(Vector3 position, string label, Color color)
@@ -508,22 +652,22 @@ namespace CastleBusters
 
         public static void NotifyTurnUrgency(int secondsLeft)
         {
-            Instance?.ShowToast($"{secondsLeft}s — LOOSE YOUR VOLLEY! / {secondsLeft}초 — 지금 발사하세요!", new Color(1f, 0.62f, 0.2f, 1f), 1.6f);
+            Instance?.ShowToast($"{secondsLeft}초 — 지금 발사!", new Color(1f, 0.62f, 0.2f, 1f), 1.6f);
         }
 
         public static void NotifyIdleNudge()
         {
-            Instance?.ShowToast("DRAW FROM THE BLUE RALLY RING / 푸른 링에서 당겨 발사", new Color(0.55f, 0.9f, 1f, 0.95f), 1.4f);
+            Instance?.ShowToast("푸른 링에서 당겨 발사", new Color(0.55f, 0.9f, 1f, 0.95f), 1.4f);
         }
 
         public static void NotifyAimGrace(float graceSeconds)
         {
-            Instance?.ShowToast($"HOLD! +{graceSeconds:F0}s TO RELEASE / 조준 유지 — {graceSeconds:F0}초 연장", new Color(1f, 0.9f, 0.4f, 1f), 1.6f);
+            Instance?.ShowToast($"조준 유지 — {graceSeconds:F0}초 연장", new Color(1f, 0.9f, 0.4f, 1f), 1.6f);
         }
 
         public static void NotifyTurnForfeited()
         {
-            Instance?.ShowToast("VOLLEY FORFEITED — ENEMY TURN / 발사 기회를 놓쳤습니다", new Color(1f, 0.45f, 0.28f, 1f), 1.8f);
+            Instance?.ShowToast("발사 기회를 놓쳤습니다", new Color(1f, 0.45f, 0.28f, 1f), 1.8f);
         }
 
         private void ShowLaunchToast(string unitName, float powerPercent, float angle)
@@ -540,6 +684,12 @@ namespace CastleBusters
             if (comboCount > SessionMaxCombo) SessionMaxCombo = comboCount;
             lastComboTime = Time.time;
             comboPopTimer = 0f;
+
+            if (comboCount > 1)
+            {
+                GameFeelVfx.PlayComboSfx(comboCount);
+            }
+
             if (comboText != null)
             {
                 comboText.text = comboCount <= 1 ? label : $"{label} x{comboCount}";
@@ -637,17 +787,16 @@ namespace CastleBusters
             root.offsetMin = Vector2.zero;
             root.offsetMax = Vector2.zero;
 
-            comboBackplate = CreatePanel("ComboBackplate", new Vector2(0.5f, 0.66f), new Vector2(0.5f, 0.5f), new Vector2(560f, 78f), new Color(0.09f, 0.045f, 0.01f, 0.46f));
-            toastBackplate = CreatePanel("ToastBackplate", new Vector2(0.5f, 0.68f), new Vector2(0.5f, 0.5f), new Vector2(940f, 90f), new Color(0f, 0.05f, 0.1f, 0.58f));
+            comboBackplate = CreatePanel("ComboBackplate", new Vector2(0.60f, 0.60f), new Vector2(0.5f, 0.5f), new Vector2(400f, 52f), new Color(0.09f, 0.045f, 0.01f, 0.46f));
+            toastBackplate = CreatePanel("ToastBackplate", new Vector2(0.78f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), new Color(0f, 0.05f, 0.1f, 0.58f));
             toastBackplateRt = toastBackplate.GetComponent<RectTransform>();
             toastBackplateImg = toastBackplate.GetComponent<Image>();
 
-            // 0.68 (was 0.78): in short/wide viewports the toast's entrance rise clipped into
-            // the objective band at 0.965 — cycle-2 design review screenshot evidence.
-            turnToastText = CreateText("TurnToastText", new Vector2(0.5f, 0.68f), new Vector2(0.5f, 0.5f), new Vector2(900f, 80f), 34, TextAlignmentOptions.Center, Color.white);
+            // 0.78 anchor keeps the toast clear of the unit row at 960x600; combo remains
+            // lower at 0.60 to avoid overlap.
+            turnToastText = CreateText("TurnToastText", new Vector2(0.78f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), 28, TextAlignmentOptions.Center, Color.white);
             turnToastRt = turnToastText.rectTransform;
-            comboText = CreateText("ComboText", new Vector2(0.5f, 0.66f), new Vector2(0.5f, 0.5f), new Vector2(520f, 72f), 30, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.22f, 1f));
-            comboText.gameObject.SetActive(false);
+            comboText = CreateText("ComboText", new Vector2(0.60f, 0.60f), new Vector2(0.5f, 0.5f), new Vector2(400f, 52f), 24, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.22f, 1f));
             comboBackplate.SetActive(false);
             if (toastBackplate != null) toastBackplate.SetActive(false);
 
