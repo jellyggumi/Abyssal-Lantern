@@ -230,17 +230,25 @@ namespace CastleBusters
             if (GetComponent<ExplosiveGimmick>() != null) return;
             visualScale = Mathf.Max(0.01f, visualScale);
 
-            transform.localScale = new Vector3(visualScale, visualScale, 1f);
+            // Wider stages frame more world, so a fixed-size body renders smaller there.
+            // Folding the stage factor in here keeps a soldier the same size on screen on
+            // every board. The serialized visualScale is deliberately not overwritten —
+            // this must not compound if the method runs twice.
+            float renderScale = Mathf.Max(0.01f, visualScale * GameManager.StageActorVisualScale);
+
+            transform.localScale = new Vector3(renderScale, renderScale, 1f);
 
             var sr = GetComponentInChildren<SpriteRenderer>(true);
             var box = GetComponent<BoxCollider2D>();
             if (sr != null && sr.sprite != null && box != null)
             {
                 Vector2 spriteSize = sr.sprite.bounds.size;
-                float referenceScaleRatio = ReferenceVisualScale / visualScale;
+                // Dividing by the same factor the transform multiplies by leaves world
+                // collider extents identical on every stage: art scales, hitboxes do not.
+                float referenceScaleRatio = ReferenceVisualScale / renderScale;
                 box.size = new Vector2(
-                    Mathf.Max(0.25f / visualScale, spriteSize.x * colliderVisualCoverage * referenceScaleRatio),
-                    Mathf.Max(0.25f / visualScale, spriteSize.y * colliderVisualCoverage * referenceScaleRatio));
+                    Mathf.Max(0.25f / renderScale, spriteSize.x * colliderVisualCoverage * referenceScaleRatio),
+                    Mathf.Max(0.25f / renderScale, spriteSize.y * colliderVisualCoverage * referenceScaleRatio));
                 box.offset = sr.sprite.bounds.center;
             }
         }
@@ -276,12 +284,16 @@ namespace CastleBusters
             var unit = prefab.GetComponent<UnitController>();
             if (unit != null && sprite != null)
             {
-                float visualScale = Mathf.Max(0.01f, unit.visualScale);
+                // Must mirror ApplyPlayableScaleAndCollider exactly, stage factor included:
+                // the runtime offset is the sprite centre times the *rendered* scale, so a
+                // prediction using the bare visualScale would drift on the wider stages and
+                // the aim preview would start from the wrong point.
+                float renderScale = Mathf.Max(0.01f, unit.visualScale * GameManager.StageActorVisualScale);
                 Vector2 spriteSize = sprite.bounds.size;
                 Vector2 size = new Vector2(
                     Mathf.Max(0.25f, spriteSize.x * unit.colliderVisualCoverage * ReferenceVisualScale),
                     Mathf.Max(0.25f, spriteSize.y * unit.colliderVisualCoverage * ReferenceVisualScale));
-                Vector2 center = sprite.bounds.center * visualScale;
+                Vector2 center = sprite.bounds.center * renderScale;
                 return new Bounds(center, new Vector3(size.x, size.y, 0f));
             }
 

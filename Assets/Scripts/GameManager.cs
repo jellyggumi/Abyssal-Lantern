@@ -29,6 +29,28 @@ namespace CastleBusters
         public static StageId PendingStage = StageId.Stage1;
         public StageId currentStage = StageId.Stage1;
         public StageLayout ActiveLayout { get; private set; } = StageDefinitions.Stage1;
+
+        /// <summary>
+        /// Visual-only scale that keeps a unit the same size *on screen* across stages.
+        /// The camera frames a wider board on Stage3 (47u vs Stage1's 39u), so at a fixed
+        /// world size every soldier rendered ~17% smaller there and the wide board was the
+        /// hardest to read — the opposite of what its extra range deserves.
+        ///
+        /// Simulation is untouched: UnitController divides the collider by the same factor
+        /// it multiplies the transform by, so world collider extents are invariant. Only
+        /// playable bodies scale — board geometry (blocks, castles) must not, because their
+        /// world positions *are* the gameplay.
+        /// </summary>
+        public static float StageActorVisualScale
+        {
+            get
+            {
+                var gm = Instance;
+                float baseline = StageDefinitions.Stage1.cameraDesiredWorldWidth;
+                if (gm == null || baseline <= 0.01f) return 1f;
+                return gm.ActiveLayout.cameraDesiredWorldWidth / baseline;
+            }
+        }
         private float turnTimer;
 
         [Header("Difficulty Curve")]
@@ -339,6 +361,12 @@ namespace CastleBusters
         {
             if (currentState != GameState.Intro) return;
             Time.timeScale = 1f;
+            // A cold-open cutscene may still be on screen when something starts the siege
+            // directly (the title's START, or an automated playtest calling BeginSiege).
+            // Dismiss rather than Complete: its callback is ShowTitleScreen, and running that
+            // AFTER StartGame would drop a title card over a live match — which froze the
+            // 30-game PlayMode sim mid-run.
+            if (StageInterludeController.Active != null) StageInterludeController.Active.Dismiss();
             if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
             if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
             StartGame();
