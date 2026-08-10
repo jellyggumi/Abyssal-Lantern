@@ -1514,13 +1514,28 @@ namespace CastleBusters.Tests
                 coldOpenSkipButton.onClick.Invoke();
             }
 
-            // The cold open is a StageInterludeController now, not the webtoon, and it is only
-            // shown once per session (GameManager.webtoonIntroShown is static). That made this
-            // test order-dependent: run after something that had already consumed the cold
-            // open and the title was waiting; run it first and the interlude held the screen
-            // past the deadline. Dismissing whatever is actually playing removes the
-            // dependency instead of relying on another test to have cleared it.
-            StageInterludeController.Active?.Dismiss();
+            // The cold open is no longer the webtoon this test knows how to skip: it is the
+            // narrative reel, falling back to a StageInterludeController when video is
+            // unavailable. It is also shown only once per session (GameManager.webtoonIntroShown
+            // is static), which made this test order-dependent — run after something that had
+            // consumed the cold open and the title was waiting, run it first and the cold open
+            // held the screen past the deadline. Dismissing whichever one is actually on screen
+            // removes the dependency instead of relying on another test to have cleared it.
+            // Skipping the reel lands on the title; the fallback needs dismissing separately
+            // because the reel hands off to it rather than to the title.
+            // Complete(), not Dismiss(): Dismiss tears the surface down and deliberately drops
+            // the completion callback, so dismissing the cold open would remove it and leave no
+            // title behind it. Skipping must run the handoff, which is what a player pressing
+            // through the interlude does.
+            NarrativeVideoIntro.Active?.Skip();
+            yield return null;
+            var playingInterlude = StageInterludeController.Active;
+            if (playingInterlude != null)
+            {
+                typeof(StageInterludeController)
+                    .GetMethod("Complete", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.Invoke(playingInterlude, null);
+            }
 
             while (Object.FindObjectOfType<IntroScreenController>() == null &&
                    Time.realtimeSinceStartup < titleDeadline)

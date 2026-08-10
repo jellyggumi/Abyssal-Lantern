@@ -334,38 +334,25 @@ namespace CastleBusters
             if (!webtoonIntroShown)
             {
                 webtoonIntroShown = true;
-                StageInterludeController.Play(
-                    StageInterlude.ForStageEntry(StageId.Stage1),
-                    ShowTitleScreen);
+                // Two lanes each built a cold open. Rather than pick a winner, they compose:
+                // the narrative reel plays, and the three-line interlude is what happens when it
+                // cannot. WebGL video playback is at the browser's discretion, so the reel needs
+                // a fallback regardless — and a fallback that is itself a finished cold open
+                // beats a black screen or a silent skip to the title.
+                NarrativeVideoIntro.Play(ShowTitleScreen, PlayInterludeColdOpen);
                 return;
             }
 
             ShowTitleScreen();
         }
 
-        /// <summary>
-        /// Reel-first prologue. Currently ORPHANED and deliberately left in place: the cold open
-        /// it used to serve was replaced by StageInterludeController by a concurrent lane, and
-        /// the title's replay button was moved to ShowPanelPrologue so a purchased entitlement
-        /// never lands on a video that might not prepare. Which of the reel or the interlude
-        /// owns the cold open is a design call across two lanes, so it is recorded rather than
-        /// decided here — deleting this would quietly throw away the reel wiring.
-        /// </summary>
-        private void ShowWebtoonPrologue()
+        /// <summary>The reel's fallback: the short interlude cold open, which then hands off to
+        /// the title exactly as it did when it was the cold open outright.</summary>
+        private void PlayInterludeColdOpen()
         {
-            if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
-            if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
-
-            // Prefer the animated reel, but never depend on it: WebGL video playback is at
-            // the browser's discretion, so an error or a prepare that never finishes drops
-            // straight to the panel prologue instead of leaving a black screen.
-            if (Application.isPlaying)
-            {
-                NarrativeVideoIntro.Play(ShowTitleScreen, ShowPanelPrologue);
-                return;
-            }
-
-            ShowPanelPrologue();
+            StageInterludeController.Play(
+                StageInterlude.ForStageEntry(StageId.Stage1),
+                ShowTitleScreen);
         }
 
         private void ShowPanelPrologue()

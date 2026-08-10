@@ -36,12 +36,37 @@ namespace CastleBusters
         private bool started;
         private bool settled;
 
+        private static NarrativeVideoIntro active;
+
+        /// <summary>The reel currently on screen, if any. Mirrors StageInterludeController.Active
+        /// so a caller that needs the screen back can dismiss whatever cold open is playing
+        /// without knowing which of the two it got.
+        ///
+        /// Compared against Unity's null rather than returned raw: a scene load destroys the
+        /// host without Settle ever running, and a stale reference survives `?.` — which checks
+        /// C# null, not Unity's — so callers would reach a destroyed object.</summary>
+        public static NarrativeVideoIntro Active => active != null ? active : null;
+
         public static NarrativeVideoIntro Play(Action onFinished, Action onUnavailable)
         {
+            Active?.Skip();
+
             var host = new GameObject("NarrativeVideoIntro");
             var intro = host.AddComponent<NarrativeVideoIntro>();
+            active = intro;
             intro.Begin(onFinished, onUnavailable);
             return intro;
+        }
+
+        /// <summary>Cut the reel short and continue as if it had finished — the same outcome as
+        /// the player pressing a key, so skipping lands on the title rather than the fallback.</summary>
+        public void Skip() => Settle(true);
+
+        private void OnDestroy()
+        {
+            // A scene load destroys the host without Settle running; without this the
+            // static would keep pointing at a destroyed object across the reload.
+            if (active == this) active = null;
         }
 
         private void Begin(Action finished, Action unavailable)
@@ -128,6 +153,7 @@ namespace CastleBusters
         {
             if (settled) return;
             settled = true;
+            if (active == this) active = null;
 
             var finished = onFinished;
             var unavailable = onUnavailable;
