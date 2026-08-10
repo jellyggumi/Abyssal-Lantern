@@ -202,7 +202,26 @@ namespace CastleBusters
         // and inside the ±14.5 launch aprons — ground content behind a launch point is dead
         // content (design review, cycle 2). Midfield ground lanes skip the chariot sweep
         // (|x|<=4.8) and the eruption vents (±5.4): solids there got plowed or cooked.
-        public static readonly float[] SpawnLanes = { -13.5f, -12.5f, -6.5f, 0f, 6.5f, 12.5f, 13.5f };
+        /// <summary>
+        /// Where field obstacles may appear, laid out around the keeps rather than through
+        /// them. Two things forced this table to change:
+        ///
+        /// The old inner lanes at ±6.5 now fall inside the enlarged keep (courses run
+        /// |x| 4.0–7.0), so they could never spawn anything — the clearance probe rejected
+        /// them against the walls and the beat was silently skipped. Midfield lanes moved to
+        /// ±2.5 / 0, which is genuinely open ground.
+        ///
+        /// The outer pair used to be ±12.5 and ±13.5 — one world unit apart, which is what
+        /// made hazards read as dumped on top of each other. They are now 2.5u apart, and
+        /// both sit in the free corridor between the core's far edge (10.15) and the launch
+        /// apron, so neither crowds the other or the muzzle.
+        /// </summary>
+        public static readonly float[] SpawnLanes = { -13.5f, -11.0f, -2.5f, 0f, 2.5f, 11.0f, 13.5f };
+
+        /// <summary>Minimum gap between two field obstacles, in world units. The clearance
+        /// probe used to be exactly one block wide, so two hazards in neighbouring lanes
+        /// both passed: they did not overlap, they just looked piled up.</summary>
+        public const float MinObstacleSpacing = 2.2f;
 
         private struct FieldEntry
         {
@@ -584,7 +603,11 @@ namespace CastleBusters
             foreach (float candidate in LaneProbeOrder(preferredX))
             {
                 if (LaunchRingRules.IsInsideRing(new Vector2(candidate, 0.5f))) continue;
-                var hit = Physics2D.OverlapBox(new Vector2(candidate, 1.0f), new Vector2(1.0f, 1.9f), 0f);
+                // Probe the spacing envelope, not just the footprint: a one-block box only
+                // rejected an actual overlap, so neighbouring hazards passed while looking
+                // stacked. The box stays 1.9 tall so it never catches the ground strip.
+                var hit = Physics2D.OverlapBox(new Vector2(candidate, 1.0f),
+                    new Vector2(MinObstacleSpacing, 1.9f), 0f);
                 if (hit == null) return candidate;
             }
             return null;
