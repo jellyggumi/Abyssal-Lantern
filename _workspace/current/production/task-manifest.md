@@ -41,6 +41,10 @@ Fal/BytePlus만) 해당 키가 이 머신에 없어 실행 불가 — 스프라�
 
 **Cycle3 조사 결과 (내 회귀 아님).** `Cycle3_PlaytestDataCollection_30Games`가 게임당 120초(GameOver 대기 상한)를 다 태우고 `Units launched: 0`을 기록한다. 원인은 이 테스트가 `BeginSiege()`를 **한 번도 호출하지 않아** 판이 Intro 상태(`timeScale=0`)에 머물러 `IsPlayerTurn`이 영원히 false라는 것이다. 내 컷씬이 원인인지 확인하려고 콜드 오픈을 임시로 끄고 재실행했으나 **결과 동일(0 units, 120초/게임)** — 컷씬과 무관하다. 베이스라인 커밋(`f8437913`)의 테스트 본문도 바이트 동일하므로 선행 결함이다. 별도 워크트리 대조는 그 환경에서 MCP 플러그인 인증 오류(`Server forcefully disconnected`)가 먼저 터져 성립하지 않았다.
 
+| 26 | origin/main 컴파일 불가 (누락 파일) + 최종 빌드·배포 | engineering + ops | done 2026-08-10 — `724ea59d` 이후 `GameManager.cs`는 `StageInterludeController`를 참조하는데 **그 파일이 커밋된 적이 없어** 신규 클론이 컴파일되지 않았다(CS0103 ×3). 깨끗한 워크트리로 `7bdf8434`를 체크아웃해 재현·확정했다. 누락 파일과 컷씬 시스템 나머지를 `8dc73975`로 커밋, `Assets/InitTestScene*.unity`(PlayMode가 실행마다 남기는 스캐폴딩)를 gitignore에 추가(`374cbb6f`). **검증: 별도 워크트리에 내 커밋을 클린 체크아웃 → 컴파일 에러 0, EditMode 319 중 318 통과**(유일한 실패는 워크트리에 없는 `llm-wiki-sync/` 경로를 쓰는 `Run20BalanceIterations`로 코드 결함 아님). 로컬 전체는 **316/316 EditMode**. WebGL `result=Succeeded`, 89,496,322 bytes, errors=0 → pages `d7fd428` 배포. **라이브 검증: 콘솔 오류 0, 100% 로드, 실제 매치 진입** — 새총·보급 게이지(15/24)·`1 KNIGHT · 2 ARCHER · 3 CANNON · 4 POWDER KEG` 로스터·양측 성채 코어 게이지 확인 (`qa/evidence/20260810-deploy-title.png`, `20260810-deploy-ingame.png`). https://jellyggumi.github.io/games/castle-war/ | web beat |
+
+**PlayMode 잔여 실패 5건은 내 작업이 아니다 (근거).** `LastStandButton_ArmedPlayerClickActivatesAndLaunchConsumesBuff`를 깨끗한 워크트리에서 이분했다: 베이스라인 `f8437913` **통과**, 내 컷씬이 포함된 `724ea59d` **통과**, HUD 커밋 `7bdf8434` 이후 **실패**. 즉 원인은 "주문 카드를 전장 밖으로 옮긴" 동시 세션의 HUD 변경이며 레이캐스트 대상 위치가 바뀐 것이다. 추가 확인으로 콜드 오픈을 임시 비활성화하고 전체를 재실행했더니 실패가 5→**6건으로 늘어** 내 컷씬이 원인이 아님이 재확인됐다(워크트리 대조 시 MCP 플러그인 인증 오류가 끼어들어, 비교는 해당 패키지를 제거한 뒤에만 성립했다).
+
 Blocking notes:
 - 1b: `gh repo rename` returned 404 (akillness has push, not admin). Owner
   must rename in Settings; then update `origin` URL here.
