@@ -562,17 +562,69 @@ namespace CastleBusters
 
         // ---- Castle walls (§5): runtime defensive walls, never inside a launch ring ----
 
-        public static readonly Vector3[] WallBasePositions =
+        /// <summary>One course of a keep: how far out it stands and how tall it is.</summary>
+        public readonly struct KeepCourse
         {
-            new Vector3(-7.5f, 0.5f, 0f),  // shields the player keep's approach
-            new Vector3(7.5f, 0.5f, 0f),   // shields the enemy keep's approach
+            public readonly float AbsX;
+            /// <summary>Blocks added to the stage's wall height. Ignored when
+            /// <see cref="IsOutpost"/> — an outwork is the same size on every stage.</summary>
+            public readonly int HeightOffset;
+            public readonly bool IsOutpost;
+
+            public KeepCourse(float absX, int heightOffset, bool isOutpost)
+            {
+                AbsX = absX;
+                HeightOffset = heightOffset;
+                IsOutpost = isOutpost;
+            }
+        }
+
+        /// <summary>Fixed height of a forward outpost, in blocks. Deliberately not scaled by
+        /// stage: it is an outwork the attacker clears on the way in, not part of the
+        /// fortress the stage is tuning.</summary>
+        public const int OutpostHeightBlocks = 2;
+
+        /// <summary>
+        /// The keep, from the battlefield inward. A "castle" used to be a single one-block
+        /// column at ±7.5 plus the core — thinner than the slingshot battering it, which is
+        /// why it never read as a fortress. It is now an outpost the attacker must breach
+        /// first, then three courses stepping up toward the core.
+        ///
+        /// Positions stop at 7.5 because the core occupies 7.85–10.15 (centre ±9, 2.3u
+        /// wide): there is no room to build inward, only out toward the middle of the field.
+        /// Every entry is validated against the launch rings by CastleWall_BasePositions_*.
+        /// </summary>
+        public static readonly KeepCourse[] KeepProfile =
+        {
+            new KeepCourse(4.0f, 0, true),   // forward outpost — the first thing to fall
+            new KeepCourse(5.0f, 0, false),  // outer course
+            new KeepCourse(6.0f, 1, false),  // middle course
+            new KeepCourse(7.0f, 2, false),  // inner course, tallest, shields the core
         };
+
+        public static readonly Vector3[] WallBasePositions = BuildWallBasePositions();
+
+        private static Vector3[] BuildWallBasePositions()
+        {
+            var positions = new Vector3[KeepProfile.Length * 2];
+            for (int i = 0; i < KeepProfile.Length; i++)
+            {
+                positions[i * 2] = new Vector3(-KeepProfile[i].AbsX, 0.5f, 0f);
+                positions[i * 2 + 1] = new Vector3(KeepProfile[i].AbsX, 0.5f, 0f);
+            }
+            return positions;
+        }
 
         private void SpawnCastleWalls()
         {
-            foreach (var basePos in WallBasePositions)
+            foreach (var course in KeepProfile)
             {
-                SpawnCastleWall(basePos, basePos.x < 0f);
+                int height = course.IsOutpost
+                    ? OutpostHeightBlocks
+                    : Mathf.Max(1, ActiveLayout.wallHeightBlocks + course.HeightOffset);
+
+                SpawnCastleWall(new Vector3(-course.AbsX, 0.5f, 0f), true, height);
+                SpawnCastleWall(new Vector3(course.AbsX, 0.5f, 0f), false, height);
             }
         }
 
@@ -582,7 +634,9 @@ namespace CastleBusters
         /// more fortified silhouette). Positions inside either launch affordance ring are
         /// refused — a wall in the muzzle blocks that side's every volley.
         /// </summary>
-        public GameObject SpawnCastleWall(Vector3 basePosition, bool isPlayerSide)
+        /// <param name="heightOverride">Blocks to stack. Null uses the active stage's wall
+        /// height, which is what a caller outside the keep profile wants.</param>
+        public GameObject SpawnCastleWall(Vector3 basePosition, bool isPlayerSide, int? heightOverride = null)
         {
             if (LaunchRingRules.IsInsideRing(basePosition))
             {
@@ -599,7 +653,7 @@ namespace CastleBusters
             var parentCastle = isPlayerSide ? playerCastle : enemyCastle;
             if (parentCastle != null) root.transform.SetParent(parentCastle.transform);
 
-            int height = Mathf.Max(1, ActiveLayout.wallHeightBlocks);
+            int height = Mathf.Max(1, heightOverride ?? ActiveLayout.wallHeightBlocks);
             for (int i = 0; i < height; i++)
             {
                 var block = Instantiate(blockPrefab, basePosition + new Vector3(0f, i, 0f),
