@@ -23,6 +23,7 @@ namespace CastleBusters
         public const string MuzzleFlash = "gimmick_muzzle_flash";
         public const string WallBrick = "gimmick_wall_brick";
         public const string WallBrickCracked = "gimmick_wall_brick_cracked";
+        public const string GaugeFrame = "ui_gauge_frame";
         public const string Core = "gimmick_core";
         public const string ButtonCard = "ui_button_card";
         public const string LastStandButton = "last_stand_button";

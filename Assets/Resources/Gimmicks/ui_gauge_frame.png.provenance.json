@@ -1,0 +1,10 @@
+{
+  "asset": "ui_gauge_frame.png",
+  "tool": "Higgsfield CLI (starter plan)",
+  "model": "gpt_image_2",
+  "prompt_summary": "horizontal ornate medieval siege health-gauge frame, iron and riveted bronze, castle-tower end caps with shield crests, hollow centre slot filled flat magenta, magenta background",
+  "postprocess": "ImageMagick -fuzz 16% -transparent magenta -trim +repage, resize to 512x135; spriteBorder {74,10,74,10} hand-authored so 9-slicing stretches only the riveted span between the towers",
+  "sha256": "50250f956fd289f64b512817039f32e7b2d46a6d38a11bd2ae2429e2a443e5dc",
+  "generated": "2026-08-10",
+  "audited": "hollow centre confirmed after keying (the slot was prompted as magenta so one key removes both background and interior); soft-fails to the bare bar if absent"
+}

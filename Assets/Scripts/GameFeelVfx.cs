@@ -1005,6 +1005,29 @@ namespace CastleBusters
                 fillRt.offsetMin = Vector2.zero;
                 fillRt.offsetMax = Vector2.zero;
 
+                // Ornate frame over the fill, so the core gauge reads as siege hardware
+                // instead of a flat coloured strip. Sliced with tower end-caps as fixed
+                // borders (see the sprite's spriteBorder), so widening the badge stretches
+                // only the riveted span between them. Soft-fails to the bare bar if the art
+                // is missing, and never intercepts clicks.
+                var frameSprite = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.GaugeFrame);
+                if (frameSprite != null)
+                {
+                    var frameGo = new GameObject("Frame");
+                    frameGo.transform.SetParent(container, false);
+                    var frame = frameGo.AddComponent<Image>();
+                    frame.sprite = frameSprite;
+                    frame.type = Image.Type.Sliced;
+                    frame.raycastTarget = false;
+                    var frameRt = frameGo.GetComponent<RectTransform>();
+                    frameRt.anchorMin = Vector2.zero;
+                    frameRt.anchorMax = Vector2.one;
+                    // Bleed slightly past the fill so the frame's inner lip overlaps the bar
+                    // edge rather than leaving a hairline of background between them.
+                    frameRt.offsetMin = new Vector2(-6f, -7f);
+                    frameRt.offsetMax = new Vector2(6f, 7f);
+                }
+
                 var textGo = new GameObject("Label");
                 textGo.transform.SetParent(container, false);
                 label = textGo.AddComponent<TextMeshProUGUI>();
