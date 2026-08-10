@@ -1417,7 +1417,11 @@ namespace CastleBusters
         public void StartGame()
         {
             // Idempotent entry: tests and the intro gate both call this. Any lingering intro
-            // overlay or frozen timescale is cleared before the first turn begins.
+            // overlay or frozen timescale is cleared before the first turn begins — including
+            // a narration cutscene. Its canvas sits at sortingOrder 900 WITH a raycaster, so
+            // one left alive over a live match both holds the board in Intro and swallows
+            // every UI click underneath it.
+            if (StageInterludeController.Active != null) StageInterludeController.Active.Dismiss();
             if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
             Time.timeScale = 1f;
             turnCount = 0;
@@ -1448,8 +1452,6 @@ namespace CastleBusters
 
         private void Update()
         {
-            if (currentState == GameState.GameOver) return;
-
             if (currentState == GameState.Intro)
             {
                 if (webtoonPrologue != null)
@@ -1947,22 +1949,23 @@ namespace CastleBusters
             HitStopManager.Instance?.CancelPendingHitStop();
             Time.timeScale = 0f;
 
-            void ShowResults() => ResultsScreenController.Create(victory, turnCount, playerScore,
+            // The scoreboard is built FIRST, always. Gating its creation behind a cutscene
+            // meant "the match ended" and "the results exist" stopped being the same moment,
+            // which broke every caller that waits for a results screen after a siege ends.
+            ResultsScreenController.Create(victory, turnCount, playerScore,
                 GameplayUxDirector.SessionMaxCombo, lastStandUsed, nextStage,
                 seriesPlayerWins, seriesEnemyWins, seriesGamesPlayed, seriesDecided, seriesScoreTotal, warChestReward);
 
             // Campaign closer: clinching the series on the FINAL stage ends the campaign, and
-            // that deserves a beat before a scoreboard. `nextStage == null` alone is not the
-            // test — a mid-campaign defeat also has no next stage. It must be a series win
-            // with nothing left after this stage.
+            // that deserves a beat. It plays OVER the finished scoreboard (the interlude canvas
+            // sorts above it), so the closing narration is a curtain on top of the result
+            // rather than a gate in front of it. `nextStage == null` alone is not the test —
+            // a mid-campaign defeat also has no next stage. It must be a series win with
+            // nothing left after this stage.
             bool campaignCleared = seriesWonByPlayer && !StageProgress.NextStage(currentStage).HasValue;
             if (campaignCleared)
             {
-                StageInterludeController.Play(StageInterlude.Epilogue(), ShowResults);
-            }
-            else
-            {
-                ShowResults();
+                StageInterludeController.Play(StageInterlude.Epilogue(), null);
             }
 
             // The series is now fully resolved (2 wins clinched or 3 games played): the next

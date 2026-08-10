@@ -47,7 +47,17 @@ namespace CastleBusters
         public readonly string backdropKey;
         public readonly Color tone;
         public readonly Color accent;
-        public readonly InterludeLine[] lines;
+        /// <summary>
+        /// Ordered narration beats. May be null on a `default(InterludeScript)` — a struct's
+        /// default skips the constructor entirely, so the constructor's null-coalescing does
+        /// NOT protect that path. Read it through <see cref="Lines"/>, never directly.
+        /// </summary>
+        private readonly InterludeLine[] lines;
+
+        /// <summary>Null-safe view of the beats; empty for a default-constructed script.</summary>
+        public InterludeLine[] Lines => lines ?? Empty;
+
+        private static readonly InterludeLine[] Empty = new InterludeLine[0];
 
         public InterludeScript(InterludeKind kind, string heading, string backdropKey,
             Color tone, Color accent, InterludeLine[] lines)
@@ -57,10 +67,10 @@ namespace CastleBusters
             this.backdropKey = string.IsNullOrWhiteSpace(backdropKey) ? null : backdropKey;
             this.tone = tone;
             this.accent = accent;
-            this.lines = lines ?? new InterludeLine[0];
+            this.lines = lines ?? Empty;
         }
 
-        public bool HasContent => lines.Length > 0;
+        public bool HasContent => Lines.Length > 0;
     }
 
     /// <summary>
@@ -97,9 +107,9 @@ namespace CastleBusters
         public static float TotalDurationSeconds(InterludeScript script)
         {
             float total = PreRollSeconds + TailSeconds;
-            for (int i = 0; i < script.lines.Length; i++)
+            for (int i = 0; i < script.Lines.Length; i++)
             {
-                total += LineDurationSeconds(script.lines[i].text);
+                total += LineDurationSeconds(script.Lines[i].text);
             }
             return total;
         }
@@ -111,16 +121,16 @@ namespace CastleBusters
         /// </summary>
         public static int LineIndexAt(InterludeScript script, float elapsed)
         {
-            if (script.lines.Length == 0) return -1;
+            if (script.Lines.Length == 0) return -1;
             if (elapsed < PreRollSeconds) return -1;
 
             float cursor = PreRollSeconds;
-            for (int i = 0; i < script.lines.Length; i++)
+            for (int i = 0; i < script.Lines.Length; i++)
             {
-                cursor += LineDurationSeconds(script.lines[i].text);
+                cursor += LineDurationSeconds(script.Lines[i].text);
                 if (elapsed < cursor) return i;
             }
-            return script.lines.Length - 1;
+            return script.Lines.Length - 1;
         }
 
         /// <summary>Seconds spent inside the line currently showing (0 during pre-roll).</summary>
@@ -132,7 +142,7 @@ namespace CastleBusters
             float cursor = PreRollSeconds;
             for (int i = 0; i < index; i++)
             {
-                cursor += LineDurationSeconds(script.lines[i].text);
+                cursor += LineDurationSeconds(script.Lines[i].text);
             }
             return Mathf.Max(0f, elapsed - cursor);
         }

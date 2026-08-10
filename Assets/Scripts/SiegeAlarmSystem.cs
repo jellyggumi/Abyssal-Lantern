@@ -90,12 +90,36 @@ namespace CastleBusters
             flowStrip.alignment = TextAlignmentOptions.Center;
             flowStrip.enableWordWrapping = false;
             flowStrip.raycastTarget = false;
-            flowStrip.outlineWidth = 0.16f;
-            flowStrip.outlineColor = new Color(0.02f, 0.02f, 0.04f, 0.9f);
+            TryApplyOutline(flowStrip, 0.16f, new Color(0.02f, 0.02f, 0.04f, 0.9f));
             var stripRt = stripGo.GetComponent<RectTransform>();
             stripRt.anchorMin = stripRt.anchorMax = new Vector2(0.5f, 0.9f);
             stripRt.pivot = new Vector2(0.5f, 1f);
             stripRt.sizeDelta = new Vector2(700f, 26f);
+        }
+
+        /// <summary>
+        /// Applies a text outline only when TMP can actually build the material instance.
+        /// `outlineWidth` internally does `new Material(fontSharedMaterial)`, which throws
+        /// ArgumentNullException when the font asset has not resolved yet — reachable in
+        /// batchmode and on the very first frame after a scene load, before TMP's default
+        /// font is bound. An alarm that cannot draw an outline is cosmetically poorer; an
+        /// alarm that throws takes the caller down with it (this aborted a PlayMode run when
+        /// selecting the Cannon card posted an alarm during scene setup).
+        /// </summary>
+        private static void TryApplyOutline(TextMeshProUGUI text, float width, Color color)
+        {
+            if (text == null) return;
+            if (text.font == null || text.fontSharedMaterial == null) return;
+            try
+            {
+                text.outlineWidth = width;
+                text.outlineColor = color;
+            }
+            catch (System.ArgumentNullException)
+            {
+                // TMP resolved a font but not its material; readable text without an outline
+                // is strictly better than no text at all.
+            }
         }
 
         private void PostInternal(string message, Color color)
@@ -114,8 +138,7 @@ namespace CastleBusters
             text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Ellipsis;
             text.raycastTarget = false;
-            text.outlineWidth = 0.15f;
-            text.outlineColor = new Color(0.02f, 0.02f, 0.04f, 0.92f);
+            TryApplyOutline(text, 0.15f, new Color(0.02f, 0.02f, 0.04f, 0.92f));
             var rt = go.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
