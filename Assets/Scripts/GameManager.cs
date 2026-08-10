@@ -343,6 +343,14 @@ namespace CastleBusters
             ShowTitleScreen();
         }
 
+        /// <summary>
+        /// Reel-first prologue. Currently ORPHANED and deliberately left in place: the cold open
+        /// it used to serve was replaced by StageInterludeController by a concurrent lane, and
+        /// the title's replay button was moved to ShowPanelPrologue so a purchased entitlement
+        /// never lands on a video that might not prepare. Which of the reel or the interlude
+        /// owns the cold open is a design call across two lanes, so it is recorded rather than
+        /// decided here — deleting this would quietly throw away the reel wiring.
+        /// </summary>
         private void ShowWebtoonPrologue()
         {
             if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
@@ -370,7 +378,12 @@ namespace CastleBusters
         {
             if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
             if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
-            introScreen = IntroScreenController.Create(BeginSiege, MobileStorefront.OpenStore, ShowWebtoonPrologue);
+            // The title's replay action goes straight to the panels, not through the reel.
+            // Replay is a purchased entitlement whose whole contract — a SKIP control, a return
+            // to the paused title, no runtime mutation — belongs to the panel prologue. Routing
+            // it through a video that may never finish preparing would leave a paying player on
+            // a black screen with nothing to press. The reel stays the cold open.
+            introScreen = IntroScreenController.Create(BeginSiege, MobileStorefront.OpenStore, ShowPanelPrologue);
         }
 
         public void BeginSiege()
@@ -588,19 +601,41 @@ namespace CastleBusters
         /// The keep, from the battlefield inward. A "castle" used to be a single one-block
         /// column at ±7.5 plus the core — thinner than the slingshot battering it, which is
         /// why it never read as a fortress. It is now an outpost the attacker must breach
-        /// first, then three courses stepping up toward the core.
+        /// first, then two courses stepping up toward the core.
         ///
-        /// Positions stop at 7.5 because the core occupies 7.85–10.15 (centre ±9, 2.3u
-        /// wide): there is no room to build inward, only out toward the middle of the field.
-        /// Every entry is validated against the launch rings by CastleWall_BasePositions_*.
+        /// Depth is capped, not maximised. A four-course keep (11 blocks a side) was tried
+        /// and screened the core so completely that a match no longer reached GameOver in
+        /// twenty turns of play — the fortress read well and was no longer a game. The
+        /// innermost course was dropped, which both thins the screen and leaves an approach
+        /// lane between the wall face at 6.5 and the core face at 7.85. KeepProfileTests caps
+        /// the block count so the next enlargement cannot quietly re-cross that line.
+        ///
+        /// Positions stop short of 7.85 because the core occupies 7.85–10.15 (centre ±9,
+        /// 2.3u wide): there is no room to build inward, only out toward the middle of the
+        /// field. Every entry is validated against the launch rings by CastleWall_BasePositions_*.
         /// </summary>
         public static readonly KeepCourse[] KeepProfile =
         {
             new KeepCourse(4.0f, 0, true),   // forward outpost — the first thing to fall
             new KeepCourse(5.0f, 0, false),  // outer course
-            new KeepCourse(6.0f, 1, false),  // middle course
-            new KeepCourse(7.0f, 2, false),  // inner course, tallest, shields the core
+            new KeepCourse(6.0f, 1, false),  // inner course, tallest, shields the core
         };
+
+        /// <summary>
+        /// Blocks in one side's keep at the baseline stage height. Derived rather than
+        /// written down so the cap test measures the profile that actually spawns.
+        /// </summary>
+        public static int BlocksPerKeep(int wallHeightBlocks)
+        {
+            int total = 0;
+            foreach (var course in KeepProfile)
+            {
+                total += course.IsOutpost
+                    ? OutpostHeightBlocks
+                    : Mathf.Max(1, wallHeightBlocks + course.HeightOffset);
+            }
+            return total;
+        }
 
         public static readonly Vector3[] WallBasePositions = BuildWallBasePositions();
 
@@ -889,11 +924,10 @@ namespace CastleBusters
             // face/text ratio breaking. LayoutSelectionRow re-centers the row with the new,
             // variable widths so the larger cards never overlap.
             const float baseWidth = 82f;
-            const float baseHeight = 54f;
             const float characterScale = 1.5f;
             const float gimmickScale = 1.5f;
-            var characterSize = new Vector2(baseWidth * characterScale, baseHeight * characterScale);
-            var gimmickSize = new Vector2(baseWidth * gimmickScale, baseHeight * gimmickScale);
+            var characterSize = new Vector2(baseWidth * characterScale, SelectionRowCardHeight);
+            var gimmickSize = new Vector2(baseWidth * gimmickScale, SelectionRowCardHeight);
 
             StyleSelectionButton(knightButton, "Knight", 0, characterSize);
             StyleSelectionButton(archerButton, "Archer", 1, characterSize);
@@ -903,9 +937,7 @@ namespace CastleBusters
             LayoutSelectionRow(
                 new[] { knightButton, archerButton, cannonButton, gimmickButton },
                 new[] { characterSize, characterSize, characterSize, gimmickSize },
-                // Height above the bottom edge: clears the launch-guide line that runs along
-                // the very bottom while keeping the row inside thumb reach on a phone.
-                104f, 16f);
+                SelectionRowY, 16f);
 
             if (knightButton != null && knightButton.GetComponent<GameButtonAnimator>() == null) knightButton.gameObject.AddComponent<GameButtonAnimator>();
             if (archerButton != null && archerButton.GetComponent<GameButtonAnimator>() == null) archerButton.gameObject.AddComponent<GameButtonAnimator>();
@@ -913,6 +945,18 @@ namespace CastleBusters
             if (gimmickButton != null && gimmickButton.GetComponent<GameButtonAnimator>() == null) gimmickButton.gameObject.AddComponent<GameButtonAnimator>();
             SetupLastStandButton();
         }
+
+        /// <summary>
+        /// Bottom-anchored HUD geometry, in canvas units. These live together because the Last
+        /// Stand card is positioned relative to the selection row but set up in a different
+        /// method — when they were two sets of inline literals, moving the row left the card
+        /// behind and pushed it off the bottom of the screen, where it stayed interactable and
+        /// unclickable. HudLayoutTests pins the relationship.
+        /// </summary>
+        public const float SelectionRowY = 104f;          // clears the launch-guide line along the bottom
+        public const float SelectionRowCardHeight = 81f;  // 54 base × 1.5 playtest upscale
+        public const float LastStandCardY = 212f;
+        public const float LastStandCardHeight = 104f;
 
         private void SetupLastStandButton()
         {
@@ -950,8 +994,17 @@ namespace CastleBusters
             var rt = lastStandButton.GetComponent<RectTransform>();
             if (rt != null)
             {
-                rt.anchoredPosition = new Vector2(0f, -220f);
-                rt.sizeDelta = new Vector2(156f, 104f);
+                // Anchor explicitly rather than inheriting the clone's. This card is a copy of
+                // a selection-row button, and LayoutSelectionRow has already re-anchored that
+                // row to the bottom edge — inheriting that anchor while keeping a y written for
+                // a centre-anchored card put the whole card off the bottom of the screen, where
+                // it still animated and still reported itself interactable but could never be
+                // hit by a pointer.
+                rt.anchorMin = new Vector2(0.5f, 0f);
+                rt.anchorMax = new Vector2(0.5f, 0f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = new Vector2(0f, LastStandCardY);
+                rt.sizeDelta = new Vector2(156f, LastStandCardHeight);
                 rt.localScale = Vector3.one;
             }
 

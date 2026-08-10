@@ -14,6 +14,9 @@ namespace CastleBusters.Tests
         /// <summary>Core centre ±9 with a 2.3u core spans 7.85–10.15.</summary>
         const float CoreNearEdgeAbsX = 7.85f;
 
+        /// <summary>Wall height of the opening stage — the one the playtest harness runs.</summary>
+        static int BaselineWallHeightBlocks => StageDefinitions.Stage1.wallHeightBlocks;
+
         [Test]
         public void Profile_HasAnOutpostAheadOfEveryWallCourse()
         {
@@ -87,9 +90,22 @@ namespace CastleBusters.Tests
         [Test]
         public void Profile_IsSubstantiallyDeeperThanTheOldSingleColumn()
         {
-            // The whole point of the change: 4 courses per side instead of 1.
-            Assert.GreaterOrEqual(GameManager.KeepProfile.Length, 4,
+            // Measured in blocks, not courses: courses are how the keep is authored, blocks
+            // are what the attacker actually has to knock down.
+            Assert.GreaterOrEqual(GameManager.BlocksPerKeep(BaselineWallHeightBlocks), 6,
                 "a keep that is one column deep is what this replaced");
+        }
+
+        [Test]
+        public void Profile_StaysThinEnoughForAMatchToEnd()
+        {
+            // The guard this file was missing. A four-course keep (11 blocks a side at the
+            // baseline stage) screened the core so completely that a match no longer reached
+            // GameOver inside the twenty turns the playtest harness allows, which is also the
+            // point at which a real match stops being winnable and starts being a chore.
+            // Anyone deepening the keep again has to re-measure rather than re-discover this.
+            Assert.LessOrEqual(GameManager.BlocksPerKeep(BaselineWallHeightBlocks), 8,
+                "the keep is deep enough again to screen the core out of reach");
         }
     }
 }
