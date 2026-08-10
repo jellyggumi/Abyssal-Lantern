@@ -91,3 +91,7 @@ Thumbs.db
 /TestResults/
 /.rfxgen-upstream/
 /GameplayCapture_*.png
+
+# Unity PlayMode test scaffolding (regenerated per run)
+Assets/InitTestScene*.unity
+Assets/InitTestScene*.unity.meta
