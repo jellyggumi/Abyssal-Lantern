@@ -1948,16 +1948,32 @@ namespace CastleBusters
         /// redundant intro card between clearing one stage and starting the next); false
         /// (default) shows the intro on the new stage (intro screen's stage picker use
         /// case).</param>
-        public static void RequestStage(StageId stage, bool skipIntro = false)
+        /// <returns>
+        /// True when the request was accepted and a scene reload is now scheduled. False
+        /// means a guard refused it — the caller MUST NOT latch itself as "navigated", or
+        /// the player is stranded on a screen whose button silently did nothing.
+        /// </returns>
+        public static bool RequestStage(StageId stage, bool skipIntro = false)
         {
-            if (PendingStage == stage) return;
-            if (StageDefinitions.For(stage).locked) return;
-            if (!StageProgress.IsUnlocked(StageProgressStore.Load(), stage)) return;
+            if (StageDefinitions.For(stage).locked) return false;
+            if (!StageProgress.IsUnlocked(StageProgressStore.Load(), stage)) return false;
+
+            // NOTE: deliberately no `PendingStage == stage` early-out. That guard used to
+            // treat "already the pending stage" as "nothing to do", but PendingStage only
+            // records which layout the NEXT boot should build — it says nothing about
+            // whether the caller still needs the reload. Three callers do:
+            //   * the results-screen NEXT STAGE button and its auto-advance, which also need
+            //     skipIntroOnce + ResetSeries applied, and
+            //   * the intro picker, where re-selecting the currently pending stage was a
+            //     visibly interactive card that did nothing at all.
+            // Refusing there stranded the player on the results screen with the countdown
+            // already stopped (the caller had latched `navigated`), which is exactly the
+            // "다음 스테이지로 넘어가지 않는다" report.
             PendingStage = stage;
             skipIntroOnce = skipIntro;
             ResetSeries();
             ReloadArena();
-
+            return true;
         }
 
         private static void ReloadArena()

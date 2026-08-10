@@ -6,7 +6,9 @@ namespace CastleBusters
     {
         [Header("Core Settings")]
         public bool isPlayerCore = true;
-        public float coreTargetWorldSize = 2.3f; // Scaled up by 1.4375x (>= 0.4x increase) for usability and playability
+        // The keep is the object the whole match is about — it carries the largest presentation
+        // footprint on the board so "how close am I to losing" is legible without a HUD glance.
+        public float coreTargetWorldSize = 2.3f;
 
         private const float ShieldMaxHP = 50f;
         private Vector3 coreBaseScale = Vector3.one;
@@ -19,6 +21,9 @@ namespace CastleBusters
         private float healthDamageThisTurn;
         private bool turnStartedAtFullHealth;
         private bool braceFeedbackShown;
+        // Damage stage currently displayed (0 intact, 1 battered, 2 near-ruin). -1 = not yet
+        // applied, so the first RefreshKeepStage() always installs stage art.
+        private int keepStage = -1;
         protected override void Awake()
         {
             maxHP = 150f;
@@ -43,24 +48,64 @@ namespace CastleBusters
             if (sr == null) return;
             sr.sortingOrder = 3;
 
-            var coreArt = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.Core);
-            if (coreArt != null)
+            // The base you defend is a CASTLE KEEP, not an abstract crystal: three
+            // hand-authored damage stages whose SILHOUETTES differ (roofs → gone, battlements
+            // → gap-toothed, wall → breached), so its condition reads at gameplay scale
+            // without a health bar. Falls back to the legacy crystal-core art when the keep
+            // art is absent, keeping art-less builds correct (same contract as CastleSkinLibrary).
+            var keepArt = GimmickSpriteLibrary.Load(GimmickAnimLibrary.CastleKeepStill(0));
+            bool hasKeepArt = keepArt != null;
+            var art = hasKeepArt ? keepArt : GimmickSpriteLibrary.Load(GimmickSpriteLibrary.Core);
+
+            if (art != null)
             {
-                // Dedicated crystal-keep-core art: near-white team tints keep the pedestal/orb
-                // detail readable. Registered via SetPresentationSprite so DestructibleBlock's
-                // damage-state UpdateVisuals() keeps this sprite as "normal" instead of reverting
-                // to a null placeholder on the first hit.
-                SetPresentationSprite(coreArt, isPlayerCore ? new Color(0.75f, 0.9f, 1f) : new Color(1f, 0.92f, 0.7f));
+                // Registered through SetPresentationSprite so DestructibleBlock's damage-state
+                // UpdateVisuals() treats this as "normal" instead of reverting to a null
+                // placeholder on the first hit.
+                SetPresentationSprite(art, isPlayerCore ? new Color(0.75f, 0.9f, 1f) : new Color(1f, 0.92f, 0.7f));
             }
             else
             {
-                sr.color = isPlayerCore ? new Color(0.2f, 0.7f, 1f) : new Color(1f, 0.8f, 0.2f); // Blue for player core, Gold for enemy core
+                sr.color = isPlayerCore ? new Color(0.2f, 0.7f, 1f) : new Color(1f, 0.8f, 0.2f);
+            }
+
+            if (hasKeepArt)
+            {
+                // Feed the damage-state slots so a band change swaps the keep silhouette even
+                // if the frame animator is unavailable (missing frames, suspended, EditMode).
+                SetSkinSprites(
+                    keepArt,
+                    GimmickSpriteLibrary.Load(GimmickAnimLibrary.CastleKeepStill(1)) ?? keepArt,
+                    GimmickSpriteLibrary.Load(GimmickAnimLibrary.CastleKeepStill(2)) ?? keepArt);
             }
 
             ApplyCorePresentationScale(sr);
-            // Animated crystal bob loop; suspended on first damage so cracked art wins.
-            GimmickFrameAnimator.TryAttach(gameObject, GimmickAnimLibrary.CoreAnim, 6f);
+
+            // Idle loop for the current stage: banner flutter + window-glow life while intact,
+            // guttering embers and settling dust once breached.
+            GimmickFrameAnimator.TryAttach(gameObject,
+                hasKeepArt ? GimmickAnimLibrary.CastleKeepAnim(0) : GimmickAnimLibrary.CoreAnim,
+                hasKeepArt ? 5f : 6f);
+            keepStage = hasKeepArt ? 0 : -1;
             coreBaseScale = transform.localScale;
+        }
+
+        /// <summary>
+        /// Points the idle loop at the frame set for the keep's current damage band, so the
+        /// castle visibly degrades as it is battered instead of freezing on a still.
+        /// Presentation-only (CLAUDE.md §2): reads HP, never writes simulation state.
+        /// </summary>
+        private void RefreshKeepStage()
+        {
+            if (keepStage < 0) return; // legacy crystal-core art path: nothing staged to swap
+            int band = DisplayBand;
+            if (band == keepStage) return;
+
+            var anim = GetComponent<GimmickFrameAnimator>();
+            if (anim != null && anim.Retarget(GimmickAnimLibrary.CastleKeepAnim(band), band == 0 ? 5f : 4f))
+            {
+                keepStage = band;
+            }
         }
 
         private void ApplyCorePresentationScale(SpriteRenderer sr)
@@ -131,10 +176,14 @@ namespace CastleBusters
 
             if (damage <= 0f) return;
 
-            // Damage states own the renderer from here: stop the idle crystal loop.
-            GetComponent<GimmickFrameAnimator>()?.Suspend();
+            // Legacy crystal-core art has only one loop, so damage art must own the renderer
+            // and the loop stops. The staged castle keep instead KEEPS animating and swaps to
+            // the frame set for its new damage band — the keep crumbles on screen rather than
+            // freezing on a still the moment it is first hit.
+            if (keepStage < 0) GetComponent<GimmickFrameAnimator>()?.Suspend();
 
             base.TakeDamage(damage, damageFromPlayer);
+            RefreshKeepStage();
 
             // Cycle 20: Trigger shield when core drops below 50% HP (75 HP)
             if (!shieldTriggered && currentHP > 0f && currentHP <= maxHP * 0.5f)

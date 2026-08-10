@@ -1,0 +1,12 @@
+{
+  "file": "castle_keep_s1_anim_000.png",
+  "prompt": "Midpoint between the intact keep and the wreck: half the merlons broken off, holes punched through the upper wall, left turret roof tip sheared away, deep cracks down both towers, arrow slits charred and dimmed to weak embers, gate split and scorched, banner frayed.",
+  "tool": "Higgsfield CLI (flux_2 / flux_kontext) for key art; PIL 12.2.0 keying + frame derivation via gen_siege_art.py",
+  "model": "flux_2 / flux_kontext (Higgsfield) key art; frame derived procedurally",
+  "generatedAt": "2026-08-09T23:08:29.151028+00:00",
+  "checksumSha256": "38bc69dda04d07d2cc5cc44e2c0336952460c9b8f08f143569b14dc7e34cfa13",
+  "runtimeEligible": true,
+  "notes": "Frame 0/4 of the castle keep s1 idle loop.",
+  "width": 512,
+  "height": 512
+}

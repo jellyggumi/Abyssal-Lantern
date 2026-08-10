@@ -1,0 +1,12 @@
+{
+  "file": "castle_keep_s2_anim_001.png",
+  "prompt": "Near-destroyed ruin: both turret conical roofs gone leaving jagged stumps, the whole upper third collapsed into a torn ragged crown, flagpole down and banner gone, a massive cavernous breach eating most of the front wall, all windows pitch black. Low, jagged, asymmetric outline.",
+  "tool": "Higgsfield CLI (flux_2 / flux_kontext) for key art; PIL 12.2.0 keying + frame derivation via gen_siege_art.py",
+  "model": "flux_2 / flux_kontext (Higgsfield) key art; frame derived procedurally",
+  "generatedAt": "2026-08-09T23:08:30.149951+00:00",
+  "checksumSha256": "2837ee78e51a0d3ebca602f41dfa7403f16b206a9ccb856477b4c4ac002d495e",
+  "runtimeEligible": true,
+  "notes": "Frame 1/4 of the castle keep s2 idle loop.",
+  "width": 512,
+  "height": 512
+}

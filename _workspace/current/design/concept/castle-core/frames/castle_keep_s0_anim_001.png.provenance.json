@@ -1,0 +1,12 @@
+{
+  "file": "castle_keep_s0_anim_001.png",
+  "prompt": "2D game asset, single object on a pure flat solid magenta background. A proud intact medieval stone castle keep viewed straight from the front: tall square granite tower with crenellated battlements, heavy arched oak gate with iron studs, narrow arrow-slit windows glowing warm gold, two flanking corner turrets with conical slate roofs, bright banner pennant flying from the top. Clean undamaged masonry. Dark-fantasy medieval siege game art.",
+  "tool": "Higgsfield CLI (flux_2 / flux_kontext) for key art; PIL 12.2.0 keying + frame derivation via gen_siege_art.py",
+  "model": "flux_2 / flux_kontext (Higgsfield) key art; frame derived procedurally",
+  "generatedAt": "2026-08-09T23:08:28.217746+00:00",
+  "checksumSha256": "8dfcbd7bd18c24cde50d29c3a700a03938df9d575fcc2844e5a97b8e3748a0c6",
+  "runtimeEligible": true,
+  "notes": "Frame 1/4 of the castle keep s0 idle loop.",
+  "width": 512,
+  "height": 512
+}

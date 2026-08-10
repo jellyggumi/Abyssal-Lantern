@@ -25,6 +25,12 @@ owner action. Public beat: WebGL build on the
   ffmpeg. Higgsfield's video models are paid-plan only, so the reel is
   composited from stills rather than generated — see
   `_workspace/current/engineering/resource-manifest.md`.
+- **Launcher and keep art** (2026-08-10): the launch portal became a **새총
+  (slingshot)** and the defended base became a **성 (castle keep)** that
+  visibly crumbles through three damage stages. Codex/gti quota was exhausted,
+  so generation ran on Higgsfield (`flux_2` + `flux_kontext`); stages 1–2 are
+  image-conditioned edits of stage 0, so all three are the same castle.
+  See [[wiki/projects/castle-war/siege-art]].
 - Cycle: Stage 1 concept pivot — see
   `_workspace/current/production/task-manifest.md` (live) for tasks.
 - Rule file: repository `CLAUDE.md` (AGENTS.md points to it).
@@ -36,6 +42,8 @@ owner action. Public beat: WebGL build on the
   physics destruction + meta spine)
 - Deployment economy (roster overhaul, 대포 + 전투 중 생성):
   [[wiki/projects/castle-war/deployment-economy]]
+- Launcher + castle keep art (새총, 성, 3단계 파괴 애니메이션):
+  [[wiki/projects/castle-war/siege-art]]
 - Legacy history: [[castle-busters-phase-1-analysis]],
   [[castle-busters-phase-2-completion]] (under `wiki/reports/`)
 

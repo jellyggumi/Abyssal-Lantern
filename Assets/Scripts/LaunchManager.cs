@@ -39,6 +39,12 @@ namespace CastleBusters
 
         private GameObject impactMarkerInstance;
         private GameObject launchPointIndicatorInstance;
+        // Fitted world scale of the launch affordance, captured at setup. Update() multiplies
+        // its breathing pulse into this instead of overwriting it.
+        private Vector3 launchPointIndicatorBaseScale = Vector3.one;
+        // True when the affordance is textured art (slingshot / gate frames) rather than the
+        // procedural cyan ring — art must not be tinted, only alpha-pulsed.
+        private bool launchPointIndicatorIsArt;
         private GameObject invalidStartMarkerInstance;
         private LineRenderer boundaryLine;
         private const int BoundaryPointCount = 73;
@@ -100,6 +106,8 @@ namespace CastleBusters
             if (launchPoint != null && launchPointIndicatorPrefab != null)
             {
                 launchPointIndicatorInstance = Instantiate(launchPointIndicatorPrefab, launchPoint.position, Quaternion.identity, launchPoint);
+                launchPointIndicatorBaseScale = launchPointIndicatorInstance.transform.localScale;
+                launchPointIndicatorIsArt = true; // an authored prefab owns its own look
             }
             else if (launchPoint != null)
             {
@@ -111,21 +119,43 @@ namespace CastleBusters
                 sr.sortingOrder = 8;
                 launchPointIndicatorInstance = go;
 
-                // Launch-gate portal (§5): dedicated gti-generated frame animation replaces
-                // the flat circle when the art exists (min 5 frames, 8fps loop). Fails soft
-                // to the procedural ring on missing art.
-                var gateFrames = GimmickAnimLibrary.LoadFrames(GimmickAnimLibrary.LaunchGateAnim);
+                // 병사생성 포털 → 새총. The launch point used to be an abstract glowing portal
+                // ring, which never explained WHY dragging backwards fires a soldier forwards.
+                // A slingshot states the control's whole grammar in its silhouette: pull the
+                // pouch, release, the band throws. Prefers the slingshot art, falls back to
+                // the legacy portal frames, then to the procedural ring — an art-less build
+                // still gets a readable launch affordance.
+                string gateKey = GimmickAnimLibrary.SlingshotAnim;
+                var gateFrames = GimmickAnimLibrary.LoadFrames(gateKey);
+                if (gateFrames == null || gateFrames.Length < 2)
+                {
+                    gateKey = GimmickAnimLibrary.LaunchGateAnim;
+                    gateFrames = GimmickAnimLibrary.LoadFrames(gateKey);
+                }
                 if (gateFrames != null && gateFrames.Length >= 2)
                 {
                     sr.sprite = gateFrames[0];
                     float native = Mathf.Max(sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
                     if (native > 0.0001f)
                     {
-                        float s = 2.4f / native; // portal spans ~2.4u over the muzzle
+                        // The slingshot reads as a physical siege machine, so it is sized to
+                        // stand on the apron (3.1u) rather than hover like the 2.4u portal.
+                        float target = gateKey == GimmickAnimLibrary.SlingshotAnim ? 3.1f : 2.4f;
+                        float s = target / native;
                         go.transform.localScale = new Vector3(s, s, 1f);
                     }
-                    GimmickFrameAnimator.TryAttach(go, GimmickAnimLibrary.LaunchGateAnim, 8f);
+                    // Slingshot stands ON the ground; the portal floated centered on the muzzle.
+                    if (gateKey == GimmickAnimLibrary.SlingshotAnim)
+                    {
+                        go.transform.localPosition = new Vector3(0f, 0.85f, 0f);
+                        sr.color = Color.white; // no cyan portal wash over the wood/leather
+                    }
+                    // TryAttach re-derives scale from frame 0 to preserve the world footprint,
+                    // so the authoritative base scale is read back AFTER it runs.
+                    GimmickFrameAnimator.TryAttach(go, gateKey, 8f);
+                    launchPointIndicatorIsArt = true;
                 }
+                launchPointIndicatorBaseScale = go.transform.localScale;
             }
 
             if (launchPoint != null && launchPointHintLabel == null)
@@ -475,16 +505,30 @@ namespace CastleBusters
             if (launchPointIndicatorInstance != null)
             {
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.18f;
-                launchPointIndicatorInstance.transform.localScale = new Vector3(pulse, pulse, 1f);
+                // Multiply the breathing pulse INTO the fitted scale. Assigning the raw pulse
+                // (as this did) discarded the world-size fit computed at setup, so any framed
+                // launch art silently rendered at its native sprite scale instead of the
+                // intended world size.
+                launchPointIndicatorInstance.transform.localScale = launchPointIndicatorBaseScale * pulse;
                 launchPointIndicatorInstance.SetActive(isPlayerTurn && !deployArmed);
 
                 var sr = launchPointIndicatorInstance.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    // Drag-start affordance: raised the floor so the ring never dims below a
-                    // clearly-visible glow, keeping it legible as the "start here" hint at rest.
-                    float alpha = 0.58f + Mathf.Sin(Time.time * 8f) * 0.26f;
-                    sr.color = new Color(0.35f, 0.9f, 1f, alpha);
+                    if (launchPointIndicatorIsArt)
+                    {
+                        // Textured launcher (새총): pulse only the alpha so the wood/leather
+                        // keeps its own colour instead of being washed cyan every frame.
+                        float alpha = 0.88f + Mathf.Sin(Time.time * 8f) * 0.12f;
+                        sr.color = new Color(1f, 1f, 1f, alpha);
+                    }
+                    else
+                    {
+                        // Procedural ring fallback: raised alpha floor so it never dims below
+                        // a clearly-visible glow as the "start here" hint at rest.
+                        float alpha = 0.58f + Mathf.Sin(Time.time * 8f) * 0.26f;
+                        sr.color = new Color(0.35f, 0.9f, 1f, alpha);
+                    }
                 }
             }
 

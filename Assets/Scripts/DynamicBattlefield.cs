@@ -99,6 +99,27 @@ namespace CastleBusters
         /// <summary>Damage states (cracked cores) take over the renderer; stop animating.</summary>
         public void Suspend() => suspended = true;
 
+        /// <summary>
+        /// Swaps the running loop to a different frame key without re-attaching, so a host
+        /// whose appearance changes with state (the castle keep crumbling through its three
+        /// damage stages) keeps ONE animator and one world footprint across the swap.
+        /// Re-attaching instead would re-measure the footprint from the new stage's art —
+        /// and stage 2's smaller ruin silhouette would visibly shrink the keep's collider.
+        /// Returns false and leaves the current loop running when the art is missing.
+        /// </summary>
+        public bool Retarget(string key, float newFps = -1f)
+        {
+            var next = GimmickAnimLibrary.LoadFrames(key);
+            if (next == null || next.Length < 1) return false;
+            frames = next;
+            if (newFps > 0f) fps = newFps;
+            // Keep `elapsed` so the loop phase carries across the swap — resetting it would
+            // snap the banner/ember mid-flutter on every damage band crossing.
+            lastFrame = -1;
+            suspended = false;
+            return true;
+        }
+
         private void Update()
         {
             if (suspended || frames == null || sr == null) return;
@@ -125,7 +146,20 @@ namespace CastleBusters
         public const string HexRuneAnim = "hex_rune_anim";
         public const string CoreAnim = "core_anim";
         public const string IntroBanner = "IntroAnim"; // lives at Resources root, not Gimmicks/
+        /// <summary>Legacy portal-ring launch gate. Superseded by <see cref="SlingshotAnim"/>.</summary>
         public const string LaunchGateAnim = "launch_gate_anim";
+        /// <summary>새총 — the unit-launch slingshot that replaced the portal ring.</summary>
+        public const string SlingshotAnim = "slingshot_anim";
+
+        /// <summary>
+        /// Castle keep idle loop for a damage stage (0 intact, 1 battered, 2 near-ruin).
+        /// The keep is the base the player defends, so its stage must be readable at a
+        /// glance — each stage has its own silhouette, not just a recolour.
+        /// </summary>
+        public static string CastleKeepAnim(int stage) => $"castle_keep_s{Mathf.Clamp(stage, 0, 2)}_anim";
+
+        /// <summary>Static per-stage keep sprite (feeds the damage-state sprite slots).</summary>
+        public static string CastleKeepStill(int stage) => $"castle_keep_s{Mathf.Clamp(stage, 0, 2)}";
         public const string FlyingBeastAnim = "flying_beast_anim";
         private static readonly Dictionary<string, Sprite[]> cache = new Dictionary<string, Sprite[]>();
 

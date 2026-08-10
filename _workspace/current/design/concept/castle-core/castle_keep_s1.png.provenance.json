@@ -1,0 +1,12 @@
+{
+  "file": "castle_keep_s1.png",
+  "prompt": "Midpoint between the intact keep and the wreck: half the merlons broken off, holes punched through the upper wall, left turret roof tip sheared away, deep cracks down both towers, arrow slits charred and dimmed to weak embers, gate split and scorched, banner frayed.",
+  "tool": "Higgsfield CLI (flux_2 / flux_kontext) for key art; PIL 12.2.0 keying + frame derivation via gen_siege_art.py",
+  "model": "flux_2 (stage 0) / flux_kontext (stages 1-2), Higgsfield",
+  "generatedAt": "2026-08-09T23:08:29.107903+00:00",
+  "checksumSha256": "f24fea402e66fe97827bffca95f5d1cdf43aa2e33fedbbdcfe202055980a14aa",
+  "runtimeEligible": true,
+  "notes": "Castle keep damage stage s1 \u2014 the core the player defends. Stage art is chroma-keyed from the studio render; stages share one identity because 1 and 2 were generated as edits of stage 0 rather than independent renders.",
+  "width": 512,
+  "height": 512
+}

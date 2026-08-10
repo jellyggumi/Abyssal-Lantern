@@ -307,7 +307,11 @@ namespace CastleBusters
                     new Color(0.95f, 0.62f, 0.18f, 0.98f), () => { navigated = true; GameManager.RequestRematch(); });
                 nextStageLabel = BuildButton("NextStageButton", new Vector2(0.50f, seriesWon ? 0.065f : 0.10f),
                     $"다음 스테이지 ({Mathf.CeilToInt(AutoAdvanceDelay)})",
-                    new Color(0.35f, 0.92f, 0.55f, 1f), () => { navigated = true; GameManager.RequestStage(nextStage.Value, skipIntro: true); });
+                    new Color(0.35f, 0.92f, 0.55f, 1f),
+                    // Only latch `navigated` when the request was actually ACCEPTED. Latching
+                    // first and hoping meant a refused request left the countdown stopped and
+                    // the screen inert — the player could no longer advance at all.
+                    () => { if (GameManager.RequestStage(nextStage.Value, skipIntro: true)) navigated = true; });
                 BuildButton("TitleButton", new Vector2(0.75f, seriesWon ? 0.065f : 0.10f), "타이틀",
                     new Color(0.35f, 0.55f, 0.85f, 0.95f), () => { navigated = true; GameManager.RequestTitle(); });
             }
@@ -376,8 +380,19 @@ namespace CastleBusters
                     nextStageLabel.text = $"다음 스테이지 ({Mathf.Max(0, Mathf.CeilToInt(remaining))})";
                 if (remaining <= 0f)
                 {
-                    navigated = true;
-                    GameManager.RequestStage(pendingNextStage.Value, skipIntro: true);
+                    // Latch only on acceptance. A refused request previously left `navigated`
+                    // true forever, which froze the countdown AND disabled the button, so the
+                    // player had no way to reach the next stage at all. On refusal the label
+                    // says so plainly instead of counting down to nothing.
+                    if (GameManager.RequestStage(pendingNextStage.Value, skipIntro: true))
+                    {
+                        navigated = true;
+                    }
+                    else
+                    {
+                        pendingNextStage = null;
+                        if (nextStageLabel != null) nextStageLabel.text = "다음 스테이지 (잠김)";
+                    }
                     return;
                 }
             }

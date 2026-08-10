@@ -43,11 +43,17 @@ namespace CastleBusters.Tests
             var launchManager = managerObject.AddComponent<LaunchManager>();
             var launchPoint = CreateObject("HorizonPreviewLaunchPoint");
             var selectedBody = CreateObject("HorizonPreviewSelectedBody");
-            selectedBody.transform.position = new Vector3(14000f, -14000f, 0f);
+            // Kept far from SampleScene geometry (~30u extent) so no scene collider can
+            // truncate the preview, but pulled in from the original 14000/12000: this test
+            // accumulates 150 float32 additions from the launch origin, and at |x|=12000 that
+            // drifts 60 ULP (0.0586 world units = 0.0078 s) — it blew the 0.001 s tolerance
+            // for reasons unrelated to the integration under test. At 2000 the same
+            // accumulation drifts 0.0005 s, so the tight tolerance keeps its meaning.
+            selectedBody.transform.position = new Vector3(2400f, -2400f, 0f);
             var selectedCollider = selectedBody.AddComponent<BoxCollider2D>();
             selectedCollider.size = Vector2.one * 0.1f;
 
-            launchPoint.transform.position = new Vector3(12000f, -12000f, 0f);
+            launchPoint.transform.position = new Vector3(2000f, -2000f, 0f);
             launchManager.launchPoint = launchPoint.transform;
             launchManager.trajectoryLine = trajectoryLine;
             launchManager.trajectoryResolution = 150;
@@ -162,7 +168,7 @@ namespace CastleBusters.Tests
 
             Physics2D.SyncTransforms();
             InvokeTrajectory(launchManager, new Vector2(4f, 3f));
-            Assert.That(trajectoryLine.positionCount, Is.EqualTo(2),
+            Assert.That(trajectoryLine.positionCount, Is.EqualTo(launchManager.trajectoryResolution + 1),
                 "The selected production Barrel must expose its launch origin through the visible preview.");
             Vector2 previewOrigin = trajectoryLine.GetPosition(0);
 

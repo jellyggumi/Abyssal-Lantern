@@ -49,19 +49,48 @@ namespace CastleBusters
     {
         private const string PrefsKey = "CastleBusters.StageProgress.v1";
 
+        // Session mirror of the frontier. PlayerPrefs is the durable record, but on WebGL it
+        // writes to IndexedDB asynchronously and a Save() can be lost to a tab close, a
+        // private-browsing profile, or a storage-quota refusal — all silent. Losing it
+        // mid-session used to mean the stage the player had JUST cleared into was refused by
+        // RequestStage's unlock gate, stranding them on the results screen. The mirror never
+        // regresses within a session, so a failed write costs persistence across reloads, not
+        // the ability to advance right now.
+        private static StageId sessionFrontier = StageId.Stage1;
+        private static bool sessionFrontierLoaded;
+
         public static StageId Load()
         {
             int raw = PlayerPrefs.GetInt(PrefsKey, (int)StageId.Stage1);
             // Defensive clamp: a stale/corrupt/hand-edited pref must never point past the
             // last real stage (or before Stage1).
             int clamped = Mathf.Clamp(raw, (int)StageId.Stage1, (int)StageId.Stage3);
-            return (StageId)clamped;
+            var stored = (StageId)clamped;
+
+            if (!sessionFrontierLoaded)
+            {
+                sessionFrontier = stored;
+                sessionFrontierLoaded = true;
+                return stored;
+            }
+            // Whichever source is further along wins: a persisted frontier from a previous
+            // session, or one earned in this one whose write may not have survived.
+            return (int)stored > (int)sessionFrontier ? stored : sessionFrontier;
         }
 
         public static void Save(StageId highestUnlocked)
         {
+            if ((int)highestUnlocked > (int)sessionFrontier) sessionFrontier = highestUnlocked;
+            sessionFrontierLoaded = true;
             PlayerPrefs.SetInt(PrefsKey, (int)highestUnlocked);
             PlayerPrefs.Save();
+        }
+
+        /// <summary>Test/title hook: forget the session mirror so a fresh profile reads clean.</summary>
+        public static void ResetSessionMirror()
+        {
+            sessionFrontier = StageId.Stage1;
+            sessionFrontierLoaded = false;
         }
 
         /// <summary>Record a stage clear: advances + persists the unlock frontier if the

@@ -1,0 +1,12 @@
+{
+  "file": "slingshot_anim_002.png",
+  "prompt": "2D game asset, single object on a pure flat solid magenta background. A sturdy wooden slingshot siege launcher: Y-shaped forked branch of dark weathered oak, riveted iron bands at the fork joints, a wide worn brown leather pouch, thick amber-brown elastic bands strung taut between the two prongs. Standing upright, planted in the ground, viewed from the side at a slight three-quarter angle. Dark-fantasy medieval siege game art, painterly but crisp readable silhouette, warm rim light from upper left, neutral fill. Object centered with generous empty margin on all sides, fully inside frame. No ground plane, no shadow on background, no text, no watermark, no extra props.",
+  "tool": "Higgsfield CLI (flux_2 / flux_kontext) for key art; PIL 12.2.0 keying + frame derivation via gen_siege_art.py",
+  "model": "flux_2 (Higgsfield) key art; frame derived procedurally",
+  "generatedAt": "2026-08-09T23:08:27.309773+00:00",
+  "checksumSha256": "ebca92cd5040b20dcdc09579fe9627dbd99edfe31923af302522b6b0117c51f1",
+  "runtimeEligible": true,
+  "notes": "Frame 2/6 of the launcher idle loop. Derived from one keyed still so the silhouette is identical across frames (per-frame model generation drifts identity).",
+  "width": 256,
+  "height": 256
+}

@@ -79,6 +79,20 @@ namespace CastleBusters
             BuildVisual();
         }
 
+        /// <summary>
+        /// Seconds between target re-acquisitions. FindTarget walks every live
+        /// DestructibleBlock (the 41x5 terrain grid plus both castles, ~200 entries) and
+        /// calls GetComponentInParent on each, which walks the transform hierarchy. Doing
+        /// that per battery per frame dominated the frame budget once two batteries per side
+        /// were on the field — it doubled the 30-game PlayMode sim's runtime. A battery that
+        /// reloads every 3.2 s does not need a fresh scan 60 times a second; re-acquiring 4
+        /// times a second is far below the reload clock and stays visually immediate.
+        /// </summary>
+        private const float RetargetIntervalSeconds = 0.25f;
+
+        private Transform cachedTarget;
+        private float retargetTimer;
+
         private void Update()
         {
             if (!Application.isPlaying) return;
@@ -87,7 +101,15 @@ namespace CastleBusters
             var gm = GameManager.Instance;
             if (gm != null && gm.currentState == GameState.GameOver) return;
 
-            var target = FindTarget();
+            // Re-acquire on a clock, but drop a target the instant it dies or leaves range so
+            // the battery never keeps aiming at a corpse for a quarter second.
+            retargetTimer -= Time.deltaTime;
+            if (retargetTimer <= 0f || !IsTargetStillValid(cachedTarget))
+            {
+                retargetTimer = RetargetIntervalSeconds;
+                cachedTarget = FindTarget();
+            }
+            var target = cachedTarget;
             AimAt(target);
 
             // Reload only advances with a live target in the arc — an idle battery holds its
@@ -103,6 +125,21 @@ namespace CastleBusters
 
             reloadRemaining = reloadSeconds;
             Fire(target);
+        }
+
+        /// <summary>
+        /// Cheap per-frame validity check on the cached target: destroyed, dead, or out of
+        /// range forces an immediate re-acquire without paying for the full scan.
+        /// </summary>
+        private bool IsTargetStillValid(Transform t)
+        {
+            if (t == null) return false;
+            if (!CannonRules.InRange(Vector2.Distance(transform.position, t.position))) return false;
+            var unit = t.GetComponent<UnitController>();
+            if (unit != null) return unit.CurrentState != UnitState.Dead;
+            var block = t.GetComponent<DestructibleBlock>();
+            if (block != null) return !block.IsFalling;
+            return true;
         }
 
         /// <summary>
@@ -203,6 +240,17 @@ namespace CastleBusters
             if (shell == null) return;
 
             Vector2 dir = velocity.sqrMagnitude > 0.01f ? velocity.normalized : Vector2.right;
+
+            // Drawn blast at the muzzle, rotated onto the shot line so the flare reads as
+            // coming out of the barrel. The particle burst and ring below stay: they carry
+            // the ember spray and the pressure wave, which a flat sprite cannot.
+            var blast = FrameAnimEffect.Spawn(EffectSpriteLibrary.MuzzleBlast,
+                muzzle + dir * 0.45f, 1.5f, Color.white, fps: 22f, sortingOrder: 37);
+            if (blast != null)
+            {
+                blast.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+            }
+
             GameFeelVfx.SpawnImpactBurst(muzzle + dir * 0.35f, new Color(1f, 0.82f, 0.35f, 0.9f), 0.42f);
             GameFeelVfx.SpawnShockwaveRing(muzzle, new Color(1f, 0.75f, 0.3f, 0.5f), 0.75f, 0.24f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.08f, 0.04f);

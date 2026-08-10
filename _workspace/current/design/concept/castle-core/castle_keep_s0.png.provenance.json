@@ -1,0 +1,12 @@
+{
+  "file": "castle_keep_s0.png",
+  "prompt": "2D game asset, single object on a pure flat solid magenta background. A proud intact medieval stone castle keep viewed straight from the front: tall square granite tower with crenellated battlements, heavy arched oak gate with iron studs, narrow arrow-slit windows glowing warm gold, two flanking corner turrets with conical slate roofs, bright banner pennant flying from the top. Clean undamaged masonry. Dark-fantasy medieval siege game art.",
+  "tool": "Higgsfield CLI (flux_2 / flux_kontext) for key art; PIL 12.2.0 keying + frame derivation via gen_siege_art.py",
+  "model": "flux_2 (stage 0) / flux_kontext (stages 1-2), Higgsfield",
+  "generatedAt": "2026-08-09T23:08:28.123560+00:00",
+  "checksumSha256": "bb754c2f4446ebfc2d68f2cb9b2702dcb8d157378f3ef5d6fe5bc488e01cdea3",
+  "runtimeEligible": true,
+  "notes": "Castle keep damage stage s0 \u2014 the core the player defends. Stage art is chroma-keyed from the studio render; stages share one identity because 1 and 2 were generated as edits of stage 0 rather than independent renders.",
+  "width": 512,
+  "height": 512
+}

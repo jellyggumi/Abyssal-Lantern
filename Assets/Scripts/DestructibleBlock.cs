@@ -150,6 +150,15 @@ namespace CastleBusters
             UpdateVisuals();
         }
 
+        /// <summary>
+        /// The damage band currently DISPLAYED (0 intact, 1 cracked, 2 crumbling) — true HP
+        /// ratio raised by any castle-wide wear floor. Subclasses whose presentation is
+        /// staged (the castle keep swapping silhouettes as it is battered) read this instead
+        /// of recomputing the band, so a wear-floor ratchet moves them too.
+        /// </summary>
+        protected int DisplayBand =>
+            CastleSkinLibrary.ComputeDisplayBand(maxHP > 0f ? currentHP / maxHP : 0f, displayWearFloor);
+
         // Rescales the (oversized) source sprite + its collider so the block renders at
         // 'targetWorldSize' world units, matching the ~1u castle grid spacing. Both the
         // SpriteRenderer and the BoxCollider2D end up at the same world size.

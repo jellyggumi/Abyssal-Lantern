@@ -2667,7 +2667,13 @@ namespace CastleBusters.Tests
                 Vector2 startingVelocity = new Vector2(2f, 5f);
                 drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
 
-                Assert.AreEqual(3, trajectoryLine.positionCount);
+                // DrawTrajectory renders the t=0 origin plus one point per configured
+                // integration, so a resolution of N yields N+1 points (same contract as
+                // LaunchManager_DrawTrajectory_RendersConfiguredResolution and the 151-point
+                // horizon pin). The indices asserted below are unchanged: 1 and 2 are still
+                // the first and second integrated samples.
+                Assert.AreEqual(launchManager.trajectoryResolution + 1, trajectoryLine.positionCount,
+                    "The preview must render the launch origin plus every configured integration.");
                 Vector3 firstStep = trajectoryLine.GetPosition(1);
                 Vector3 secondStep = trajectoryLine.GetPosition(2);
                 float expectedFirstY =
@@ -2889,7 +2895,8 @@ namespace CastleBusters.Tests
                 Vector2 startingVelocity = new Vector2(2f, 5f);
                 drawTrajectory.Invoke(launchManager, new object[] { startingVelocity });
 
-                Assert.AreEqual(3, trajectoryLine.positionCount);
+                Assert.AreEqual(launchManager.trajectoryResolution + 1, trajectoryLine.positionCount,
+                    "The preview must render the launch origin plus every configured integration.");
                 Vector3 firstStep = trajectoryLine.GetPosition(1);
                 Vector3 secondStep = trajectoryLine.GetPosition(2);
                 float expectedFirstY =

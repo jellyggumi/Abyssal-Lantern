@@ -24,6 +24,11 @@ namespace CastleBusters
         // which would look wrong multiplied under a rune's blue/orange glow tint.
         public const string Arcane = "fx_arcane";
 
+        // Cannon muzzle blast. Frames are derived from the drawn muzzle-flash art by a
+        // scale/alpha ramp (punch out, expand, dissipate) rather than drawn one by one, so
+        // every frame is the same blast and the registration cannot drift between them.
+        public const string MuzzleBlast = "fx_muzzle";
+
 
         // Single-sprite particle art under Resources/Effects/particles/. These skin the
         // procedural ParticleSystems (impact bursts, collapse dust, vent columns) that used
