@@ -149,6 +149,32 @@ namespace CastleBusters
         public static bool IsUnlocked(DeployCard card, int turnCount) => turnCount >= UnlockTurn(card);
 
         /// <summary>
+        /// Enemy wall blocks that must be brought down before the battery can be sited.
+        ///
+        /// The turn gate alone meant artillery arrived for simply waiting. Requiring a
+        /// breach makes the siege earn it: open a hole with the volley, then move the guns
+        /// up. It only became a meaningful condition once a keep was more than one block
+        /// deep — before the keep enlargement a single hit satisfied any such rule.
+        /// </summary>
+        public const int CannonBreachRequirement = 2;
+
+        /// <summary>Cards whose unlock depends on having breached the enemy keep.</summary>
+        public static bool NeedsBreach(DeployCard card) => card == DeployCard.Cannon;
+
+        /// <summary>
+        /// Whether the breach precondition is met. <paramref name="enemyWallsBreached"/>
+        /// counts wall blocks lost by the *opposing* keep, so tearing down your own wall
+        /// can never unlock your own battery.
+        /// </summary>
+        public static bool BreachSatisfied(DeployCard card, int enemyWallsBreached) =>
+            !NeedsBreach(card) || enemyWallsBreached >= CannonBreachRequirement;
+
+        /// <summary>Player-facing text for an unmet breach requirement. A lock that does not
+        /// say what to do reads as a bug, not a rule.</summary>
+        public static string BreachReasonText(int enemyWallsBreached) =>
+            $"적 성벽 {CannonBreachRequirement}개를 부숴야 해금 (현재 {Mathf.Max(0, enemyWallsBreached)}개)";
+
+        /// <summary>
         /// Geometric legality only (no scene queries), so EditMode pins the band exactly:
         /// inside the owner's half, inside the field band, and clear of both launch rings.
         /// </summary>

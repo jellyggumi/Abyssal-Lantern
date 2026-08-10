@@ -354,7 +354,8 @@ namespace CastleBusters
             var castle = GetComponentInParent<CastleController>();
             if (castle != null)
             {
-                DeploymentController.Instance?.CreditBlockDestroyed(castle.isPlayerCastle);
+                DeploymentController.Instance?.CreditBlockDestroyed(
+                    castle.isPlayerCastle, blockWasCore: this is CastleCoreGimmick);
                 if (gameManager != null && resolvedDamageFromPlayer.HasValue)
                 {
                     bool attackerIsPlayer = resolvedDamageFromPlayer.Value;

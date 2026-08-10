@@ -99,9 +99,35 @@ namespace CastleBusters
         }
 
         /// <summary>Collapsing an enemy block pays the side that owns the opposite castle.</summary>
-        public void CreditBlockDestroyed(bool blockBelongedToPlayer)
+        /// <summary>Enemy keep blocks the player has brought down. Drives the battery's
+        /// breach unlock.</summary>
+        public int PlayerBreaches { get; private set; }
+
+        /// <summary>Player keep blocks the enemy has brought down.</summary>
+        public int EnemyBreaches { get; private set; }
+
+        public int BreachesFor(bool isPlayer) => isPlayer ? PlayerBreaches : EnemyBreaches;
+
+        /// <param name="blockWasCore">The core is the objective, not a wall; breaching it
+        /// ends the match, so it must not also count toward unlocking artillery.</param>
+        public void CreditBlockDestroyed(bool blockBelongedToPlayer, bool blockWasCore = false)
         {
             CreditSide(!blockBelongedToPlayer, SupplyRules.BlockBonus);
+
+            if (blockWasCore) return;
+
+            // Counted by whose wall fell, never by who fired. That is what closes the
+            // obvious loophole: demolishing your own keep credits the opponent's tally,
+            // so it can never unlock your own battery.
+            if (blockBelongedToPlayer) EnemyBreaches++;
+            else PlayerBreaches++;
+        }
+
+        /// <summary>Clears the tallies for a fresh match.</summary>
+        public void ResetBreaches()
+        {
+            PlayerBreaches = 0;
+            EnemyBreaches = 0;
         }
 
         private void CreditSide(bool isPlayer, float amount)
@@ -215,6 +241,15 @@ namespace CastleBusters
                 card, turn, AliveInGroup(card, isPlayer), CooldownOf(card, isPlayer),
                 SupplyOf(isPlayer), position, isPlayer);
 
+            // Breach gate sits alongside the turn gate rather than inside Evaluate: the
+            // rule needs match state (how much of the enemy keep has fallen) that the pure
+            // rules table has no business holding.
+            if (reason == DeployBlockReason.None &&
+                !DeploymentRules.BreachSatisfied(card, BreachesFor(isPlayer)))
+            {
+                reason = DeployBlockReason.Locked;
+            }
+
             if (reason == DeployBlockReason.None && OverlapsEnemyBody(position, isPlayer))
             {
                 reason = DeployBlockReason.Zone;
@@ -224,8 +259,15 @@ namespace CastleBusters
             {
                 if (isPlayer)
                 {
-                    GameFeelVfx.SpawnFeedbackLabel(position,
-                        DeploymentRules.ReasonText(reason, card, turn),
+                    // Name the condition the player actually has to solve. A turn-gated card
+                    // and a breach-gated one are both "Locked", but telling someone to wait
+                    // when they need to knock a wall down sends them the wrong way.
+                    string text = DeploymentRules.NeedsBreach(card) &&
+                                  !DeploymentRules.BreachSatisfied(card, BreachesFor(true))
+                        ? DeploymentRules.BreachReasonText(BreachesFor(true))
+                        : DeploymentRules.ReasonText(reason, card, turn);
+
+                    GameFeelVfx.SpawnFeedbackLabel(position, text,
                         new Color(1f, 0.5f, 0.35f, 1f), 1.7f, 0.45f);
                 }
                 return reason;
@@ -423,6 +465,14 @@ namespace CastleBusters
             var reason = DeploymentRules.Evaluate(SelectedCard, turn,
                 AliveInGroup(SelectedCard, true), CooldownOf(SelectedCard, true),
                 PlayerSupply, worldPos, true);
+
+            if (reason == DeployBlockReason.None &&
+                !DeploymentRules.BreachSatisfied(SelectedCard, PlayerBreaches))
+            {
+                // The placement ghost must agree with the click, or the player learns the
+                // rule by being refused rather than by looking.
+                reason = DeployBlockReason.Locked;
+            }
 
             ghostRenderer.color = reason == DeployBlockReason.None
                 ? new Color(0.55f, 1f, 0.7f, 0.55f)
