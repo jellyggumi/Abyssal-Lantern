@@ -432,6 +432,14 @@ namespace CastleBusters
             sr.sortingOrder = -10;
             sr.sprite = sprite;
             sr.color = ActiveLayout.backgroundTint;
+
+            // Weather rides with the backdrop so each stage reads as its own place: rain on
+            // the plain, snow on the dunes, ash in the gorge. Presentation only, and it
+            // renders under the units so atmosphere never hides what the player is aiming at.
+            if (Application.isPlaying)
+            {
+                StageWeather.Ensure().Apply(currentStage);
+            }
         }
 
         private static Sprite GetStageBackgroundSprite(StageId stage)

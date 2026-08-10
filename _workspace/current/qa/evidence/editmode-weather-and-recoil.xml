@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="319" result="Passed" total="319" passed="319" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:13Z" duration="3.9050131">
+  <test-suite type="TestSuite" id="1371" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="319" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:13Z" duration="3.905013" total="319" passed="319" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1607" name="Assembly-CSharp-Editor.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="226" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:12Z" duration="3.633684" total="226" passed="226" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="63012" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1608" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="226" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:12Z" duration="3.632965" total="226" passed="226" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1609" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="226" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:12Z" duration="3.632124" total="226" passed="226" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1372" name="AosOverhaulTests" fullname="CastleBusters.Tests.AosOverhaulTests" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" testcasecount="36" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.130865" total="36" passed="36" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1377" name="ArcherShouldJump_OnlyForMeaningfulElevation" fullname="CastleBusters.Tests.AosOverhaulTests.ArcherShouldJump_OnlyForMeaningfulElevation" methodname="ArcherShouldJump_OnlyForMeaningfulElevation" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="293069884" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.012079" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1376" name="ArcherVolley_ArrowCounts_MatchKind" fullname="CastleBusters.Tests.AosOverhaulTests.ArcherVolley_ArrowCounts_MatchKind" methodname="ArcherVolley_ArrowCounts_MatchKind" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="812466336" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.004380" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1375" name="ArcherVolley_FifthDoubles_TenthGoesAerial_AndCycles" fullname="CastleBusters.Tests.AosOverhaulTests.ArcherVolley_FifthDoubles_TenthGoesAerial_AndCycles" methodname="ArcherVolley_FifthDoubles_TenthGoesAerial_AndCycles" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="736545879" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001259" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1402" name="ArrowController_ScalesToVisualLength_RegardlessOfSpriteAtlasRemap" fullname="CastleBusters.Tests.AosOverhaulTests.ArrowController_ScalesToVisualLength_RegardlessOfSpriteAtlasRemap" methodname="ArrowController_ScalesToVisualLength_RegardlessOfSpriteAtlasRemap" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="603829467" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.016381" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1387" name="BalanceEvents_FireOnlyOnEveryFourthBeat" fullname="CastleBusters.Tests.AosOverhaulTests.BalanceEvents_FireOnlyOnEveryFourthBeat" methodname="BalanceEvents_FireOnlyOnEveryFourthBeat" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1572417796" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000378" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1388" name="BalanceEvents_HelpTheTrailingSide_HinderTheLeader" fullname="CastleBusters.Tests.AosOverhaulTests.BalanceEvents_HelpTheTrailingSide_HinderTheLeader" methodname="BalanceEvents_HelpTheTrailingSide_HinderTheLeader" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1488245542" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000168" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1389" name="BalanceEvents_NearParityYieldsNeutralGate" fullname="CastleBusters.Tests.AosOverhaulTests.BalanceEvents_NearParityYieldsNeutralGate" methodname="BalanceEvents_NearParityYieldsNeutralGate" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="2124047580" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000114" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1378" name="BarrelFuse_IsTwoSeconds" fullname="CastleBusters.Tests.AosOverhaulTests.BarrelFuse_IsTwoSeconds" methodname="BarrelFuse_IsTwoSeconds" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="517468008" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000575" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1407" name="BeastArt_FlyingFrames_HaveAtLeastFive" fullname="CastleBusters.Tests.AosOverhaulTests.BeastArt_FlyingFrames_HaveAtLeastFive" methodname="BeastArt_FlyingFrames_HaveAtLeastFive" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1702086676" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.034075" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1398" name="BrickPlacement_AcceptsMidfieldAndKeepApproaches" fullname="CastleBusters.Tests.AosOverhaulTests.BrickPlacement_AcceptsMidfieldAndKeepApproaches" methodname="BrickPlacement_AcceptsMidfieldAndKeepApproaches" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1163638907" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001561" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1401" name="BrickPlacement_IgnoresCollisionWithOverlappingEnemyUnitOnSpawn" fullname="CastleBusters.Tests.AosOverhaulTests.BrickPlacement_IgnoresCollisionWithOverlappingEnemyUnitOnSpawn" methodname="BrickPlacement_IgnoresCollisionWithOverlappingEnemyUnitOnSpawn" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="377024267" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.022101" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1399" name="BrickPlacement_PendingCap_IsTwo" fullname="CastleBusters.Tests.AosOverhaulTests.BrickPlacement_PendingCap_IsTwo" methodname="BrickPlacement_PendingCap_IsTwo" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="371946873" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000164" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1400" name="BrickPlacement_RejectsIfOverlappingEnemyUnit" fullname="CastleBusters.Tests.AosOverhaulTests.BrickPlacement_RejectsIfOverlappingEnemyUnit" methodname="BrickPlacement_RejectsIfOverlappingEnemyUnit" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="102074707" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000850" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1397" name="BrickPlacement_RejectsLaunchRings_AndOutOfBand" fullname="CastleBusters.Tests.AosOverhaulTests.BrickPlacement_RejectsLaunchRings_AndOutOfBand" methodname="BrickPlacement_RejectsLaunchRings_AndOutOfBand" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="375131781" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000316" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1386" name="CaptureRules_AbandonedZoneDecays_AtHalfRate" fullname="CastleBusters.Tests.AosOverhaulTests.CaptureRules_AbandonedZoneDecays_AtHalfRate" methodname="CaptureRules_AbandonedZoneDecays_AtHalfRate" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1573894839" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000240" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1385" name="CaptureRules_DefenderContests_GaugeHolds" fullname="CastleBusters.Tests.AosOverhaulTests.CaptureRules_DefenderContests_GaugeHolds" methodname="CaptureRules_DefenderContests_GaugeHolds" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="13001961" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000109" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1384" name="CaptureRules_UncontestedAttackersFill_InCaptureSeconds" fullname="CastleBusters.Tests.AosOverhaulTests.CaptureRules_UncontestedAttackersFill_InCaptureSeconds" methodname="CaptureRules_UncontestedAttackersFill_InCaptureSeconds" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="176196274" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000123" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1383" name="CastleWall_BasePositions_AreOutsideBothRings" fullname="CastleBusters.Tests.AosOverhaulTests.CastleWall_BasePositions_AreOutsideBothRings" methodname="CastleWall_BasePositions_AreOutsideBothRings" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1203291287" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001517" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1392" name="Chariot_RespawnDelay_IsFiveSeconds" fullname="CastleBusters.Tests.AosOverhaulTests.Chariot_RespawnDelay_IsFiveSeconds" methodname="Chariot_RespawnDelay_IsFiveSeconds" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="74029042" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000109" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1390" name="ChariotPhases_EscalateWithDamage" fullname="CastleBusters.Tests.AosOverhaulTests.ChariotPhases_EscalateWithDamage" methodname="ChariotPhases_EscalateWithDamage" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="487003605" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000266" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1391" name="ChariotPhases_SpeedAndSweep_GrowMonotonically" fullname="CastleBusters.Tests.AosOverhaulTests.ChariotPhases_SpeedAndSweep_GrowMonotonically" methodname="ChariotPhases_SpeedAndSweep_GrowMonotonically" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="399711721" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000456" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1403" name="FlightPatterns_MoveInBothAxes_EveryPhase" fullname="CastleBusters.Tests.AosOverhaulTests.FlightPatterns_MoveInBothAxes_EveryPhase" methodname="FlightPatterns_MoveInBothAxes_EveryPhase" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="120504504" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000456" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1404" name="FlightPatterns_RampageDivesLowest" fullname="CastleBusters.Tests.AosOverhaulTests.FlightPatterns_RampageDivesLowest" methodname="FlightPatterns_RampageDivesLowest" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="738311424" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000263" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1405" name="HeroGrowth_StacksPerSide_AndCaps" fullname="CastleBusters.Tests.AosOverhaulTests.HeroGrowth_StacksPerSide_AndCaps" methodname="HeroGrowth_StacksPerSide_AndCaps" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="284201262" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000515" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1408" name="ItemArt_AllThreeIcons_Exist" fullname="CastleBusters.Tests.AosOverhaulTests.ItemArt_AllThreeIcons_Exist" methodname="ItemArt_AllThreeIcons_Exist" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1970934273" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.002460" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1406" name="ItemDrops_ChanceGate_AndTypeBuckets" fullname="CastleBusters.Tests.AosOverhaulTests.ItemDrops_ChanceGate_AndTypeBuckets" methodname="ItemDrops_ChanceGate_AndTypeBuckets" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1511234025" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000264" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1373" name="KnightHits_ThirdSwingDoubles_SixthTriples_AndCycles" fullname="CastleBusters.Tests.AosOverhaulTests.KnightHits_ThirdSwingDoubles_SixthTriples_AndCycles" methodname="KnightHits_ThirdSwingDoubles_SixthTriples_AndCycles" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="356250256" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000237" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1374" name="KnightShouldPush_OnlyWhenBlockerNear_AndObjectiveFar" fullname="CastleBusters.Tests.AosOverhaulTests.KnightShouldPush_OnlyWhenBlockerNear_AndObjectiveFar" methodname="KnightShouldPush_OnlyWhenBlockerNear_AndObjectiveFar" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="2109414066" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000112" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1393" name="LaunchGateAnim_HasAtLeastFiveFrames" fullname="CastleBusters.Tests.AosOverhaulTests.LaunchGateAnim_HasAtLeastFiveFrames" methodname="LaunchGateAnim_HasAtLeastFiveFrames" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="833555572" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.003319" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1382" name="LaunchRing_RejectsMuzzlePositions_AllowsMidfield" fullname="CastleBusters.Tests.AosOverhaulTests.LaunchRing_RejectsMuzzlePositions_AllowsMidfield" methodname="LaunchRing_RejectsMuzzlePositions_AllowsMidfield" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="455780085" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000238" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1396" name="Targeting_EnemyHalf_FollowsAttackerSide" fullname="CastleBusters.Tests.AosOverhaulTests.Targeting_EnemyHalf_FollowsAttackerSide" methodname="Targeting_EnemyHalf_FollowsAttackerSide" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="894133034" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000128" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1395" name="Targeting_GimmicksOutrankUnitsOutrankPlainBlocks" fullname="CastleBusters.Tests.AosOverhaulTests.Targeting_GimmicksOutrankUnitsOutrankPlainBlocks" methodname="Targeting_GimmicksOutrankUnitsOutrankPlainBlocks" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1000296927" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000254" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1394" name="Targeting_GroundTiles_AreNeverTargets" fullname="CastleBusters.Tests.AosOverhaulTests.Targeting_GroundTiles_AreNeverTargets" methodname="Targeting_GroundTiles_AreNeverTargets" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="568373889" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000149" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1380" name="VentSchedule_AlternatesStyles_AndExpires" fullname="CastleBusters.Tests.AosOverhaulTests.VentSchedule_AlternatesStyles_AndExpires" methodname="VentSchedule_AlternatesStyles_AndExpires" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="81692529" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000172" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1381" name="VentSchedule_PositionsStayBetweenTheCamps" fullname="CastleBusters.Tests.AosOverhaulTests.VentSchedule_PositionsStayBetweenTheCamps" methodname="VentSchedule_PositionsStayBetweenTheCamps" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="476456391" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000098" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1379" name="VentSchedule_SpawnsEveryThirdBeat_FromTurnTwo" fullname="CastleBusters.Tests.AosOverhaulTests.VentSchedule_SpawnsEveryThirdBeat_FromTurnTwo" methodname="VentSchedule_SpawnsEveryThirdBeat_FromTurnTwo" classname="CastleBusters.Tests.AosOverhaulTests" runstate="Runnable" seed="1436482176" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000106" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1409" name="DeploymentEconomyTests" fullname="CastleBusters.Tests.DeploymentEconomyTests" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" testcasecount="48" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.060670" total="48" passed="48" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1456" name="AiPreferenceOrder_CoversEveryCardExactlyOnce" fullname="CastleBusters.Tests.DeploymentEconomyTests.AiPreferenceOrder_CoversEveryCardExactlyOnce" methodname="AiPreferenceOrder_CoversEveryCardExactlyOnce" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="33418264" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.002185" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1457" name="AiPreferenceOrder_ReachesForTheMostBoardChangingCardFirst" fullname="CastleBusters.Tests.DeploymentEconomyTests.AiPreferenceOrder_ReachesForTheMostBoardChangingCardFirst" methodname="AiPreferenceOrder_ReachesForTheMostBoardChangingCardFirst" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="954104930" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000314" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1445" name="BatteriesAtCap_StayBelowTheVolleysBurst" fullname="CastleBusters.Tests.DeploymentEconomyTests.BatteriesAtCap_StayBelowTheVolleysBurst" methodname="BatteriesAtCap_StayBelowTheVolleysBurst" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="313426917" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000363" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1412" name="CannonIsThePremiumPurchase_BarrelTheCheapest" fullname="CastleBusters.Tests.DeploymentEconomyTests.CannonIsThePremiumPurchase_BarrelTheCheapest" methodname="CannonIsThePremiumPurchase_BarrelTheCheapest" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="268009906" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000585" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1443" name="CannonStatBlock_MatchesTheDesignSheet" fullname="CastleBusters.Tests.DeploymentEconomyTests.CannonStatBlock_MatchesTheDesignSheet" methodname="CannonStatBlock_MatchesTheDesignSheet" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="587030203" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000284" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1414" name="CapFor_GivesEachGroupItsOwnCeiling" fullname="CastleBusters.Tests.DeploymentEconomyTests.CapFor_GivesEachGroupItsOwnCeiling" methodname="CapFor_GivesEachGroupItsOwnCeiling" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1963480359" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000354" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1435" name="Clamp_FloorsAtZero_AndCeilingsAtMax" fullname="CastleBusters.Tests.DeploymentEconomyTests.Clamp_FloorsAtZero_AndCeilingsAtMax" methodname="Clamp_FloorsAtZero_AndCeilingsAtMax" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="672985214" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000219" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1433" name="Credit_AddsBonuses_ButCannotOverfill" fullname="CastleBusters.Tests.DeploymentEconomyTests.Credit_AddsBonuses_ButCannotOverfill" methodname="Credit_AddsBonuses_ButCannotOverfill" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1359572864" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000472" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1423" name="DeployZone_AcceptsMidfield_OnEachSidesOwnHalf" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_AcceptsMidfield_OnEachSidesOwnHalf" methodname="DeployZone_AcceptsMidfield_OnEachSidesOwnHalf" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1884074389" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000555" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1430" name="DeployZone_EffectivePlayerBand_EndsWhereTheRingBegins" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_EffectivePlayerBand_EndsWhereTheRingBegins" methodname="DeployZone_EffectivePlayerBand_EndsWhereTheRingBegins" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1409112844" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000881" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1429" name="DeployZone_ExcludesTheLaunchRing_OnBothSides" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_ExcludesTheLaunchRing_OnBothSides" methodname="DeployZone_ExcludesTheLaunchRing_OnBothSides" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1524680420" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000558" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1426" name="DeployZone_InnerBound_IsInclusiveAtMinAbsX" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_InnerBound_IsInclusiveAtMinAbsX" methodname="DeployZone_InnerBound_IsInclusiveAtMinAbsX" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1236404507" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000379" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1427" name="DeployZone_OuterBound_IsInclusiveAtMaxAbsX" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_OuterBound_IsInclusiveAtMaxAbsX" methodname="DeployZone_OuterBound_IsInclusiveAtMaxAbsX" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="634539940" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000258" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1424" name="DeployZone_RejectsTheCenterLine_ForBothSides" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_RejectsTheCenterLine_ForBothSides" methodname="DeployZone_RejectsTheCenterLine_ForBothSides" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="591658434" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000288" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1425" name="DeployZone_RejectsTheWrongHalf_ForEachDeployer" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_RejectsTheWrongHalf_ForEachDeployer" methodname="DeployZone_RejectsTheWrongHalf_ForEachDeployer" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="174146578" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000339" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1428" name="DeployZone_VerticalBand_IsInclusiveAtBothEnds" fullname="CastleBusters.Tests.DeploymentEconomyTests.DeployZone_VerticalBand_IsInclusiveAtBothEnds" methodname="DeployZone_VerticalBand_IsInclusiveAtBothEnds" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1926870701" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000721" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1419" name="Evaluate_CooldownBitesWhileRunning_ClearsAtZero" fullname="CastleBusters.Tests.DeploymentEconomyTests.Evaluate_CooldownBitesWhileRunning_ClearsAtZero" methodname="Evaluate_CooldownBitesWhileRunning_ClearsAtZero" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="917906093" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001541" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1418" name="Evaluate_EachAdjacentPair_ResolvesToTheMorePermanentBlocker" fullname="CastleBusters.Tests.DeploymentEconomyTests.Evaluate_EachAdjacentPair_ResolvesToTheMorePermanentBlocker" methodname="Evaluate_EachAdjacentPair_ResolvesToTheMorePermanentBlocker" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1900180589" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001621" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1421" name="Evaluate_HoldsForBothSides_NoHiddenAiDiscount" fullname="CastleBusters.Tests.DeploymentEconomyTests.Evaluate_HoldsForBothSides_NoHiddenAiDiscount" methodname="Evaluate_HoldsForBothSides_NoHiddenAiDiscount" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="643059834" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001077" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1417" name="Evaluate_NamesTheMostPermanentBlocker_NotTheFirstOneTripped" fullname="CastleBusters.Tests.DeploymentEconomyTests.Evaluate_NamesTheMostPermanentBlocker_NotTheFirstOneTripped" methodname="Evaluate_NamesTheMostPermanentBlocker_NotTheFirstOneTripped" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="32382159" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000582" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1420" name="Evaluate_SupplyGate_AllowsExactAffordability" fullname="CastleBusters.Tests.DeploymentEconomyTests.Evaluate_SupplyGate_AllowsExactAffordability" methodname="Evaluate_SupplyGate_AllowsExactAffordability" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="250196845" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000366" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1416" name="FieldCap_BitesAtTheCeiling_NotBeforeIt" fullname="CastleBusters.Tests.DeploymentEconomyTests.FieldCap_BitesAtTheCeiling_NotBeforeIt" methodname="FieldCap_BitesAtTheCeiling_NotBeforeIt" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1555626226" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.002734" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1455" name="FromIndex_GivesEveryCardItsOwnSlot" fullname="CastleBusters.Tests.DeploymentEconomyTests.FromIndex_GivesEveryCardItsOwnSlot" methodname="FromIndex_GivesEveryCardItsOwnSlot" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="497737940" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000918" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1454" name="FromIndex_MapsEachRosterSlot_AndClampsUnknownSlots" fullname="CastleBusters.Tests.DeploymentEconomyTests.FromIndex_MapsEachRosterSlot_AndClampsUnknownSlots" methodname="FromIndex_MapsEachRosterSlot_AndClampsUnknownSlots" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1155971274" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000681" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1415" name="FullBodyCap_BlocksASoldier_ButNeverABattery" fullname="CastleBusters.Tests.DeploymentEconomyTests.FullBodyCap_BlocksASoldier_ButNeverABattery" methodname="FullBodyCap_BlocksASoldier_ButNeverABattery" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1847675732" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000322" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1446" name="InRange_IsInclusiveAtRange_AndRejectsNonsense" fullname="CastleBusters.Tests.DeploymentEconomyTests.InRange_IsInclusiveAtRange_AndRejectsNonsense" methodname="InRange_IsInclusiveAtRange_AndRejectsNonsense" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="720644527" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000208" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1413" name="KnightAndArcher_ShareOneBodyCap_CannonAndBarrelDoNot" fullname="CastleBusters.Tests.DeploymentEconomyTests.KnightAndArcher_ShareOneBodyCap_CannonAndBarrelDoNot" methodname="KnightAndArcher_ShareOneBodyCap_CannonAndBarrelDoNot" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="561007033" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000461" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1442" name="OneTurnOfRegen_FundsTwoBodies_ButNotABattery" fullname="CastleBusters.Tests.DeploymentEconomyTests.OneTurnOfRegen_FundsTwoBodies_ButNotABattery" methodname="OneTurnOfRegen_FundsTwoBodies_ButNotABattery" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1384444761" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000242" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1453" name="OnlyTheCannonIsDeployOnly" fullname="CastleBusters.Tests.DeploymentEconomyTests.OnlyTheCannonIsDeployOnly" methodname="OnlyTheCannonIsDeployOnly" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1753400327" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000618" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1440" name="OpeningSupply_BuysAnImmediateBody_ButNotABattery" fullname="CastleBusters.Tests.DeploymentEconomyTests.OpeningSupply_BuysAnImmediateBody_ButNotABattery" methodname="OpeningSupply_BuysAnImmediateBody_ButNotABattery" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1595888469" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000395" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1422" name="ReasonText_SpeaksForEveryRefusal_AndStaysSilentOnSuccess" fullname="CastleBusters.Tests.DeploymentEconomyTests.ReasonText_SpeaksForEveryRefusal_AndStaysSilentOnSuccess" methodname="ReasonText_SpeaksForEveryRefusal_AndStaysSilentOnSuccess" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="2065019157" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000900" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1431" name="Regen_AccruesOverTime_AndParksAtTheCap" fullname="CastleBusters.Tests.DeploymentEconomyTests.Regen_AccruesOverTime_AndParksAtTheCap" methodname="Regen_AccruesOverTime_AndParksAtTheCap" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="2111843582" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000831" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1432" name="Regen_IgnoresNonPositiveTicks" fullname="CastleBusters.Tests.DeploymentEconomyTests.Regen_IgnoresNonPositiveTicks" methodname="Regen_IgnoresNonPositiveTicks" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1995550702" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000272" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1410" name="RosterTable_MatchesTheDesignSheet_ForEveryCard" fullname="CastleBusters.Tests.DeploymentEconomyTests.RosterTable_MatchesTheDesignSheet_ForEveryCard" methodname="RosterTable_MatchesTheDesignSheet_ForEveryCard" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="783675266" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001013" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1449" name="SolveShellVelocity_ActuallyLandsOnTheTarget" fullname="CastleBusters.Tests.DeploymentEconomyTests.SolveShellVelocity_ActuallyLandsOnTheTarget" methodname="SolveShellVelocity_ActuallyLandsOnTheTarget" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1050543999" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000735" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1450" name="SolveShellVelocity_ApexesAboveTheHigherEndpoint_SoItClearsTheWall" fullname="CastleBusters.Tests.DeploymentEconomyTests.SolveShellVelocity_ApexesAboveTheHigherEndpoint_SoItClearsTheWall" methodname="SolveShellVelocity_ApexesAboveTheHigherEndpoint_SoItClearsTheWall" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1059105933" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000382" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1447" name="SolveShellVelocity_ArcsUpward_ForALevelTarget" fullname="CastleBusters.Tests.DeploymentEconomyTests.SolveShellVelocity_ArcsUpward_ForALevelTarget" methodname="SolveShellVelocity_ArcsUpward_ForALevelTarget" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="907470946" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000174" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1451" name="SolveShellVelocity_FallsBackToAFlatLob_WhenGravityIsDisabled" fullname="CastleBusters.Tests.DeploymentEconomyTests.SolveShellVelocity_FallsBackToAFlatLob_WhenGravityIsDisabled" methodname="SolveShellVelocity_FallsBackToAFlatLob_WhenGravityIsDisabled" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="919564064" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000395" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1448" name="SolveShellVelocity_PointsAtTheTarget_InBothDirections" fullname="CastleBusters.Tests.DeploymentEconomyTests.SolveShellVelocity_PointsAtTheTarget_InBothDirections" methodname="SolveShellVelocity_PointsAtTheTarget_InBothDirections" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="940522038" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000479" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1452" name="SolveShellVelocity_StaysFinite_ForADegenerateTarget" fullname="CastleBusters.Tests.DeploymentEconomyTests.SolveShellVelocity_StaysFinite_ForADegenerateTarget" methodname="SolveShellVelocity_StaysFinite_ForADegenerateTarget" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1192542689" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000418" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1441" name="SupplyCeiling_ForbidsAFiveBodyAlphaStrike" fullname="CastleBusters.Tests.DeploymentEconomyTests.SupplyCeiling_ForbidsAFiveBodyAlphaStrike" methodname="SupplyCeiling_ForbidsAFiveBodyAlphaStrike" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="955116975" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000283" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1434" name="SupplySources_AreAdditive_AcrossRegenAndEvents" fullname="CastleBusters.Tests.DeploymentEconomyTests.SupplySources_AreAdditive_AcrossRegenAndEvents" methodname="SupplySources_AreAdditive_AcrossRegenAndEvents" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1888197924" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000149" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1444" name="SustainedDps_IsDamagePerReload" fullname="CastleBusters.Tests.DeploymentEconomyTests.SustainedDps_IsDamagePerReload" methodname="SustainedDps_IsDamagePerReload" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1074763442" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000343" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1436" name="TrySpend_ChargesExactly_WhenAffordable" fullname="CastleBusters.Tests.DeploymentEconomyTests.TrySpend_ChargesExactly_WhenAffordable" methodname="TrySpend_ChargesExactly_WhenAffordable" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="399615734" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000152" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1438" name="TrySpend_LeavesTheBankUntouched_WhenUnaffordable" fullname="CastleBusters.Tests.DeploymentEconomyTests.TrySpend_LeavesTheBankUntouched_WhenUnaffordable" methodname="TrySpend_LeavesTheBankUntouched_WhenUnaffordable" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="352611136" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000253" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1439" name="TrySpend_RefusesNegativePrices" fullname="CastleBusters.Tests.DeploymentEconomyTests.TrySpend_RefusesNegativePrices" methodname="TrySpend_RefusesNegativePrices" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1688959937" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001546" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1437" name="TrySpend_SucceedsAtExactAffordability" fullname="CastleBusters.Tests.DeploymentEconomyTests.TrySpend_SucceedsAtExactAffordability" methodname="TrySpend_SucceedsAtExactAffordability" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="2115860272" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000281" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1411" name="UnlockOrder_TeachesMelee_ThenRange_ThenHazard_ThenStructure" fullname="CastleBusters.Tests.DeploymentEconomyTests.UnlockOrder_TeachesMelee_ThenRange_ThenHazard_ThenStructure" methodname="UnlockOrder_TeachesMelee_ThenRange_ThenHazard_ThenStructure" classname="CastleBusters.Tests.DeploymentEconomyTests" runstate="Runnable" seed="1049330619" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000276" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1458" name="FrostVentTests" fullname="CastleBusters.Tests.FrostVentTests" classname="CastleBusters.Tests.FrostVentTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.008227" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1462" name="EruptionVentGimmick_FrostStyle_ConstructsWithoutThrowing_AndStartsDormant" fullname="CastleBusters.Tests.FrostVentTests.EruptionVentGimmick_FrostStyle_ConstructsWithoutThrowing_AndStartsDormant" methodname="EruptionVentGimmick_FrostStyle_ConstructsWithoutThrowing_AndStartsDormant" classname="CastleBusters.Tests.FrostVentTests" runstate="Runnable" seed="276826304" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001106" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1459" name="StyleForTurn_Stage1_MatchesLegacyTwoWayRotation" fullname="CastleBusters.Tests.FrostVentTests.StyleForTurn_Stage1_MatchesLegacyTwoWayRotation" methodname="StyleForTurn_Stage1_MatchesLegacyTwoWayRotation" classname="CastleBusters.Tests.FrostVentTests" runstate="Runnable" seed="1465370905" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000297" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1460" name="StyleForTurn_Stage2_IsAlwaysMagma" fullname="CastleBusters.Tests.FrostVentTests.StyleForTurn_Stage2_IsAlwaysMagma" methodname="StyleForTurn_Stage2_IsAlwaysMagma" classname="CastleBusters.Tests.FrostVentTests" runstate="Runnable" seed="1911019735" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000230" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1461" name="StyleForTurn_Stage3_IsAlwaysFrost" fullname="CastleBusters.Tests.FrostVentTests.StyleForTurn_Stage3_IsAlwaysFrost" methodname="StyleForTurn_Stage3_IsAlwaysFrost" classname="CastleBusters.Tests.FrostVentTests" runstate="Runnable" seed="863707377" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.000299" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1463" name="GamePlayTests" fullname="CastleBusters.Tests.GamePlayTests" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" testcasecount="96" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:12Z" duration="3.341126" total="96" passed="96" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1485" name="BuffDebuffGimmick_AppliesBuffAndDebuffToUnit" fullname="CastleBusters.Tests.GamePlayTests.BuffDebuffGimmick_AppliesBuffAndDebuffToUnit" methodname="BuffDebuffGimmick_AppliesBuffAndDebuffToUnit" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="275333595" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.003167" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1467" name="CastleController_BFS_DetectsUnsupportedBlocks" fullname="CastleBusters.Tests.GamePlayTests.CastleController_BFS_DetectsUnsupportedBlocks" methodname="CastleController_BFS_DetectsUnsupportedBlocks" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1909256055" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.012846" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1483" name="CastleCoreGimmick_InitializesAndPulses" fullname="CastleBusters.Tests.GamePlayTests.CastleCoreGimmick_InitializesAndPulses" methodname="CastleCoreGimmick_InitializesAndPulses" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="449992275" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.001640" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1518" name="CreateGround_AnchorsBottomRowsAndFlanks_KeepsBridgeBreakable" fullname="CastleBusters.Tests.GamePlayTests.CreateGround_AnchorsBottomRowsAndFlanks_KeepsBridgeBreakable" methodname="CreateGround_AnchorsBottomRowsAndFlanks_KeepsBridgeBreakable" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="187795651" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:09Z" duration="0.547823" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1548" name="DeathHooks_CreditTheSideThatEarnedKillAndBlockDestruction" fullname="CastleBusters.Tests.GamePlayTests.DeathHooks_CreditTheSideThatEarnedKillAndBlockDestruction" methodname="DeathHooks_CreditTheSideThatEarnedKillAndBlockDestruction" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1640589770" result="Passed" start-time="2026-08-10 03:30:09Z" end-time="2026-08-10 03:30:10Z" duration="0.082676" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1546" name="DeploymentRules_CardsUnlockAtExactTurnBoundaries" fullname="CastleBusters.Tests.GamePlayTests.DeploymentRules_CardsUnlockAtExactTurnBoundaries" methodname="DeploymentRules_CardsUnlockAtExactTurnBoundaries" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="209899454" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000391" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1551" name="DestructibleBlock_DamageOwnerScoresOffTurn_AndUnattributedDamageUsesCurrentTurn" fullname="CastleBusters.Tests.GamePlayTests.DestructibleBlock_DamageOwnerScoresOffTurn_AndUnattributedDamageUsesCurrentTurn" methodname="DestructibleBlock_DamageOwnerScoresOffTurn_AndUnattributedDamageUsesCurrentTurn" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="772909495" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000810" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1552" name="DestructibleBlock_DestroyEnemyCoreWithoutDamageOwner_CreditsPlayerBeforeGameOver" fullname="CastleBusters.Tests.GamePlayTests.DestructibleBlock_DestroyEnemyCoreWithoutDamageOwner_CreditsPlayerBeforeGameOver" methodname="DestructibleBlock_DestroyEnemyCoreWithoutDamageOwner_CreditsPlayerBeforeGameOver" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1055684862" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.044189" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1491" name="DestructibleBlock_Destroys_WhenFallingBelowThreshold" fullname="CastleBusters.Tests.GamePlayTests.DestructibleBlock_Destroys_WhenFallingBelowThreshold" methodname="DestructibleBlock_Destroys_WhenFallingBelowThreshold" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="758787072" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000362" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1464" name="DestructibleBlock_TakesDamage_AndDestroys" fullname="CastleBusters.Tests.GamePlayTests.DestructibleBlock_TakesDamage_AndDestroys" methodname="DestructibleBlock_TakesDamage_AndDestroys" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1477664589" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000222" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1469" name="DestructibleBlock_UsesBlockData_WhenAssigned" fullname="CastleBusters.Tests.GamePlayTests.DestructibleBlock_UsesBlockData_WhenAssigned" methodname="DestructibleBlock_UsesBlockData_WhenAssigned" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1423527830" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000263" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1487" name="DestructibleGround_CastleCollapses_WhenGroundDestroyed" fullname="CastleBusters.Tests.GamePlayTests.DestructibleGround_CastleCollapses_WhenGroundDestroyed" methodname="DestructibleGround_CastleCollapses_WhenGroundDestroyed" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1073337483" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000359" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1517" name="DifficultyCurve_RampsWindAndTightensAI" fullname="CastleBusters.Tests.GamePlayTests.DifficultyCurve_RampsWindAndTightensAI" methodname="DifficultyCurve_RampsWindAndTightensAI" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1456081881" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000560" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1523" name="EffectSpriteLibrary_LoadsAllFrameSets_InOrder" fullname="CastleBusters.Tests.GamePlayTests.EffectSpriteLibrary_LoadsAllFrameSets_InOrder" methodname="EffectSpriteLibrary_LoadsAllFrameSets_InOrder" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="295279598" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.008162" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1532" name="EffectSpriteLibrary_LoadsShatterFrames" fullname="CastleBusters.Tests.GamePlayTests.EffectSpriteLibrary_LoadsShatterFrames" methodname="EffectSpriteLibrary_LoadsShatterFrames" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="494896807" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.003707" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1539" name="EruptionVent_CycleMath_WrapsAndPhases" fullname="CastleBusters.Tests.GamePlayTests.EruptionVent_CycleMath_WrapsAndPhases" methodname="EruptionVent_CycleMath_WrapsAndPhases" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="272801253" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000415" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1540" name="EruptionVent_LiftCeiling_NeverSlingshots" fullname="CastleBusters.Tests.GamePlayTests.EruptionVent_LiftCeiling_NeverSlingshots" methodname="EruptionVent_LiftCeiling_NeverSlingshots" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1790452758" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000443" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1510" name="EventGateGimmick_MultiplyArrow_CapsClones" fullname="CastleBusters.Tests.GamePlayTests.EventGateGimmick_MultiplyArrow_CapsClones" methodname="EventGateGimmick_MultiplyArrow_CapsClones" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1593855344" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.003497" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1514" name="EventGateGimmick_PowerUpExplosiveGimmick_MultipliesExplosionProperties" fullname="CastleBusters.Tests.GamePlayTests.EventGateGimmick_PowerUpExplosiveGimmick_MultipliesExplosionProperties" methodname="EventGateGimmick_PowerUpExplosiveGimmick_MultipliesExplosionProperties" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="312599784" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.002387" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1509" name="EventGateGimmick_PowerUpUnit_MultipliesVelocity" fullname="CastleBusters.Tests.GamePlayTests.EventGateGimmick_PowerUpUnit_MultipliesVelocity" methodname="EventGateGimmick_PowerUpUnit_MultipliesVelocity" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1859674514" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000794" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1559" name="ExplosiveGimmick_DamageOwnerPropagatesThroughChainIntoBlockScore" fullname="CastleBusters.Tests.GamePlayTests.ExplosiveGimmick_DamageOwnerPropagatesThroughChainIntoBlockScore" methodname="ExplosiveGimmick_DamageOwnerPropagatesThroughChainIntoBlockScore" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1850134713" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.001711" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1475" name="ExplosiveGimmick_Explodes_DamagesNearbyObjects" fullname="CastleBusters.Tests.GamePlayTests.ExplosiveGimmick_Explodes_DamagesNearbyObjects" methodname="ExplosiveGimmick_Explodes_DamagesNearbyObjects" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="792577629" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000309" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1512" name="ExplosiveGimmick_OutOfBounds_Destroyed" fullname="CastleBusters.Tests.GamePlayTests.ExplosiveGimmick_OutOfBounds_Destroyed" methodname="ExplosiveGimmick_OutOfBounds_Destroyed" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1345002614" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000228" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1516" name="FallImpactDamage_IsCapped_AndIgnoresSlowContacts" fullname="CastleBusters.Tests.GamePlayTests.FallImpactDamage_IsCapped_AndIgnoresSlowContacts" methodname="FallImpactDamage_IsCapped_AndIgnoresSlowContacts" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="121849753" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000195" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1538" name="FieldLayout_KegsClearLaunchMuzzles" fullname="CastleBusters.Tests.GamePlayTests.FieldLayout_KegsClearLaunchMuzzles" methodname="FieldLayout_KegsClearLaunchMuzzles" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="311647034" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000242" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1528" name="FieldLayout_SpansWideEnvelope" fullname="CastleBusters.Tests.GamePlayTests.FieldLayout_SpansWideEnvelope" methodname="FieldLayout_SpansWideEnvelope" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="2027053632" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000489" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1524" name="FrameAnimEffect_FrameMath_ProgressesAndFinishes" fullname="CastleBusters.Tests.GamePlayTests.FrameAnimEffect_FrameMath_ProgressesAndFinishes" methodname="FrameAnimEffect_FrameMath_ProgressesAndFinishes" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="881800911" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000196" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1508" name="GameAudio_BundledSfx_LoadAsShortMono44100HzClips" fullname="CastleBusters.Tests.GamePlayTests.GameAudio_BundledSfx_LoadAsShortMono44100HzClips" methodname="GameAudio_BundledSfx_LoadAsShortMono44100HzClips" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="158376694" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.002413" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1554" name="GameManager_ActiveAiPreparationAndPreview_ReturnDesiredVelocityWithoutConsumingPhase" fullname="CastleBusters.Tests.GamePlayTests.GameManager_ActiveAiPreparationAndPreview_ReturnDesiredVelocityWithoutConsumingPhase" methodname="GameManager_ActiveAiPreparationAndPreview_ReturnDesiredVelocityWithoutConsumingPhase" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="543873280" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000701" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1550" name="GameManager_ApplyLastStandOnLaunch_MirrorsBuffIntoExplosiveGimmick" fullname="CastleBusters.Tests.GamePlayTests.GameManager_ApplyLastStandOnLaunch_MirrorsBuffIntoExplosiveGimmick" methodname="GameManager_ApplyLastStandOnLaunch_MirrorsBuffIntoExplosiveGimmick" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1055632261" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.000816" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1476" name="GameManager_BackgroundAndUI_AreConfigured" fullname="CastleBusters.Tests.GamePlayTests.GameManager_BackgroundAndUI_AreConfigured" methodname="GameManager_BackgroundAndUI_AreConfigured" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1251118241" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:10Z" duration="0.894931" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1489" name="GameManager_CreateGround_SpawnsHeterogeneousGround" fullname="CastleBusters.Tests.GamePlayTests.GameManager_CreateGround_SpawnsHeterogeneousGround" methodname="GameManager_CreateGround_SpawnsHeterogeneousGround" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1044283338" result="Passed" start-time="2026-08-10 03:30:10Z" end-time="2026-08-10 03:30:11Z" duration="0.538612" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1555" name="GameManager_InactiveAiPreparation_ReturnsDesiredVelocityAndPreservesPhase" fullname="CastleBusters.Tests.GamePlayTests.GameManager_InactiveAiPreparation_ReturnsDesiredVelocityAndPreservesPhase" methodname="GameManager_InactiveAiPreparation_ReturnsDesiredVelocityAndPreservesPhase" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1623278497" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.001329" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1502" name="GameManager_PostImpactHold_RemainsShortAndObservable" fullname="CastleBusters.Tests.GamePlayTests.GameManager_PostImpactHold_RemainsShortAndObservable" methodname="GameManager_PostImpactHold_RemainsShortAndObservable" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="3245583" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000413" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1553" name="GameManager_PreviewLastStandLaunchVelocity_BuffsOnlyActivePhaseWithoutConsumingIt" fullname="CastleBusters.Tests.GamePlayTests.GameManager_PreviewLastStandLaunchVelocity_BuffsOnlyActivePhaseWithoutConsumingIt" methodname="GameManager_PreviewLastStandLaunchVelocity_BuffsOnlyActivePhaseWithoutConsumingIt" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="901418819" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000624" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1547" name="GameManager_StartGame_SelectsAndLaunchesKnightBeforeDeployOnlyCards" fullname="CastleBusters.Tests.GamePlayTests.GameManager_StartGame_SelectsAndLaunchesKnightBeforeDeployOnlyCards" methodname="GameManager_StartGame_SelectsAndLaunchesKnightBeforeDeployOnlyCards" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1834004146" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.018145" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1474" name="GameManager_WindAndScore_InitializedAndUpdated" fullname="CastleBusters.Tests.GamePlayTests.GameManager_WindAndScore_InitializedAndUpdated" methodname="GameManager_WindAndScore_InitializedAndUpdated" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1504954719" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000709" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1536" name="GimmickAnimLibrary_LoadsDerivedFrameSets" fullname="CastleBusters.Tests.GamePlayTests.GimmickAnimLibrary_LoadsDerivedFrameSets" methodname="GimmickAnimLibrary_LoadsDerivedFrameSets" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1095534778" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.035174" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1531" name="GimmickAnimLibrary_LoadsIntroBanner_AndFailsSoft" fullname="CastleBusters.Tests.GamePlayTests.GimmickAnimLibrary_LoadsIntroBanner_AndFailsSoft" methodname="GimmickAnimLibrary_LoadsIntroBanner_AndFailsSoft" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1225379262" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.009406" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1527" name="GimmickFieldDirector_PlanForTurn_SpawnsMutatesAndRests" fullname="CastleBusters.Tests.GamePlayTests.GimmickFieldDirector_PlanForTurn_SpawnsMutatesAndRests" methodname="GimmickFieldDirector_PlanForTurn_SpawnsMutatesAndRests" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="710035745" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.003641" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1530" name="GimmickFieldDirector_SpawnAndDespawn_TracksAliveList" fullname="CastleBusters.Tests.GamePlayTests.GimmickFieldDirector_SpawnAndDespawn_TracksAliveList" methodname="GimmickFieldDirector_SpawnAndDespawn_TracksAliveList" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1869415424" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.009904" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1526" name="GimmickFrameAnimator_LoopMath_WrapsForever" fullname="CastleBusters.Tests.GamePlayTests.GimmickFrameAnimator_LoopMath_WrapsForever" methodname="GimmickFrameAnimator_LoopMath_WrapsForever" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1687611410" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000355" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1537" name="GimmickFrameAnimator_TryAttach_PreservesWorldFootprint" fullname="CastleBusters.Tests.GamePlayTests.GimmickFrameAnimator_TryAttach_PreservesWorldFootprint" methodname="GimmickFrameAnimator_TryAttach_PreservesWorldFootprint" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1749398430" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.002864" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1522" name="Gimmicks_UseDedicatedSprites_NotTintedBlocks" fullname="CastleBusters.Tests.GamePlayTests.Gimmicks_UseDedicatedSprites_NotTintedBlocks" methodname="Gimmicks_UseDedicatedSprites_NotTintedBlocks" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1305418366" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.010849" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1486" name="GimmicksAndBlocks_UnifyCollisionAndObjectSize" fullname="CastleBusters.Tests.GamePlayTests.GimmicksAndBlocks_UnifyCollisionAndObjectSize" methodname="GimmicksAndBlocks_UnifyCollisionAndObjectSize" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="439929793" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.001871" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1521" name="GimmickSpriteLibrary_LoadsDedicatedArt_AndFailsSoftOnMissing" fullname="CastleBusters.Tests.GamePlayTests.GimmickSpriteLibrary_LoadsDedicatedArt_AndFailsSoftOnMissing" methodname="GimmickSpriteLibrary_LoadsDedicatedArt_AndFailsSoftOnMissing" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1157166087" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.001890" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1488" name="GroundDisintegration_BridgeCollapses_WhenSupportSevered" fullname="CastleBusters.Tests.GamePlayTests.GroundDisintegration_BridgeCollapses_WhenSupportSevered" methodname="GroundDisintegration_BridgeCollapses_WhenSupportSevered" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="213860135" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000576" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1471" name="HitStopManager_Singleton_IsInitialized" fullname="CastleBusters.Tests.GamePlayTests.HitStopManager_Singleton_IsInitialized" methodname="HitStopManager_Singleton_IsInitialized" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="259072351" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000314" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1525" name="IntroEasePhase_ClampsAndProgresses" fullname="CastleBusters.Tests.GamePlayTests.IntroEasePhase_ClampsAndProgresses" methodname="IntroEasePhase_ClampsAndProgresses" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="882275289" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000300" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1504" name="ItemDropRules_ShouldDrop_ExcludesExactSixtyPercentBoundary" fullname="CastleBusters.Tests.GamePlayTests.ItemDropRules_ShouldDrop_ExcludesExactSixtyPercentBoundary" methodname="ItemDropRules_ShouldDrop_ExcludesExactSixtyPercentBoundary" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="591681289" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000113" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1505" name="ItemDropRules_TypeForRoll_ChangesAtExactThirdBoundaries" fullname="CastleBusters.Tests.GamePlayTests.ItemDropRules_TypeForRoll_ChangesAtExactThirdBoundaries" methodname="ItemDropRules_TypeForRoll_ChangesAtExactThirdBoundaries" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="885857886" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000285" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1507" name="KoreanFontSupport_BundledDynamicFont_LoadsAndSupportsHangul" fullname="CastleBusters.Tests.GamePlayTests.KoreanFontSupport_BundledDynamicFont_LoadsAndSupportsHangul" methodname="KoreanFontSupport_BundledDynamicFont_LoadsAndSupportsHangul" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="912259628" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000254" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1519" name="KoreanFontSupport_RegistersHangulCapableFallback" fullname="CastleBusters.Tests.GamePlayTests.KoreanFontSupport_RegistersHangulCapableFallback" methodname="KoreanFontSupport_RegistersHangulCapableFallback" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1744306549" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000411" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1535" name="LastStand_AdvanceAuto_ArmsAndActivatesInOneStep" fullname="CastleBusters.Tests.GamePlayTests.LastStand_AdvanceAuto_ArmsAndActivatesInOneStep" methodname="LastStand_AdvanceAuto_ArmsAndActivatesInOneStep" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1404701461" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000182" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1529" name="LastStand_DangerThreshold_AndOneWayArmLatch" fullname="CastleBusters.Tests.GamePlayTests.LastStand_DangerThreshold_AndOneWayArmLatch" methodname="LastStand_DangerThreshold_AndOneWayArmLatch" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="649788997" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000685" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1493" name="LaunchManager_CalculatesBowstringVelocity_WithClamp" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_CalculatesBowstringVelocity_WithClamp" methodname="LaunchManager_CalculatesBowstringVelocity_WithClamp" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="273849893" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.001051" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1503" name="LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn" methodname="LaunchManager_CancelAim_ClearsPreviewWithoutLaunchingOrConsumingTurn" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="335117040" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.003631" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1498" name="LaunchManager_DrawTrajectory_BoxFootprintStopsAtOffCenterThinObstacle" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_BoxFootprintStopsAtOffCenterThinObstacle" methodname="LaunchManager_DrawTrajectory_BoxFootprintStopsAtOffCenterThinObstacle" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1856179285" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.003802" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1497" name="LaunchManager_DrawTrajectory_FirstPreviewPointMatchesElevatedRuntimeLaunchPosition" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_FirstPreviewPointMatchesElevatedRuntimeLaunchPosition" methodname="LaunchManager_DrawTrajectory_FirstPreviewPointMatchesElevatedRuntimeLaunchPosition" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1476675048" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000535" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1496" name="LaunchManager_DrawTrajectory_FirstStepUsesSemiImplicitIntegration" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_FirstStepUsesSemiImplicitIntegration" methodname="LaunchManager_DrawTrajectory_FirstStepUsesSemiImplicitIntegration" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1188148212" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000368" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1500" name="LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround" methodname="LaunchManager_DrawTrajectory_IgnoresFriendlyDefaultLayerBodyButStopsOnEnemyAndGround" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="872344923" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000930" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1499" name="LaunchManager_DrawTrajectory_MatchesRuntimeLinearDragAcrossRepresentativeSteps" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_MatchesRuntimeLinearDragAcrossRepresentativeSteps" methodname="LaunchManager_DrawTrajectory_MatchesRuntimeLinearDragAcrossRepresentativeSteps" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1798598319" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000978" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1549" name="LaunchManager_DrawTrajectory_RuntimeAddedBarrelUsesDefaultHardCeiling" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_RuntimeAddedBarrelUsesDefaultHardCeiling" methodname="LaunchManager_DrawTrajectory_RuntimeAddedBarrelUsesDefaultHardCeiling" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="29643909" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000974" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1545" name="LaunchManager_DrawTrajectory_StopsClimbingAfterSelectedUnitHardCeiling" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_DrawTrajectory_StopsClimbingAfterSelectedUnitHardCeiling" methodname="LaunchManager_DrawTrajectory_StopsClimbingAfterSelectedUnitHardCeiling" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1471785770" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.001320" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1494" name="LaunchManager_FullDrawProducesTunedVelocityAndFullTension" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_FullDrawProducesTunedVelocityAndFullTension" methodname="LaunchManager_FullDrawProducesTunedVelocityAndFullTension" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1744486779" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000522" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1495" name="LaunchManager_MinimumLaunchThresholdBoundaryRemainsContinuous" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_MinimumLaunchThresholdBoundaryRemainsContinuous" methodname="LaunchManager_MinimumLaunchThresholdBoundaryRemainsContinuous" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="491050616" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000540" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1480" name="LaunchManager_SimulatedPointer_LaunchesUnit" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_SimulatedPointer_LaunchesUnit" methodname="LaunchManager_SimulatedPointer_LaunchesUnit" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="194181483" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.019728" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1479" name="LaunchManager_Visuals_AreInitializedAndUpdated" fullname="CastleBusters.Tests.GamePlayTests.LaunchManager_Visuals_AreInitializedAndUpdated" methodname="LaunchManager_Visuals_AreInitializedAndUpdated" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1809874089" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.004198" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1511" name="MovingGimmick_ClampsInsidePlayableBounds" fullname="CastleBusters.Tests.GamePlayTests.MovingGimmick_ClampsInsidePlayableBounds" methodname="MovingGimmick_ClampsInsidePlayableBounds" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1425740360" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.002556" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1484" name="MovingGimmick_MovesAndPulses" fullname="CastleBusters.Tests.GamePlayTests.MovingGimmick_MovesAndPulses" methodname="MovingGimmick_MovesAndPulses" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="601854248" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000761" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1513" name="MovingGimmick_Stuck_ReversesDirection" fullname="CastleBusters.Tests.GamePlayTests.MovingGimmick_Stuck_ReversesDirection" methodname="MovingGimmick_Stuck_ReversesDirection" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1070928783" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000420" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1466" name="PowderKegUnit_ExplodesOnCollision_AndDealsAoEDamage" fullname="CastleBusters.Tests.GamePlayTests.PowderKegUnit_ExplodesOnCollision_AndDealsAoEDamage" methodname="PowderKegUnit_ExplodesOnCollision_AndDealsAoEDamage" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="959277817" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.002189" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1472" name="Prefabs_HaveRequiredComponents" fullname="CastleBusters.Tests.GamePlayTests.Prefabs_HaveRequiredComponents" methodname="Prefabs_HaveRequiredComponents" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1386639333" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.000938" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1492" name="Run20BalanceIterations" fullname="CastleBusters.Tests.GamePlayTests.Run20BalanceIterations" methodname="Run20BalanceIterations" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1197460210" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:11Z" duration="0.008937" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1477" name="Scene_BlockLayoutAndGimmicks_AreConfigured" fullname="CastleBusters.Tests.GamePlayTests.Scene_BlockLayoutAndGimmicks_AreConfigured" methodname="Scene_BlockLayoutAndGimmicks_AreConfigured" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="320682074" result="Passed" start-time="2026-08-10 03:30:11Z" end-time="2026-08-10 03:30:12Z" duration="0.874115" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1473" name="ScreenShakeManager_Singleton_IsInitialized" fullname="CastleBusters.Tests.GamePlayTests.ScreenShakeManager_Singleton_IsInitialized" methodname="ScreenShakeManager_Singleton_IsInitialized" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1721960512" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002995" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1533" name="SiegeRank_GradeLadder_CoversAllBands" fullname="CastleBusters.Tests.GamePlayTests.SiegeRank_GradeLadder_CoversAllBands" methodname="SiegeRank_GradeLadder_CoversAllBands" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1731414877" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001622" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1534" name="SiegeRank_Insert_OrdersCapsAndRanks" fullname="CastleBusters.Tests.GamePlayTests.SiegeRank_Insert_OrdersCapsAndRanks" methodname="SiegeRank_Insert_OrdersCapsAndRanks" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1998885012" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.009877" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1557" name="SimpleAI_Solver_DegenerateTargets_ReturnFiniteBoundedVelocity" fullname="CastleBusters.Tests.GamePlayTests.SimpleAI_Solver_DegenerateTargets_ReturnFiniteBoundedVelocity" methodname="SimpleAI_Solver_DegenerateTargets_ReturnFiniteBoundedVelocity" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="349054542" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004792" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1556" name="SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim" fullname="CastleBusters.Tests.GamePlayTests.SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim" methodname="SimpleAI_Solver_WithDragAndLocalizedWind_OutperformsLegacyAnalyticAim" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="717499532" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.041093" asserts="0">
+              <properties />
+              <output><![CDATA[Solved closest distance 0.0673; legacy closest distance 17.9747
+]]></output>
+            </test-case>
+            <test-case id="1481" name="SpriteAtlasPacker_PacksSpritesCorrectly" fullname="CastleBusters.Tests.GamePlayTests.SpriteAtlasPacker_PacksSpritesCorrectly" methodname="SpriteAtlasPacker_PacksSpritesCorrectly" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="855097019" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.041993" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1520" name="TurnExpiry_AimingPlayerGetsOneGrace_IdlePlayerForfeits" fullname="CastleBusters.Tests.GamePlayTests.TurnExpiry_AimingPlayerGetsOneGrace_IdlePlayerForfeits" methodname="TurnExpiry_AimingPlayerGetsOneGrace_IdlePlayerForfeits" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="483434804" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000509" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1470" name="UnitController_Awake_InitializesRigidbodyToStatic" fullname="CastleBusters.Tests.GamePlayTests.UnitController_Awake_InitializesRigidbodyToStatic" methodname="UnitController_Awake_InitializesRigidbodyToStatic" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1385433940" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000856" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1501" name="UnitController_CalculateWindAcceleration_RespectsRadiusForceAndMassFloor" fullname="CastleBusters.Tests.GamePlayTests.UnitController_CalculateWindAcceleration_RespectsRadiusForceAndMassFloor" methodname="UnitController_CalculateWindAcceleration_RespectsRadiusForceAndMassFloor" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="215039809" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000613" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1490" name="UnitController_Dies_WhenFallingBelowThreshold" fullname="CastleBusters.Tests.GamePlayTests.UnitController_Dies_WhenFallingBelowThreshold" methodname="UnitController_Dies_WhenFallingBelowThreshold" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1845428214" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001111" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1543" name="UnitController_EnforceHardCeiling_ClampsUpwardVelocityAboveCeiling" fullname="CastleBusters.Tests.GamePlayTests.UnitController_EnforceHardCeiling_ClampsUpwardVelocityAboveCeiling" methodname="UnitController_EnforceHardCeiling_ClampsUpwardVelocityAboveCeiling" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="597849715" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000705" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1544" name="UnitController_EnforceHardCeiling_LeavesLegitimateFlightUntouched" fullname="CastleBusters.Tests.GamePlayTests.UnitController_EnforceHardCeiling_LeavesLegitimateFlightUntouched" methodname="UnitController_EnforceHardCeiling_LeavesLegitimateFlightUntouched" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="598413671" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000555" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1558" name="UnitController_FatalDamage_CreditsOnlyOpposingKiller_NotSelfOrUnownedBarrelDeath" fullname="CastleBusters.Tests.GamePlayTests.UnitController_FatalDamage_CreditsOnlyOpposingKiller_NotSelfOrUnownedBarrelDeath" methodname="UnitController_FatalDamage_CreditsOnlyOpposingKiller_NotSelfOrUnownedBarrelDeath" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="599591286" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001981" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1478" name="UnitController_GetMaxHP_ReturnsCorrectValue" fullname="CastleBusters.Tests.GamePlayTests.UnitController_GetMaxHP_ReturnsCorrectValue" methodname="UnitController_GetMaxHP_ReturnsCorrectValue" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1351521452" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000445" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1515" name="UnitController_GroundedStuck_TriggersRecovery" fullname="CastleBusters.Tests.GamePlayTests.UnitController_GroundedStuck_TriggersRecovery" methodname="UnitController_GroundedStuck_TriggersRecovery" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="956965424" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000702" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1542" name="UnitController_MoveTowardsTarget_ObstacleHop_FiresOnceWhenGrounded" fullname="CastleBusters.Tests.GamePlayTests.UnitController_MoveTowardsTarget_ObstacleHop_FiresOnceWhenGrounded" methodname="UnitController_MoveTowardsTarget_ObstacleHop_FiresOnceWhenGrounded" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="33699072" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002222" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1541" name="UnitController_MoveTowardsTarget_ObstacleHop_SkipsWhileAlreadyAirborne" fullname="CastleBusters.Tests.GamePlayTests.UnitController_MoveTowardsTarget_ObstacleHop_SkipsWhileAlreadyAirborne" methodname="UnitController_MoveTowardsTarget_ObstacleHop_SkipsWhileAlreadyAirborne" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="735267154" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000630" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1465" name="UnitController_TakesDamage_AndDies" fullname="CastleBusters.Tests.GamePlayTests.UnitController_TakesDamage_AndDies" methodname="UnitController_TakesDamage_AndDies" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="241548430" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000690" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1468" name="UnitController_UsesUnitData_WhenAssigned" fullname="CastleBusters.Tests.GamePlayTests.UnitController_UsesUnitData_WhenAssigned" methodname="UnitController_UsesUnitData_WhenAssigned" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1877724371" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000652" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1506" name="UnitPrefabs_InitializeAtEnlargedScaleWithoutChangingColliderWorldFootprint" fullname="CastleBusters.Tests.GamePlayTests.UnitPrefabs_InitializeAtEnlargedScaleWithoutChangingColliderWorldFootprint" methodname="UnitPrefabs_InitializeAtEnlargedScaleWithoutChangingColliderWorldFootprint" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1847890710" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002547" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1482" name="WindVfxManager_UpdatesWindParticles" fullname="CastleBusters.Tests.GamePlayTests.WindVfxManager_UpdatesWindParticles" methodname="WindVfxManager_UpdatesWindParticles" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="93325302" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.009432" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1560" name="SpikeTrapGimmickTests" fullname="CastleBusters.Tests.SpikeTrapGimmickTests" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.059744" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1564" name="Active_HoldsUntilActiveDuration_ThenBecomesCooldown" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.Active_HoldsUntilActiveDuration_ThenBecomesCooldown" methodname="Active_HoldsUntilActiveDuration_ThenBecomesCooldown" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="2113542069" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000373" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1563" name="Arming_HoldsUntilArmDelay_ThenBecomesActive" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.Arming_HoldsUntilArmDelay_ThenBecomesActive" methodname="Arming_HoldsUntilArmDelay_ThenBecomesActive" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="831016804" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000224" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1565" name="Cooldown_ReturnsToDormant_AfterCooldownDuration_EvenIfBodyStillDetected" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.Cooldown_ReturnsToDormant_AfterCooldownDuration_EvenIfBodyStillDetected" methodname="Cooldown_ReturnsToDormant_AfterCooldownDuration_EvenIfBodyStillDetected" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="2070144171" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000144" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1561" name="Dormant_StaysDormant_WhenNoBodyDetected_RegardlessOfElapsed" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.Dormant_StaysDormant_WhenNoBodyDetected_RegardlessOfElapsed" methodname="Dormant_StaysDormant_WhenNoBodyDetected_RegardlessOfElapsed" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="1955753827" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000106" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1562" name="Dormant_TransitionsToArming_TheInstantBodyDetected" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.Dormant_TransitionsToArming_TheInstantBodyDetected" methodname="Dormant_TransitionsToArming_TheInstantBodyDetected" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="934968574" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000085" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1566" name="KnockbackVelocity_AlwaysHasPositiveY_IncludingAtZeroHorizontalOffset" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.KnockbackVelocity_AlwaysHasPositiveY_IncludingAtZeroHorizontalOffset" methodname="KnockbackVelocity_AlwaysHasPositiveY_IncludingAtZeroHorizontalOffset" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="205228718" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000253" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1567" name="KnockbackVelocity_PushesAwayFromTrap_MatchingHorizontalSign" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.KnockbackVelocity_PushesAwayFromTrap_MatchingHorizontalSign" methodname="KnockbackVelocity_PushesAwayFromTrap_MatchingHorizontalSign" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="278910719" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000131" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1568" name="SpikeTrapGimmick_AddComponent_DoesNotThrow_AndHasSpriteRenderer" fullname="CastleBusters.Tests.SpikeTrapGimmickTests.SpikeTrapGimmick_AddComponent_DoesNotThrow_AndHasSpriteRenderer" methodname="SpikeTrapGimmick_AddComponent_DoesNotThrow_AndHasSpriteRenderer" classname="CastleBusters.Tests.SpikeTrapGimmickTests" runstate="Runnable" seed="1003097866" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000359" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1569" name="Stage2FieldRulesTests" fullname="CastleBusters.Tests.Stage2FieldRulesTests" classname="CastleBusters.Tests.Stage2FieldRulesTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004068" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1572" name="Stage2_CoversAllThreeKinds_WithinFirstFewTurns" fullname="CastleBusters.Tests.Stage2FieldRulesTests.Stage2_CoversAllThreeKinds_WithinFirstFewTurns" methodname="Stage2_CoversAllThreeKinds_WithinFirstFewTurns" classname="CastleBusters.Tests.Stage2FieldRulesTests" runstate="Runnable" seed="1601621732" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000318" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1570" name="Stage2_MutatesEveryOtherTurn_FasterThanStage1" fullname="CastleBusters.Tests.Stage2FieldRulesTests.Stage2_MutatesEveryOtherTurn_FasterThanStage1" methodname="Stage2_MutatesEveryOtherTurn_FasterThanStage1" classname="CastleBusters.Tests.Stage2FieldRulesTests" runstate="Runnable" seed="1311442140" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000521" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1571" name="Stage2_NeverProducesBarrelOrMiniTowerKind" fullname="CastleBusters.Tests.Stage2FieldRulesTests.Stage2_NeverProducesBarrelOrMiniTowerKind" methodname="Stage2_NeverProducesBarrelOrMiniTowerKind" classname="CastleBusters.Tests.Stage2FieldRulesTests" runstate="Runnable" seed="929672857" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000734" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1573" name="Stage2_RestBeatOnOddNonSpawnTurns_NeverDespawnsBelowCapacity" fullname="CastleBusters.Tests.Stage2FieldRulesTests.Stage2_RestBeatOnOddNonSpawnTurns_NeverDespawnsBelowCapacity" methodname="Stage2_RestBeatOnOddNonSpawnTurns_NeverDespawnsBelowCapacity" classname="CastleBusters.Tests.Stage2FieldRulesTests" runstate="Runnable" seed="359487053" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000521" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1574" name="Stage2_Turn0_IsAlwaysANoOp" fullname="CastleBusters.Tests.Stage2FieldRulesTests.Stage2_Turn0_IsAlwaysANoOp" methodname="Stage2_Turn0_IsAlwaysANoOp" classname="CastleBusters.Tests.Stage2FieldRulesTests" runstate="Runnable" seed="1587281799" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000450" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1575" name="StageDefinitionsTests" fullname="CastleBusters.Tests.StageDefinitionsTests" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.007563" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1589" name="For_ResolvesStageId_ToMatchingLayout" fullname="CastleBusters.Tests.StageDefinitionsTests.For_ResolvesStageId_ToMatchingLayout" methodname="For_ResolvesStageId_ToMatchingLayout" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="914738860" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000336" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1576" name="Stage1_MatchesFrozenGameManagerDefaults" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage1_MatchesFrozenGameManagerDefaults" methodname="Stage1_MatchesFrozenGameManagerDefaults" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="312454498" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000317" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1578" name="Stage2_CompressesPlayerDistance_RelativeToStage1" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_CompressesPlayerDistance_RelativeToStage1" methodname="Stage2_CompressesPlayerDistance_RelativeToStage1" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="879343703" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000168" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1583" name="Stage2_HasDistinctBackgroundTint" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_HasDistinctBackgroundTint" methodname="Stage2_HasDistinctBackgroundTint" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1565684719" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000121" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1581" name="Stage2_HasLowerObstacleCapAndFasterMutateCadenceThanStage1" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_HasLowerObstacleCapAndFasterMutateCadenceThanStage1" methodname="Stage2_HasLowerObstacleCapAndFasterMutateCadenceThanStage1" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="896410491" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000079" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1582" name="Stage2_HasLowerWindCapThanStage1" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_HasLowerWindCapThanStage1" methodname="Stage2_HasLowerWindCapThanStage1" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="375897650" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000079" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1580" name="Stage2_HasTallerWallsThanStage1" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_HasTallerWallsThanStage1" methodname="Stage2_HasTallerWallsThanStage1" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1456917893" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000109" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1577" name="Stage2_IsUnlocked" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_IsUnlocked" methodname="Stage2_IsUnlocked" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1644859738" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000069" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1584" name="Stage2_KeepsGroundAndCameraWideEnoughForItsOwnApron" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_KeepsGroundAndCameraWideEnoughForItsOwnApron" methodname="Stage2_KeepsGroundAndCameraWideEnoughForItsOwnApron" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1590316453" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000104" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1579" name="Stage2_ShipsWithZeroStartingKegs" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage2_ShipsWithZeroStartingKegs" methodname="Stage2_ShipsWithZeroStartingKegs" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="816006048" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000062" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1591" name="Stage3_CoversAllThreeKinds_WithinFirstFewTurns" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage3_CoversAllThreeKinds_WithinFirstFewTurns" methodname="Stage3_CoversAllThreeKinds_WithinFirstFewTurns" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="730307660" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000172" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1586" name="Stage3_KeepsCameraAndGroundWideEnoughForNewApron" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage3_KeepsCameraAndGroundWideEnoughForNewApron" methodname="Stage3_KeepsCameraAndGroundWideEnoughForNewApron" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1591481749" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000214" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1588" name="Stage3_SpreadsKegsToTheWings_ClearOfCoreAndLaunchMuzzle" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage3_SpreadsKegsToTheWings_ClearOfCoreAndLaunchMuzzle" methodname="Stage3_SpreadsKegsToTheWings_ClearOfCoreAndLaunchMuzzle" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1350630845" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000298" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1585" name="Stage3_WidensPlayerDistance_WithoutMovingSharedCore" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage3_WidensPlayerDistance_WithoutMovingSharedCore" methodname="Stage3_WidensPlayerDistance_WithoutMovingSharedCore" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1133155241" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000216" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1587" name="Stage3_WindCapIsHigherThanStage1_ToCompensateForWiderGap" fullname="CastleBusters.Tests.StageDefinitionsTests.Stage3_WindCapIsHigherThanStage1_ToCompensateForWiderGap" methodname="Stage3_WindCapIsHigherThanStage1_ToCompensateForWiderGap" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="1808180740" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000085" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1590" name="StageLayout_HasCorrectAllowedGimmicks" fullname="CastleBusters.Tests.StageDefinitionsTests.StageLayout_HasCorrectAllowedGimmicks" methodname="StageLayout_HasCorrectAllowedGimmicks" classname="CastleBusters.Tests.StageDefinitionsTests" runstate="Runnable" seed="964368137" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002301" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1592" name="StageProgressionTests" fullname="CastleBusters.Tests.StageProgressionTests" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002717" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1599" name="Advance_ClearingFinalStage_StaysClampedAtFinalStage" fullname="CastleBusters.Tests.StageProgressionTests.Advance_ClearingFinalStage_StaysClampedAtFinalStage" methodname="Advance_ClearingFinalStage_StaysClampedAtFinalStage" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="692170779" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000394" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1597" name="Advance_ClearingStage1_UnlocksStage2" fullname="CastleBusters.Tests.StageProgressionTests.Advance_ClearingStage1_UnlocksStage2" methodname="Advance_ClearingStage1_UnlocksStage2" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="920288790" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000123" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1598" name="Advance_ClearingStage2_UnlocksStage3" fullname="CastleBusters.Tests.StageProgressionTests.Advance_ClearingStage2_UnlocksStage3" methodname="Advance_ClearingStage2_UnlocksStage3" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="1951201067" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000075" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1601" name="Advance_ClearingTheFrontierStageAgain_IsIdempotent" fullname="CastleBusters.Tests.StageProgressionTests.Advance_ClearingTheFrontierStageAgain_IsIdempotent" methodname="Advance_ClearingTheFrontierStageAgain_IsIdempotent" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="1543319418" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000069" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1600" name="Advance_ReplayingAnAlreadyClearedEarlierStage_NeverRegressesFrontier" fullname="CastleBusters.Tests.StageProgressionTests.Advance_ReplayingAnAlreadyClearedEarlierStage_NeverRegressesFrontier" methodname="Advance_ReplayingAnAlreadyClearedEarlierStage_NeverRegressesFrontier" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="1411912077" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000082" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1594" name="IsUnlocked_TrueForStagesAtOrBeforeFrontier_FalseAfter" fullname="CastleBusters.Tests.StageProgressionTests.IsUnlocked_TrueForStagesAtOrBeforeFrontier_FalseAfter" methodname="IsUnlocked_TrueForStagesAtOrBeforeFrontier_FalseAfter" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="87148339" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000106" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1596" name="NextStage_IsNullPastTheFinalStage" fullname="CastleBusters.Tests.StageProgressionTests.NextStage_IsNullPastTheFinalStage" methodname="NextStage_IsNullPastTheFinalStage" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="1085406515" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000095" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1595" name="NextStage_ReturnsImmediateSuccessor" fullname="CastleBusters.Tests.StageProgressionTests.NextStage_ReturnsImmediateSuccessor" methodname="NextStage_ReturnsImmediateSuccessor" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="1531939773" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000101" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1593" name="Stage1_IsAlwaysUnlocked_RegardlessOfFrontier" fullname="CastleBusters.Tests.StageProgressionTests.Stage1_IsAlwaysUnlocked_RegardlessOfFrontier" methodname="Stage1_IsAlwaysUnlocked_RegardlessOfFrontier" classname="CastleBusters.Tests.StageProgressionTests" runstate="Runnable" seed="356202615" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000060" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1602" name="WebtoonPrologueTests" fullname="CastleBusters.Tests.WebtoonPrologueTests" classname="CastleBusters.Tests.WebtoonPrologueTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.011315" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1606" name="KnightPrologueIdleResources_LoadsFourOrderedFrames" fullname="CastleBusters.Tests.WebtoonPrologueTests.KnightPrologueIdleResources_LoadsFourOrderedFrames" methodname="KnightPrologueIdleResources_LoadsFourOrderedFrames" classname="CastleBusters.Tests.WebtoonPrologueTests" runstate="Runnable" seed="1781918511" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.008735" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1603" name="PixelSnap_RoundsToConfiguredGrid" fullname="CastleBusters.Tests.WebtoonPrologueTests.PixelSnap_RoundsToConfiguredGrid" methodname="PixelSnap_RoundsToConfiguredGrid" classname="CastleBusters.Tests.WebtoonPrologueTests" runstate="Runnable" seed="115051580" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000780" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1604" name="SlideProgressAt_StaysInHold_ThenCompletesTransition" fullname="CastleBusters.Tests.WebtoonPrologueTests.SlideProgressAt_StaysInHold_ThenCompletesTransition" methodname="SlideProgressAt_StaysInHold_ThenCompletesTransition" classname="CastleBusters.Tests.WebtoonPrologueTests" runstate="Runnable" seed="1432825872" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000182" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1605" name="StripPageOffsetAt_AdvancesOnePagePerBlock_AndClampsOnLastPage" fullname="CastleBusters.Tests.WebtoonPrologueTests.StripPageOffsetAt_AdvancesOnePagePerBlock_AndClampsOnLastPage" methodname="StripPageOffsetAt_AdvancesOnePagePerBlock_AndClampsOnLastPage" classname="CastleBusters.Tests.WebtoonPrologueTests" runstate="Runnable" seed="840852856" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000206" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1725" name="CastleBusters.EditModeTests.dll" fullname="/Users/jangyoung/orca/Abyssal-Surge/Library/ScriptAssemblies/CastleBusters.EditModeTests.dll" runstate="Runnable" testcasecount="93" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:13Z" duration="0.243575" total="93" passed="93" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="63012" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1726" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="93" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:13Z" duration="0.242790" total="93" passed="93" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1727" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="93" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:13Z" duration="0.242417" total="93" passed="93" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1610" name="CastleCoreVolleyCapTests" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.005339" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1611" name="CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests.CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth" methodname="CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" seed="1835836513" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.003280" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1612" name="CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests.CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore" methodname="CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" seed="1824819876" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000529" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1613" name="CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap" fullname="CastleBusters.Tests.CastleCoreVolleyCapTests.CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap" methodname="CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap" classname="CastleBusters.Tests.CastleCoreVolleyCapTests" runstate="Runnable" seed="1554045616" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000503" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1614" name="CastleSkinResourceTests" fullname="CastleBusters.Tests.CastleSkinResourceTests" classname="CastleBusters.Tests.CastleSkinResourceTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.011132" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1616" name="SetSkinSprites_AppliesCurrentDamageArtWithoutChangingColliderHealthOrMass" fullname="CastleBusters.Tests.CastleSkinResourceTests.SetSkinSprites_AppliesCurrentDamageArtWithoutChangingColliderHealthOrMass" methodname="SetSkinSprites_AppliesCurrentDamageArtWithoutChangingColliderHealthOrMass" classname="CastleBusters.Tests.CastleSkinResourceTests" runstate="Runnable" seed="2055562232" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.005679" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1615" name="TryGetSkin_LoadsDistinctNormalCrackedAndHeavySpritesForEveryFacadeRole" fullname="CastleBusters.Tests.CastleSkinResourceTests.TryGetSkin_LoadsDistinctNormalCrackedAndHeavySpritesForEveryFacadeRole" methodname="TryGetSkin_LoadsDistinctNormalCrackedAndHeavySpritesForEveryFacadeRole" classname="CastleBusters.Tests.CastleSkinResourceTests" runstate="Runnable" seed="301254409" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004354" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1630" name="CurrentRosterBalanceGateTests" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.013442" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1637" name="Barrel_LastStandPowerUpComposition_RemainsAtDamageCap" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.Barrel_LastStandPowerUpComposition_RemainsAtDamageCap" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001487" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1635" name="Barrel_LastStandThenPowerUp_RemainsAtDamageCap" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.Barrel_LastStandThenPowerUp_RemainsAtDamageCap" methodname="Barrel_LastStandPowerUpComposition_RemainsAtDamageCap" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="932091732" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000575" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1636" name="Barrel_PowerUpThenLastStand_RemainsAtDamageCap" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.Barrel_PowerUpThenLastStand_RemainsAtDamageCap" methodname="Barrel_LastStandPowerUpComposition_RemainsAtDamageCap" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1944676877" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000176" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1638" name="Barrel_PowerUpWithoutLastStand_AppliesConfiguredDamageMultiplier" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.Barrel_PowerUpWithoutLastStand_AppliesConfiguredDamageMultiplier" methodname="Barrel_PowerUpWithoutLastStand_AppliesConfiguredDamageMultiplier" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="840150862" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000321" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1634" name="BarrelHazard_HasAClusterPayoffAndARangedCountercondition" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.BarrelHazard_HasAClusterPayoffAndARangedCountercondition" methodname="BarrelHazard_HasAClusterPayoffAndARangedCountercondition" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1427270082" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001038" asserts="0">
+              <properties />
+              <output><![CDATA[HAZARD|Barrel|damage=80.000|radius=2.200|fuse=2.000|two_archer_hp=160.000|two_target_damage=160.000
+HAZARD_COUNTER|trigger_distance=3.200|arrow_travel=0.320|outside_damage=0.000|fuse=2.000
+]]></output>
+            </test-case>
+            <test-case id="1631" name="DamageSurvivabilityAndCostMatrix_PreservesDistinctEfficientRoles" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.DamageSurvivabilityAndCostMatrix_PreservesDistinctEfficientRoles" methodname="DamageSurvivabilityAndCostMatrix_PreservesDistinctEfficientRoles" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1852532390" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000809" asserts="0">
+              <properties />
+              <output><![CDATA[BALANCE_MATRIX|Knight|dps=20.000|dps_per_supply=4.000|hp_per_supply=20.000
+BALANCE_MATRIX|Archer|dps=25.263|dps_per_supply=4.211|hp_per_supply=13.333
+BALANCE_MATRIX|Cannon|single_dps=13.125|single_dps_per_supply=1.094|four_target_dps_per_supply=4.375|hp_per_supply=11.667
+THRESHOLD|body_dps_per_supply_delta=5.00 %|limit=15 %|cannon_four_target_delta=6.17 %
+]]></output>
+            </test-case>
+            <test-case id="1639" name="LastStand_ExtraDamageShare_DoesNotExceedThirtyPercentOfCoreDefensePool" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.LastStand_ExtraDamageShare_DoesNotExceedThirtyPercentOfCoreDefensePool" methodname="LastStand_ExtraDamageShare_DoesNotExceedThirtyPercentOfCoreDefensePool" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="1026304266" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001972" asserts="0">
+              <properties />
+              <output><![CDATA[REVERSAL|Knight|applicable=true|base=20.000|buffed=44.000|extra_defense_share=12.00 %
+REVERSAL|Archer|applicable=true|base=20.000|buffed=44.000|extra_defense_share=12.00 %
+REVERSAL|Barrel|applicable=true|base=80.000|buffed=140.000|extra_defense_share=30.00 %
+REVERSAL|Cannon|applicable=false|reason=deploy_only|runtime_extra_share=0.00%
+CORE_DEFENSE|runtime_component=CastleCoreGimmick|core_hp=150.000|shield_hp=50.000|defense_pool=200.000
+THRESHOLD|worst_reachable_role=Barrel|worst_extra_share=30.00 %|limit=30 %|defense_pool=200.000
+]]></output>
+            </test-case>
+            <test-case id="1632" name="ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable" methodname="ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="754130038" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001544" asserts="0">
+              <properties />
+              <output><![CDATA[COUNTER|Knight_vs_Archer_close|distance=2.500|winner=Knight|ttk=3.640
+COUNTER|Knight_vs_Archer_open|distance=10.000|winner=Archer|ttk=4.690
+ROLE_OUTCOME|Cannon_siege|core_hp=150.000|shield_hp=50.000|defense_pool=200.000|one_battery_ttk=17.502|cap_batteries=2|cap_ttk=11.102|threshold=12.000
+]]></output>
+            </test-case>
+            <test-case id="1633" name="SeededRuntimeDeploymentFactionBranch_MirrorsPlayerAndAiLegalityWithinFifteenPercent" fullname="CastleBusters.Tests.CurrentRosterBalanceGateTests.SeededRuntimeDeploymentFactionBranch_MirrorsPlayerAndAiLegalityWithinFifteenPercent" methodname="SeededRuntimeDeploymentFactionBranch_MirrorsPlayerAndAiLegalityWithinFifteenPercent" classname="CastleBusters.Tests.CurrentRosterBalanceGateTests" runstate="Runnable" seed="528831382" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001099" asserts="0">
+              <properties />
+              <output><![CDATA[FACTION_BRANCH|samples_per_side=8|seeds=104729,130363,155921,196613,262147,327673,393241,524287|player_own_half_legal=8|ai_own_half_legal=8|player_enemy_half_rejected=8|ai_enemy_half_rejected=8|acceptance_delta=0.000 %|limit=15 %
+WIN_RATE|not_claimed=true|reason=runtime_deployment_ownership_is_not_a_match_AI_decision_model
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1640" name="DestructibleBlockGroundAnchorFeedbackTests" fullname="CastleBusters.Tests.DestructibleBlockGroundAnchorFeedbackTests" classname="CastleBusters.Tests.DestructibleBlockGroundAnchorFeedbackTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.005688" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1641" name="DestructibleBlock_DestroyGroundAnchor_DoesNotIncrementSessionMaxCombo" fullname="CastleBusters.Tests.DestructibleBlockGroundAnchorFeedbackTests.DestructibleBlock_DestroyGroundAnchor_DoesNotIncrementSessionMaxCombo" methodname="DestructibleBlock_DestroyGroundAnchor_DoesNotIncrementSessionMaxCombo" classname="CastleBusters.Tests.DestructibleBlockGroundAnchorFeedbackTests" runstate="Runnable" seed="458130174" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004218" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1642" name="DifficultyCurveTests" fullname="CastleBusters.Tests.DifficultyCurveTests" classname="CastleBusters.Tests.DifficultyCurveTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002145" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1645" name="Evaluate_IsHalfwayAtTheConfiguredHalfTurn" fullname="CastleBusters.Tests.DifficultyCurveTests.Evaluate_IsHalfwayAtTheConfiguredHalfTurn" methodname="Evaluate_IsHalfwayAtTheConfiguredHalfTurn" classname="CastleBusters.Tests.DifficultyCurveTests" runstate="Runnable" seed="1510900251" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000181" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1644" name="Evaluate_IsStrictlyIncreasingWellPastTheRampTurn" fullname="CastleBusters.Tests.DifficultyCurveTests.Evaluate_IsStrictlyIncreasingWellPastTheRampTurn" methodname="Evaluate_IsStrictlyIncreasingWellPastTheRampTurn" classname="CastleBusters.Tests.DifficultyCurveTests" runstate="Runnable" seed="1742395539" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000398" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1646" name="Evaluate_OpeningIsGentlerThanLinear" fullname="CastleBusters.Tests.DifficultyCurveTests.Evaluate_OpeningIsGentlerThanLinear" methodname="Evaluate_OpeningIsGentlerThanLinear" classname="CastleBusters.Tests.DifficultyCurveTests" runstate="Runnable" seed="338861497" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000121" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1647" name="Evaluate_SlopeShrinksAfterTheHalfTurn" fullname="CastleBusters.Tests.DifficultyCurveTests.Evaluate_SlopeShrinksAfterTheHalfTurn" methodname="Evaluate_SlopeShrinksAfterTheHalfTurn" classname="CastleBusters.Tests.DifficultyCurveTests" runstate="Runnable" seed="1668755897" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000119" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1643" name="Evaluate_StartsAtZeroAndStaysBelowOne" fullname="CastleBusters.Tests.DifficultyCurveTests.Evaluate_StartsAtZeroAndStaysBelowOne" methodname="Evaluate_StartsAtZeroAndStaysBelowOne" classname="CastleBusters.Tests.DifficultyCurveTests" runstate="Runnable" seed="1430845358" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000094" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1617" name="HiggsfieldSpriteLibraryTests" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.075698" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1624" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.049496" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1618" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Knight&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Knight&quot;)" methodname="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="1476892462" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.013380" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1619" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Archer&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Archer&quot;)" methodname="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="376022643" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.008925" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1620" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Cannon&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Cannon&quot;)" methodname="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="1133158811" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.005175" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1621" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Barrel&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Barrel&quot;)" methodname="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="997676012" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.006830" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1622" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Ram&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Ram&quot;)" methodname="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="282215272" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.007598" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1623" name="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Trap&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Trap&quot;)" methodname="LoadUi_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="1232501067" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004997" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="1629" name="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.025428" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1625" name="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Impact&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Impact&quot;)" methodname="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="103424467" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.006317" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1626" name="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Wind&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;Wind&quot;)" methodname="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="1183098564" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.005792" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1627" name="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;CoreCrack&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;CoreCrack&quot;)" methodname="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="773855085" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.006075" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1628" name="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;CollapseDust&quot;)" fullname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests.LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner(&quot;CollapseDust&quot;)" methodname="LoadVfx_AuthoredKey_Resolves512SpriteWithTransparentCorner" classname="CastleBusters.Tests.HiggsfieldSpriteLibraryTests" runstate="Runnable" seed="71066813" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.005190" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="1648" name="MobileNarrativeCommerceTests" fullname="CastleBusters.Tests.MobileNarrativeCommerceTests" classname="CastleBusters.Tests.MobileNarrativeCommerceTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.012260" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1652" name="ChronicleCatalogAndEntitlementHelper_PreservePublishedIdAndIdempotentReplayOwnership" fullname="CastleBusters.Tests.MobileNarrativeCommerceTests.ChronicleCatalogAndEntitlementHelper_PreservePublishedIdAndIdempotentReplayOwnership" methodname="ChronicleCatalogAndEntitlementHelper_PreservePublishedIdAndIdempotentReplayOwnership" classname="CastleBusters.Tests.MobileNarrativeCommerceTests" runstate="Runnable" seed="2109914695" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004516" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1651" name="CreateChronicleProductDefinition_UsesPublishedIdsAndNonConsumableType" fullname="CastleBusters.Tests.MobileNarrativeCommerceTests.CreateChronicleProductDefinition_UsesPublishedIdsAndNonConsumableType" methodname="CreateChronicleProductDefinition_UsesPublishedIdsAndNonConsumableType" classname="CastleBusters.Tests.MobileNarrativeCommerceTests" runstate="Runnable" seed="1499039891" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001850" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1649" name="GetNormalizedSafeArea_MapsNontrivialScreenSafeAreaToExactAnchors" fullname="CastleBusters.Tests.MobileNarrativeCommerceTests.GetNormalizedSafeArea_MapsNontrivialScreenSafeAreaToExactAnchors" methodname="GetNormalizedSafeArea_MapsNontrivialScreenSafeAreaToExactAnchors" classname="CastleBusters.Tests.MobileNarrativeCommerceTests" runstate="Runnable" seed="213435062" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001341" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1653" name="InitializeIfSupported_InEditor_MarksStorefrontUnavailableWithoutGrantingLocalEntitlement" fullname="CastleBusters.Tests.MobileNarrativeCommerceTests.InitializeIfSupported_InEditor_MarksStorefrontUnavailableWithoutGrantingLocalEntitlement" methodname="InitializeIfSupported_InEditor_MarksStorefrontUnavailableWithoutGrantingLocalEntitlement" classname="CastleBusters.Tests.MobileNarrativeCommerceTests" runstate="Runnable" seed="1700544152" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001180" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1650" name="NarrativeTypewriter_RevealsWholeEmojiAndCombiningTextElementsBeforeCompleting" fullname="CastleBusters.Tests.MobileNarrativeCommerceTests.NarrativeTypewriter_RevealsWholeEmojiAndCombiningTextElementsBeforeCompleting" methodname="NarrativeTypewriter_RevealsWholeEmojiAndCombiningTextElementsBeforeCompleting" classname="CastleBusters.Tests.MobileNarrativeCommerceTests" runstate="Runnable" seed="1634733600" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001623" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1654" name="PreviewParityRegressionTests" fullname="CastleBusters.Tests.PreviewParityRegressionTests" classname="CastleBusters.Tests.PreviewParityRegressionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.008121" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1657" name="GameManager_BarrelSelection_PreviewOriginMatchesRuntimeLaunchOriginAboveGround" fullname="CastleBusters.Tests.PreviewParityRegressionTests.GameManager_BarrelSelection_PreviewOriginMatchesRuntimeLaunchOriginAboveGround" methodname="GameManager_BarrelSelection_PreviewOriginMatchesRuntimeLaunchOriginAboveGround" classname="CastleBusters.Tests.PreviewParityRegressionTests" runstate="Runnable" seed="52629982" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002437" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1658" name="GameManager_CannonSelection_ArmsDeployModeAndShowsPlacementGuide" fullname="CastleBusters.Tests.PreviewParityRegressionTests.GameManager_CannonSelection_ArmsDeployModeAndShowsPlacementGuide" methodname="GameManager_CannonSelection_ArmsDeployModeAndShowsPlacementGuide" classname="CastleBusters.Tests.PreviewParityRegressionTests" runstate="Runnable" seed="241908925" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001269" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1655" name="LaunchManager_DrawTrajectory_ConfiguredIntegrationSamplesRenderFullThreeSecondHorizon" fullname="CastleBusters.Tests.PreviewParityRegressionTests.LaunchManager_DrawTrajectory_ConfiguredIntegrationSamplesRenderFullThreeSecondHorizon" methodname="LaunchManager_DrawTrajectory_ConfiguredIntegrationSamplesRenderFullThreeSecondHorizon" classname="CastleBusters.Tests.PreviewParityRegressionTests" runstate="Runnable" seed="1488969502" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001225" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1656" name="LaunchManager_DrawTrajectory_EventGateTriggerMultipliesDownstreamVelocityWithoutEndingPreview" fullname="CastleBusters.Tests.PreviewParityRegressionTests.LaunchManager_DrawTrajectory_EventGateTriggerMultipliesDownstreamVelocityWithoutEndingPreview" methodname="LaunchManager_DrawTrajectory_EventGateTriggerMultipliesDownstreamVelocityWithoutEndingPreview" classname="CastleBusters.Tests.PreviewParityRegressionTests" runstate="Runnable" seed="534816199" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001453" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1659" name="ProductionPathRegressionTests" fullname="CastleBusters.Tests.ProductionPathRegressionTests" classname="CastleBusters.Tests.ProductionPathRegressionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.013711" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1663" name="DeploymentController_SpawnCannon_NeutralizesUnitDefaultsForStationaryInstallation" fullname="CastleBusters.Tests.ProductionPathRegressionTests.DeploymentController_SpawnCannon_NeutralizesUnitDefaultsForStationaryInstallation" methodname="DeploymentController_SpawnCannon_NeutralizesUnitDefaultsForStationaryInstallation" classname="CastleBusters.Tests.ProductionPathRegressionTests" runstate="Runnable" seed="1927541569" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001884" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1660" name="GameManager_EndTurn_CancelsActiveAimBeforeAdvancingToAiTurn" fullname="CastleBusters.Tests.ProductionPathRegressionTests.GameManager_EndTurn_CancelsActiveAimBeforeAdvancingToAiTurn" methodname="GameManager_EndTurn_CancelsActiveAimBeforeAdvancingToAiTurn" classname="CastleBusters.Tests.ProductionPathRegressionTests" runstate="Runnable" seed="227507175" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002090" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1661" name="LaunchManager_CancelAim_ClearsDrawFeedbackAndRestoresSelectedUnitGuide" fullname="CastleBusters.Tests.ProductionPathRegressionTests.LaunchManager_CancelAim_ClearsDrawFeedbackAndRestoresSelectedUnitGuide" methodname="LaunchManager_CancelAim_ClearsDrawFeedbackAndRestoresSelectedUnitGuide" classname="CastleBusters.Tests.ProductionPathRegressionTests" runstate="Runnable" seed="1111290130" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.006555" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1662" name="LaunchManager_GameOverPointerRelease_DoesNotLaunchResolveTurnOrConsumeActiveShot" fullname="CastleBusters.Tests.ProductionPathRegressionTests.LaunchManager_GameOverPointerRelease_DoesNotLaunchResolveTurnOrConsumeActiveShot" methodname="LaunchManager_GameOverPointerRelease_DoesNotLaunchResolveTurnOrConsumeActiveShot" classname="CastleBusters.Tests.ProductionPathRegressionTests" runstate="Runnable" seed="8893250" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001713" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1664" name="SiegeArtResourceTests" fullname="CastleBusters.Tests.SiegeArtResourceTests" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.050032" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1676" name="AnimFrameSets_ResolveThroughTheRuntimeLoaderAloneWithNoEditorOnlySelfHeal" fullname="CastleBusters.Tests.SiegeArtResourceTests.AnimFrameSets_ResolveThroughTheRuntimeLoaderAloneWithNoEditorOnlySelfHeal" methodname="AnimFrameSets_ResolveThroughTheRuntimeLoaderAloneWithNoEditorOnlySelfHeal" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="732063988" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.011758" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1668" name="CastleKeep_EveryDamageStageShipsBothAnAnimatedLoopAndAStaticStill" fullname="CastleBusters.Tests.SiegeArtResourceTests.CastleKeep_EveryDamageStageShipsBothAnAnimatedLoopAndAStaticStill" methodname="CastleKeep_EveryDamageStageShipsBothAnAnimatedLoopAndAStaticStill" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1148609670" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004649" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1670" name="CastleKeepKeys_ClampOutOfRangeStagesSoABadBandNeverAsksForArtThatWasNeverAuthored" fullname="CastleBusters.Tests.SiegeArtResourceTests.CastleKeepKeys_ClampOutOfRangeStagesSoABadBandNeverAsksForArtThatWasNeverAuthored" methodname="CastleKeepKeys_ClampOutOfRangeStagesSoABadBandNeverAsksForArtThatWasNeverAuthored" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1378926179" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000810" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1669" name="CastleKeepStills_ThreeStagesAreDifferentArtNotThreeCopiesOfOneImage" fullname="CastleBusters.Tests.SiegeArtResourceTests.CastleKeepStills_ThreeStagesAreDifferentArtNotThreeCopiesOfOneImage" methodname="CastleKeepStills_ThreeStagesAreDifferentArtNotThreeCopiesOfOneImage" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1844728643" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.018953" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1671" name="ComputeDisplayBand_KeepBreaksExactlyAtTheDocumentedHealthBoundaries" fullname="CastleBusters.Tests.SiegeArtResourceTests.ComputeDisplayBand_KeepBreaksExactlyAtTheDocumentedHealthBoundaries" methodname="ComputeDisplayBand_KeepBreaksExactlyAtTheDocumentedHealthBoundaries" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="22438987" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000265" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1672" name="ComputeDisplayBand_WearFloorOnlyRaisesTheDisplayedStageAndNeverLeavesTheAuthoredRange" fullname="CastleBusters.Tests.SiegeArtResourceTests.ComputeDisplayBand_WearFloorOnlyRaisesTheDisplayedStageAndNeverLeavesTheAuthoredRange" methodname="ComputeDisplayBand_WearFloorOnlyRaisesTheDisplayedStageAndNeverLeavesTheAuthoredRange" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1380941870" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000582" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1674" name="LoopFrameAt_DegenerateTimingReturnsASafeFrameInsteadOfDividingByZero" fullname="CastleBusters.Tests.SiegeArtResourceTests.LoopFrameAt_DegenerateTimingReturnsASafeFrameInsteadOfDividingByZero" methodname="LoopFrameAt_DegenerateTimingReturnsASafeFrameInsteadOfDividingByZero" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1815085174" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000135" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1673" name="LoopFrameAt_WrapsForeverInsideBothTheSlingshotAndKeepFrameCounts" fullname="CastleBusters.Tests.SiegeArtResourceTests.LoopFrameAt_WrapsForeverInsideBothTheSlingshotAndKeepFrameCounts" methodname="LoopFrameAt_WrapsForeverInsideBothTheSlingshotAndKeepFrameCounts" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="2143933954" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000337" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1667" name="SiegeLoops_EveryFrameIsRealArtRatherThanAnEmptyTexture" fullname="CastleBusters.Tests.SiegeArtResourceTests.SiegeLoops_EveryFrameIsRealArtRatherThanAnEmptyTexture" methodname="SiegeLoops_EveryFrameIsRealArtRatherThanAnEmptyTexture" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1634074165" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000954" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1666" name="SlingshotAnim_FramesArriveInOrdinalNameOrderSoThePullBackPlaysForwards" fullname="CastleBusters.Tests.SiegeArtResourceTests.SlingshotAnim_FramesArriveInOrdinalNameOrderSoThePullBackPlaysForwards" methodname="SlingshotAnim_FramesArriveInOrdinalNameOrderSoThePullBackPlaysForwards" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1374867259" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000396" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1665" name="SlingshotAnim_ResolvesEnoughFramesToAnimateInsteadOfFallingBackToTheProceduralRing" fullname="CastleBusters.Tests.SiegeArtResourceTests.SlingshotAnim_ResolvesEnoughFramesToAnimateInsteadOfFallingBackToTheProceduralRing" methodname="SlingshotAnim_ResolvesEnoughFramesToAnimateInsteadOfFallingBackToTheProceduralRing" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1105653939" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000190" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1675" name="SlingshotArt_DidNotOverwriteTheLegacyPortalRingTheRuntimeStillReferences" fullname="CastleBusters.Tests.SiegeArtResourceTests.SlingshotArt_DidNotOverwriteTheLegacyPortalRingTheRuntimeStillReferences" methodname="SlingshotArt_DidNotOverwriteTheLegacyPortalRingTheRuntimeStillReferences" classname="CastleBusters.Tests.SiegeArtResourceTests" runstate="Runnable" seed="1711795750" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.008035" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1677" name="SiegePrototypeEconomyTests" fullname="CastleBusters.Tests.SiegePrototypeEconomyTests" classname="CastleBusters.Tests.SiegePrototypeEconomyTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.004890" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1678" name="SeriesVictoryAndBattleBannerSeal_FollowThePublishedOneTimeExchangeContract" fullname="CastleBusters.Tests.SiegePrototypeEconomyTests.SeriesVictoryAndBattleBannerSeal_FollowThePublishedOneTimeExchangeContract" methodname="SeriesVictoryAndBattleBannerSeal_FollowThePublishedOneTimeExchangeContract" classname="CastleBusters.Tests.SiegePrototypeEconomyTests" runstate="Runnable" seed="1867904713" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.003725" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1679" name="StageActorScaleTests" fullname="CastleBusters.Tests.StageActorScaleTests" classname="CastleBusters.Tests.StageActorScaleTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002147" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1682" name="ColliderExtents_AreInvariantUnderVisualScale" fullname="CastleBusters.Tests.StageActorScaleTests.ColliderExtents_AreInvariantUnderVisualScale" methodname="ColliderExtents_AreInvariantUnderVisualScale" classname="CastleBusters.Tests.StageActorScaleTests" runstate="Runnable" seed="210789979" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000400" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1680" name="StageActorVisualScale_IsOneWithoutAGameManager" fullname="CastleBusters.Tests.StageActorScaleTests.StageActorVisualScale_IsOneWithoutAGameManager" methodname="StageActorVisualScale_IsOneWithoutAGameManager" classname="CastleBusters.Tests.StageActorScaleTests" runstate="Runnable" seed="943448660" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000161" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1681" name="StageActorVisualScale_TracksCameraWidthRelativeToStage1" fullname="CastleBusters.Tests.StageActorScaleTests.StageActorVisualScale_TracksCameraWidthRelativeToStage1" methodname="StageActorVisualScale_TracksCameraWidthRelativeToStage1" classname="CastleBusters.Tests.StageActorScaleTests" runstate="Runnable" seed="2004660414" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000162" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1683" name="StageAdvanceRegressionTests" fullname="CastleBusters.Tests.StageAdvanceRegressionTests" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:13Z" duration="0.019080" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1700" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.006581" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1694" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(3)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(3)" methodname="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="746329812" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001261" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1695" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(99)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(99)" methodname="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="248372865" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000858" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1696" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(int.MaxValue)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(int.MaxValue)" methodname="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="1961038490" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000904" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1697" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(-1)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(-1)" methodname="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="1202843553" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000887" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1698" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(-99)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(-99)" methodname="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="1114876390" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000690" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1699" name="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(int.MinValue)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists(int.MinValue)" methodname="ACorruptStoredFrontier_ResolvesToAStageThatActuallyExists" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="385220330" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000873" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1693" name="AFrontierWhosePersistenceWasLost_StillAdvancesForTheRestOfTheSession" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.AFrontierWhosePersistenceWasLost_StillAdvancesForTheRestOfTheSession" methodname="AFrontierWhosePersistenceWasLost_StillAdvancesForTheRestOfTheSession" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="901627798" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001425" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1701" name="AFurtherAlongSavedProfile_WinsOverThisSessionsSafetyNet" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.AFurtherAlongSavedProfile_WinsOverThisSessionsSafetyNet" methodname="AFurtherAlongSavedProfile_WinsOverThisSessionsSafetyNet" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="469685220" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.001248" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1687" name="ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.002620" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1685" name="ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload(Stage1,Stage2)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload(Stage1,Stage2)" methodname="ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="95770223" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000951" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1686" name="ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload(Stage2,Stage3)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload(Stage2,Stage3)" methodname="ClearingAStage_ReportsTheNextOneAndKeepsItAcrossTheReload" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="2089921188" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:12Z" duration="0.000871" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1692" name="ClearingTheLastStage_HoldsTheFrontierAndOffersNothingFurther" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ClearingTheLastStage_HoldsTheFrontierAndOffersNothingFurther" methodname="ClearingTheLastStage_HoldsTheFrontierAndOffersNothingFurther" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="848076054" result="Passed" start-time="2026-08-10 03:30:12Z" end-time="2026-08-10 03:30:13Z" duration="0.001266" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1684" name="FreshProfile_OpensTheFirstStageAndNothingElse" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.FreshProfile_OpensTheFirstStageAndNothingElse" methodname="FreshProfile_OpensTheFirstStageAndNothingElse" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="1256107005" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000572" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1691" name="ReplayingAnEarlierStage_LeavesTheEarnedFrontierAlone" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.ReplayingAnEarlierStage_LeavesTheEarnedFrontierAlone" methodname="ReplayingAnEarlierStage_LeavesTheEarnedFrontierAlone" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="1115923477" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.001007" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1690" name="TheStageJustCleared_PassesBothGatesGuardingTheAdvance" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.TheStageJustCleared_PassesBothGatesGuardingTheAdvance" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.002626" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1688" name="TheStageJustCleared_PassesBothGatesGuardingTheAdvance(Stage1)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.TheStageJustCleared_PassesBothGatesGuardingTheAdvance(Stage1)" methodname="TheStageJustCleared_PassesBothGatesGuardingTheAdvance" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="21800713" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000965" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1689" name="TheStageJustCleared_PassesBothGatesGuardingTheAdvance(Stage2)" fullname="CastleBusters.Tests.StageAdvanceRegressionTests.TheStageJustCleared_PassesBothGatesGuardingTheAdvance(Stage2)" methodname="TheStageJustCleared_PassesBothGatesGuardingTheAdvance" classname="CastleBusters.Tests.StageAdvanceRegressionTests" runstate="Runnable" seed="1086286226" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000869" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="1702" name="StageInterludeTests" fullname="CastleBusters.Tests.StageInterludeTests" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.012493" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1719" name="ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank" fullname="CastleBusters.Tests.StageInterludeTests.ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.001472" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1717" name="ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank(0.0f)" fullname="CastleBusters.Tests.StageInterludeTests.ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank(0.0f)" methodname="ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1119696978" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000905" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1718" name="ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank(-30.0f)" fullname="CastleBusters.Tests.StageInterludeTests.ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank(-30.0f)" methodname="ABeatWithNoRevealSpeed_ShowsItsLineOutrightInsteadOfStayingBlank" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1882633754" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000086" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1710" name="ACutscene_FinishesAtItsOwnRuntimeAndStaysFinished" fullname="CastleBusters.Tests.StageInterludeTests.ACutscene_FinishesAtItsOwnRuntimeAndStaysFinished" methodname="ACutscene_FinishesAtItsOwnRuntimeAndStaysFinished" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1337120175" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000680" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1708" name="ACutscenesRuntime_IsTheOpeningHoldTheTailAndTheBeatsItActuallyPlays" fullname="CastleBusters.Tests.StageInterludeTests.ACutscenesRuntime_IsTheOpeningHoldTheTailAndTheBeatsItActuallyPlays" methodname="ACutscenesRuntime_IsTheOpeningHoldTheTailAndTheBeatsItActuallyPlays" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="2114631397" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000187" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1709" name="ALongerBeat_BuysStrictlyMoreScreenTimeThanAShorterOne" fullname="CastleBusters.Tests.StageInterludeTests.ALongerBeat_BuysStrictlyMoreScreenTimeThanAShorterOne" methodname="ALongerBeat_BuysStrictlyMoreScreenTimeThanAShorterOne" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1289756683" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000212" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1712" name="AScriptThatWasNeverBuilt_PlaysAsAnEmptyBeatInsteadOfThrowing" fullname="CastleBusters.Tests.StageInterludeTests.AScriptThatWasNeverBuilt_PlaysAsAnEmptyBeatInsteadOfThrowing" methodname="AScriptThatWasNeverBuilt_PlaysAsAnEmptyBeatInsteadOfThrowing" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="600648215" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000516" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1703" name="EveryStage_EntersOnACutsceneWithRealLinesInsteadOfABlankCut" fullname="CastleBusters.Tests.StageInterludeTests.EveryStage_EntersOnACutsceneWithRealLinesInsteadOfABlankCut" methodname="EveryStage_EntersOnACutsceneWithRealLinesInsteadOfABlankCut" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1384549206" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000297" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1716" name="RevealAll_SkipsStraightToTheWholeBeat" fullname="CastleBusters.Tests.StageInterludeTests.RevealAll_SkipsStraightToTheWholeBeat" methodname="RevealAll_SkipsStraightToTheWholeBeat" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1376766090" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000196" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1705" name="TheCampaignScripts_MixImpersonalNarrationWithAttributedCharacterVoice" fullname="CastleBusters.Tests.StageInterludeTests.TheCampaignScripts_MixImpersonalNarrationWithAttributedCharacterVoice" methodname="TheCampaignScripts_MixImpersonalNarrationWithAttributedCharacterVoice" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="967978590" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000327" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1711" name="TheEntryCutscene_PlaysOnlyWhenTheCampaignActuallyMovedForwardOnAClear" fullname="CastleBusters.Tests.StageInterludeTests.TheEntryCutscene_PlaysOnlyWhenTheCampaignActuallyMovedForwardOnAClear" methodname="TheEntryCutscene_PlaysOnlyWhenTheCampaignActuallyMovedForwardOnAClear" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="969265853" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000152" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1704" name="TheStageEntryCutscenes_AreDistinctBeatsRatherThanOneRepeatedOne" fullname="CastleBusters.Tests.StageInterludeTests.TheStageEntryCutscenes_AreDistinctBeatsRatherThanOneRepeatedOne" methodname="TheStageEntryCutscenes_AreDistinctBeatsRatherThanOneRepeatedOne" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1569153901" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000268" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1706" name="TheTimeline_WalksForwardThroughEveryBeatWithoutSkippingOrRewinding" fullname="CastleBusters.Tests.StageInterludeTests.TheTimeline_WalksForwardThroughEveryBeatWithoutSkippingOrRewinding" methodname="TheTimeline_WalksForwardThroughEveryBeatWithoutSkippingOrRewinding" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="201738346" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.001454" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1715" name="TheTypewriter_IgnoresAFrameThatDidNotAdvance" fullname="CastleBusters.Tests.StageInterludeTests.TheTypewriter_IgnoresAFrameThatDidNotAdvance" methodname="TheTypewriter_IgnoresAFrameThatDidNotAdvance" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1259173896" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000155" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1713" name="TheTypewriter_RevealsAShippedBeatAsAGrowingPrefixAndLandsExactlyOnTheFullLine" fullname="CastleBusters.Tests.StageInterludeTests.TheTypewriter_RevealsAShippedBeatAsAGrowingPrefixAndLandsExactlyOnTheFullLine" methodname="TheTypewriter_RevealsAShippedBeatAsAGrowingPrefixAndLandsExactlyOnTheFullLine" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1032347867" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.001161" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1714" name="TheTypewriter_SurvivesAFrameLongEnoughToOverrunTheWholeLine" fullname="CastleBusters.Tests.StageInterludeTests.TheTypewriter_SurvivesAFrameLongEnoughToOverrunTheWholeLine" methodname="TheTypewriter_SurvivesAFrameLongEnoughToOverrunTheWholeLine" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1447083010" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000130" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1707" name="TimeInLine_RestartsOnEveryBeatAndStaysInsideTheBeatItBelongsTo" fullname="CastleBusters.Tests.StageInterludeTests.TimeInLine_RestartsOnEveryBeatAndStaysInsideTheBeatItBelongsTo" methodname="TimeInLine_RestartsOnEveryBeatAndStaysInsideTheBeatItBelongsTo" classname="CastleBusters.Tests.StageInterludeTests" runstate="Runnable" seed="1450792555" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.002496" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1720" name="StageProgressionShapeTests" fullname="CastleBusters.Tests.StageProgressionShapeTests" classname="CastleBusters.Tests.StageProgressionShapeTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.002480" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1724" name="EveryStageKeepsItsOwnBackdrop" fullname="CastleBusters.Tests.StageProgressionShapeTests.EveryStageKeepsItsOwnBackdrop" methodname="EveryStageKeepsItsOwnBackdrop" classname="CastleBusters.Tests.StageProgressionShapeTests" runstate="Runnable" seed="69958905" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000278" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1723" name="PacingStaysDistinctPerStage" fullname="CastleBusters.Tests.StageProgressionShapeTests.PacingStaysDistinctPerStage" methodname="PacingStaysDistinctPerStage" classname="CastleBusters.Tests.StageProgressionShapeTests" runstate="Runnable" seed="1234475738" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000131" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1721" name="WallHeight_RisesAcrossTheUnlockOrder" fullname="CastleBusters.Tests.StageProgressionShapeTests.WallHeight_RisesAcrossTheUnlockOrder" methodname="WallHeight_RisesAcrossTheUnlockOrder" classname="CastleBusters.Tests.StageProgressionShapeTests" runstate="Runnable" seed="1343472567" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000110" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1722" name="WindCap_StaysTiedToThrowDistanceNotUnlockOrder" fullname="CastleBusters.Tests.StageProgressionShapeTests.WindCap_StaysTiedToThrowDistanceNotUnlockOrder" methodname="WindCap_StaysTiedToThrowDistanceNotUnlockOrder" classname="CastleBusters.Tests.StageProgressionShapeTests" runstate="Runnable" seed="602356302" result="Passed" start-time="2026-08-10 03:30:13Z" end-time="2026-08-10 03:30:13Z" duration="0.000123" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -37,6 +37,12 @@ namespace CastleBusters
         public const string ParticleSmoke = "particle_smoke";
         public const string ParticlePetal = "particle_petal";
 
+        // Ambient weather, one per stage — see StageWeather. Rain for the plain, snow for
+        // the dunes' cold nights, ash for the volcanic gorge.
+        public const string ParticleRain = "particle_rain";
+        public const string ParticleSnow = "particle_snow";
+        public const string ParticleAsh = "particle_ash";
+
         private static readonly Dictionary<string, Sprite[]> cache = new Dictionary<string, Sprite[]>();
         private static readonly Dictionary<string, Sprite> singleCache = new Dictionary<string, Sprite>();
 

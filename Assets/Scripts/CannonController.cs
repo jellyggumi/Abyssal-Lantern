@@ -225,6 +225,32 @@ namespace CastleBusters
                     : new Color(0.95f, 0.62f, 0.55f, 1f);
                 barrelRenderer.color = Color.Lerp(cool, new Color(1f, 0.85f, 0.45f, 1f), charge * charge);
             }
+
+            ApplyRecoil();
+        }
+
+        // Recoil: the barrel snaps back along its own axis on firing, then eases forward.
+        // Without it the shell simply appeared and the battery looked inert at the one moment
+        // it should feel heaviest. Purely visual — the shell's origin is Muzzle(), which is
+        // computed from the cannon's transform and is untouched by this offset.
+        private const float RecoilSeconds = 0.26f;
+        private const float RecoilDistance = 0.3f;
+        private const float BarrelRestOffsetX = 0.42f;
+        private float recoilTimer;
+
+        private void ApplyRecoil()
+        {
+            if (barrelRenderer == null) return;
+
+            if (recoilTimer > 0f) recoilTimer = Mathf.Max(0f, recoilTimer - Time.deltaTime);
+
+            // Fast kick back, slower settle: t^3 leaves most of the travel in the first
+            // frames, which is what reads as a punch rather than a slide.
+            float t = recoilTimer / RecoilSeconds;
+            float kick = RecoilDistance * (t * t * t);
+
+            var local = barrelRenderer.transform.localPosition;
+            barrelRenderer.transform.localPosition = new Vector3(BarrelRestOffsetX - kick, local.y, local.z);
         }
 
         private Vector2 Muzzle() => (Vector2)transform.position + Vector2.up * CannonRules.MuzzleHeight;
@@ -238,6 +264,8 @@ namespace CastleBusters
             var shell = CannonShell.Spawn(muzzle, velocity, shellDamage, shellSplashRadius,
                 owner != null && owner.isPlayerUnit);
             if (shell == null) return;
+
+            recoilTimer = RecoilSeconds;
 
             Vector2 dir = velocity.sqrMagnitude > 0.01f ? velocity.normalized : Vector2.right;
 

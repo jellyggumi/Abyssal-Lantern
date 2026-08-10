@@ -1,0 +1,10 @@
+{
+  "asset": "particle_rain.png",
+  "tool": "Higgsfield CLI (starter plan)",
+  "model": "gpt_image_2",
+  "prompt_summary": "pixel-art weather particle sheet on flat magenta: rain streaks / snowflakes / ash flecks in three separated columns",
+  "postprocess": "cropped one representative particle from its column, ImageMagick -fuzz 14% -transparent magenta -trim, resized to 64px",
+  "sha256": "4139701d5134fbd174f2df169da3043b68eba63bbcb7c96ff79a42e71690c771",
+  "generated": "2026-08-10",
+  "audited": "alpha verified on a dark montage; used by StageWeather at sortingOrder 1 so it never covers units"
+}
