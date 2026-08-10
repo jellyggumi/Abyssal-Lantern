@@ -347,6 +347,22 @@ namespace CastleBusters
         {
             if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
             if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
+
+            // Prefer the animated reel, but never depend on it: WebGL video playback is at
+            // the browser's discretion, so an error or a prepare that never finishes drops
+            // straight to the panel prologue instead of leaving a black screen.
+            if (Application.isPlaying)
+            {
+                NarrativeVideoIntro.Play(ShowTitleScreen, ShowPanelPrologue);
+                return;
+            }
+
+            ShowPanelPrologue();
+        }
+
+        private void ShowPanelPrologue()
+        {
+            if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
             webtoonPrologue = WebtoonPrologueController.Create(ShowTitleScreen);
         }
 
