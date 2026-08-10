@@ -258,7 +258,11 @@ namespace CastleBusters
         public const float Range = 13f;
         public const float ReloadSeconds = 3.2f;
         public const float ShellDamage = 42f;
-        public const float ShellSplashRadius = 1.5f;
+        // 1.5 -> 2.4: the battery is the roster's only area weapon since the bomber was
+        // removed, and at 1.5 a shell that visibly landed in a cluster still only took the
+        // one block it touched. 2.4 reliably catches a block and its neighbours, which is
+        // what "heavy artillery" has to mean for the 12-supply price to read as worth it.
+        public const float ShellSplashRadius = 2.4f;
         public const float MuzzleHeight = 0.55f;
         /// <summary>Extra apex the ballistic solve adds so the shell clears the caster's own wall.</summary>
         public const float ArcApexBonus = 2.5f;

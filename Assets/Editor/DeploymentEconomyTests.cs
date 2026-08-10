@@ -532,8 +532,9 @@ namespace CastleBusters.Tests
                 "the reload clock is the battery's rate limit");
             Assert.AreEqual(42f, CannonRules.ShellDamage, Tol,
                 "shell damage is the battery's whole damage contribution");
-            Assert.AreEqual(1.5f, CannonRules.ShellSplashRadius, Tol,
-                "splash radius is the niche the removed bomber left behind");
+            Assert.AreEqual(2.4f, CannonRules.ShellSplashRadius, Tol,
+                "splash radius is the niche the removed bomber left behind, and it has to be " +
+                "wide enough to catch a block's neighbours or the battery is just a slow arrow");
         }
 
         [Test]

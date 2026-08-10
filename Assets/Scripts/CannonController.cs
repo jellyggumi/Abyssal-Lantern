@@ -382,6 +382,10 @@ namespace CastleBusters
     /// </summary>
     public class CannonShell : MonoBehaviour
     {
+        /// <summary>World radius of the shell. The art is fitted to this, never the reverse —
+        /// this is the number collision, balance and tests are written against.</summary>
+        public const float ShellRadius = 0.18f;
+
         public float damage = CannonRules.ShellDamage;
         public float splashRadius = CannonRules.ShellSplashRadius;
         public bool isPlayerShell = true;
@@ -410,13 +414,27 @@ namespace CastleBusters
             }
             sr.sortingOrder = 5;
 
+            // The shell drew at its sprite's native size while colliding at ShellRadius, so
+            // it looked several times bigger than it hit — a ball that visibly overlaps a
+            // block without damaging it reads as a broken hitbox. Match the art to the
+            // collider instead of the other way round: the collider is what the balance and
+            // the tests are written against.
+            if (sr.sprite != null)
+            {
+                float native = Mathf.Max(0.0001f, sr.sprite.bounds.size.x);
+                float fit = (ShellRadius * 2f) / native;
+                go.transform.localScale = new Vector3(fit, fit, 1f);
+            }
+
             var body = go.AddComponent<Rigidbody2D>();
             body.gravityScale = 1f;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             body.velocity = velocity;
 
             var circle = go.AddComponent<CircleCollider2D>();
-            circle.radius = 0.18f;
+            // Set before the scale above is read anywhere; localScale multiplies this, so the
+            // collider is authored in unscaled units and the art is fitted to it.
+            circle.radius = ShellRadius / Mathf.Max(0.0001f, go.transform.localScale.x);
             circle.isTrigger = true;
 
             var shell = go.AddComponent<CannonShell>();
