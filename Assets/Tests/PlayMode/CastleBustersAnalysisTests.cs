@@ -80,6 +80,14 @@ namespace CastleBusters.Tests
             gameManager = GameManager.Instance;
             launchManager = Object.FindObjectOfType<LaunchManager>();
 
+            // A loaded scene sits on the title in GameState.Intro and waits to be started —
+            // RuntimeReliabilityRegressionTests asserts that as the correct post-load state.
+            // This test used to launch straight into it and then expect a turn handoff, so it
+            // was asserting a mechanic it had never entered. The missing step was the start,
+            // not the expectation.
+            gameManager.BeginSiege();
+            yield return null;
+
             // Test 1: Knight unit launch
             Debug.Log("Testing Knight unit...");
             gameManager.SelectUnit(0);
@@ -96,7 +104,11 @@ namespace CastleBusters.Tests
         }
 
         [UnityTest]
-        [Timeout(900000)]
+        // Thirty games at roughly a minute each, measured at 1683 s once the siege was actually
+        // being started (before that the harness sat on the title and collected nothing, which
+        // is the only reason it used to fit in 900 s). Sized from the measurement with headroom
+        // rather than tuned down until it passed.
+        [Timeout(2400000)]
         public IEnumerator Cycle3_PlaytestDataCollection_30Games()
         {
             Debug.Log("=== CYCLE 3: Playtest Data Collection (30 Games) ===");
@@ -115,6 +127,13 @@ namespace CastleBusters.Tests
 
                 gameManager = GameManager.Instance;
                 launchManager = Object.FindObjectOfType<LaunchManager>();
+
+                // Same missing step as Cycle 2: without it the scene stays on the title,
+                // IsPlayerTurn is never true, nothing is ever launched, and thirty "games"
+                // collect thirty identical rows of nothing while still burning their full
+                // turn budget in wall-clock waits.
+                gameManager.BeginSiege();
+                yield return null;
 
                 float gameStartTime = Time.realtimeSinceStartup;
                 int unitsLaunched = 0;

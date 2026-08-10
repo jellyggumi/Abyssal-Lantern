@@ -1514,6 +1514,14 @@ namespace CastleBusters.Tests
                 coldOpenSkipButton.onClick.Invoke();
             }
 
+            // The cold open is a StageInterludeController now, not the webtoon, and it is only
+            // shown once per session (GameManager.webtoonIntroShown is static). That made this
+            // test order-dependent: run after something that had already consumed the cold
+            // open and the title was waiting; run it first and the interlude held the screen
+            // past the deadline. Dismissing whatever is actually playing removes the
+            // dependency instead of relying on another test to have cleared it.
+            StageInterludeController.Active?.Dismiss();
+
             while (Object.FindObjectOfType<IntroScreenController>() == null &&
                    Time.realtimeSinceStartup < titleDeadline)
             {
@@ -1618,12 +1626,21 @@ namespace CastleBusters.Tests
             LeaderboardStore.Save(new SiegeRank.Board());
             StageProgressStore.Save(StageId.Stage1);
 
+            // The best-of-three tally lives in GameManager statics so it can survive the scene
+            // reload between games, which also means it survives between TESTS. Resetting the
+            // economy alone left a prior test's win on the board, so this test's very first
+            // game clinched the series and paid out before the assertion that says it must not.
+            // That only became visible once the siege actually ended — see D-011.
+            typeof(GameManager)
+                .GetMethod("ResetSeries", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                ?.Invoke(null, null);
+
             yield return LoadAndBeginStage(StageId.Stage1);
 
             var firstGameManager = GameManager.Instance;
             var firstEnemyCore = FindCore(false);
             Assert.IsNotNull(firstEnemyCore, "The first actual siege must expose an enemy core to win through public damage.");
-            firstEnemyCore.TakeDamage(firstEnemyCore.currentHP + 1f);
+            BreachCoreWithinTheVolleyBudget(firstGameManager, firstEnemyCore);
             yield return WaitForResultsScreen();
 
             var firstResults = Object.FindObjectOfType<ResultsScreenController>();
@@ -1646,7 +1663,7 @@ namespace CastleBusters.Tests
             var clinchGameManager = GameManager.Instance;
             var clinchEnemyCore = FindCore(false);
             Assert.IsNotNull(clinchEnemyCore, "The continued series game must expose an enemy core to win through public damage.");
-            clinchEnemyCore.TakeDamage(clinchEnemyCore.currentHP + 1f);
+            BreachCoreWithinTheVolleyBudget(clinchGameManager, clinchEnemyCore);
             yield return WaitForResultsScreen();
 
             var clinchResults = Object.FindObjectOfType<ResultsScreenController>();
@@ -1686,6 +1703,35 @@ namespace CastleBusters.Tests
                 "The rendered TitleButton route must ResetDemo's mark ledger.");
             Assert.IsFalse(SiegePrototypeEconomy.HasBattleBannerSeal,
                 "The rendered TitleButton route must ResetDemo's one-time banner unlock.");
+        }
+
+        /// <summary>
+        /// Breaks an enemy core the way the balance rules actually allow. A core that begins a
+        /// turn at full health absorbs at most FullHealthVolleyDamageCap (140) that turn, and
+        /// the cap is below the core's 150 max — deliberately, so a single opening volley can
+        /// no longer end a game (defect D-003). One TakeDamage(currentHP + 1) therefore leaves
+        /// the core alive at 10 HP and the siege never ends, which is what made this test fail:
+        /// the premise went stale when the anti-one-shot cap landed, not the game.
+        ///
+        /// So: spend the turn's budget, cross a turn boundary to reset it, then finish. The
+        /// second hit is uncapped because the core no longer starts that turn at full health.
+        /// </summary>
+        private static void BreachCoreWithinTheVolleyBudget(GameManager gameManager, CastleCoreGimmick core)
+        {
+            var endTurn = typeof(GameManager).GetMethod(
+                "EndTurn",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.IsNotNull(endTurn, "GameManager must still expose an EndTurn handoff to cross a turn boundary.");
+
+            for (int guard = 0; guard < 8 && core != null && core.currentHP > 0f; guard++)
+            {
+                core.TakeDamage(core.currentHP + 1f);
+                if (core == null || core.currentHP <= 0f) return;
+                endTurn.Invoke(gameManager, null);
+            }
+
+            Assert.IsTrue(core == null || core.currentHP <= 0f,
+                "The core must be breachable within a few turns of uncapped damage.");
         }
 
         private static IEnumerator WaitForResultsScreen()
