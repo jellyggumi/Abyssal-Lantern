@@ -138,16 +138,21 @@ namespace CastleBusters
                     float native = Mathf.Max(sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
                     if (native > 0.0001f)
                     {
-                        // The slingshot reads as a physical siege machine, so it is sized to
-                        // stand on the apron (3.1u) rather than hover like the 2.4u portal.
-                        float target = gateKey == GimmickAnimLibrary.SlingshotAnim ? 3.1f : 2.4f;
+                        // The slingshot reads as a physical siege machine standing on the
+                        // apron, but at 3.1u it stood taller than a 2-block wall and level
+                        // with a 3-block one — the engine dwarfing the fortress it is meant
+                        // to be battering. 2.2u keeps it substantial while leaving every
+                        // castle silhouette clearly the larger thing on the board.
+                        float target = gateKey == GimmickAnimLibrary.SlingshotAnim ? 2.2f : 2.4f;
                         float s = target / native;
                         go.transform.localScale = new Vector3(s, s, 1f);
                     }
                     // Slingshot stands ON the ground; the portal floated centered on the muzzle.
                     if (gateKey == GimmickAnimLibrary.SlingshotAnim)
                     {
-                        go.transform.localPosition = new Vector3(0f, 0.85f, 0f);
+                        // Ground offset tracks the height above: 0.85 was tuned for the 3.1u
+                        // frame, so it scales with it or the machine sinks into the apron.
+                        go.transform.localPosition = new Vector3(0f, 0.85f * (2.2f / 3.1f), 0f);
                         sr.color = Color.white; // no cyan portal wash over the wood/leather
                     }
                     // TryAttach re-derives scale from frame 0 to preserve the world footprint,
