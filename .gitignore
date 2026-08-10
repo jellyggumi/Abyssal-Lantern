@@ -95,3 +95,7 @@ Thumbs.db
 # Unity PlayMode test scaffolding (regenerated per run)
 Assets/InitTestScene*.unity
 Assets/InitTestScene*.unity.meta
+
+# Unity auto-merges package link.xml into Assets during a build; regenerated each time
+/Assets/packages-merged-link/
+/Assets/packages-merged-link.meta
