@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -87,7 +86,11 @@ public static class KoreanFontAssetBuilder
         var found = new HashSet<char>();
         foreach (char c in ExtraChars) found.Add(c);
 
-        var hangul = new Regex("[가-힣㄰-㆏]");
+        // Every non-ASCII character in the sources, not just Hangul. A Hangul-only sweep
+        // plus a hand-kept symbol list is exactly how "▶ {message}" shipped as a tofu box
+        // in the siege alarms: the arrow was typed into a string but was in neither set.
+        // Symbols are cheap — the whole atlas is one 1024x1024 page — so the safe default
+        // is to bake anything a developer can type rather than to curate a list.
         var patterns = new[] { "*.cs", "*.unity", "*.prefab", "*.asset", "*.json" };
         foreach (var pattern in patterns)
         {
@@ -96,7 +99,14 @@ public static class KoreanFontAssetBuilder
                 string text;
                 try { text = File.ReadAllText(file, Encoding.UTF8); }
                 catch { continue; }
-                foreach (Match m in hangul.Matches(text)) found.Add(m.Value[0]);
+
+                foreach (char c in text)
+                {
+                    // Surrogates need a full code point to render and TMP takes chars here;
+                    // skipping them keeps the set honest instead of baking half a glyph.
+                    if (c < 0x80 || char.IsControl(c) || char.IsSurrogate(c)) continue;
+                    found.Add(c);
+                }
             }
         }
 

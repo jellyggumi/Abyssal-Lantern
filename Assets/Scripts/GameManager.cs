@@ -48,6 +48,10 @@ namespace CastleBusters
         // Survives ReloadArena() (static) so Title/Rematch/RequestStage reloads never replay the
         // pre-title webtoon cold-open after the player has already seen it this app session.
         private static bool webtoonIntroShown;
+        // Set by RequestStage when the campaign MOVES to a different stage, consumed by
+        // ShowIntro on the next boot. Static so it survives the scene reload the advance
+        // triggers — the flag has to outlive the GameManager that set it.
+        private static bool pendingStageInterlude;
 
 
 
@@ -267,23 +271,54 @@ namespace CastleBusters
             if (skipIntroOnce)
             {
                 skipIntroOnce = false;
+
+                // ...but a CAMPAIGN ADVANCE also arrives here (RequestStage passes
+                // skipIntro: true so the player is not made to sit through the title card
+                // between stages). That is exactly where the connective narration belongs:
+                // the board is built and frozen behind the cutscene, and StartGame runs the
+                // moment it ends. Without this the campaign cut from a results screen
+                // straight into a new battlefield, so three distinct stages read as "the
+                // same fight again with different rocks".
+                if (pendingStageInterlude)
+                {
+                    pendingStageInterlude = false;
+                    currentState = GameState.Intro;
+                    isPlayerTurn = false;
+                    HitStopManager.Instance?.CancelPendingHitStop();
+                    Time.timeScale = 0f;
+                    StageInterludeController.Play(
+                        StageInterlude.ForStageEntry(currentStage),
+                        () => { Time.timeScale = 1f; StartGame(); });
+                    return;
+                }
+
                 StartGame();
                 return;
             }
             currentState = GameState.Intro;
             isPlayerTurn = false;
 
-            // Straight to the title card. The 11-page webtoon used to cold-open the very
-            // first session, which put a long read between arriving and playing a siege
-            // game — the worst place to spend a new player's patience. The prologue is
-            // still there, on the title screen's 프롤로그 button, for players who want it.
-            webtoonIntroShown = true;
-            ShowTitleScreen();
-
             // A hit-stop restore pending from the previous scene/turn must not thaw the
             // intro freeze 0.05s from now (rematch/title "game plays itself" bug).
             HitStopManager.Instance?.CancelPendingHitStop();
             Time.timeScale = 0f;
+
+            // Cold open, once per app session: a short narration beat before the title card
+            // that says where we are and what is at stake. The 11-page webtoon is the LONG
+            // form and stays behind the title's 프롤로그 button — putting it in front of a
+            // first-time player was the "long read before the game" problem. This is the
+            // short form: three lines, skippable, and never replayed on a scene reload
+            // (webtoonIntroShown is static, so Title/Rematch/RequestStage all pass it by).
+            if (!webtoonIntroShown)
+            {
+                webtoonIntroShown = true;
+                StageInterludeController.Play(
+                    StageInterlude.ForStageEntry(StageId.Stage1),
+                    ShowTitleScreen);
+                return;
+            }
+
+            ShowTitleScreen();
         }
 
         private void ShowWebtoonPrologue()
@@ -762,7 +797,9 @@ namespace CastleBusters
             LayoutSelectionRow(
                 new[] { knightButton, archerButton, cannonButton, gimmickButton },
                 new[] { characterSize, characterSize, characterSize, gimmickSize },
-                -96f, 16f);
+                // Height above the bottom edge: clears the launch-guide line that runs along
+                // the very bottom while keeping the row inside thumb reach on a phone.
+                104f, 16f);
 
             if (knightButton != null && knightButton.GetComponent<GameButtonAnimator>() == null) knightButton.gameObject.AddComponent<GameButtonAnimator>();
             if (archerButton != null && archerButton.GetComponent<GameButtonAnimator>() == null) archerButton.gameObject.AddComponent<GameButtonAnimator>();
@@ -862,6 +899,13 @@ namespace CastleBusters
         // Centers a row of variable-width selection cards with a fixed edge gap so the
         // enlarged character/gimmick cards (playtest sizing pass) never overlap or drift
         // off their old shared baseline.
+        /// <summary>
+        /// Lays the siege-order cards out as a bottom-centred bar. The anchor is forced here
+        /// rather than trusted from the scene: the cards were anchored to screen centre, so
+        /// the row sat across the middle of the battlefield, covering both castles and the
+        /// rally rings — the busiest part of the board. <paramref name="y"/> is now a height
+        /// above the bottom edge.
+        /// </summary>
         private static void LayoutSelectionRow(UnityEngine.UI.Button[] buttons, Vector2[] sizes, float y, float gap)
         {
             float totalWidth = 0f;
@@ -875,6 +919,9 @@ namespace CastleBusters
                 var rt = buttons[i].GetComponent<RectTransform>();
                 if (rt != null)
                 {
+                    rt.anchorMin = new Vector2(0.5f, 0f);
+                    rt.anchorMax = new Vector2(0.5f, 0f);
+                    rt.pivot = new Vector2(0.5f, 0.5f);
                     rt.anchoredPosition = new Vector2(cursor + sizes[i].x / 2f, y);
                 }
                 cursor += sizes[i].x + gap;
@@ -1863,9 +1910,24 @@ namespace CastleBusters
             }
             HitStopManager.Instance?.CancelPendingHitStop();
             Time.timeScale = 0f;
-            ResultsScreenController.Create(victory, turnCount, playerScore,
+
+            void ShowResults() => ResultsScreenController.Create(victory, turnCount, playerScore,
                 GameplayUxDirector.SessionMaxCombo, lastStandUsed, nextStage,
                 seriesPlayerWins, seriesEnemyWins, seriesGamesPlayed, seriesDecided, seriesScoreTotal, warChestReward);
+
+            // Campaign closer: clinching the series on the FINAL stage ends the campaign, and
+            // that deserves a beat before a scoreboard. `nextStage == null` alone is not the
+            // test — a mid-campaign defeat also has no next stage. It must be a series win
+            // with nothing left after this stage.
+            bool campaignCleared = seriesWonByPlayer && !StageProgress.NextStage(currentStage).HasValue;
+            if (campaignCleared)
+            {
+                StageInterludeController.Play(StageInterlude.Epilogue(), ShowResults);
+            }
+            else
+            {
+                ShowResults();
+            }
 
             // The series is now fully resolved (2 wins clinched or 3 games played): the next
             // EndGame from Rematch/NextGame/NextStage must start counting a brand-new series
@@ -1923,6 +1985,9 @@ namespace CastleBusters
         public static void RequestTitle()
         {
             skipIntroOnce = false;
+            // Returning to the title abandons the campaign advance, so a cutscene armed for a
+            // stage the player is no longer entering must not fire on the title's own boot.
+            pendingStageInterlude = false;
             PendingStage = StageId.Stage1;
             ResetSeries();
             SiegePrototypeEconomy.ResetDemo();
@@ -1969,6 +2034,11 @@ namespace CastleBusters
             // Refusing there stranded the player on the results screen with the countdown
             // already stopped (the caller had latched `navigated`), which is exactly the
             // "다음 스테이지로 넘어가지 않는다" report.
+            // Arm the connective cutscene only when the campaign actually MOVES and the
+            // caller is skipping the title (the results-screen advance). Re-picking a stage
+            // from the intro shows the title card anyway, and a rematch of the same stage
+            // must never put a cutscene between the player and their retry.
+            pendingStageInterlude = StageInterlude.ShouldPlayOnEntry(stage, PendingStage, skipIntro);
             PendingStage = stage;
             skipIntroOnce = skipIntro;
             ResetSeries();
