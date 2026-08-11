@@ -279,6 +279,10 @@ namespace CastleBusters
                 blast.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
             }
 
+            // Ghost of the gun at full recoil. The recoil itself lasts a quarter of a second,
+            // which the eye misses when it is looking downrange at the target.
+            CannonShotVisuals.SpawnBarrelAfterimage(barrelRenderer, owner != null && owner.isPlayerUnit);
+
             GameFeelVfx.SpawnImpactBurst(muzzle + dir * 0.35f, new Color(1f, 0.82f, 0.35f, 0.9f), 0.42f);
             GameFeelVfx.SpawnShockwaveRing(muzzle, new Color(1f, 0.75f, 0.3f, 0.5f), 0.75f, 0.24f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.08f, 0.04f);
@@ -442,6 +446,11 @@ namespace CastleBusters
             shell.splashRadius = splashRadius;
             shell.isPlayerShell = isPlayerShell;
             shell.rb = body;
+
+            // Attached after the collider-matched scale above, because the trail sizes its
+            // width against that scale.
+            CannonShotVisuals.AttachShellTrail(go, isPlayerShell);
+
             Destroy(go, shell.lifetime);
             return shell;
         }

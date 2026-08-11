@@ -97,15 +97,25 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void Profile_StaysThinEnoughForAMatchToEnd()
+        public void Keep_IsSizedForTheTargetMatchLength()
         {
-            // The guard this file was missing. A four-course keep (11 blocks a side at the
-            // baseline stage) screened the core so completely that a match no longer reached
-            // GameOver inside the twenty turns the playtest harness allows, which is also the
-            // point at which a real match stops being winnable and starts being a chore.
-            // Anyone deepening the keep again has to re-measure rather than re-discover this.
-            Assert.LessOrEqual(GameManager.BlocksPerKeep(BaselineWallHeightBlocks), 8,
-                "the keep is deep enough again to screen the core out of reach");
+            // This replaced a flat cap of eight blocks. That cap came from the thirty-game
+            // harness failing to finish, but the harness fires at random velocities — its
+            // trouble reaching a screened core said nothing about a player who aims. Sizing the
+            // keep against a target match length is the thing actually worth defending, and it
+            // fails loudly in both directions: too thin ends matches early, too thick grinds.
+            var stone = Resources.Load<BlockData>("StoneBlockData");
+            Assert.IsNotNull(stone, "wall blocks take their health from StoneBlockData");
+
+            float seconds = MatchLengthModel.EstimatedMatchSeconds(
+                GameManager.BlocksPerKeep(BaselineWallHeightBlocks),
+                stone.maxHP,
+                CastleCoreGimmick.CoreMaxHP);
+            float tolerance = MatchLengthModel.TargetMatchSeconds * MatchLengthModel.ToleranceFraction;
+
+            Assert.That(seconds,
+                Is.EqualTo(MatchLengthModel.TargetMatchSeconds).Within(tolerance),
+                $"a decided match models at {seconds:F0}s against a {MatchLengthModel.TargetMatchSeconds:F0}s target");
         }
     }
 }

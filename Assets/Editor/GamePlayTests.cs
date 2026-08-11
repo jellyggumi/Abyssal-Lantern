@@ -604,8 +604,8 @@ namespace CastleBusters.Tests
             var awakeMethod = typeof(CastleCoreGimmick).GetMethod("Awake", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             awakeMethod.Invoke(core, null);
 
-            Assert.AreEqual(150f, core.maxHP);
-            Assert.AreEqual(150f, core.currentHP);
+            Assert.AreEqual(CastleCoreGimmick.CoreMaxHP, core.maxHP);
+            Assert.AreEqual(CastleCoreGimmick.CoreMaxHP, core.currentHP);
             Assert.IsTrue(core.isPlayerCore);
 
             core.simulatedTime = 1.0f; // Advance simulated time to trigger pulsing

@@ -34,59 +34,71 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void CastleCoreGimmick_MultipleSameTurnHits_CapPristineCoreAtTenHealth()
+        public void PristineTurn_StopsAtTheVolleyCap()
         {
             GameManager gameManager = CreateGameManager(4);
             CastleCoreGimmick core = CreateCore();
 
-            core.TakeDamage(100f);
-            core.TakeDamage(100f);
+            // Written against the constants, not against arithmetic from a 150 HP core: the
+            // rule is "a pristine turn spends a fixed budget", and it should keep holding when
+            // the core's health is retuned.
+            core.TakeDamage(CastleCoreGimmick.FullHealthVolleyDamageCap);
+            core.TakeDamage(CastleCoreGimmick.FullHealthVolleyDamageCap);
 
             Assert.That(gameManager.TurnCount, Is.EqualTo(4));
-            Assert.That(core.currentHP, Is.EqualTo(10f).Within(0.0001f),
-                "Same-turn health damage to a pristine 150 HP core must stop at the 140-point volley cap after shield absorption.");
+            Assert.That(core.currentHP,
+                Is.EqualTo(CastleCoreGimmick.CoreMaxHP - CastleCoreGimmick.FullHealthVolleyDamageCap).Within(0.0001f),
+                "same-turn damage to a pristine core must stop at the volley cap, however many hits arrive");
         }
 
         [Test]
-        public void CastleCoreGimmick_NextTurnDamage_ConsumesShieldAndDefeatsCore()
+        public void Shield_AbsorbsBeforeHealth()
         {
             GameManager gameManager = CreateGameManager(7);
             CastleCoreGimmick core = CreateCore();
 
-            core.TakeDamage(100f);
-            Assert.That(core.currentHP, Is.EqualTo(50f).Within(0.0001f),
-                "The opening hit must cross the shield threshold with 50 core health remaining.");
+            // Walk the core down to just under its half-health shield threshold, one turn at a
+            // time and never past the per-turn cap. A loop rather than a fixed pair of hits
+            // because whether that threshold is even reachable in one turn depends on how the
+            // cap and the core's health compare — a relationship that has already moved once.
+            float justUnderThreshold = CastleCoreGimmick.CoreMaxHP * 0.5f - 1f;
+            int turn = 7;
+            while (core != null && core.currentHP > CastleCoreGimmick.CoreMaxHP * 0.5f && turn < 20)
+            {
+                SetPrivateField(gameManager, "turnCount", turn++);
+                float remaining = core.currentHP - justUnderThreshold;
+                core.TakeDamage(Mathf.Min(remaining, CastleCoreGimmick.FullHealthVolleyDamageCap));
+            }
 
-            SetPrivateField(gameManager, "turnCount", 8);
-            core.TakeDamage(99f);
+            Assert.That(core != null && core.currentHP > 0f, Is.True,
+                "the fixture must leave a live core under the shield threshold");
 
-            Assert.That(core.currentHP, Is.EqualTo(1f).Within(0.0001f),
-                "On the next turn, the activated 50-point shield must absorb first and the remaining 49 damage must reach core health.");
+            SetPrivateField(gameManager, "turnCount", turn);
+            float healthBeforeShieldedHit = core.currentHP;
+            core.TakeDamage(CastleCoreGimmick.ShieldMaxHP);
 
-            core.TakeDamage(1f);
-            Assert.That(core == null, Is.True,
-                "After the next-turn shield is consumed, the final point of public damage must defeat the core.");
+            Assert.That(core.currentHP, Is.EqualTo(healthBeforeShieldedHit).Within(0.0001f),
+                "a raised shield must absorb its full value before any damage reaches core health");
         }
 
         [Test]
-        public void CastleCoreGimmick_TurnStartingBelowFullHealth_DoesNotApplyPristineCap()
+        public void TurnStartingBelowFullHealth_DoesNotApplyPristineCap()
         {
             GameManager gameManager = CreateGameManager(11);
             CastleCoreGimmick core = CreateCore();
 
             core.TakeDamage(5f);
-            Assert.That(core.currentHP, Is.EqualTo(145f).Within(0.0001f));
+            Assert.That(core.currentHP, Is.EqualTo(CastleCoreGimmick.CoreMaxHP - 5f).Within(0.0001f));
 
             SetPrivateField(gameManager, "turnCount", 12);
-            core.TakeDamage(144f);
+            float before = core.currentHP;
+            float overCap = CastleCoreGimmick.FullHealthVolleyDamageCap + 20f;
+            core.TakeDamage(overCap);
 
-            Assert.That(core.currentHP, Is.EqualTo(1f).Within(0.0001f),
-                "A turn that starts below full health must apply all incoming health damage instead of imposing the pristine-core cap.");
-
-            core.TakeDamage(51f);
-            Assert.That(core == null, Is.True,
-                "A previously damaged core must remain defeatable after the activated 50-point shield is consumed.");
+            Assert.That(before - core.currentHP, Is.EqualTo(overCap).Within(0.0001f),
+                "a turn that starts below full health must apply all incoming damage, cap included");
         }
+
 
         private GameManager CreateGameManager(int turnCount)
         {

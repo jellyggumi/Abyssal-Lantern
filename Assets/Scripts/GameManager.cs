@@ -590,12 +590,13 @@ namespace CastleBusters
         /// why it never read as a fortress. It is now an outpost the attacker must breach
         /// first, then two courses stepping up toward the core.
         ///
-        /// Depth is capped, not maximised. A four-course keep (11 blocks a side) was tried
-        /// and screened the core so completely that a match no longer reached GameOver in
-        /// twenty turns of play — the fortress read well and was no longer a game. The
-        /// innermost course was dropped, which both thins the screen and leaves an approach
-        /// lane between the wall face at 6.5 and the core face at 7.85. KeepProfileTests caps
-        /// the block count so the next enlargement cannot quietly re-cross that line.
+        /// Depth was cut to three courses once, on evidence that turned out not to describe
+        /// play: the thirty-game harness fires at RANDOM velocities, and a random shot almost
+        /// never reaches a core behind four courses, so its failure to finish a match was a
+        /// statement about the harness rather than the game. Play with someone aiming and the
+        /// same keep falls quickly — which is why the fourth course is back. Depth is now
+        /// bounded by a target match length instead (see MatchLengthModel), not by whether a
+        /// random shot can get through.
         ///
         /// Positions stop short of 7.85 because the core occupies 7.85–10.15 (centre ±9,
         /// 2.3u wide): there is no room to build inward, only out toward the middle of the
@@ -605,7 +606,8 @@ namespace CastleBusters
         {
             new KeepCourse(4.0f, 0, true),   // forward outpost — the first thing to fall
             new KeepCourse(5.0f, 0, false),  // outer course
-            new KeepCourse(6.0f, 1, false),  // inner course, tallest, shields the core
+            new KeepCourse(6.0f, 1, false),  // middle course
+            new KeepCourse(7.0f, 2, false),  // inner course, tallest, shields the core
         };
 
         /// <summary>

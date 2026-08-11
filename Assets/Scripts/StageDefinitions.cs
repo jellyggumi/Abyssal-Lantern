@@ -106,7 +106,7 @@ namespace CastleBusters
             cameraDesiredWorldWidth: 39f,
             cameraMaxHalfHeight: 11.2f,
             barrelPositions: GameManager.InitialBarrelPositions,
-            wallHeightBlocks: 2,
+            wallHeightBlocks: 3,
             maxFieldObstacles: 6,
             mutateEveryNTurns: 3,
             backgroundTint: Color.white,
@@ -141,7 +141,7 @@ namespace CastleBusters
             cameraDesiredWorldWidth: 36.3f,
             cameraMaxHalfHeight: 10.4f,
             barrelPositions: System.Array.Empty<Vector3>(),
-            wallHeightBlocks: 3,
+            wallHeightBlocks: 4,
             maxFieldObstacles: 4,
             mutateEveryNTurns: 2,
             backgroundTint: new Color(1.0f, 0.9f, 0.7f, 1f),
@@ -184,7 +184,7 @@ namespace CastleBusters
             // softest fortress in the game. Wind stays distance-derived (Stage2 lower,
             // Stage3 higher) because that is physics, not progression, and pacing
             // (obstacle cap and mutation cadence) stays each stage's identity.
-            wallHeightBlocks: 4,
+            wallHeightBlocks: 5,
             maxFieldObstacles: 7,
             mutateEveryNTurns: 4,
             backgroundTint: new Color(1.0f, 0.75f, 0.7f, 1f),

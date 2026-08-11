@@ -37,7 +37,10 @@ namespace CastleBusters.Tests
             Assert.AreEqual(6.5f, layout.windCapEnd, 0.001f);
             Assert.AreEqual(39f, layout.cameraDesiredWorldWidth, 0.001f);
             Assert.AreEqual(11.2f, layout.cameraMaxHalfHeight, 0.001f);
-            Assert.AreEqual(2, layout.wallHeightBlocks, "Stage1 walls must stay at the original 2-block height");
+            // Moved from 2 deliberately, not drifted: keeps were raised a course across every
+            // stage to pull a decided match toward the five-minute target (MatchLengthModel).
+            // The freeze still does its job — it just freezes the current intent.
+            Assert.AreEqual(3, layout.wallHeightBlocks, "Stage1 walls sit one course above the original 2-block height");
             Assert.AreEqual(6, layout.maxFieldObstacles, "Stage1 obstacle cap must stay at the original 6");
             Assert.AreEqual(3, layout.mutateEveryNTurns, "Stage1 mutation cadence must stay at the original every-3rd-turn");
 

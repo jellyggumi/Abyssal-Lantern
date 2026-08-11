@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StoneBlockData
   m_EditorClassIdentifier:
   blockName: Stone
-  maxHP: 70
+  maxHP: 85
   mass: 1.5
   friction: 0.8
   bounciness: 0.02

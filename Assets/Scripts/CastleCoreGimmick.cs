@@ -10,13 +10,33 @@ namespace CastleBusters
         // footprint on the board so "how close am I to losing" is legible without a HUD glance.
         public float coreTargetWorldSize = 2.3f;
 
-        private const float ShieldMaxHP = 50f;
+        /// <summary>Comeback shield raised once, when the keep first drops to half health.
+        /// Public so tests can state the absorb-before-health rule in terms of the rule
+        /// rather than in numbers that go stale the moment the core's health moves.</summary>
+        public const float ShieldMaxHP = 50f;
         private Vector3 coreBaseScale = Vector3.one;
         private bool shieldTriggered;
         private float shieldHP;
         // A pristine core always survives the first resolved volley. This closes the
         // barrel/clone collapse loophole where one launch could consume the whole match.
-        private const float FullHealthVolleyDamageCap = 140f;
+        public const float FullHealthVolleyDamageCap = 140f;
+
+        /// <summary>
+        /// Keep health, deliberately left at its original value while the walls around it grew.
+        ///
+        /// Raising it was tried and reverted on evidence. The artillery budget is calibrated to
+        /// this number with no headroom: two batteries must breach a core inside one Cannon
+        /// cooldown (ScriptedCounters_KeepKnightArcherAndCannonIndependentlyViable) and that gate
+        /// already sits within a rounding error of its limit. Doubling the core needs more
+        /// artillery throughput, and every route to throughput — shell damage or rate of fire —
+        /// pushes the cannon past the efficiency ceiling that keeps Knight, Archer and Cannon in
+        /// distinct roles. The two gates close on each other; there is no value in between.
+        ///
+        /// So match length comes from the walls instead, where nothing is pinned against it. If
+        /// this ever needs to move, the §6 counterplay budget has to be re-derived first — it is
+        /// a design change, not a constant.
+        /// </summary>
+        public const float CoreMaxHP = 150f;
         private int damageBudgetTurn = int.MinValue;
         private float healthDamageThisTurn;
         private bool turnStartedAtFullHealth;
@@ -26,7 +46,7 @@ namespace CastleBusters
         private int keepStage = -1;
         protected override void Awake()
         {
-            maxHP = 150f;
+            maxHP = CoreMaxHP;
             scoreValue = 500;
 
             base.Awake();
