@@ -1,429 +1,162 @@
-# Castle Busters
+# castle-war
 
-![Unity Version](https://img.shields.io/badge/Unity-2022.3.62f2-blue.svg)
+<p align="center">
+  <img src="docs/media/title.png" alt="castle-war title screen — a siege crew at the sling, an enemy keep burning on the far ridge" width="820">
+</p>
+
+<p align="center">
+  <b><a href="https://jellyggumi.github.io/games/castle-war/">▶ Play in the browser</a></b> · no install, runs on desktop and mobile
+</p>
+
+A two-dimensional siege game. You haul a unit into the sling, pull it back through a blue
+ring, and let physics do the rest — the shot arcs, the wall answers, and whatever was
+holding up the course above comes down with it. Take the enemy keep before yours falls.
+
+![Unity](https://img.shields.io/badge/Unity-2022.3.62f2-blue.svg)
+![Target](https://img.shields.io/badge/build-WebGL-informational.svg)
+![Tests](https://img.shields.io/badge/EditMode-346%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-| Intro | Gameplay |
+---
+
+## Watch a siege
+
+<video src="docs/CastleBusters_IntroToGameplay.mp4" controls muted loop width="820"></video>
+
+If the player above does not load, [download the clip](docs/CastleBusters_IntroToGameplay.mp4)
+— GitHub only renders inline video on some views.
+
+<p align="center">
+  <img src="docs/media/gameplay.png" alt="Mid-match: both keeps standing, supply gauge at 12 of 24, four deploy cards along the bottom" width="820">
+</p>
+
+---
+
+## How it plays
+
+**Drag, aim, release.** Pick a card, drag inside the blue ring, and let go. The further you
+pull, the harder it lands. Wind pushes the shot, and it pushes harder the further the shot
+travels — so the long shot across the field is never the safe one.
+
+**Break the wall, then the core.** Each keep is an outpost, three wall courses stepping up
+toward the core, and the core itself. Blocks fall on each other, so where you hit matters
+more than how often.
+
+**Four ways in.**
+
+| Card | Role |
 |---|---|
- | ![Castle Busters intro screen](IntroCapture.png) | ![Castle Busters gameplay](gameplay.gif) |
+| **Knight** | Body damage up close, where armour and combo pressure decide it |
+| **Archer** | Range — wins the open field before a Knight can close |
+| **Cannon** | Artillery. Splash damage, deploy-only, and **locked until you breach two enemy wall blocks** |
+| **Powder Keg** | A hazard you place, not a shot you take |
 
-**[▶ Watch: Intro → Gameplay (MP4)](docs/CastleBusters_IntroToGameplay.mp4)** — short capture of the title card, unit selection, and a Knight/Archer siege volley through to impact.
+**The battery has to be earned.** Artillery is the one card time alone will not give you:
+open a hole in the enemy wall first, then move the guns up. The forward outpost is exactly
+two blocks, so clearing the outwork is what unlocks it.
 
-## Concept
-Castle Busters is a 2D physics artillery game about smashing rival castles with a compact squad of launchable heroes. Players read wind, choose between Knights, Archers, and Bombers, then break load-bearing blocks and enemy cores through expressive destruction, tactical timing, and arcade-style impact feedback.
+**Three battlefields.** Siege Plain, then Ashen Bastion and Frostbound Gorge, each with its
+own board width, wall height, obstacle budget, and weather. Later stages unlock by winning
+a best-of-three series, not a single game.
 
-## Game Style
-- **Genre:** 2D Physics Puzzle / Artillery / Real-time 1v1 Castle Demolition
-- **Art Style:** Stylized 2D Pixel Art with readable combat silhouettes
-- **Core Mechanics:** Slingshot launching, physics-based destruction, unit abilities, wind-aware aiming, and deck building (up to 8 unique units)
-- **VFX & Presentation:** Screen shake, hit stop (impact freeze), trail renderers, floating damage numbers, dynamic camera zoom/pan, and particle bursts for impactful feedback
+---
 
-## Gimmicks & Ratios
-- **Physics-Based Destruction:** Castles are built on a grid. Destroying load-bearing blocks triggers a Breadth-First Search (BFS) structural integrity check, causing unsupported blocks to collapse dynamically.
-- **Match Ratio:** Real-time 1v1 PvP matches where players face off against each other's castles.
-- **Deck Ratio:** Players select up to 8 unique units (Knights, Archers, Bombers, Siege Weapons) to form their battle deck.
-- **Victory Condition:** Eliminate all enemy units OR reduce the opponent's castle to ruins.
+## The numbers behind it
 
-## Battlefield Stages
-The intro screen's stage picker offers three genuinely distinct battlefields — not palette swaps of the same board — unlocked sequentially as a linear campaign (clear a stage once to unlock the next; PlayerPrefs-persisted across sessions), each with its own concept, composition, and balance tuning:
-- **Stage1 — Siege Plains (공성 평원):** the frozen baseline every other stage is judged against. Launch points ±14.5 (29u player-to-player distance), 41×5 ground grid, 4 kegs at the bridge-hugging spots, 2-high walls, 4 rotating field-obstacle kinds (Barrel/MiniTower/Rune/Patrol), 2-way vent rotation (Magma/Petal), 6-piece obstacle cap, field composition mutates every 3rd turn, wind cap 6.5, white background.
-- **Stage2 — Ashen Bastion (잿빛 보루):** a close-quarters fortress duel, not a smaller Stage1. Launch points pulled in to ±13.5 (27u distance, -6.9%), ground/camera scaled to match with a real 1.0u buffer between the enemy launch ring and the shared core. Zero starting kegs — a fortress isn't handed free explosives at its own gate; hazards are earned mid-match via the same field-obstacle rotation as Stage1. 3-high walls (vs Stage1's 2) for a heavier, more fortified silhouette. Field composition mutates every 2nd turn at a leaner 4-piece cap — dense, fast-cycling, no rest beat ever lands twice in a row. Wind cap 6.2, scaled proportionately to the tighter distance. Ashen-grey background tint reinforces the mood.
-- **Stage3 — Frostbound Gorge (서리협곡):** a vast long-range gorge, not just a wider Stage1. Launch points pushed to ±18.5 (37u distance, +27.6%), ground/camera widened to match (49×5 grid, camera board 47u), endgame wind cap raised to 7.2 to keep late-match aiming meaningful over the longer throw. Kegs spread to the wings at ±11.5/±15.0 (mirroring Stage1's exact margin ratios scaled to the wider apron) instead of hugging the bridge, keeping the wide midfield open. Adds a 5th field-obstacle kind (**SpikeTrapGimmick** — a proximity-triggered floor hazard with a Dormant→Arming→Active→Cooldown state machine, unlike the fixed-clock `EruptionVentGimmick` or one-shot-trigger `EventGateGimmick`/`BuffDebuffGimmick`; arms when a unit walks within range, bursts once for 24 damage with a deterministic up-and-out knockback, then cools down) and a 3rd vent kind (**Frost** — shoves bodies sideways and applies a slow debuff instead of Magma's vertical lift + damage, a "stay out of the lane" counterplay). Field composition rotates all 5 kinds and mutates every 4th turn at a 7-piece cap — the wide board reads as open, not cluttered.
-- Core position (`GameManager.CoreAbsX = 9`) and HP stay shared/unchanged across all three stages — every difference is in spacing, composition, obstacle pacing, and wind compensation, never raw core power.
+Two things in this game are decided by a formula rather than by argument, and both are
+written down so they can be checked instead of relitigated.
 
-## Project Structure
+### How long a match should run
+
+`MatchLengthModel` — the target is the input, the fortress is derived from it.
+
 ```
-Unknown Castle/
-├── Assets/
-│   ├── Scenes/           # Game scenes (SampleScene)
-│   ├── Scripts/          # C# source code
-│   │   ├── Core/         # Core game managers (GameManager, InputManager)
-│   │   ├── Units/        # Unit controllers and behaviors
-│   │   ├── Environment/  # Destructible blocks and props
-│   │   └── VFX/          # Visual effects managers (ScreenShake, HitStop)
-│   ├── Prefabs/          # Reusable game objects (Units, Blocks)
-│   ├── Sprites/          # 2D art assets
-│   └── Tests/            # PlayMode and EditMode tests
-├── Packages/             # Unity package dependencies
-└── ProjectSettings/      # Unity project configuration
+M = b·h + c            material one side must lose
+N = M / d              turns to decide
+T = N·s                seconds to decide
 ```
 
-## Features
-- **Physics-based Destruction:** Structures collapse realistically based on impact and gravity.
-- **Multiple Unit Types:**
-  - **Knight:** Heavy melee unit, triggers screen shake and hit stop on impact.
-  - **Archer:** Ranged unit, shoots arrows at enemies.
-  - **Bomber:** Explosive unit, deals area-of-effect damage.
-- **Visual Polish:** Trail renderers for launched units, screen shake for heavy impacts, hit stop for dramatic effect, wind direction particles/UI, launch-ring affordance flashes, camera focus on fired units, shockwave rings, and floating combat callouts (`HIT`, `SMASH`, `BOOM`, `BREAK`).
-- **Playable Units:** Knight delivers heavy contact damage with `SMASH` feedback, Archer fires capped-size arrows with `HIT` callouts, and Bomber creates area damage with a visible `BOOM` shockwave.
-- **Core Readability:** Player/enemy core HP badges, objective banner, turn toast, and a one-time core shield callout keep the win condition visible during destruction.
-- **Intro Title Card:** The game boots into a frozen-diorama title screen (gti-generated key art, bilingual tagline, START SIEGE button / Space / Enter) before the first turn begins, so matches only start on player intent.
-- **Session Difficulty Curve:** Wind ceiling, storm chance, and enemy AI accuracy all ramp along a `SmoothStep(turn/12)` curve — gentle onboarding turns, escalating mid-game pressure, plateaued endgame.
-- **Korean Text Support:** A runtime `KoreanFontSupport` fallback builds a dynamic TMP font from OS fonts (AppleSDGothicNeo / Malgun / Nanum / Noto KR), so bilingual HUD strings render without tofu boxes on any dev machine.
-- **Automated Testing:** 41 EditMode tests plus a PlayMode intro→launch capture test (`AutoPlayTest`) verifying the boot state machine, timescale handoff, and the core loop.
-
-## Current Playable Slice
-- **Launch Controls:** Press `1`, `2`, or `3` to select Knight, Archer, or Bomber, then drag from the blue launch ring, pull back, and release to fire. The HUD now shows the selected unit, a floating "DRAG HERE" label above the launch ring, live power/angle feedback, weak-pull warnings, and bilingual instructions.
-- **Playable Units:** Knight delivers heavy contact damage, Archer fires capped-size arrows that stay smaller than playable units, and Bomber creates area damage through explosive impact behavior.
-- **Presentation Pass:** Runtime sprite animation adds child-visual idle bobbing, launch spin/stretch, walk stride, attack pulse, flash feedback, team tinting, and optional generated frame playback from `Resources/GeneratedUnitFrames`.
-- **Scene Setup:** `SetupSceneLayout` can build the test layout with unit prefabs, castle targets, explosive barrels, and gameplay capture support.
-- **Captures Kept:** `IntroCapture.png` (frozen intro diorama with key art) and `GameplayCapture_6.png` (post-launch collapse chain) are written by the PlayMode `AutoPlayTest` on every run.
-
-## Development Progress
-
-### Phase 1: Analysis & Balance Investigation ✅ COMPLETE (2026-07-02 → 2026-07-07)
-**Objective**: Identify imbalances through statistical testing.
-
-- **30 test games** played and analyzed
-- **Problem identified**: Archer underpowered (15 HP/6 damage), Bomber overpowered (70 HP/14 area-damage)
-- **Root cause**: Unit stats not tuned for fair play
-- **Output**: `wiki/reports/castle-busters-phase-1-analysis.md`
-
-### Phase 2: Balance Tuning ✅ COMPLETE (2026-07-07 → 2026-07-11)
-**Objective**: Implement balance fixes and verify with 45 test games.
-
-- **Archer buffed**: 15 → 20 HP, +54% usage rate
-- **Bomber nerfed**: 70 → 56 HP, -30% usage rate
-- **Result**: Perfect 50/50 win rate achieved
-- **Unit usage**: 31.9% / 36.2% / 31.9% (goal: 33% each ≈ 98% confidence)
-- **Outcome**: Game balanced, mechanics working flawlessly
-- **Output**: `wiki/reports/castle-busters-phase-2-completion.md`
-
-### Phase 3: Visual Polish & VFX ⏳ IN PROGRESS (2026-07-11 → est. 2026-07-12)
-**Objective**: Transform "mechanically perfect" → "visually satisfying" through particles, animations, and screen feedback.
-
-#### Current State (before Phase 3)
-- ❌ 0 unit animations (0% coverage)
-- ❌ 1 particle system (20% coverage: ExplosionEffect only)
-- ❌ 0 screen feedback systems (0% coverage)
-- ❌ 0 audio SFX (0% coverage)
-
-#### Phase 3 Plan (4 Cycles)
-
-**Cycle 8: VFX Assessment** ✅ COMPLETE (1h, 2026-07-11)
-- Audited all existing particle systems and visual effects
-- Identified 6 critical gaps and ranked 8 improvements
-- Output: `wiki/reports/castle-busters-cycle-8-vfx-assessment.md`
-
-**Cycle 9: Particle Enhancement** ⏳ READY (2–3h, starting 2026-07-11)
-- Create 4 new particle systems: HitSpark, DeathBurst, ArrowTrail, ZonePulse
-- Enhance existing ExplosionEffect (bigger, longer, more visual weight)
-- Expected impact: +50% visual feedback clarity
-- Detailed plan: `wiki/reports/castle-busters-cycle-9-particle-plan.md`
-
-**Cycle 10: Animation Implementation** 📋 PLANNED (2–3h, est. 2026-07-12)
-- Create 3 Animator controllers (Knight, Archer, Bomber)
-- Implement 15+ animation clips (Idle, Walk, Attack, Hit, Death per unit)
-- Recommended: Source from Quaternius.com (free 3D models with animations)
-- Expected impact: +60% character personality and action clarity
-
-**Cycle 11: Screen Feedback & Polish** 📋 PLANNED (1–2h, est. 2026-07-12)
-- Implement ScreenShake (camera shake on impacts)
-- Implement HitFlash (sprite color flash on damage)
-- Optional: Audio SFX (6 sound effects)
-- Expected impact: +60% viscerality and game feel
-
-#### Expected Phase 3 Outcome
-
-After Phase 3 Completion:
-- Animations:     0/3 → 3/3 (100% ✅)
-- Particles:      1/5 → 5/5 (100% ✅)
-- Screen FX:      0/5 → 3/5 (60% ✅)
-- Audio:          0/6 → 0/6 (0%, deferred to Phase 4)
-- Overall Feel:   Mechanical → Polished & Satisfying
-- Rating:         5/10 → 9/10 ⬆️
-
-**Status**: Phase 3 fully planned, Cycle 8 complete, Cycle 9 ready to start
-**Execution Guide**: See `wiki/reports/PHASE-3-EXECUTION-START.md`
-
-## Progression & Balance Curves
-
-![Progression curves](docs/ProgressionCurves.png)
-
-`docs/ProgressionCurves.png` charts the live tuning constants (mirrored from `GameManager`, `UnitController`, `DestructibleBlock`, and the `BlockData` assets):
-
-1. **Session flow** — intended tension/fun envelope from intro through endgame; the launch→break→collapse chain is the protected core fantasy.
-2. **Difficulty ramp** — wind cap 2.5→6.5, AI aim error 2.2→0.6, storm chance 5%→25% over the first 12 turns (`GameManager.DifficultyT`, SmoothStep).
-3. **Unit skill curves vs block HP tiers** — Knight breach (36 burst), Archer sustain (~21 DPS), Bomber blast (95 AoE) against Wood 50 / Stone 100 / Iron 150.
-4. **Bounded collapse economy** — falling-block impact damage is `min(relativeSpeed × 8, 45)`: wood bridges still shatter in one hit, but a single break can no longer chain-react the whole 41×5 ground grid.
-
-## Art Pipeline Notes
-- PerfectPixel Studio is the recommended external pixel-art generation workflow for final unit, projectile, and prop sprites. It was reviewed from `https://github.com/gykim80/perfectpixel-studio` at `a1385cc`.
-- Production frames now live under `Assets/Resources/GeneratedUnitFrames/{Knight,Archer,Bomber}/{Idle,Walk,Attack,Launch}/` — 60 PerfectPixel-generated 512×512 frames (Idle 4 / Walk 6 / Attack 5 / Launch 5 per unit, `roll` preset repurposed as the launched tumble). `UnitSpriteAnimator` loads them automatically with `Resources.LoadAll<Sprite>()` and sorts frames by sprite name.
-- The intro key art (`Assets/Resources/IntroKeyArt.png`) is generated with `gti` (god-tibo-imagen, Codex-backed) and imported as a Sprite for the title backdrop.
-
-## PerfectPixel Studio Install & Use
-1. Install prerequisites: Go 1.25+, Node.js 18+, and Wails CLI v2 with `go install github.com/wailsapp/wails/v2/cmd/wails@latest`.
-2. Clone and run the app outside this Unity repo: `git clone https://github.com/gykim80/perfectpixel-studio.git && cd perfectpixel-studio && ./dev.sh` (or `wails dev`).
-3. Set one provider key in the app Settings or `.env`: `GEMINI_API_KEY`/`GOOGLE_API_KEY`, `OPENROUTER_API_KEY`, `FAL_KEY`/`FAL_API_KEY`, or `BYTEPLUS_API_KEY`/`ARK_API_KEY`.
-4. Generate Knight, Archer, and Bomber states using a compact side-view prompt, export per-frame PNGs, then copy frames into `Assets/Resources/GeneratedUnitFrames/<Unit>/<State>/`.
-5. Keep supported state folder names aligned with code: `Idle`, `Walk`, `Attack`, `Launch`, and optional `Dead`.
-
-## Validation
-- C# project build was verified with `dotnet build CastleBusters.csproj --no-restore` (plus the Editor and Tests assemblies) — 0 errors.
-- Unity MCP verification (native tools against the live Editor): `tests-run` EditMode — **44/44 passed**; `tests-run` PlayMode `AutoPlayTest` — intro state asserted, `BeginSiege()` handoff asserted at timescale 1, capture sequence completed (`IntroCapture.png`, `GameplayCapture_1..6.png`).
-- `script-execute` probes were used in-editor to root-cause the macOS `.ttc` font-face load failure and the TMP fallback-list null-entry accumulation that the `KoreanFontSupport` self-healing pass now covers.
-- Unity batchmode tests may require closing any already-open Unity Editor instance before running, because Unity blocks the same project from being opened twice.
-
-### Stage variations, custom perfectpixel provider, and headless QA green (2026-07-08, follow-up 4)
-
-1. **Custom `ppgen` provider (`god-tibo-imagen`):** added native support in `perfectpixel`'s Go CLI for the `god-tibo-imagen` provider. It executes the local `gti` CLI (reusing the Codex session in `~/.codex/auth.json`) under the hood, writing and reading temp images to bypass local API key constraints.
-2. **Distinct Stage Backgrounds:** generated two custom 16:9 backgrounds (`Background_Stage2.png` and `Background_Stage3.png`) using `gti` (gpt-5.4). Modified `GameManager.CreateBackground` to load them dynamically based on the active stage, falling back to the default `Background.png`.
-3. **Stage-specific allowed gimmick pools:** added `allowedGimmicks` to the `StageLayout` struct. Stage 1 cycles through all 4 default kinds, Stage 2 (Ashen Bastion) restricts to 3 solid kinds (`MiniTower, Barrel, Patrol`), and Stage 3 (Frostbound Gorge) restricts to 3 trap/utility kinds (`SpikeTrap, Rune, Patrol`).
-4. **Differentiated eruption styling:** Stage 2 is restricted to volcanic `Magma` vents exclusively, while Stage 3 is restricted to frozen `Frost` vents exclusively, matching their concepts (Stage 1 continues alternating Magma and Petal).
-5. **Headless QA & Playable Bounds (149/149 EditMode, 14/14 PlayMode green):** fixed a mathematical rotation bug in 3-kind field mutation by switching indexing to `turn % allowed.Length` for Stage 2/3. Fixed `ui_button_card` sprite loading in headless mode by adding a self-healing reimport logic + dynamic fallback in `GimmickSpriteLibrary`. Made `UnitController.playableBounds` dynamically scale based on the active stage's `groundHalfWidth` (with a 2.0u margin), expanding the boundary to `±26u` on Stage 3, which removes the invisible "OUT" wall at the outer wings of Stage 3. Verified all 149 EditMode and 14 PlayMode tests pass.
-### Root-cause spawn-sprite fix, best-of-3 series ranking, lying-down units / gimmick spawn range / cinematic timing (2026-07-09)
-
-1. **Root cause — "Knight/Archer/Bomber spawn buttons all show Archer":** unit-type/prefab selection was already correct (`SelectUnit`/`LaunchManager.selectedUnitPrefab` instantiate the right prefab every time), but `SpriteAtlasPacker` deduped/keyed its packed atlas by bare `sprite.name` alone. PerfectPixel's export convention gives every unit the same filenames per state (`GeneratedUnitFrames/{Knight,Archer,Bomber}/{State}/idle_000.png`, ...), so whichever unit packed first alphabetically (Archer) survived and every other unit's same-named frame silently resolved to Archer's atlas cell. Fixed `SpriteAtlasPacker.cs` to dedupe/key by Sprite object identity instead of filename.
-2. **Root-cause fix for "spawns lying down / can't attack":** `LaunchManager.SpawnAndLaunchOne` never called `InitializeUnit`, so a player-launched unit's rigidbody kept free rotation for its entire flight until the first Ground/DestructibleBlock collision froze it. A glancing mid-air collision with another unit/arrow/gimmick could tip it onto its side before that happened (landing stuck lying down, unable to attack), or it could bounce off non-ground objects and never leave the `Launched` state at all. `UnitController.Awake()` now sets `RigidbodyConstraints2D.FreezeRotation` immediately at spawn, for the unit's whole lifetime — the visible spin during flight is a separate cosmetic child-transform effect in `UnitSpriteAnimator`, so nothing changes visually.
-3. **Root-cause fix for button-text "breaking" (sprite vs box-width mismatch):** every card-style button background (`ui_button_card.png`) was drawn with `Image.Type.Simple`, non-uniformly stretched to whatever aspect ratio each button needed. The source art's native ~1.5:1 aspect matched the unit-select cards but not the results/title/stage buttons (~3.8-4.1:1), so the frame's border squashed unevenly and ate into the label's safe area. Cropped the texture to its opaque bounds (402x284), gave it a `spriteBorder` (32,23,32,23), and switched all 5 call sites (`GameManager`, `IntroScreenController` x2, `SiegeEcosystem`, `BrickPlacementController` x2) to `Image.Type.Sliced` so the frame thickness stays constant regardless of aspect ratio.
-4. **Cinematic/title timing:** added a 1.2s black pre-roll (`PreRollSeconds`) before the opening webtoon cinematic starts, so boot doesn't cut straight into motion. Scaled the whole title-screen entrance timeline (fade/title stamp/tagline/button/how-to/stage picker) by `EntranceTimeScale = 0.85`, bringing the ~2.3s original reveal in under the 2-second budget (~1.96s).
-5. **Widened help/hindrance gimmick spawn range:** `DynamicBattlefield.SpawnBalanceEvent` used to place every buff/debuff rune and power/reduce gate at the exact same fixed x (+-11.5), which also never scaled with the active stage's launch-apron distance (Stage1 14.5 / Stage2 13.5 / Stage3 18.5), clustering events near the core especially on Stage3. It now picks a stage-aware, per-turn randomized position between the core's inner edge and the launch ring's outer edge, so the events range across the board instead of one repeated coordinate while still staying clear of the core/ring.
-6. **Best-of-3 series ranking (new `SiegeSeries.cs`):** the overall match is now decided by whoever wins 2 of up to 3 games. `GameManager` tallies each game's outcome into a running series score (static fields surviving scene reloads); until the series is decided, the results screen shows a "GAME n/3" banner and a "Next Game" action instead of recording to the leaderboard. Once decided (2 wins, or 3 games played), it records the aggregate series score (with a sweep bonus for a clean 2-0) to the ranking board, and next-stage unlock is now gated on winning the series, not a single game. Rematch/Title/RequestStage reset the series to 0-0; the new `GameManager.RequestNextGame()` is the only path that keeps the running series score.
-7. **Verification:** `dotnet build CastleBusters.csproj` / `CastleBusters.Tests.csproj` both 0 warnings, 0 errors (verified via a temporary `.csproj` copy with the new files' compile items added, then restored the originals unchanged). To avoid disturbing the already-open live Unity Editor (Unity MCP session), the project was rsync-cloned to `/tmp` and run headless via `Unity -batchmode -nographics -runTests -testPlatform PlayMode` for the full `CastleBusters.Tests` suite — **14/14 PlayMode tests passed**, including the 7 new `BestOfThreeAndRenderingFixTests` (`SpriteAtlasPacker_KeepsKnightArcherBomberFramesDistinct` confirms all 35 packed sprites land in distinct atlas cells; `SpawnedUnit_RigidbodyRotationIsFrozenFromCreation` confirms rotation is frozen from spawn). The temp clone was deleted afterward and the live editor's project directory confirmed untouched.
-8. **Out of scope this pass:** a new per-stage "must-defend tower type" gameplay restriction, and generating new art/animation via `god-tibo-imagen`/Nano Banana, were not attempted here — no image-generation tool was wired into this session, and shipping unverified placeholder art would be worse than leaving it out. Confirmed Stage2/Stage3's concept/layout/balance differentiation (terrain, background, field-gimmick rotation, wind caps) was already implemented in the 2026-07-07 pass.
-
-
-### Pre-title webtoon prologue: wired up, fixed, and verified (2026-07-08)
-- Discovered `Assets/Scripts/WebtoonPrologueController.cs` (an 11-page pre-title webtoon cold-open — reuses PerfectPixel-generated `GeneratedUnitFrames/{Knight,Archer,Bomber}/Idle` frames and `GimmickAnimLibrary` prop loops for panel actors, and the `gti`-generated `IntroKeyArt` for the backdrop, with pixel-snapped ("PerfectPixel-style") motion) already present but not compiling: its `GameManager.cs` wiring had two duplicate/garbled fragments (a floating statement block outside any method, a duplicate `webtoonIntroShown` field, and literal stray editor-tool marker text) left over from an interrupted prior session.
-- Repaired `GameManager.cs`: a single `ShowIntro()` now gates a one-per-app-session `webtoonIntroShown` flag — first arrival plays `ShowWebtoonPrologue()` (`WebtoonPrologueController.Create`, Space to advance a panel, Enter/Return to skip straight to the title, auto-advances on a read timer), subsequent Title/Rematch/RequestStage reloads skip straight to `ShowTitleScreen()` (`IntroScreenController.Create`) so the cinematic never replays after the player has seen it. `Update()`'s Intro-state key handling and `BeginSiege()`'s cleanup were reconciled to a single, non-duplicated implementation.
-- Registered `WebtoonPrologueController.cs` in `CastleBusters.csproj` (`<Compile Include>`) and gave it a `.meta` (both were missing, which is why the class silently failed to resolve). The same prior session had also left a dedicated, uncompiled/unregistered `Assets/Editor/WebtoonPrologueTests.cs` (EditMode coverage for `PixelSnap`/`SlideProgressAt`/`StripPageOffsetAt`) with no `.meta` and no `Assembly-CSharp-Editor.csproj` entry — registered it (matching the existing per-feature test-file convention: `SpikeTrapGimmickTests.cs`, `FrostVentTests.cs`, `StageDefinitionsTests.cs`) and gave it a `.meta` instead of duplicating its coverage in `GamePlayTests.cs`.
-- **Validation:** `dotnet build CastleBusters.csproj`, `dotnet build CastleBusters.Tests.csproj`, and `dotnet build Assembly-CSharp-Editor.csproj` all 0 errors/0 new warnings (one pre-existing unrelated `CS0105` warning in `SpriteApplyValidator.cs`). Live Unity MCP EditMode/PlayMode re-run was not performed this pass — the project's own Editor instance was already open on this machine, and Unity refuses a second instance against the same project; the next live session should run `tests-run` and a `script-execute` walk of Intro → Space-to-advance-panel → Enter-to-skip → title → `BeginSiege()` to close the loop.
-
-
-
-### Y-axis ceiling kill-bug fix + full bug-fix suite re-verification (2026-07-07, follow-up 3)
-
-Follow-up pass fixing a real playtest bug reported directly by the user: a unit launched high enough on the Y axis would suddenly disappear even while still clearly visible inside the camera's view, instead of continuing its arc back down.
-
-1. **Root cause:** `UnitController.playableBounds` (`Rect(-22, -9.5, 44, 24)`, i.e. y ∈ [-9.5, 14.5]) was checked with `Rect.Contains()`, which enforces all four edges — including a hard-coded top edge (`y = 14.5`). `GamePresentationDirector`'s dynamic camera (`boardCenter.y = 3.0`, `orthographicSize` clamped 7.2–11.2 depending on aspect) can show up to `y ≈ 16` at wide aspect ratios while following a launched unit, so a big arc, a strong wind gust, a knight push, or the stuck-recovery hop could carry a unit above `y = 14.5` while it was still on-screen — and `MonitorLaunchedUnitSafety()`/`Update()` instantly `Die()`'d it there, reading as "flies up, then just vanishes."
-2. **Fix:** replaced both `!playableBounds.Contains(position)` call sites in `UnitController.cs` with a new `IsOutOfPlayableBounds(Vector2 position)` helper that only enforces the side walls (`xMin`/`xMax`) and the floor (`yMin`) — the ceiling check is removed entirely. Units now keep flying arbitrarily high and always arc back down under gravity; `ChariotRules.KillPlaneY` (floor at `y = -20`) still catches anything that genuinely falls out of the world.
-3. **New regression tests** (`Assets/Tests/BugFixVerificationTests.cs`): `UnitAboveOldCeiling_DoesNotDisappear` (a Launched unit placed at `y = 30`, well above the old 14.5 ceiling but within the horizontal play area, must survive several physics steps) and `UnitOutsideHorizontalBounds_StillDies` (a companion test confirming the side-wall kill is untouched — a unit launched to `x = 1000` still dies), alongside the 3 pre-existing bug-fix tests (gimmick selection, kill-plane floor, wind-radius scoping).
-4. **QA:** `dotnet build Assembly-CSharp.csproj` — 0 warnings, 0 errors. Verified with genuine automated PlayMode execution, not a compile-only check: the live Editor already had the project open, so the project was rsync-copied to an isolated `/tmp` copy and run via `Unity -batchmode -nographics -runTests -testPlatform PlayMode -testFilter CastleBusters.Tests.BugFixVerificationTests` — **5/5 PlayMode tests passed** (`SelectUnit3_LaunchesExplosiveBarrel_NotWrongPrefab`, `UnitBelowKillPlaneY_Dies`, `WindForce_OnlyAffectsObjectsWithinRadius`, `UnitAboveOldCeiling_DoesNotDisappear`, `UnitOutsideHorizontalBounds_StillDies`), then the temp copy was deleted and the live Editor's project directory confirmed untouched.
-
-### Full real-gameplay re-verification via actual UI clicks + genuine combat (2026-07-07, follow-up 2)
-
-Second follow-up pass, in direct response to a request to run real tests once more end-to-end. Unlike the prior pass (which invoked `CastleCoreGimmick.TakeDamage()` directly), this session drove the entire flow through the actual production UI and let combat resolve naturally over real turns — no shortcuts into `EndGame()` or `RequestStage()`.
-
-1. **Fresh install confirmed live:** `CastleBusters.StageProgress.v1` deleted from PlayerPrefs; `Load()` correctly defaulted to `Stage1`. Intro stage picker showed `Stage_Stage1: interactable=true`, `Stage_Stage2`/`Stage_Stage3: interactable=false`.
-2. **Real START click:** `GameObject.Find("StartButton").GetComponent<Button>().onClick.Invoke()` transitioned `GameState.Intro → PlayerTurn` — the actual intro-dismiss path, not a state write.
-3. **Real unit selection + real physics launch:** `knightButton.onClick.Invoke()` (identical to a player pressing the Knight card) followed by `LaunchManager.SimulateLaunch(velocity)` (the same launch codepath a real drag-release invokes) fired a Knight mid-`PlayerTurn` — confirmed `isPlayerUnit=true` on the spawned unit, not an AI-owned clone. Dynamic field obstacles (a live `FieldRune`, an enemy `Archer`) intercepted the first two shots mid-flight — genuine, unscripted battlefield interference, not test friction.
-4. **Genuine victory through 6 real turns:** rather than forcing a result, the match was left to run at real turn pace (player launches + AI responses); the enemy core was destroyed through actual combat exchanges, triggering `GameState.GameOver` at `turnCount=6` with the real banner text `"BREACH COMPLETE — VICTORY!\n공성 성공"` — proof `CheckVictoryConditions()`'s core-HP path, not a capture-zone or scripted shortcut, drove this particular win.
-5. **Progression fired through the real `EndGame()` call site:** `StageProgressStore.Load()` read `Stage2` immediately after the natural GameOver — confirming `EndGame()`'s `StageProgressStore.RecordVictory(currentStage)` call executed as part of the genuine game-over sequence, not a test harness.
-6. **Real NEXT STAGE click → genuinely live Stage2:** `GameObject.Find("NextStageButton").GetComponent<Button>().onClick.Invoke()` reloaded the scene; confirmed `currentStage=Stage2`, `PendingStage=Stage2`, `barrelPositions.Length=0`, `wallHeightBlocks=3` — Stage2's exact composition, reached via the same click path a real player uses.
-7. **Stage3 lock re-confirmed at the new frontier:** `GameManager.RequestStage(StageId.Stage3)` while parked in a live Stage2 session correctly no-opped (`PendingStage` unchanged) — the progression gate holds after advancing, not just on a fresh install.
-8. **Environment note:** this session's Unity Editor instance showed signs of a prior/concurrent PlayMode session already active before this pass began (a stale mid-match state with no intro screen) and one spontaneous PlayMode stop mid-verification — both consistent with the same kind of concurrent-tooling collision the prior pass flagged. Adapted by restarting cleanly and re-verifying from a fresh boot each time rather than trusting carried-over state.
-9. **Test-induced PlayerPrefs cleaned up** after verification.
-10. **QA (Unity MCP live):** `dotnet build` — 0 errors. `tests-run` EditMode — **139/139 passed**, re-confirmed after the full session (no static-state leakage from the eventful PlayMode churn, including the spontaneous stop).
-
-### Independent live verification of sequential campaign progression (2026-07-07, follow-up)
-
-Follow-up pass re-verifying the sequential campaign progression feature (below) end-to-end from a genuinely fresh install, in response to a request to run real tests, verify, and ship. Build and the 139-test EditMode suite were re-confirmed independently; live verification hit a real concurrent-session collision (another process was actively driving the identical live-test flow in the same Editor at the same time — confirmed via interleaved, unfamiliar log tags in the console) and adapted around it rather than serializing behind it, per explicit direction.
-
-1. **Fresh-install lock state confirmed live:** with no `CastleBusters.StageProgress.v1` PlayerPrefs key present, the intro stage picker showed `Stage1: interactable=true`, `Stage2/Stage3: interactable=false` with the `(잠김 · LOCKED)` hint — exactly the documented contract.
-2. **Real victory → unlock, via the actual production damage path:** rather than bypassing state, `CastleCoreGimmick.TakeDamage()` (the same method every unit attack/explosion calls) was invoked directly on the enemy core to reach exactly the "core HP ≤ 0" condition `CheckVictoryConditions()` already watches for every real hit — this routes through the genuine `EndGame()` → `StageProgressStore.RecordVictory()` chain, not a shortcut around it. Confirmed live: `frontier` advanced from `Stage1` to `Stage2`, the results screen rendered "BREACH COMPLETE — VICTORY!" with a real, interactable `NextStageButton`.
-3. **Real NEXT STAGE click verified end-to-end:** invoking the button's actual `Button.onClick` reloaded the scene into a genuinely live Stage2 (`currentStage=Stage2`, `LaunchApronAbsX=13.5` confirmed), and a follow-up trip back to the title screen confirmed the picker now shows `Stage1` and `Stage2` both unlocked while `Stage3` remains correctly locked at the new frontier.
-4. **Test-induced PlayerPrefs state cleaned up** after verification (`CastleBusters.StageProgress.v1` key removed) so the next real session starts genuinely fresh.
-5. **QA (Unity MCP live):** `dotnet build` (both assemblies) — 0 errors, independently re-run. `tests-run` EditMode — **139/139 passed**, both before and after the live session. Console audit found only stale/unrelated entries (the orchestrator's own earlier syntax-error attempt, and a compile error from the concurrent session's own script) — zero genuine gameplay errors from this verification pass itself.
-
-### Sequential campaign progression: stages now unlock in order (2026-07-07, follow-up)
-
-Follow-up pass in response to a request to gate the 3-stage system behind a linear campaign instead of free selection: Stage1 starts unlocked, and clearing a stage unlocks the next one, persisted across sessions.
-
-1. **`StageProgression.cs` (new):** a pure `StageProgress` class (`IsUnlocked`, `NextStage`, `Advance`) mirrors the existing `SiegeRank`/`LeaderboardStore` split (`SiegeEcosystem.cs`) — campaign order is the `StageId` enum's declaration order, `Advance` never regresses an already-earned frontier (replaying/rematching an earlier stage is a no-op), and clamps at the final stage. `StageProgressStore` persists the unlock frontier to `PlayerPrefs` (single versioned int key, `CastleBusters.StageProgress.v1`) and is intentionally left untested at the unit level — same precedent as `LeaderboardStore` — verified live in PlayMode instead.
-2. **`GameManager.RequestStage()`** now gates on two independent locks: `StageDefinitions.For(stage).locked` (design-time "not finished/offered yet") AND `StageProgress.IsUnlocked` (sequential campaign — Stage2/3 require clearing the stage right before them at least once). `EndGame()` calls `StageProgressStore.RecordVictory(currentStage)` on every win, folding the clear into the unlock frontier before the results screen is built.
-3. **`IntroScreenController`'s stage picker:** a card is now dimmed/non-interactive when EITHER gate is closed (`IsStageLocked()` folds both checks), and a progression-locked card's label grows a `(잠김 · LOCKED)` hint so players can tell "not yet earned" apart from a simple disabled state.
-4. **`ResultsScreenController.Create()`** takes an optional `nextStage` parameter; when a win unlocks a reachable next stage, a third "다음 스테이지" (NEXT STAGE) button renders alongside Rematch/Title in a symmetric 3-up layout (0.25/0.50/0.75) and routes straight into `GameManager.RequestStage(nextStage)`. Defeats, rematches of an already-cleared stage, and victories on the final stage all keep the original 2-up layout (0.38/0.62) — zero visual regression on those paths.
-5. **New tests:** `StageProgressionTests.cs` (9 EditMode tests) pins `IsUnlocked`, `NextStage`, and every `Advance` edge case — clearing Stage1/Stage2 unlocks the next stage, clearing the final stage clamps, and replaying/rematching an earlier stage never regresses an already-advanced frontier.
-6. **QA (Unity MCP live):** `dotnet build` — 0 errors. `tests-run` EditMode — **139/139 passed** (130 baseline + 9 new), before and after a live PlayMode session. Live PlayMode verification via `script-execute` against the real production path (not just direct method calls): fresh install correctly shows only Stage1 unlocked, `RequestStage(Stage2)` is refused while locked, a forced `EndGame("...VICTORY!")` on Stage1 unlocks Stage2 and the results screen's real `NextStageButton` GameObject renders, clicking its actual `Button.onClick` reloads the scene into a genuinely live Stage2 (`LaunchApronAbsX=13.5` confirmed via launch-point alignment logs), and Stage3 remains correctly locked/refused at that new frontier. Test-induced `PlayerPrefs` state was cleaned up after verification.
-
-### Real-gameplay verification of all 3 stages + Multiply-gate clone crash fix (2026-07-07, follow-up)
-
-Follow-up pass, in direct response to a request to run genuine gameplay (not API-level state checks) across all three stages before shipping. Every session below drove the game through its actual production UI — clicking the real `StartButton`/stage-picker `Button.onClick` handlers via Unity's UI event system, firing real volleys with `LaunchManager.SimulateLaunch`, and letting the turn timer/AI resolve turns in real time — rather than calling `GameManager` methods directly.
-
-1. **Stage1 (Siege Plains):** clicked START, fired a real Knight volley, then let the match run **10 consecutive real turns** (turn timer + AI both live) with zero manual intervention beyond one launch. `GimmickFieldDirector.AliveCount` confirmed obstacles were actively spawning/mutating mid-match. Zero console errors/exceptions across the entire run.
-2. **Stage2 (Ashen Bastion):** selected via a real click on the intro screen's `Stage_Stage2` card (confirmed `interactable=true`, not the old locked placeholder), clicked START, confirmed the composition live (`0` spawned kegs, `3`-block walls, ashen tint `RGBA(0.72,0.72,0.76,1)`), fired an Archer then a Bomber across two real turns, and let the match play to a genuine conclusion: **`GameOver` at turn 8 with a real `ResultsScreen` reading "KEEP FALLEN — DEFEAT / 수성 실패"** — the full win/loss pipeline exercised end-to-end, not simulated.
-3. **Stage3 (Frostbound Gorge):** selected via a real click on the `Stage_Stage3` card, clicked START, fired a Knight then an Archer across real turns. Both new gimmicks fired **through natural turn progression, with zero manual triggering**: a live `SpikeTrapGimmick` was observed on the field at turn 3, and a live `EruptionVentGimmick` with `style=Frost` was observed at turn 6 — direct proof the 5th field-obstacle kind and 3-way vent rotation both actually reach the player during real play, not just in isolated unit tests. Match still in progress at turn 10+ (Stage3's wider board and slower mutation cadence naturally run longer than Stage1/2, consistent with its "vast gorge" design intent).
-4. **Real bug found and fixed during this pass:** a live Stage2 Multiply-event-gate clone threw `NullReferenceException` in `UnitController.SetupTrailRenderer()`. Root cause: `EventGateGimmick.MultiplyUnit()` calls `Instantiate()` on a unit that already launched (and so already has a `TrailRenderer` attached from its own prior `SetupTrailRenderer()` call) — Unity's `Instantiate()` copies that `TrailRenderer` component onto the clone but does not remap the clone's private `trailRenderer` field to point at the copy, so the clone's own `Launch()` sees `trailRenderer == null`, calls `AddComponent<TrailRenderer>()` (which fails — `TrailRenderer` disallows multiples — and returns null), and NREs on the very next line. Fixed by having `SetupTrailRenderer()` reuse an existing `TrailRenderer` via `GetComponent<TrailRenderer>()` before falling back to `AddComponent`, matching the guard pattern the codebase already uses for `UnitSpriteAnimator`. Reproduced the exact failing sequence directly (launch a unit, `Instantiate()` a clone, `Launch()` the clone) both before the fix (confirmed `NullReferenceException`) and after (confirmed clean launch with exactly 1 `TrailRenderer` on the clone, not 2).
-5. **QA (Unity MCP live):** `dotnet build` on both assemblies — 0 errors. `tests-run` EditMode — **130/130 passed**, re-confirmed after all three live sessions plus the fix (no state-pollution regression). Console log audit across all three full playthroughs found exactly one pre-existing, unrelated Unity engine diagnostic (`Some objects were not cleaned up when closing the scene` for a `ShockwaveRing`/`ItemPickup` VFX object with a pending delayed-`Destroy` timer that outlived a scene reload — a pre-existing `Object.Destroy(go, 1.2f)`/`(go, 14f)` pattern untouched by this session, and exactly the class of noise the project's own `AutoPlayTest`/`PlaytestQACapture` already suppress via `LogAssert.ignoreFailingMessages`) plus the one real `NullReferenceException` above, which was root-caused and fixed. No other errors or exceptions across ~30+ real turns of gameplay spanning all 3 stages.
-
-### 3-stage rebalance: distinct concepts/composition for all three battlefields (2026-07-07, follow-up)
-
-Follow-up pass: unlocked and fully designed Stage2 as a genuinely distinct concept (it was a locked placeholder mirroring Stage1 in the prior pass), and gave Stage1/2/3 real compositional differences instead of shared fixtures with only spacing/hazard-roster varying. Built via 3 parallel subagents (test authoring ×2, independent balance/safety review ×1) plus orchestrator integration.
-
-1. **`StageLayout` composition fields:** extended with `barrelPositions` (per-stage starting kegs), `wallHeightBlocks`, `maxFieldObstacles`, `mutateEveryNTurns`, and `backgroundTint` — concept-level differentiation, not just numeric scaling. `GameManager.SetupGimmicks()`/`SpawnCastleWall()`/`CreateBackground()`/`EnsureFieldDirector()` all read from `ActiveLayout` instead of shared statics.
-2. **`GimmickFieldDirector.PlanForTurn`** generalized into a shared `PlanForTurnGeneric(turn, aliveCount, maxObstacles, kindCount, mutateEveryNTurns)` core so each stage's kind-roster and mutation cadence come from one parametrized formula instead of duplicated per-stage branches; the pinned 3-arg overload (Stage1) and existing Stage3 behavior stayed byte-identical through the refactor.
-3. **Stage2 "Ashen Bastion" (완성, 신규):** unlocked — no longer a placeholder. Launch points pulled in to ±13.5 (27u player-to-player distance, -6.9% vs Stage1's 29u) with ground/camera/gate/wind scaled to match. Zero starting kegs (a fortress isn't handed free explosives at its own gate — hazards are earned mid-match via the same 4-kind field rotation as Stage1). 3-high walls (vs Stage1's 2). Field composition mutates every 2nd turn (vs Stage1's 3rd) at a leaner 4-piece cap (vs 6) — dense, fast-cycling, no rest beat ever repeats. Wind cap 6.2, ashen-grey background tint.
-4. **Stage3 "Frostbound Gorge" composition refined:** kegs moved off Stage1's reused bridge-hugging positions to a genuine wing spread at ±11.5/±15.0, mirroring Stage1's exact margin ratios (2.5u core clearance, 3.5u muzzle clearance) scaled to the wider apron — the wide midfield now actually reads as open, not just Stage1's board with empty space at the edges. Obstacle cap raised to 7 (vs Stage1's 6) to match the larger board.
-5. **Independent balance review caught and fixed a real regression before ship:** two parallel subagents (one authoring `Assets/Editor/Stage2FieldRulesTests.cs`, one rewriting `StageDefinitionsTests.cs`, one doing a read-only safety audit) independently flagged that an initial Stage3 keg placement (±15.5) sat *exactly* 3.0u from the launch muzzle — precisely on the boundary of a margin convention that exists in this codebase specifically because kegs at that exact distance previously self-detonated low-arc shots (`GameManager.cs` comment, review cycle 3 P1 #1). The orchestrator's own test used a weakened `Assert.GreaterOrEqual` that silently accepted the boundary case instead of the stricter `Assert.Greater` used by the equivalent pinned test elsewhere (`GamePlayTests.FieldLayout_KegsClearLaunchMuzzles`). Fixed by moving the kegs to ±15.0/±11.5 (real margin, not boundary-exact) and tightening the test operator to match the stricter convention.
-6. **Balance review also caught a design inconsistency:** Stage2's initial wind-cap cut (6.5→5.5, -25% of the wind *range*) was disproportionately steep relative to its own -10.3% distance compression, unlike Stage3's wind-cap increase which scaled sub-proportionally to its own +27.6% distance change. Retuned Stage2's wind cap to 6.2 (-7% of the wind range, proportionate to its -6.9% distance compression) and widened the apron itself from 13.0→13.5 to also restore a real 1.0u buffer between the enemy launch ring and the shared core (the tighter 13.0 apron left the ring's inner edge exactly tangent to the core's collider edge — zero free strip, a design-headroom risk the review flagged even though nothing lived in that band yet).
-7. **QA (Unity MCP live):** `dotnet build` on both assemblies — 0 errors. `tests-run` EditMode — **130/130 passed** (117 baseline + 13 new: rewritten `StageDefinitionsTests` plus new `Stage2FieldRulesTests`), both before and after a live PlayMode session spanning all 3 stages (confirms no state-pollution regression). Live PlayMode verification via `script-execute` across Stage1/2/3 in sequence: Stage1 unchanged (`LaunchApronAbsX=14.5`, 205 ground blocks, 4 spawned kegs, `maxFieldObstacles=6`, white background); Stage2 (`LaunchApronAbsX=13.5`, `windCapEnd=6.2`, 195 ground blocks, 0 spawned kegs, `maxFieldObstacles=4`, 3-block walls, ashen-grey background `RGBA(0.72,0.72,0.76,1)`, and a direct `PlanForTurn` call confirmed `mutate=true` lands on turn 2); Stage3 (`LaunchApronAbsX=18.5`, `windCapEnd=7.2`, `maxFieldObstacles=7`, kegs confirmed at the corrected ±11.5/±15.0 wing positions). Intro-screen stage picker inspected live: all three cards `interactable=true` with correct display names, no locked/dimmed card remaining.
-
-### Third battlefield stage: "Frostbound Gorge" (Stage3), 3-stage selectable system (2026-07-07)
-
-Built a selectable multi-stage battlefield system and shipped its third stage with a genuinely different concept, per the design brief: increase gimmick type/kind variety by at least one each, widen player-to-player distance, and mix field patterns differently — all under Unity MCP, with level balance considered throughout.
-
-1. **Stage architecture:** `StageDefinitions.cs` introduces `StageId {Stage1, Stage2, Stage3}` and a pure `StageLayout` data table (launch-apron distance, ground half-width/anchor band, gate offset, wind cap, camera framing, `locked` flag). `GameManager.ApplyStageLayout()` resolves `PendingStage` into concrete numbers once at the start of `Start()` — never in `Awake()` — so EditMode reflection tests (which only ever invoke `Awake()`/`CreateGround()` and never `Start()`) keep seeing Stage1's frozen defaults regardless of what a prior PlayMode session selected. `CoreAbsX` stays a shared, unchanging constant across every stage; only spacing/framing/wind are stage-dependent.
-2. **Stage1 — Siege Plains:** the original arena, byte-identical (a total no-op when selected). **Stage2 — Ashen Bastion:** a locked placeholder slot (`StageLayout.locked = true`) mirroring Stage1's exact numbers so it can never carry unconfigured live data; its intro-screen card renders dimmed and non-interactive, and `GameManager.RequestStage()` refuses to select it as an authoritative guard.
-3. **Stage3 — Frostbound Gorge (완성):** launch points widen from ±14.5 to ±18.5 — player-to-player distance grows 29u→37u (+27.6%, meaningfully more but bounded, not a drastic rebalance) — with ground (41→49 columns) and camera (39u→47u board) scaled to match, and the endgame wind cap raised 6.5→7.2 to keep late-match aiming meaningful over the longer throw.
-4. **+1 gimmick type — `SpikeTrapGimmick`:** a proximity-triggered floor hazard with a genuinely different interaction model from every existing gimmick — a Dormant/Arming/Active/Cooldown state machine driven by repeated `Physics2D.OverlapCircleAll` checks (instead of `EruptionVentGimmick`'s fixed clock or `EventGateGimmick`/`BuffDebuffGimmick`'s one-shot collider trigger). Arms when a unit walks within range, bursts once for 24 damage with a deterministic up-and-out knockback (`SpikeTrapRules.KnockbackVelocity` — always a positive-Y component, so a hit unit is never launched purely sideways or downward), then cools down before it can re-arm.
-5. **+1 gimmick kind — Frost eruption vent:** a third `EruptionStyle` (Magma/Petal/**Frost**) on the existing `EruptionVentGimmick`. Frost shoves bodies sideways and applies a slow debuff (`ApplyDebuff(0.55x, 2.5s)`) instead of Magma's vertical lift + damage — a tactically distinct "stay out of the lane" counterplay versus "don't get launched".
-6. **Mixed patterns, not a reskin:** `GimmickFieldDirector.PlanForTurn` gets a stage-aware overload — Stage3 rotates all 5 obstacle kinds (adds SpikeTrap to Barrel/MiniTower/Rune/Patrol) on a mod-5 cycle instead of Stage1/2's mod-4, and mutates field composition every 4th turn instead of every 3rd. `VentSchedule.StyleForTurn` gets a matching stage-aware overload cycling Magma→Frost→Petal every 3 vent-spawn beats instead of the 2-way Stage1/2 alternation.
-7. **Stage picker UI:** `IntroScreenController` renders three toggle cards below the how-to strip (Stage1/Stage2/Stage3); selecting an unlocked stage calls `GameManager.RequestStage()`, which reloads the scene (same path as Rematch/Title) so the whole runtime-generated world rebuilds fresh for that stage — ground width, launch distance, camera framing all stage-correct, with zero in-place layout-swap risk. The locked Stage2 card is visually dimmed and non-interactive.
-8. **QA (Unity MCP live, this session):** `dotnet build` on both `Assembly-CSharp.csproj` and `CastleBusters.Tests.csproj` — 0 errors. `tests-run` EditMode — **117/117 passed**, both before and again after a live PlayMode session (confirms `GameManager.OnDestroy()`'s stage-static reset guard holds — no state pollution leaks into EditMode). Live PlayMode verification via `script-execute`: Stage3 selection confirmed correct `LaunchApronAbsX=18.5`, `LaunchRingRules` ring positions ±18.5, `windCapEnd=7.2`, a 245-block ground grid spanning x=[-24,24], and `GimmickFieldDirector.stage=Stage3`; the intro stage picker was inspected live and confirmed Stage1 selectable/dimmed, Stage2 locked/non-interactive/dimmed, Stage3 selected/highlighted; `SpikeTrapGimmick` was spawned through the exact production `GimmickFieldDirector.TestSpawn` path and confirmed to fire against a live unit (proximity-armed, then a burst that imparted knockback velocity — independently reproduced from the prior session's exact-damage measurement, since this session's real-time match clock kept resolving to `GameOver` faster than the manual verification round-trips).
-9. **Concurrent-edit note:** mid-session, another live process was found actively editing the same files toward the same goal (a `StageDefinitions.cs`/`SpikeTrap`/Frost-vent scaffold already on disk, unlabeled `StageId {Stage1, Stage2}`). Confirmed with the user, waited for the writer to settle, then adopted and completed its work rather than discarding it: the prior process's 2-stage content became this session's Stage3, a locked Stage2 placeholder was added to make it a true 3-stage system, and every `Stage2`-named reference was renamed to `Stage3` (enum value, `VentSchedule`/`PlanForTurn` overload guards, comments, `IntroScreenController` fields, tests) with a final project-wide sweep confirming no stray `Stage2` reference survived unintentionally.
-
-### Tracking backfill: `.specify/cycles.md` reconciled with 5 un-logged commits (2026-07-04)
-
-`.specify/cycles.md` (the frozen 10-cycle iteration log for the Dynamic Battlefield pass) was found stuck at 1 logged row with a stale "pending" verdict, even though 5 real commits had already landed since (AOS overhaul, content pass, 3 follow-up/bugfix passes, gimmick fairness fixes — all documented above). A critic subagent audited the code against `.specify/spec.md`'s AC1–AC11, and direct source tracing confirmed the root cause:
-
-1. **Row 1's own live-test record was never closed out:** cycle 1's live-test log (`mcp-server.log`, 2026-07-02 23:57, EditMode 58/60 passing) recorded 2 real failures — `FieldLayout_KegsClearLaunchMuzzles` and `GimmickFrameAnimator_TryAttach_PreservesWorldFootprint` — that were actually fixed in the subsequent "code review cycle 3" commit (`175c8b1`, the Gimmick fairness pass above), but the row was never updated to reflect the fix.
-2. **Backfill:** `.specify/cycles.md` was filled in from 1→6 honest rows (commit-by-commit, no invented cycles), each citing the real commit hash and, where a fix landed, the exact source lines responsible. `.specify/spec.md`, `Boards/Engineering.md`, and `Projects/CastleBusters.md` were synced to match.
-3. **Verification status:** `dotnet build unknown-castle.sln` re-confirmed 0 errors at HEAD. A fresh **live** Unity MCP EditMode re-run — needed to convert the fix-tracing above from code-verified to live-verified — could not be completed this session: the project's Unity Editor was already open (holding the project lock, blocking a second batchmode instance) and its MCP HTTP bridge returned an empty tools list. Flagged as the first item for the next session.
-4. **AC8 gap:** AC8 requires 10 logged cycle rows; only 6 exist. Recommend either re-freezing the seed's cycle target to the actual 6-commit cadence, or continuing to log each future commit as its own row.
-
-
-
-### Playtest QA pass: UI/UX sizing, text clipping, and toast backplate contrast (2026-07-05)
-
-A playtest-driven pass focused on card visual consistency, button text clipping, and HUD overlay readability, verified end-to-end through Unity MCP PlayMode test suites:
-1. **Block Select Button Text Fix:** Changed block selection button texts from repeating thrice (`WOOD WALL WOOD WALL WOOD WALL`) to clean single labels (`WOOD WALL`, `STONE WALL`, `IRON WALL`) to completely eliminate text wrapping and clipping on 110x36 buttons.
-2. **Gimmick Selection Card Sizing:** Unified Gimmick card scale from 1.2x to 1.5x in `GameManager.cs` to match the other three character select cards, creating a visually consistent HUD layout.
-3. **Eliminated Text Redundancy:** Changed the Gimmick card's role label from `KEG` to `HAZARD` in `GameManager.cs`, resolving the redundant `POWDER KEG KEG` label text.
-4. **Disabled Selection Card Word Wrapping:** Added `text.enableWordWrapping = false;` to character selection buttons' styling method to preserve manual line breaks without causing unexpected wrapping at smaller display scales.
-5. **Toast Backplate Overlay:** Created a `ToastBackplate` panel behind the turn toast text in `EnsureHud()` (GameFeelVfx.cs) and animated its position/opacity in sync within `AnimateToastAndCombo()`. This provides a dark blue-black backdrop (58% opacity) that solves HUD readability issues and z-layer bleeding.
-6. **QA (Unity MCP live):** PlayMode `PlaytestQACapture` test passes successfully, asserting the updated Gimmick card size and capturing fresh screenshots (`QA_TitleScreen.png`, `QA_SelectionRow.png`, `QA_ArcherArrow.png`, `QA_BrickSpawnFx.png`).
-### Playtest QA pass: UI/UX sizing, particle polish, buff/debuff clarity (2026-07-04)
-
-Follow-up playtest pass focused on scene wiring, particle/VFX feel, and buff/debuff readability, verified end-to-end through the live Unity MCP tools (no manual Editor clicking).
-
-1. **GimmickButton scene wiring:** `GameManager.gimmickButton` had no scene reference (only knight/archer/bomber were wired), so the 4th selection card never appeared even though `SetupUIButtons()`/`StyleSelectionButton()` already supported it. Wired via live MCP `gameobject-component-modify` (`pathPatches`) against the actual `GameManager` component and saved with `scene-save`; confirmed persisted in `SampleScene.unity` (`gimmickButton: {fileID: ...}`).
-2. **Particle/VFX polish:** `DebrisFragment` used a linear alpha fade from frame 1, which read as "washed out" instead of solid, physical chunks — it now holds full opacity through ~55% of life then fades fast, with an eased (t²) scale-shrink. `FrameAnimEffect` (impact sparks / brick-spawn / rune sparkle) now jitters per-instance size ±12% so repeated spawns don't look like a stamped decal, and eases alpha out over the closing 25% of its frame strip instead of a hard `Destroy()` pop. `GameFeelVfx.SpawnImpactBurst` layers a smaller, ~60ms-delayed secondary puff on high-intensity hits (core hits/breaks) for a "crack, then scatter" read instead of one flat burst.
-3. **Buff/debuff clarity:** a buff/debuff on a unit used to just silently revert color when its timer hit zero. `UnitController` now blinks the tint at 8Hz over the closing 0.8s as an "about to expire" warning, then spawns a `BUFF ENDED`/`DEBUFF ENDED` floating label on actual expiry.
-4. **Damage-number weight:** `GameFeelVfx.SpawnDamageNumber` used a fixed 3.5 font size/color regardless of hit size, so a 5-damage graze read identically to an 80-damage blast. Font size and color now tier with magnitude, and hits ≥50 get an extra opening scale-punch from `FloatingDamageText`.
-5. **QA (Unity MCP live):** `tests-run` EditMode — **100/100 passed**; `tests-run` PlayMode — **2/2 passed** (`AutoPlayTest` + `PlaytestQACapture`, the latter re-asserting the existing +20% title-button / 1.5×/1.2× selection-row / archer-arrow-visibility / brick-spawn-fx pins from the prior sizing pass, all still green, zero overlap between enlarged selection cards). `console-get-logs` confirmed zero compile errors/exceptions after every edit in this pass.
-
-### Gimmick fairness bug fix, phase telegraph, and Knight/Archer trait tunables (2026-07-04, follow-up)
-
-Follow-up pass on the remaining backlog items from the QA pass above: an architect-subagent review of the gimmick scripts and `UnitData.cs` surfaced one real correctness bug and a readability gap; both were fixed and re-verified live via Unity MCP.
-
-1. **EventGateGimmick explosion-potency bug:** the PowerUp/PowerDown/Reduce gate effects called `unit.ApplyLaunchPowerMultiplier(...)` (time-limited, reverts via the existing buff/debuff timer) but separately multiplied a Bomber's `ExplosiveGimmick.explosionRadius`/`explosionDamage` directly with **no revert and no expiry** — a Bomber that passed through a gate kept a permanently inflated or crippled blast forever while its velocity/damage-speed effect quietly reverted. `ExplosiveGimmick` now has `ApplyTemporaryPotencyMultiplier(multiplier, duration)`, which captures a base value once (lazily, so it still works if called before `Awake()`) and reverts via coroutine after `duration`, matching the existing buff/debuff pattern; the three copy-pasted `GetComponent<ExplosiveGimmick>()` blocks in `EventGateGimmick.ApplyToUnit` were de-duplicated into one `ApplyExplosiveScaling` helper.
-2. **EventGateGimmick spent-clone cue:** once a gate's clone budget (`maxTotalClones`) was exhausted it kept pulsing/tinted as if still live, misleading players into expecting a clone that would never spawn. It now dims and shows a one-time "SPENT" label the moment the budget runs out.
-3. **BuffDebuffGimmick re-trigger fairness:** unlike `EventGateGimmick` (which has a one-shot processed-id guard), the buff/debuff zone had no cooldown, so a unit jittering across the trigger boundary (common after a launch/knockback) could restack `ApplyBuff`/`ApplyDebuff` and extend the effect duration unpredictably. Added a per-instance cooldown that only suppresses a repeat of the *same* effect type within 1s (jitter spam); a genuinely different effect (zone reconfigured, or a different zone occupying the same collider) still applies immediately — this distinction was needed to keep the existing `BuffDebuffGimmick_AppliesBuffAndDebuffToUnit` EditMode test (which deliberately re-triggers with a flipped `effectType`) passing.
-4. **MovingGimmick chariot phase telegraph:** the "WAR BEAST RAMPAGE!/FRENZY!" callout and the harder flight-speed/pattern used to apply on the exact same frame, leaving zero reaction window before the hazard got harder. The callout/shockwave/alarm still fire immediately on the health threshold crossing, but the actual pattern speed/shape (`appliedPhase`) now lags the announced phase (`lastPhase`) by 0.45s, so the warning genuinely precedes the hazard.
-5. **UnitData.cs Knight/Archer trait tunables:** only Bomber had prefab-level tunables (`explosionRadius`/`explosionDamage`); Knight and Archer's push force, combo interval, jump velocity, and volley follow-up delay were all hardcoded literals in `UnitController`. Added `knightPushForceMultiplier`/`knightComboIntervalSeconds` and `archerJumpVelocity`/`archerVolleyFollowupDelaySeconds` to `UnitData`, mirrored as `UnitController` fields (defaults match the prior hardcoded values, so behavior is unchanged unless a designer creates a differently-tuned prefab), and wired the four call sites to read them instead of magic numbers.
-6. **QA (Unity MCP live):** an architect subagent first analyzed the gimmick files read-only and proposed the prioritized fix list above; all edits were then applied directly and verified with `tests-run` EditMode — **100/100 passed** (2 regressions caught and fixed mid-pass: the retrigger-cooldown and lazy-base-potency issues above were found exactly because these two EditMode tests broke first) — and `tests-run` PlayMode — **2/2 passed**. `console-get-logs` showed no new compile errors after the final edits.
-
-
-### Review pass on the collider fix: arrow ordering bug + dead-code cleanup (2026-07-03, follow-up 2)
-
-Re-reviewed the gimmick collider fix above for gaps. Found and fixed one more real bug of the same class, plus one design gap and one clarity issue:
-
-1. **Real bug — `ArrowController.Awake()` sprite-remap ordering:** `FitArrowToPlayableScale()` ran BEFORE the atlas-packed sprite was assigned, so the scale was computed against the raw resource sprite's bounds and then a smaller packed sprite was swapped in afterward with no resync — arrows rendered at ~0.26u instead of the intended 1.35u (collider matched the shrunken sprite, so isolated collider checks missed it; only visible as "arrows are tiny"). Fixed by moving the packed-sprite remap before `FitArrowToPlayableScale()`. New EditMode regression test (`ArrowController_ScalesToVisualLength_RegardlessOfSpriteAtlasRemap`) pins the ordering.
-2. **Design gap — `ItemPickup` not in the gimmick exclusion list:** the new hero-loot pickups (`ItemSystem.cs`) use the same raw-sprite-then-scale pattern as the fixed gimmicks. Not hit in practice today (loot spawns mid-match, after the one-shot `ApplyRuntimeSpriteAtlas()` pass in `GameManager.Start()` already ran), but added to `IsGimmickRenderer()` defensively so it stays safe if that spawn-timing assumption ever changes.
-3. **Dead code — pre-assigned sprites discarded on the first frame:** `GameManager`'s core/chariot/barrel spawners loaded a sprite and ran it through `GetPackedSprite()` before `AddComponent<...Gimmick>()`, but each gimmick's own `Awake()`/`Start()` immediately overwrites that sprite with its real art (`GimmickSpriteLibrary`/`GimmickFrameAnimator`) — the pre-assignment was silently discarded every time, misleading anyone reading the spawn code. Removed the dead sprite loads; `EventGateGimmick`'s spawner was left untouched since its visual fallback chain (`ApplyVisuals()` keeps the pre-assigned sprite when `GimmickSpriteLibrary.TryApply` fails) actually uses it.
-4. **QA:** EditMode 100/100 (3 consecutive runs, 1 new test). Live Unity MCP verification: archer volley re-launched post-fix confirms `arrow.visualLength == 1.35` matches rendered world size exactly; core/barrel/chariot art re-confirmed non-null and correctly named after the spawn-code cleanup.
-
-### Gimmick collider/sprite size alignment fix (2026-07-03, follow-up)
-
-Reported symptom: some gimmicks' collision boxes visibly diverged from their rendered sprite size. Root-caused with live Unity MCP inspection (not per-frame animation drift — frame bounds were verified pixel-identical within each animation set):
-
-1. **Root cause:** `SpriteAtlasPacker.LoadDefaultSprites()` vacuumed every `SpriteRenderer` in the scene — including gimmick art — into a shared runtime atlas, then `ApplyPackedSpritesInScene()` silently swapped renderers to the (often downscaled) packed sprite without ever resyncing `transform.localScale` or `BoxCollider2D`. `DestructibleBlock` avoided this by proactively calling `GetPackedSprite()` before computing its own collider, but `ExplosiveGimmick`, `CastleCoreGimmick`, `MovingGimmick`, `EventGateGimmick`, and `BuffDebuffGimmick` all computed their collider from the raw resource sprite first and then got remapped later, causing the mismatch.
-2. **Fix:** added `SpriteAtlasPacker.IsGimmickRenderer()` and excluded all 5 gimmick component types from both the atlas-vacuum step and the remap step — gimmicks already own correct, self-contained scale/collider sync logic and don't need shared-atlas batching.
-3. **QA:** EditMode 99/99 (3 consecutive runs). Live Unity MCP verification: barrels, castle cores, the flying beast, event gates, and buff/debuff runes all confirmed `colliderWorldSize == nativeSpriteBounds × lossyScale` (deterministic match, not a visual approximation) after a fresh `BeginSiege()` + runtime-atlas pass.
-
-### Content pass: flying war beast, hero loot growth, flow clarity, alarms (2026-07-03)
-
-1. **Bigger heroes + arrows:** knights/archers/bombers scaled 0.30 → 0.42, arrows 0.95 → 1.35u with matching colliders — combat reads at a glance on the wide field.
-2. **Flying war beast (gti/perfectpixel):** the lateral ground chariot is now an airborne wyvern — 6-frame wing-flap cycle (`Resources/Gimmicks/flying_beast_anim`, magenta-keyed) on a zero-gravity dynamic body. `FlightRules` gives each HP phase a distinct 2-axis pattern (Patrol glide+bob → Frenzy figure-8 → Rampage deck-skimming swoops); blast waves visibly fling it off-pattern before the homing steer recovers. It rams structures on dive passes, drops guaranteed loot on death, and redeploys after 5 s.
-3. **Hero item growth ("기믹을 부숴 아이템을"):** destroyed kegs drop loot 60% of the time, the beast always. Three icons (gti-generated sword/shield/boots) bob on the field for 14 s; any unit collecting one raises its WHOLE SIDE's stats permanently for the match (+15% dmg / +20% HP / +12% speed per stack, cap 5) via `HeroGrowth` — applied to every subsequently spawned/launched unit.
-4. **Flow clarity + alarm system:** a persistent flow strip always states what the game is doing (aim / volley resolving with animated ellipsis / enemy battery / build window), and a 4-line alarm feed (top-left) reports every battlefield event — vent spawns with position and lifetime, balance events with side and kind, beast phase shifts, brick builds, loot drops/pickups, capture 50% warnings. A 12 s watchdog on volley resolution guarantees a wedged projectile can never freeze the match, and squads with no target now MARCH on the enemy camp instead of standing idle (feeding the capture zone).
-5. **QA (Unity MCP live):** EditMode 99/99 (new pins: 2-axis flight envelopes per phase, Rampage dive depth, hero-growth stacking/caps/side-independence, drop chance/type buckets, beast/item art presence). Live: beast observed gliding across both axes at (3.1,4.9)→(-0.9,4.3), kill → loot drop + alarm feed + 5 s redeploy, alarm feed and flow strip active on the gameplay canvas, ⚔-glyph TMP warning eliminated. Includes concurrent session work: brick type selection UI (wood/stone/iron) with overlap-safe spawning.
-
-### Targeting policy, pre-designated bricks, button overflow pass (2026-07-03, follow-up)
-
-1. **Gimmick-first targeting / ground-attack fix:** ground tiles are parented to the castles for BFS support, so units beelined to the nearest FLOOR tile and whacked the bridge. `TargetingRules` now drops every block below the ground line and ranks candidates by weighted distance — enemy camp gimmicks (cores, kegs) at 0.55, enemy units at 0.85, plain wall/castle blocks at 1.0 — so squads hunt the opponent's installations first without marching across the whole map past everything. Neutral installations on the opponent's half count as enemy-placed gimmicks.
-2. **Pre-designated bricks:** during the ENEMY turn the player clicks the field to mark up to 2 brick sites (translucent blueprint ghosts; clicking a ghost cancels it); the stone bricks materialize the moment the player's turn opens (`BrickPlacementController` + `BrickPlacementRules`). Placement hard-rejects both launch rings (the unit spawn areas), out-of-band positions, and the build ceiling.
-3. **Unit-spawn exclusion:** brick/wall/solid placement shares `LaunchRingRules` — nothing can ever be built inside the circles where knights/archers/bombers launch.
-4. **Button text overflow:** unit selection cards and the intro START button now auto-size their captions inside inset label rects (min/max font clamps, no wrapping), completing the pass that already fixed the results-screen buttons — no button caption can clip on any viewport scale.
-5. **QA:** EditMode 91/91 (6 new pins: ground-tile filter, weight ordering, enemy-half test, ring/band rejection, placement cap). Live play-mode: all grounded units observed targeting cores/castle blocks at y≥0.5 (zero floor targets), 2 ghost designations materialized into 2 settled bricks on turn open, intro/card captions verified unclipped.
-
-### AOS overhaul: capture objective, unit combat traits, living battlefield (2026-07-03)
-
-Design contract: `docs/design/aos-overhaul.md`. Pure rules live in `Assets/Scripts/SiegeTactics.cs` (23 new EditMode pins).
-
-1. **Capture-or-destroy objective (§1):** a capture zone rings each core (`CaptureZoneController`). Attackers alone in the zone fill a 6-second gauge (defenders freeze it, abandonment decays it at half rate); a full gauge ends the match — "CASTLE SEIZED" — as the alternative to breaking the core. Progress ring + 점령/경합 label render in-world.
-2. **Knight (§2):** every 3rd swing is a double hit, every 6th a triple (0.14s combo chain with DOUBLE!/TRIPLE! callouts, cycle repeats). While advancing, an enemy body standing between the knight and a farther objective gets shoved along ("PUSH!").
-3. **Archer (§2):** every 5th shot is a double, every 10th a double whose follow-up is an aerial gravity lob over cover ("SKY VOLLEY!"). Jumps situationally when the target sits ≥1.2u above.
-4. **Bomber (§2):** volleys scale with the owner's turn ordinal — 2 bombs from the 3rd own turn, 4 from the 9th (`VolleyRules`, 0.16s stagger with spread). Landing no longer detonates on contact: a 2-second fuse arms with an accelerating blink telegraph, then blows; killing the bomber early still detonates it.
-5. **Eruption vents as events (§3):** the fixed magma/petal vents are gone. Every 3rd turn a vent erupts at a random terrain spot between the camps (styles alternate), lives 3 turns, then shatters away.
-6. **Chariot 3-phase war machine (§4):** the bridge chariot is now a destructible (150 HP via `DestructibleBlock`), gravity-bound dynamic body. Phases escalate with damage — Patrol (slow sweep) → Frenzy (fast, wide) → Rampage (charges the nearest keep). It rams walls above the ground line (22 dmg/0.8s), falls when the floor is broken, gets flipped/launched by bomb blast waves (new physical explosion impulse) and vent columns, and redeploys 5 s after destruction.
-7. **Castle walls + launch rings (§5):** 2-high stone walls materialize at match start on designated slots (±7.5) — `LaunchRingRules` hard-rejects any wall/solid spawn inside either launch affordance circle (radius 3.5 at ±14.5), including the field director's obstacle lanes.
-8. **Animated launch portal (§5):** the flat launch circle is replaced by a 6-frame gti-generated stone-arch portal (`Resources/Gimmicks/launch_gate_anim/`, magenta-keyed, 8fps `GimmickFrameAnimator` loop); fails soft to the procedural ring when art is missing.
-9. **Balance-driven field events (§6):** runes and gates are no longer fixtures. Every 4th turn `BalanceEventPlanner` reads both cores' health and spawns one event — buff rune / power gate on the trailing side's approach, hex rune / reduce gate against the leader, neutral center Multiply gate near parity — each expiring after 4 turns.
-10. **Safety net:** grounded/attacking units flung out of the arena (depenetration, blasts, vent columns) now die with an OUT callout instead of drifting forever — the stuck-recovery hop could previously ladder them off-screen.
-11. **QA:** EditMode 85/85 green (23 new AOS pins in `AosOverhaulTests.cs`). Live play-mode verification via Unity MCP: capture zones/walls/dynamic chariot/portal on boot, turn-2 random vent + turn-1 neutral gate, 4-bomb 9th-turn volley (2+4=6 bombers observed), organic chariot destruction → 5 s redeploy, and `CountOccupants` attacker/defender classification — no exceptions in console.
-12. **Docs refresh + push (2026-07-03):** header captures (`IntroCapture.png`, `GameplayCapture_6.png`) regenerated from the latest PlayMode `AutoPlayTest` run and re-committed; README EN/KO re-synced and pushed to `origin/main`.
-
-### Retention-loop hardening + HUD text diet (2026-07-02, late pass)
-
-Playtest report: pressing REMATCH/TITLE after a match could drop into a "dead" scene, arrows were invisible, launched squads besieged neutral barrels instead of the enemy camp, and persistent HUD text drowned the battlefield. Root causes and fixes:
-
-1. **Frozen-overlay unfreeze bug (rematch/title):** `HitStopManager`'s realtime restore coroutine flipped `timeScale` back to 1 while the intro/results overlay owned the screen. After a scene reload `Time.time` is already large, so every attack cooldown read as elapsed — the board fought itself behind the title card until a core died. Hit-stops now refuse to run outside live turns, re-check state before restoring, and `ShowIntro`/`EndGame` cancel any pending restore. `UnitController.Update` combat is gated to PlayerTurn/AITurn.
-2. **Domain-reload resilience:** `GameManager` and `HitStopManager` re-register their singleton in `OnEnable`, so a mid-play script recompile no longer strands a live scene with `Instance == null` (unresponsive dead board).
-3. **Compile unblock:** removed a dangling `SpawnEruptionVents()` call that referenced a not-yet-written method and blocked entering Play Mode entirely.
-4. **Neutral-debris targeting fix:** melee target selection treated parentless blocks (powder kegs, field obstacles) as enemy blocks for *both* teams; units now only target enemy-castle blocks and enemy units, so squads actually push into the opposing camp.
-5. **Arrow visibility:** arrows scaled ~3.6× (0.26 → 0.95 world units, matching collider) so ranged volleys read on the 33.6-unit-wide battlefield.
-6. **Results-button overflow fix:** rematch/title captions now auto-size inside an inset label rect — fixed 30pt clipped "재도전"/"타이틀" down to "전"/"이틀" on wide viewports; labels shortened to "재도전 (R)" / "타이틀".
-7. **HUD text diet:** removed the FIELD INTEL panel, WAR ROOM coaching panel, objective band, bottom command strip, and duplicate wind hint; launch guide/stats collapsed to single lines; the legacy green game-over banner is hidden behind the results card; the whole HUD hides during GameOver so frozen toasts can't bleed through the results screen.
-8. **Verification (Unity MCP, live editor):** scripted E2E — `EndGame` → real button `onClick` → scene reload asserted for both REMATCH (straight into PlayerTurn at timescale 1) and TITLE (Intro stays frozen at timescale 0 for 12+ s with zero arrows/explosions, previously unfroze within 0.14 s). EditMode `tests-run`: 60/62 pass — the 2 failures are pre-existing WIP in ground anchoring and the gimmick frame animator, untouched by this pass.
-
-### Playtest polish pass: dedicated gimmick art + turn coaching (2026-07-02)
-
-Playtesting showed every gimmick reused the same stone-block texture with a color tint, so runes/gates/rams read as "floating misplaced blocks", and an idle player's turn could silently evaporate. This pass gives every interactive object its own silhouette and makes the turn system actively coach the player:
-
-1. **Dedicated gimmick art** (gti-generated, magenta-matted, `Resources/Gimmicks/`): rally/hex rune decals, stone-arch portal gates (tinted per effect type), siege-ram obstacle, powder-keg barrel, crystal keep core (team-tinted), and a wooden card frame for the unit buttons (card face + separate `UnitPortrait` child).
-2. **Awake→Start visual ordering fix:** spawners `AddComponent()` first and assign `effectType`/`isPlayerCore` afterwards, so Awake-time art selection always saw default values (DebuffZone rendered the rally rune, every gate rendered the PowerUp tint, the enemy core rendered blue). Visual selection now runs in `Start()`/`ApplyVisuals()` after field assignment.
-3. **Core sprite persistence:** the keep-core art is registered through `SetPresentationSprite`, so `DestructibleBlock.UpdateVisuals()` no longer reverts the core to a null sprite on its first hit.
-4. **Turn-skip fix:** the turn clock pauses while a volley resolves (`isResolvingTurn`); previously the timer could expire mid-resolve and double-fire `EndTurn` (Update + settle coroutine), silently skipping the player's next turn.
-5. **Turn coaching:** ≤5s urgency toast ("LOOSE YOUR VOLLEY!"), idle nudges every 5s with a rally-ring shockwave ping, a one-time +4s aim-grace window when the timer expires mid-drag (`DecideTurnExpiry`), and an explicit "VOLLEY FORFEITED" notice instead of a silent skip.
-6. **New EditMode guards (44 total):** turn-expiry decision table, gimmick sprite library load/soft-fail contract, and post-assignment visual selection for zones/gates.
-7. **Git Push & Verification:** Verified repository status, updated documentation, and pushed all changes to the remote repository.
-
-### Stability + intro + curves pass (2026-07-02)
-
-1. **Self-collapse root cause closed:** castle cores/barrels spawned airborne (y=1.5/1.0) above the y=0 ground surface — outside BFS adjacency — and fell on the first physics tick; both now spawn flush at y=0.5.
-2. **Bounded cascades:** falling-block collision damage switched to relative velocity with a 45-damage cap, and the bottom two ground rows plus outer flanks are ground-anchored, so collapse depth is finite while the wood bridge stays fully breakable.
-3. **Intro gate:** `GameState.Intro` + `IntroScreenController` freeze the board behind the title card until START — the "game plays itself to GameOver while unattended" QA failure is structurally impossible now.
-4. **HUD gating:** `GameplayUxDirector` hides its HUD during the intro and never adopts the intro canvas as its parent.
-5. **New EditMode guards:** fall-damage cap, difficulty-curve monotonicity, ground-anchor topology, and Hangul fallback registration (4 new tests; bridge-collapse test rebuilt on a realistic two-row topology).
-
-### 10-pass playable UX iteration (2026-06-30)
-
-The current playable slice now includes a dedicated runtime `GameplayUxDirector` pass that focuses on first-time playability and moment-to-moment readability. The ten concrete iteration outcomes are:
-
-This Obsidian/llm-wiki sync pass also adds a live tactic panel, unit-specific drag-aim coaching, wind correction wording, low-core warning toasts, launch shockwave/callout feedback, and explicit labels for buff/debuff zones so the first playable minute is easier to understand in motion and in screenshots.
-
-1. Top objective banner clarifies the win condition: destroy the enemy core before yours falls.
-2. Turn toast announces player/enemy phase changes and explains when to aim.
-3. Turn timer bar gives a fast visual countdown in addition to the numeric timer.
-4. Persistent command strip explains unit hotkeys and drag-from-ring launch controls.
-5. Launch grading labels shots as Soft Arc, Clean Launch, or Power Shot with power/angle.
-6. Core HP badges keep player and enemy core health visible during action.
-7. Wind tactical hint translates wind value into aim advice.
-8. Combo/impact ticker summarizes launch, hit, block break, core hit, and explosion chains.
-9. Hazard labels periodically identify barrels and moving obstacles in the world.
-10. Damage/break/explosion hooks feed the HUD so combat feedback and UI stay synchronized.
-
-Validation: `dotnet build Assembly-CSharp.csproj --no-restore` passes with 0 warnings and 0 errors after the UX pass.
-### Ground density & tile resolution pass (2026-07-01)
-
-The ground strip previously read as a handful of floating collision boxes rather than one cohesive strip, and blast-damaged tile edges showed visible aliasing. This pass reworks `GameManager.CreateGround()` and the shared destructible-block pipeline:
-
-1. Ground is now 5 rows tall (was 3) across a unified 41-column band, for 205 total ground blocks (was 123), so the strip reads as a continuous landmass instead of scattered floating blocks.
-2. Ground, cracked-slice, and debris-fragment textures are generated at higher resolution (128→160px ground tiles, 128→192px debris fragments) and now build mipmaps with `FilterMode.Trilinear` and `anisoLevel = 4`, removing the shimmer/aliasing that showed up when explosions shrank or rotated blocks.
-3. `DestructibleBlock.SetPresentationSprite()` re-applies scale and collider size whenever a tile's sprite is swapped, fixing a bug where a block's `BoxCollider2D` could stay at the original art size after a smaller texture slice was applied.
-4. Cracked/heavily-cracked ground sprites are now baked lazily via `SetLazyCrackedSprites()` (only generated the first time a tile actually cracks) instead of upfront for every one of the 205 ground tiles, and `BlockData.GetSharedPhysicsMaterial()` caches one `PhysicsMaterial2D` instance instead of allocating one per block.
-5. Ground boundary math in `GenerateGroundTexture()` was moved from a per-pixel trig computation to a per-column precomputation, cutting the boundary cost from O(width × height) to O(width).
-
-Validation: `GamePlayTests` (29 EditMode tests) pass, including an updated ground-count assertion (`41 * 5` blocks) and a new regression guard asserting every ground tile keeps `localScale == Vector3.one` and `BoxCollider2D.size == Vector2.one` after presentation-sprite swaps.
+| Term | Meaning | Shipped |
+|---|---|---|
+| `b` | blocks in one keep | 14 |
+| `h` | health per wall block | 85 |
+| `c` | keep core health | 150 |
+| `d` | effective damage landed per turn | 42 |
+| `s` | seconds a player actually spends on a turn | 8.5 |
+
+That puts a decided match at **T ≈ 271 s**, against a **300 s target** — inside the ±20%
+band a test enforces in both directions, because too thin ends matches early and too thick
+grinds. Note that `s` is *not* the 15-second turn timer; the timer is a ceiling players
+rarely reach.
+
+The core sits at 150 while the walls carry the length, and that asymmetry is deliberate:
+two batteries have to breach a core inside one Cannon cooldown, and that gate is already at
+its limit. Raising the core needs more artillery throughput, and every route to throughput
+pushes the cannon past the efficiency ceiling that keeps the three combat roles distinct.
+The walls had no such constraint, so the length went there.
+
+### How difficulty rises
+
+`DifficultyCurve` — a hill curve, so pressure keeps rising and never flattens out.
+
+```
+D(n) = n^p / (n^p + k^p)        k = 0.6 · rampTurns,  p = 1.8
+```
+
+It replaced a smoothstep that pinned at 1.0 around turn 15 and stopped meaning anything
+after. Wind and AI accuracy read from `D(n)`, so late turns actually feel late.
+
+---
+
+## Metrics
+
+| | |
+|---|---|
+| EditMode tests | **346 passing** |
+| PlayMode tests (core suite) | **45 / 46** |
+| Modeled match length | 271 s vs 300 s target |
+| Keep material per side | 1340 (14 blocks × 85 + 150 core) |
+| Stages | 3, unlocked by best-of-three series |
+| Deploy cards | 4 |
+| Build | WebGL, ~85 MB compressed |
+| Engine | Unity 2022.3.62f2, 2D URP, IL2CPP |
+
+---
+
+## Build and run
+
+```bash
+# Play locally against the shipped build
+python3 -m http.server 8000 --directory Builds/WebGL/castle-war
+
+# Regression suite (close the editor first — it holds the project lock)
+"/Applications/Unity/Hub/Editor/2022.3.62f2/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -projectPath . -runTests -testPlatform EditMode \
+  -testResults ./editmode-results.xml -logFile ./editmode-test.log
+
+# WebGL release build
+"/Applications/Unity/Hub/Editor/2022.3.62f2/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -quit -projectPath . -buildTarget WebGL \
+  -executeMethod WebGLReleaseBuild.Build -logFile ./webgl-build.log
+```
+
+---
+
+## Repository
+
+| Path | Contents |
+|---|---|
+| `Assets/Scripts/` | Gameplay, balance rules, VFX |
+| `Assets/Tests/`, `Assets/Editor/` | EditMode and PlayMode suites |
+| `_workspace/current/` | The live design, QA, and production lane |
+| `docs/changelog.md` | Verification history, pass by pass |
+| `CLAUDE.md` | Working agreement for agents on this repository |
+
+Korean text on WebGL depends on a **static** TextMeshPro atlas: browsers expose no OS fonts,
+and rasterising CJK glyphs at runtime overflows the WASM stack. `KoreanFontAssetBuilder`
+bakes every non-ASCII character used in the UI — if you add a new one, re-bake or it ships
+as tofu.
+
+## License
+
+MIT.
