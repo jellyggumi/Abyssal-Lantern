@@ -139,6 +139,10 @@ namespace CastleBusters
         public const float UrgencyThresholdSeconds = 5f;
         public const float IdleNudgeIntervalSeconds = 5f;
         private bool isResolvingTurn;
+        [Header("One-Shot Turn Siege")]
+        [Tooltip("Locks a turn to one automatically selected volley and removes deployment/roster input.")]
+        public bool enforceOneShotTurns = true;
+        private readonly OneShotTurnGate oneShotTurnGate = new OneShotTurnGate();
         private bool graceUsedThisTurn;
         private bool urgencyNotified;
         private float idleNudgeTimer;
@@ -169,6 +173,14 @@ namespace CastleBusters
         public bool IsResolvingTurn => isResolvingTurn;
         public float TurnTimeRemaining => turnTimer;
         public int TurnCount => turnCount;
+        public bool EnforcesOneShotTurns => enforceOneShotTurns;
+
+        /// <summary>Called by launchers immediately before a projectile is instantiated.</summary>
+        public bool TryCommitTurnShot()
+        {
+            if (currentState == GameState.GameOver || isResolvingTurn) return false;
+            return !enforceOneShotTurns || oneShotTurnGate.TryCommitShot();
+        }
 
         /// <summary>
         /// Turns the ramp is spread over, derived from how long this stage's match actually
@@ -1593,7 +1605,7 @@ namespace CastleBusters
             currentState = GameState.PlayerTurn;
             isPlayerTurn = true;
             turnTimer = turnDuration;
-            SelectUnit(0);
+            BeginOneShotTurn();
             UpdateUI();
             RefreshLastStandButton();
             GameplayUxDirector.NotifyTurnChanged(true);
@@ -1617,7 +1629,7 @@ namespace CastleBusters
             }
 
 
-            if (isPlayerTurn)
+            if (isPlayerTurn && !enforceOneShotTurns)
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1)) SelectUnit(0);
                 else if (Input.GetKeyDown(KeyCode.Alpha2)) SelectUnit(1);
@@ -1846,6 +1858,70 @@ namespace CastleBusters
             UpdateButtonVisuals(unitTypeIndex);
         }
 
+        private void BeginOneShotTurn()
+        {
+            oneShotTurnGate.BeginTurn();
+            if (!enforceOneShotTurns)
+            {
+                SelectUnit(0);
+                return;
+            }
+
+            // There is no pre-shot roster, placement, or movement decision.  The turn's
+            // projectile is deterministic and the only player task is to set angle/power.
+            var deployment = DeploymentController.Instance;
+            deployment?.DisarmDeployMode();
+            SetSelectionControlsVisible(false);
+
+            var projectile = OneShotSiegeRules.ProjectileForTurn(turnCount);
+            // Keep the underlying card state coherent for existing launch plumbing, without
+            // exposing a card as a player choice or entering deployment mode.
+            deployment?.SetSelectedCard(ToDeployCard(projectile));
+            deployment?.DisarmDeployMode();
+            selectedUnitPrefab = AutomaticProjectilePrefab;
+            LaunchManagerRef?.SetSelectedUnit(selectedUnitPrefab);
+        }
+
+        private static DeployCard ToDeployCard(OneShotSiegeRules.Projectile projectile)
+        {
+            switch (projectile)
+            {
+                case OneShotSiegeRules.Projectile.Archer: return DeployCard.Archer;
+                case OneShotSiegeRules.Projectile.Barrel: return DeployCard.Barrel;
+                default: return DeployCard.Knight;
+            }
+        }
+
+        /// <summary>The deterministic projectile selected by the current round's rules.</summary>
+        public GameObject AutomaticProjectilePrefab
+        {
+            get
+            {
+                switch (OneShotSiegeRules.ProjectileForTurn(turnCount))
+                {
+                    case OneShotSiegeRules.Projectile.Archer:
+                        return archerPrefab;
+                    case OneShotSiegeRules.Projectile.Barrel:
+                        return explosiveBarrelPrefab;
+                    default:
+                        return knightPrefab;
+                }
+            }
+        }
+
+        private void SetSelectionControlsVisible(bool visible)
+        {
+            SetSelectionControlVisible(knightButton, visible);
+            SetSelectionControlVisible(archerButton, visible);
+            SetSelectionControlVisible(cannonButton, visible);
+            SetSelectionControlVisible(gimmickButton, visible);
+        }
+
+        private static void SetSelectionControlVisible(UnityEngine.UI.Button button, bool visible)
+        {
+            if (button != null) button.gameObject.SetActive(visible);
+        }
+
         private void UpdateButtonVisuals(int selectedIndex)
         {
             StyleButtonState(knightButton, selectedIndex == 0);
@@ -1974,6 +2050,7 @@ namespace CastleBusters
             isPlayerTurn = !isPlayerTurn;
             currentState = isPlayerTurn ? GameState.PlayerTurn : GameState.AITurn;
             turnTimer = turnDuration;
+            BeginOneShotTurn();
             graceUsedThisTurn = false;
             urgencyNotified = false;
             idleNudgeTimer = 0f;

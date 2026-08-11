@@ -27,8 +27,15 @@ namespace CastleBusters
 
             yield return new WaitForSeconds(1.5f);
             var targetPos = FindTargetPosition() + new Vector2(Random.Range(-errorOffsetRange, errorOffsetRange), Random.Range(-errorOffsetRange, errorOffsetRange));
+            var gameManager = GameManager.Instance;
 
-            var prefab = unitPrefabs[Random.Range(0, unitPrefabs.Length)];
+            var automaticPrefab = gameManager != null && gameManager.EnforcesOneShotTurns
+                ? gameManager.AutomaticProjectilePrefab
+                : null;
+            var prefab = automaticPrefab != null
+                ? automaticPrefab
+                : unitPrefabs[Random.Range(0, unitPrefabs.Length)];
+            if (prefab == null) { gameManager?.OnUnitLaunched(null); yield break; }
             float mass = UnitController.MinRuntimeMass;
             float linearDrag = 0f;
             float hardCeilingY = UnitController.DefaultHardCeilingY;
@@ -43,7 +50,6 @@ namespace CastleBusters
                 hardCeilingY = prefabUnit.hardCeilingY;
             }
 
-            var gameManager = GameManager.Instance;
             if (gameManager != null)
             {
                 // Wind is spatial. The runtime body and this prediction must start from the
@@ -55,6 +61,8 @@ namespace CastleBusters
             var velocity = gameManager != null
                 ? gameManager.PrepareLastStandLaunchVelocity(false, desiredFinalVelocity)
                 : desiredFinalVelocity;
+
+            if (gameManager != null && !gameManager.TryCommitTurnShot()) yield break;
 
             var unitGo = Instantiate(prefab, GetLaunchPosition(), Quaternion.identity);
             // See UnitController.SnapColliderAboveGround: without this the unit spawns embedded
