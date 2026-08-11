@@ -353,7 +353,13 @@ namespace CastleBusters.Tests
                 Assert.IsInstanceOf<WaitForSeconds>(routine.Current);
                 Assert.IsFalse(routine.MoveNext(), "The launch coroutine must complete after solving and spawning its shot.");
 
-                Assert.AreEqual(aiMuzzle, gameManager.windEffectOrigin,
+                // The origin is the point the projectile actually appears from, which is the
+                // launch anchor raised by DefaultLaunchSpawnHeight -- not the bare anchor. The
+                // implementation moved to the spawn point deliberately (wind should blow from
+                // where the shot is, not from a marker under it) and this expectation was left
+                // behind, failing in every run of this suite since.
+                Vector2 expectedOrigin = aiMuzzle + Vector2.up * UnitController.DefaultLaunchSpawnHeight;
+                Assert.AreEqual(expectedOrigin, gameManager.windEffectOrigin,
                     "The AI launch path must replace a stale player-shot wind origin with the AI muzzle before solving and launching.");
             }
             finally
