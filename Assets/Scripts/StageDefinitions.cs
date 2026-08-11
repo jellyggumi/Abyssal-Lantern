@@ -16,6 +16,11 @@ namespace CastleBusters
     /// cluttered.</summary>
     public enum StageId { Stage1, Stage2, Stage3 }
 
+    /// <summary>Wall material tier for one keep course. Maps 1:1 onto the BlockData
+    /// resources (Wood 30 / Stone 85 / Iron 150 HP) so a stage's silhouette states its
+    /// durability without text: timber splinters, stone holds, iron gleams.</summary>
+    public enum KeepTier { Wood, Stone, Iron }
+
     /// <summary>
     /// Pure per-stage layout + composition numbers. GameManager copies these into its
     /// mutable static fields (CoreAbsX stays shared/unchanged; LaunchApronAbsX + ring
@@ -62,12 +67,17 @@ namespace CastleBusters
         // Multiplies the background sprite's tint (CreateBackground) for a per-stage mood
         // without needing dedicated art: white = unchanged, Stage2 = ashen grey.
         public readonly Color backgroundTint;
+        // Wall material per keep course, aligned index-for-index with GameManager.KeepProfile
+        // (outpost, outer, middle, inner). Level design lives here: the same four-course
+        // profile reads differently per stage because the materials differ, not the shape.
+        public readonly KeepTier[] keepCourseMaterials;
 
         public StageLayout(StageId id, string displayName, float launchApronAbsX, float groundHalfWidth,
             float groundAnchorAbsX, float gateAbsX, float windCapEnd,
             float cameraDesiredWorldWidth, float cameraMaxHalfHeight,
             Vector3[] barrelPositions, int wallHeightBlocks, int maxFieldObstacles, int mutateEveryNTurns,
-            Color backgroundTint, FieldObstacleKind[] allowedGimmicks, bool locked = false)
+            Color backgroundTint, FieldObstacleKind[] allowedGimmicks, KeepTier[] keepCourseMaterials,
+            bool locked = false)
         {
             this.id = id;
             this.displayName = displayName;
@@ -84,6 +94,7 @@ namespace CastleBusters
             this.mutateEveryNTurns = mutateEveryNTurns;
             this.backgroundTint = backgroundTint;
             this.allowedGimmicks = allowedGimmicks;
+            this.keepCourseMaterials = keepCourseMaterials;
             this.locked = locked;
         }
     }
@@ -110,7 +121,12 @@ namespace CastleBusters
             maxFieldObstacles: 6,
             mutateEveryNTurns: 3,
             backgroundTint: Color.white,
-            allowedGimmicks: new[] { FieldObstacleKind.Barrel, FieldObstacleKind.MiniTower, FieldObstacleKind.Rune, FieldObstacleKind.Patrol });
+            allowedGimmicks: new[] { FieldObstacleKind.Barrel, FieldObstacleKind.MiniTower, FieldObstacleKind.Rune, FieldObstacleKind.Patrol },
+            // 목책 전초 → 석재 성벽 → 철재 내성: the approach is soft and teaches the breach,
+            // the wall line holds, the course shielding the core gleams. Wall HP total
+            // 2·30 + 3·85 + 4·85 + 5·150 = 1405, which puts the MatchLengthModel estimate
+            // at ~315s — closer to the 300s target than the old all-stone 1190 (~271s).
+            keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Stone, KeepTier.Stone, KeepTier.Iron });
 
         // Stage2 "Desolate Dunes": a close-quarters fortress duel, not a smaller Stage1.
         // Launch apron pulled in from 14.5 to 13.5 (player-to-player distance 29 -> 27,
@@ -145,7 +161,12 @@ namespace CastleBusters
             maxFieldObstacles: 4,
             mutateEveryNTurns: 2,
             backgroundTint: new Color(1.0f, 0.9f, 0.7f, 1f),
-            allowedGimmicks: new[] { FieldObstacleKind.Rune, FieldObstacleKind.SpikeTrap, FieldObstacleKind.Patrol });
+            allowedGimmicks: new[] { FieldObstacleKind.Rune, FieldObstacleKind.SpikeTrap, FieldObstacleKind.Patrol },
+            // A bastion is strongest at its wall line: the iron bulwark sits at the MIDDLE
+            // course, with plain stone behind it — breach the bulwark and the rest goes
+            // quickly. Wall HP total 2·30 + 4·85 + 5·150 + 6·85 = 1660 (+15% over
+            // all-stone), a deliberate step up from Stage1's 1405.
+            keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Stone, KeepTier.Iron, KeepTier.Stone });
 
         // Stage3 "Volcanic Abyss": a vast long-range gorge, not just a wider Stage1.
         // Launch apron pushed from 14.5 to 18.5 (player-to-player distance 29 -> 37,
@@ -188,7 +209,13 @@ namespace CastleBusters
             maxFieldObstacles: 7,
             mutateEveryNTurns: 4,
             backgroundTint: new Color(1.0f, 0.75f, 0.7f, 1f),
-            allowedGimmicks: new[] { FieldObstacleKind.Barrel, FieldObstacleKind.MiniTower, FieldObstacleKind.SpikeTrap });
+            allowedGimmicks: new[] { FieldObstacleKind.Barrel, FieldObstacleKind.MiniTower, FieldObstacleKind.SpikeTrap },
+            // The final citadel: a stone outwork makes even the first breach cost real
+            // shots, the charred timber palisade behind it burns away fast (volcanic ash
+            // reading), and the innermost course is iron. Wall HP total
+            // 2·85 + 5·30 + 6·85 + 7·150 = 1880 (+11% over all-stone) — the top of the
+            // campaign's 1405 → 1660 → 1880 durability ladder.
+            keepCourseMaterials: new[] { KeepTier.Stone, KeepTier.Wood, KeepTier.Stone, KeepTier.Iron });
 
         public static StageLayout For(StageId id)
         {

@@ -688,16 +688,65 @@ namespace CastleBusters
             return positions;
         }
 
+        /// <summary>Blocks in one course for a given stage wall height — the single
+        /// authority both spawning and the balance tests measure against.</summary>
+        public static int CourseHeightBlocks(KeepCourse course, int wallHeightBlocks)
+            => course.IsOutpost
+                ? OutpostHeightBlocks
+                : Mathf.Max(1, wallHeightBlocks + course.HeightOffset);
+
+        /// <summary>Resource name of the BlockData asset backing a keep material tier.</summary>
+        public static string BlockDataResourceFor(KeepTier tier)
+        {
+            switch (tier)
+            {
+                case KeepTier.Wood: return "WoodBlockData";
+                case KeepTier.Iron: return "IronBlockData";
+                default: return "StoneBlockData";
+            }
+        }
+
+        /// <summary>Material tier of a keep course for a stage. Stages without a material
+        /// profile (defensive default) read as all-stone, the historical behaviour.</summary>
+        public static KeepTier CourseMaterial(StageLayout layout, int courseIndex)
+        {
+            var materials = layout.keepCourseMaterials;
+            if (materials == null || courseIndex < 0 || courseIndex >= materials.Length) return KeepTier.Stone;
+            return materials[courseIndex];
+        }
+
+        /// <summary>
+        /// Total wall hit points of one side's keep for a stage, from the same course
+        /// heights and material tiers that actually spawn. The balance tests feed this
+        /// into MatchLengthModel so the pacing estimate tracks the real fortress.
+        /// </summary>
+        public static float KeepWallHitPoints(StageLayout layout, float woodHp, float stoneHp, float ironHp)
+        {
+            float total = 0f;
+            for (int i = 0; i < KeepProfile.Length; i++)
+            {
+                float hp;
+                switch (CourseMaterial(layout, i))
+                {
+                    case KeepTier.Wood: hp = woodHp; break;
+                    case KeepTier.Iron: hp = ironHp; break;
+                    default: hp = stoneHp; break;
+                }
+                total += CourseHeightBlocks(KeepProfile[i], layout.wallHeightBlocks) * hp;
+            }
+            return total;
+        }
+
         private void SpawnCastleWalls()
         {
-            foreach (var course in KeepProfile)
+            for (int i = 0; i < KeepProfile.Length; i++)
             {
-                int height = course.IsOutpost
-                    ? OutpostHeightBlocks
-                    : Mathf.Max(1, ActiveLayout.wallHeightBlocks + course.HeightOffset);
+                var course = KeepProfile[i];
+                int height = CourseHeightBlocks(course, ActiveLayout.wallHeightBlocks);
+                var material = Resources.Load<BlockData>(BlockDataResourceFor(CourseMaterial(ActiveLayout, i)));
 
-                SpawnCastleWall(new Vector3(-course.AbsX, 0.5f, 0f), true, height);
-                SpawnCastleWall(new Vector3(course.AbsX, 0.5f, 0f), false, height);
+                SpawnCastleWall(new Vector3(-course.AbsX, 0.5f, 0f), true, height, material);
+                SpawnCastleWall(new Vector3(course.AbsX, 0.5f, 0f), false, height, material);
             }
         }
 
@@ -709,7 +758,9 @@ namespace CastleBusters
         /// </summary>
         /// <param name="heightOverride">Blocks to stack. Null uses the active stage's wall
         /// height, which is what a caller outside the keep profile wants.</param>
-        public GameObject SpawnCastleWall(Vector3 basePosition, bool isPlayerSide, int? heightOverride = null)
+        /// <param name="materialOverride">BlockData applied to every block in the column.
+        /// Null keeps the historical stone default for callers outside the keep profile.</param>
+        public GameObject SpawnCastleWall(Vector3 basePosition, bool isPlayerSide, int? heightOverride = null, BlockData materialOverride = null)
         {
             if (LaunchRingRules.IsInsideRing(basePosition))
             {
@@ -719,7 +770,7 @@ namespace CastleBusters
 
             var blockPrefab = Resources.Load<GameObject>("DestructibleBlock");
             if (blockPrefab == null) return null;
-            var stone = Resources.Load<BlockData>("StoneBlockData");
+            var stone = materialOverride != null ? materialOverride : Resources.Load<BlockData>("StoneBlockData");
 
             var root = new GameObject(isPlayerSide ? "PlayerWall" : "EnemyWall");
             root.transform.position = basePosition;

@@ -504,8 +504,8 @@ namespace CastleBusters.Tests
             var launchVelocityField = typeof(LaunchManager).GetField("launchVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var velocity = (Vector2)launchVelocityField.GetValue(lm);
             Assert.IsTrue(velocity.magnitude > 0f, "Launch velocity should be calculated during drag!");
-            Assert.Less(velocity.x, 0f, "Velocity X should be negative in direct drag mode when dragging left!");
-            Assert.Less(velocity.y, 0f, "Velocity Y should be negative in direct drag mode when dragging down!");
+            Assert.Greater(velocity.x, 0f, "Pulling the pouch left must throw right (slingshot pull)!");
+            Assert.Greater(velocity.y, 0f, "Pulling the pouch down must throw upward (slingshot pull)!");
             // Act 3: Release pointer
             lm.SetSimulatedPointer(new Vector2(-15f, -2f), false, false, true);
             handleInputMethod.Invoke(lm, null);
@@ -1045,16 +1045,16 @@ namespace CastleBusters.Tests
             launchManager.launchForceMultiplier = 10f;
             launchManager.maxLaunchVelocity = 12f;
 
-            // Dragging to the left (-100, 0) should result in a velocity pointing to the left (negative X)
+            // Slingshot pull: drawing the pouch to the left (-100, 0) throws to the RIGHT.
             Vector2 velocityLeft = launchManager.CalculateLaunchVelocity(new Vector2(-100f, 0f));
             Assert.LessOrEqual(velocityLeft.magnitude, launchManager.maxLaunchVelocity + 0.001f);
-            Assert.Less(velocityLeft.x, 0f);
+            Assert.Greater(velocityLeft.x, 0f);
             Assert.AreEqual(0f, velocityLeft.y, 0.001f);
 
-            // Dragging to the right (100, 0) should result in a velocity pointing to the right (positive X)
+            // Drawing the pouch to the right (100, 0) throws to the LEFT.
             Vector2 velocityRight = launchManager.CalculateLaunchVelocity(new Vector2(100f, 0f));
             Assert.LessOrEqual(velocityRight.magnitude, launchManager.maxLaunchVelocity + 0.001f);
-            Assert.Greater(velocityRight.x, 0f);
+            Assert.Less(velocityRight.x, 0f);
             Assert.AreEqual(0f, velocityRight.y, 0.001f);
 
             Assert.AreEqual(1f, launchManager.GetPullTensionRatio(new Vector2(-100f, 0f)), 0.001f);
@@ -1082,8 +1082,8 @@ namespace CastleBusters.Tests
                 Vector2 pointer = (Vector2)launchPointGo.transform.position + Vector2.left * 4.2f;
                 Vector2 velocity = launchManager.CalculateLaunchVelocity(pointer);
 
-                Assert.AreEqual(-25.2f, velocity.x, 0.001f,
-                    "A full leftward draw must preserve aim while reaching the tuned launch cap.");
+                Assert.AreEqual(25.2f, velocity.x, 0.001f,
+                    "A full leftward draw must throw RIGHT (slingshot pull) at the tuned launch cap.");
                 Assert.AreEqual(0f, velocity.y, 0.001f);
                 Assert.AreEqual(25.2f, velocity.magnitude, 0.001f,
                     "A 4.2-unit full draw must launch at 25.2 m/s.");
@@ -1122,7 +1122,8 @@ namespace CastleBusters.Tests
                     "A 0.49-unit pull must remain below the 3 m/s launch threshold.");
                 Assert.AreEqual(3f, atThreshold.magnitude, 0.001f,
                     "The exact 0.50-unit boundary must reach 3 m/s without an off-by-one dead zone.");
-                Assert.Greater(atThreshold.y, 0f, "Threshold handling must preserve the aimed direction.");
+                Assert.Less(atThreshold.y, 0f,
+                    "An upward pull must throw downward — threshold handling must preserve the slingshot direction.");
             }
             finally
             {

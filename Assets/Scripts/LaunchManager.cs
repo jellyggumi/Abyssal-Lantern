@@ -612,41 +612,40 @@ namespace CastleBusters
         private void HandleInput()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            // Test fixtures use this seam to exercise the retired drag path without making it
-            // available to players.  Runtime input below is exclusively separate angle/power.
+            // Test fixtures drive the same drag path through the simulated pointer seam so
+            // what they exercise is exactly what the player performs.
             if (useSimulatedPointer)
             {
-                HandleSimulatedPointerInput();
+                HandleDragAimInput();
                 return;
             }
 #endif
-            HandleSeparatedAimInput();
+            HandleKeyboardFineTune();
+            HandleDragAimInput();
         }
 
-        private void HandleSeparatedAimInput()
+        /// <summary>
+        /// Keyboard fallback: arrows nudge angle/power, Space commits the tuned shot.
+        /// A pointer click deliberately does NOT fire — committing a launch requires
+        /// either the full pull gesture or an explicit Space press, never a bare tap.
+        /// </summary>
+        private void HandleKeyboardFineTune()
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow)) AdjustAimAngle(-angleStepDegrees);
             if (Input.GetKeyDown(KeyCode.RightArrow)) AdjustAimAngle(angleStepDegrees);
             if (Input.GetKeyDown(KeyCode.DownArrow)) AdjustAimPower(-powerStep);
             if (Input.GetKeyDown(KeyCode.UpArrow)) AdjustAimPower(powerStep);
 
+            if (isDragging) return; // an active pull owns the trajectory preview
+
             launchVelocity = GetSeparatedAimVelocity();
             DrawTrajectory(launchVelocity);
             UpdateLaunchStats(launchVelocity);
 
-            bool fire = Input.GetKeyDown(KeyCode.Space);
-            if (!fire && Input.GetMouseButtonDown(0) && Camera.main != null)
-            {
-                Vector2 pointer = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                fire = IsWithinLaunchAffordance(pointer) &&
-                    (UnityEngine.EventSystems.EventSystem.current == null ||
-                     !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject());
-            }
-
-            if (fire) LaunchUnit();
+            if (Input.GetKeyDown(KeyCode.Space)) LaunchUnit();
         }
 
-        private void HandleSimulatedPointerInput()
+        private void HandleDragAimInput()
         {
             if (!TryReadPointer(out var pointerWorldPos, out var pressed, out var held, out var released)) return;
 
@@ -740,11 +739,16 @@ namespace CastleBusters
             return launchPoint != null && Vector2.Distance(worldPosition, launchPoint.position) <= launchActivationRadius;
         }
 
+        /// <summary>
+        /// Slingshot pull: the shot flies OPPOSITE the drag. Pulling the pouch down-left
+        /// throws up-right, exactly like the band the affordance art depicts. Draw depth
+        /// (clamped to maxDragDistance) sets power; the pull direction sets the angle.
+        /// </summary>
         public Vector2 CalculateLaunchVelocity(Vector2 pointerWorldPosition)
         {
-            Vector2 dragVector = pointerWorldPosition - GetLaunchAnchorPosition();
-            Vector2 clampedDrag = Vector2.ClampMagnitude(dragVector, maxDragDistance);
-            Vector2 velocity = clampedDrag * launchForceMultiplier;
+            Vector2 pullVector = GetLaunchAnchorPosition() - pointerWorldPosition;
+            Vector2 clampedPull = Vector2.ClampMagnitude(pullVector, maxDragDistance);
+            Vector2 velocity = clampedPull * launchForceMultiplier;
             float cappedMagnitude = Mathf.Min(maxLaunchVelocity, velocity.magnitude);
             return velocity.sqrMagnitude > 0.0001f ? velocity.normalized * cappedMagnitude : Vector2.zero;
         }

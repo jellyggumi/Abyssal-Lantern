@@ -96,6 +96,16 @@ namespace CastleBusters.Tests
                 "a keep that is one column deep is what this replaced");
         }
 
+        static float LoadedHp(string resource)
+        {
+            var data = Resources.Load<BlockData>(resource);
+            Assert.IsNotNull(data, $"wall blocks take their health from {resource}");
+            return data.maxHP;
+        }
+
+        static float WallHitPoints(StageLayout layout) => GameManager.KeepWallHitPoints(
+            layout, LoadedHp("WoodBlockData"), LoadedHp("StoneBlockData"), LoadedHp("IronBlockData"));
+
         [Test]
         public void Keep_IsSizedForTheTargetMatchLength()
         {
@@ -104,18 +114,59 @@ namespace CastleBusters.Tests
             // trouble reaching a screened core said nothing about a player who aims. Sizing the
             // keep against a target match length is the thing actually worth defending, and it
             // fails loudly in both directions: too thin ends matches early, too thick grinds.
-            var stone = Resources.Load<BlockData>("StoneBlockData");
-            Assert.IsNotNull(stone, "wall blocks take their health from StoneBlockData");
-
-            float seconds = MatchLengthModel.EstimatedMatchSeconds(
-                GameManager.BlocksPerKeep(BaselineWallHeightBlocks),
-                stone.maxHP,
-                CastleCoreGimmick.CoreMaxHP);
+            // Measured against the REAL per-course materials (wood outpost, stone walls, iron
+            // inner) rather than pretending every course is stone.
+            float material = WallHitPoints(StageDefinitions.Stage1) + CastleCoreGimmick.CoreMaxHP;
+            float seconds = MatchLengthModel.SecondsToDecide(
+                material,
+                MatchLengthModel.EffectiveDamagePerTurn,
+                MatchLengthModel.AverageTurnSeconds);
             float tolerance = MatchLengthModel.TargetMatchSeconds * MatchLengthModel.ToleranceFraction;
 
             Assert.That(seconds,
                 Is.EqualTo(MatchLengthModel.TargetMatchSeconds).Within(tolerance),
                 $"a decided match models at {seconds:F0}s against a {MatchLengthModel.TargetMatchSeconds:F0}s target");
+        }
+
+        [Test]
+        public void KeepMaterials_EveryStageProfilesEveryCourse()
+        {
+            foreach (var layout in new[] { StageDefinitions.Stage1, StageDefinitions.Stage2, StageDefinitions.Stage3 })
+            {
+                Assert.IsNotNull(layout.keepCourseMaterials,
+                    $"{layout.displayName} must declare a keep material profile");
+                Assert.AreEqual(GameManager.KeepProfile.Length, layout.keepCourseMaterials.Length,
+                    $"{layout.displayName} must assign a material to every keep course");
+            }
+        }
+
+        [Test]
+        public void KeepMaterials_DurabilityClimbsAcrossTheCampaign()
+        {
+            // 1405 → 1660 → 1880: each unlock should present a genuinely tougher fortress,
+            // through materials and height together, never a step down.
+            float s1 = WallHitPoints(StageDefinitions.Stage1);
+            float s2 = WallHitPoints(StageDefinitions.Stage2);
+            float s3 = WallHitPoints(StageDefinitions.Stage3);
+
+            Assert.Less(s1, s2, "Stage2's bastion must out-endure Stage1's plains keep");
+            Assert.Less(s2, s3, "Stage3's citadel must out-endure Stage2's bastion");
+        }
+
+        [Test]
+        public void KeepMaterials_StayNearTheAllStoneBaseline()
+        {
+            // Materials are level design, not a stealth balance patch: each stage's mixed
+            // profile must stay within −10%/+25% of what the same courses would total in
+            // plain stone, so pacing shifts stay a deliberate, reviewed decision.
+            float stoneHp = LoadedHp("StoneBlockData");
+            foreach (var layout in new[] { StageDefinitions.Stage1, StageDefinitions.Stage2, StageDefinitions.Stage3 })
+            {
+                float mixed = WallHitPoints(layout);
+                float allStone = GameManager.BlocksPerKeep(layout.wallHeightBlocks) * stoneHp;
+                Assert.That(mixed / allStone, Is.InRange(0.9f, 1.25f),
+                    $"{layout.displayName}: mixed-material walls ({mixed}) drift too far from the all-stone baseline ({allStone})");
+            }
         }
     }
 }
