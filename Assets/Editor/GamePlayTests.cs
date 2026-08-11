@@ -1901,7 +1901,7 @@ namespace CastleBusters.Tests
             Assert.AreEqual(gm.aiErrorStart, gm.CurrentAiErrorOffset, 0.001f);
 
             // Mid-ramp: strictly between the endpoints, and monotonic.
-            turnCountField.SetValue(gm, gm.difficultyRampTurns / 2);
+            turnCountField.SetValue(gm, gm.EffectiveDifficultyRampTurns / 2);
             float midWind = gm.CurrentWindCap;
             float midError = gm.CurrentAiErrorOffset;
             Assert.Greater(midWind, gm.windCapStart);
@@ -1913,7 +1913,10 @@ namespace CastleBusters.Tests
             // exactly 1.0 here, which froze wind, AI error and storm odds for the rest of
             // the match; DifficultyCurve now approaches the endpoints asymptotically so a
             // long siege keeps tightening. See DifficultyCurveTests for the curve's shape.
-            turnCountField.SetValue(gm, gm.difficultyRampTurns * 3);
+            // Against the ramp actually in effect, not the superseded inspector field: that
+            // field still reads 15 while a match now runs past thirty turns, so multiplying it
+            // sampled barely past the ramp instead of well beyond it.
+            turnCountField.SetValue(gm, gm.EffectiveDifficultyRampTurns * 3);
             float lateT = gm.DifficultyT;
             float lateWind = gm.CurrentWindCap;
             Assert.Greater(lateT, 0.85f, "Deep into a match the pressure must be near maximum.");
@@ -1924,7 +1927,7 @@ namespace CastleBusters.Tests
             Assert.Greater(gm.CurrentAiErrorOffset, gm.aiErrorEnd);
             Assert.Less(gm.CurrentStormChance, gm.stormChanceEnd);
 
-            turnCountField.SetValue(gm, gm.difficultyRampTurns * 6);
+            turnCountField.SetValue(gm, gm.EffectiveDifficultyRampTurns * 6);
             Assert.Greater(gm.DifficultyT, lateT, "Even a very long match must keep escalating.");
 
             Object.DestroyImmediate(go);

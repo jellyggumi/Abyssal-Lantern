@@ -54,9 +54,13 @@ namespace CastleBusters
         private float turnTimer;
 
         [Header("Difficulty Curve")]
-        // Session difficulty ramp: turn 0 -> gentle breeze + sloppy AI, turn ~difficultyRampTurns ->
-        // gale-force wind ceiling + tight AI groupings. SmoothStep keeps the mid-game the steepest
-        // part of the curve (slow onboarding, accelerating pressure, plateaued endgame).
+        // Session difficulty ramp: turn 0 -> gentle breeze + sloppy AI, late match -> gale-force
+        // wind ceiling + tight AI groupings.
+        //
+        // SUPERSEDED, and kept only so existing scene data deserialises without warnings: the
+        // ramp is now derived per stage from the match-length model (EffectiveDifficultyRampTurns).
+        // Editing this value in the inspector changes nothing. It was left at 15 while a match
+        // grew past thirty turns, which is exactly the drift that deriving it prevents.
         public int difficultyRampTurns = 15;
         public float windCapStart = 2.0f;
         public float windCapEnd = 6.5f;
@@ -166,10 +170,43 @@ namespace CastleBusters
         public float TurnTimeRemaining => turnTimer;
         public int TurnCount => turnCount;
 
+        /// <summary>
+        /// Turns the ramp is spread over, derived from how long this stage's match actually
+        /// runs rather than read from the inspector.
+        ///
+        /// The serialized 15 was tuned when a keep was a couple of blocks and a match was about
+        /// that long. With four courses a match runs past thirty turns, so a half-way point at
+        /// turn 9 put difficulty at ~74% by the midpoint and moved it almost nowhere after —
+        /// the flat back half the hill curve exists to prevent, reintroduced through a constant
+        /// that no longer described the game.
+        ///
+        /// Deriving it makes the ramp per-stage for free: a stage with taller walls is a longer
+        /// match and gets a proportionally longer ramp, so pressure tracks progress through the
+        /// siege instead of an absolute turn number.
+        /// </summary>
+        public int EffectiveDifficultyRampTurns
+        {
+            get
+            {
+                if (cachedRampTurns > 0) return cachedRampTurns;
+
+                var stone = Resources.Load<BlockData>("StoneBlockData");
+                float blockHealth = stone != null ? stone.maxHP : 85f;
+                float material = MatchLengthModel.Material(
+                    BlocksPerKeep(ActiveLayout.wallHeightBlocks), blockHealth, CastleCoreGimmick.CoreMaxHP);
+
+                cachedRampTurns = Mathf.Max(1, Mathf.RoundToInt(
+                    MatchLengthModel.TurnsToDecide(material, MatchLengthModel.EffectiveDamagePerTurn)));
+                return cachedRampTurns;
+            }
+        }
+
+        private int cachedRampTurns;
+
         // Strictly rising, non-linear, and never flat: see DifficultyCurve. The old
-        // smoothstep hit 1.0 at difficultyRampTurns and stopped, which left long matches
+        // smoothstep hit 1.0 at the ramp length and stopped, which left long matches
         // with an unchanging back half.
-        public float DifficultyT => DifficultyCurve.Evaluate(turnCount, difficultyRampTurns);
+        public float DifficultyT => DifficultyCurve.Evaluate(turnCount, EffectiveDifficultyRampTurns);
         public float CurrentWindCap => Mathf.Lerp(windCapStart, windCapEnd, DifficultyT);
         public float CurrentAiErrorOffset => Mathf.Lerp(aiErrorStart, aiErrorEnd, DifficultyT);
         public float CurrentStormChance => Mathf.Lerp(stormChanceStart, stormChanceEnd, DifficultyT);
