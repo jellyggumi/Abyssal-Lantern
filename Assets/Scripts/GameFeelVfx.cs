@@ -410,6 +410,13 @@ namespace CastleBusters
         private RectTransform toastBackplateRt;
         private Image toastBackplateImg;
         private Image turnProgressFill;
+        private Image playerTurnMarker;
+        private Image enemyTurnMarker;
+        private Image launchReadyMarker;
+        private Image launchReadyHorizontalMarker;
+        private Image launchReadyVerticalMarker;
+        private Image objectiveCoreMarker;
+        private Image completionSealMarker;
         private CoreHealthBadge playerCoreBadge;
         private CoreHealthBadge enemyCoreBadge;
         private CastleCoreGimmick playerCore;
@@ -456,13 +463,11 @@ namespace CastleBusters
 
         private void Update()
         {
-            // The gameplay HUD must stay invisible while an overlay owns the screen: the intro
-            // title card AND the results screen. Time.time is frozen under timeScale 0, so a
-            // "BREACH COMPLETE" toast or combo counter raised at the killing blow would
-            // otherwise hang behind the results card forever.
+            // The intro title card is the sole full-screen owner. The result card intentionally
+            // leaves the match rail visible so faction, core, and win-condition glyphs remain
+            // legible at the moment the match ends.
             var state = GameManager.Instance != null ? GameManager.Instance.currentState : GameState.PlayerTurn;
-            bool overlayOwnsScreen = state == GameState.Intro || state == GameState.GameOver;
-            if (overlayOwnsScreen)
+            if (state == GameState.Intro)
             {
                 if (root != null && root.gameObject.activeSelf) root.gameObject.SetActive(false);
                 return;
@@ -470,6 +475,13 @@ namespace CastleBusters
             EnsureHud();
             if (root != null && !root.gameObject.activeSelf) root.gameObject.SetActive(true);
             RefreshCoreReferences();
+            UpdatePersistentSignals(state);
+            if (state == GameState.GameOver)
+            {
+                HideTransientSignals();
+                UpdateCoreBadges();
+                return;
+            }
             UpdateToastExpiry();
             UpdateTurnProgress();
             UpdateCoreBadges();
@@ -820,6 +832,35 @@ namespace CastleBusters
 
             playerCoreBadge = new CoreHealthBadge(root, "KEEP CORE", new Vector2(0.18f, 0.84f), new Color(0.25f, 0.75f, 1f, 1f));
             enemyCoreBadge = new CoreHealthBadge(root, "BREACH CORE", new Vector2(0.82f, 0.84f), new Color(1f, 0.62f, 0.18f, 1f));
+
+            // A wordless rail: faction chevrons, a pulsing crosshair for a legal shot, and a
+            // diamond over the target core. Colour, side, shape, and motion all agree so the
+            // signal remains usable when labels are hidden or unreadable.
+            playerTurnMarker = CreateSignalMarker("PlayerTurnMarker", new Vector2(0.42f, 0.93f), new Color(0.25f, 0.75f, 1f, 1f), 34f, 45f);
+            enemyTurnMarker = CreateSignalMarker("EnemyTurnMarker", new Vector2(0.58f, 0.93f), new Color(1f, 0.48f, 0.2f, 1f), 34f, -45f);
+            launchReadyMarker = CreateCrosshairMarker("LaunchReadyMarker", new Vector2(0.5f, 0.17f), new Color(1f, 0.82f, 0.22f, 1f));
+            objectiveCoreMarker = CreateSignalMarker("ObjectiveCoreMarker", new Vector2(0.5f, 0.93f), new Color(1f, 0.82f, 0.22f, 1f), 22f, 45f);
+            completionSealMarker = CreateSignalMarker("MatchCompleteSeal", new Vector2(0.5f, 0.93f), new Color(1f, 0.94f, 0.58f, 1f), 34f, 0f);
+            completionSealMarker.gameObject.SetActive(false);
+        }
+
+        private Image CreateSignalMarker(string name, Vector2 anchor, Color color, float size, float rotation)
+        {
+            var marker = CreatePanel(name, anchor, new Vector2(0.5f, 0.5f), new Vector2(size, size), color).GetComponent<Image>();
+            marker.rectTransform.localRotation = Quaternion.Euler(0f, 0f, rotation);
+            return marker;
+        }
+
+        private Image CreateCrosshairMarker(string name, Vector2 anchor, Color color)
+        {
+            var marker = CreateSignalMarker(name, anchor, color, 42f, 45f);
+            var horizontal = CreatePanel(name + "Horizontal", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(58f, 5f), color);
+            horizontal.transform.SetParent(marker.transform, false);
+            var vertical = CreatePanel(name + "Vertical", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(5f, 58f), color);
+            vertical.transform.SetParent(marker.transform, false);
+            launchReadyHorizontalMarker = horizontal.GetComponent<Image>();
+            launchReadyVerticalMarker = vertical.GetComponent<Image>();
+            return marker;
         }
 
         private TextMeshProUGUI CreateText(string name, Vector2 anchor, Vector2 pivot, Vector2 size, int fontSize, TextAlignmentOptions alignment, Color color)
@@ -899,6 +940,46 @@ namespace CastleBusters
                 lastTurnLabel = label;
                 NotifyTurnChanged(GameManager.Instance.IsPlayerTurn);
             }
+        }
+
+        private void UpdatePersistentSignals(GameState state)
+        {
+            if (GameManager.Instance == null) return;
+            var signal = PersistentSiegeHudState.From(state, GameManager.Instance.IsPlayerTurn, GameManager.Instance.IsResolvingTurn);
+            SetMarker(playerTurnMarker, signal.PlayerFactionActive, 1f, new Color(0.25f, 0.75f, 1f, 1f));
+            SetMarker(enemyTurnMarker, signal.EnemyFactionActive, 1f, new Color(1f, 0.48f, 0.2f, 1f));
+            SetMarker(objectiveCoreMarker, signal.ObjectiveCoreHighlighted, 0.9f, new Color(1f, 0.82f, 0.22f, 1f));
+            SetMarker(completionSealMarker, signal.MatchComplete, 1f, new Color(1f, 0.94f, 0.58f, 1f));
+            if (objectiveCoreMarker != null) objectiveCoreMarker.gameObject.SetActive(signal.ObjectiveCoreHighlighted);
+            if (completionSealMarker != null) completionSealMarker.gameObject.SetActive(signal.MatchComplete);
+
+            if (launchReadyMarker != null)
+            {
+                launchReadyMarker.gameObject.SetActive(true);
+                float pulse = signal.LaunchReady ? 1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.14f : 0.62f;
+                launchReadyMarker.rectTransform.localScale = Vector3.one * pulse;
+                var color = new Color(1f, 0.82f, 0.22f, signal.LaunchReady ? 1f : 0.22f);
+                launchReadyMarker.color = color;
+                if (launchReadyHorizontalMarker != null) launchReadyHorizontalMarker.color = color;
+                if (launchReadyVerticalMarker != null) launchReadyVerticalMarker.color = color;
+            }
+        }
+
+        private static void SetMarker(Image marker, bool active, float activeScale, Color color)
+        {
+            if (marker == null) return;
+            marker.gameObject.SetActive(true);
+            marker.rectTransform.localScale = Vector3.one * (active ? activeScale : 0.62f);
+            color.a = active ? 1f : 0.2f;
+            marker.color = color;
+        }
+
+        private void HideTransientSignals()
+        {
+            if (turnToastText != null) turnToastText.gameObject.SetActive(false);
+            if (toastBackplate != null) toastBackplate.SetActive(false);
+            if (comboText != null) comboText.gameObject.SetActive(false);
+            if (comboBackplate != null) comboBackplate.SetActive(false);
         }
 
 

@@ -36,6 +36,11 @@ namespace CastleBusters
         private GameObject selectedUnitPrefab;
         private Bounds selectedLaunchBodyBounds = new Bounds(Vector3.zero, new Vector3(0.05f, 0.05f, 0f));
         private bool selectedUnitUsesDeployment;
+        [Header("Separated Aim")]
+        [Range(10f, 80f)] public float aimAngleDegrees = 45f;
+        [Range(0f, 1f)] public float aimPower = 0.55f;
+        public float angleStepDegrees = 2f;
+        public float powerStep = 0.04f;
 
         private GameObject impactMarkerInstance;
         private GameObject launchPointIndicatorInstance;
@@ -62,6 +67,22 @@ namespace CastleBusters
 
         /// <summary>True while the player is actively drawing the bowstring (drag in progress).</summary>
         public bool IsAiming => isDragging;
+
+        public void SetAimAngle(float degrees) => aimAngleDegrees = OneShotSiegeRules.ClampAngle(degrees);
+        public void SetAimPower(float normalizedPower) => aimPower = OneShotSiegeRules.ClampPower(normalizedPower);
+        public void AdjustAimAngle(float deltaDegrees) => SetAimAngle(aimAngleDegrees + deltaDegrees);
+        public void AdjustAimPower(float deltaPower) => SetAimPower(aimPower + deltaPower);
+
+        public Vector2 GetSeparatedAimVelocity()
+        {
+            bool playerTurn = GameManager.Instance == null || GameManager.Instance.IsPlayerTurn;
+            return OneShotSiegeRules.Velocity(
+                aimAngleDegrees,
+                aimPower,
+                minLaunchVelocity,
+                maxLaunchVelocity,
+                playerTurn ? 1f : -1f);
+        }
 
         private Sprite CreateCircleSprite(float radius, Color color)
         {
@@ -590,6 +611,43 @@ namespace CastleBusters
 
         private void HandleInput()
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // Test fixtures use this seam to exercise the retired drag path without making it
+            // available to players.  Runtime input below is exclusively separate angle/power.
+            if (useSimulatedPointer)
+            {
+                HandleSimulatedPointerInput();
+                return;
+            }
+#endif
+            HandleSeparatedAimInput();
+        }
+
+        private void HandleSeparatedAimInput()
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) AdjustAimAngle(-angleStepDegrees);
+            if (Input.GetKeyDown(KeyCode.RightArrow)) AdjustAimAngle(angleStepDegrees);
+            if (Input.GetKeyDown(KeyCode.DownArrow)) AdjustAimPower(-powerStep);
+            if (Input.GetKeyDown(KeyCode.UpArrow)) AdjustAimPower(powerStep);
+
+            launchVelocity = GetSeparatedAimVelocity();
+            DrawTrajectory(launchVelocity);
+            UpdateLaunchStats(launchVelocity);
+
+            bool fire = Input.GetKeyDown(KeyCode.Space);
+            if (!fire && Input.GetMouseButtonDown(0) && Camera.main != null)
+            {
+                Vector2 pointer = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                fire = IsWithinLaunchAffordance(pointer) &&
+                    (UnityEngine.EventSystems.EventSystem.current == null ||
+                     !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject());
+            }
+
+            if (fire) LaunchUnit();
+        }
+
+        private void HandleSimulatedPointerInput()
+        {
             if (!TryReadPointer(out var pointerWorldPos, out var pressed, out var held, out var released)) return;
 
             if (pressed)
@@ -913,9 +971,10 @@ namespace CastleBusters
         {
             if (selectedUnitPrefab == null) return;
 
+            var gameManager = GameManager.Instance;
+            if (gameManager != null && !gameManager.TryCommitTurnShot()) return;
 
             Vector2 reportedVelocity = launchVelocity;
-            var gameManager = GameManager.Instance;
             if (gameManager != null)
             {
                 reportedVelocity = gameManager.PreviewLastStandLaunchVelocity(gameManager.IsPlayerTurn, reportedVelocity);

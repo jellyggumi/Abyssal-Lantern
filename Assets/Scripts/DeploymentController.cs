@@ -139,6 +139,13 @@ namespace CastleBusters
         private void Update()
         {
             var gm = GameManager.Instance;
+            if (gm != null && gm.EnforcesOneShotTurns)
+            {
+                // The new loop has no pre-shot placement decision for either faction.
+                DisarmDeployMode();
+                SetHudVisible(false);
+                return;
+            }
             bool battleLive = gm != null &&
                 (gm.currentState == GameState.PlayerTurn || gm.currentState == GameState.AITurn);
 

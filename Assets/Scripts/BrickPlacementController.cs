@@ -73,6 +73,14 @@ namespace CastleBusters
                 return;
             }
 
+            if (gm.EnforcesOneShotTurns)
+            {
+                // Reserving bricks is a placement action, so it is unavailable in the
+                // aim-once/fire-once loop just like roster deployment.
+                if (blockUIPanel != null) blockUIPanel.SetActive(false);
+                return;
+            }
+
             // Create UI dynamically if it doesn't exist
             if (blockUIPanel == null)
             {

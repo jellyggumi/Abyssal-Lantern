@@ -1023,6 +1023,7 @@ namespace CastleBusters.Tests
             sb.AppendLine();
             sb.AppendLine("This design creates a high-risk central zone where players can strategically target the bridge to drop enemy units into the abyss, while keeping their own castle foundations secure.");
 
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(reportPath));
             System.IO.File.WriteAllText(reportPath, sb.ToString());
             try
             {

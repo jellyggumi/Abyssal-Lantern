@@ -66,5 +66,43 @@ namespace CastleBusters.Tests
                 MatchLengthModel.AverageTurnSeconds);
             Assert.AreEqual(MatchLengthModel.TargetMatchSeconds, seconds, 0.01f);
         }
+
+        [Test]
+        public void FixedAimScenario_RepeatsTheSameMapHealthWeaponAndDuration()
+        {
+            var settings = SiegeBalanceSettings.Default;
+            SiegeMatchMeasurement first = SiegePacingSimulation.RunFixedAim(settings);
+            SiegeMatchMeasurement second = SiegePacingSimulation.RunFixedAim(settings);
+
+            Assert.That(first.mapId, Is.EqualTo(SiegeBalanceSettings.DefaultMapId));
+            Assert.That(first.siegeWeaponId, Is.EqualTo(SiegeBalanceSettings.DefaultSiegeWeaponId));
+            Assert.That(first.profile, Is.EqualTo(SiegeSimulationProfile.FixedAim));
+            Assert.That(first.initialKeepDurability, Is.EqualTo(settings.KeepDurability));
+            Assert.That(second.initialKeepDurability, Is.EqualTo(settings.KeepDurability));
+            Assert.That(first.durationSeconds, Is.EqualTo(second.durationSeconds));
+            Assert.That(first.turns, Is.EqualTo(second.turns));
+            Assert.That(settings.KeepDurability, Is.EqualTo(12 * 90f + 360f));
+        }
+
+        [Test]
+        public void BeginnerAimError_TwentyMatchGateMeetsFiveMinuteDistribution()
+        {
+            var measurements = SiegePacingSimulation.RunBeginnerSeries(SiegeBalanceSettings.Default, 20260811);
+            float average = SiegePacingSimulation.AverageDuration(measurements);
+            int earlyEnds = SiegePacingSimulation.EarlyEndCount(measurements);
+
+            Assert.That(measurements, Has.Count.EqualTo(SiegePacingSimulation.RequiredBeginnerMatches));
+            foreach (SiegeMatchMeasurement measurement in measurements)
+            {
+                Assert.That(measurement.mapId, Is.EqualTo(SiegeBalanceSettings.DefaultMapId));
+                Assert.That(measurement.siegeWeaponId, Is.EqualTo(SiegeBalanceSettings.DefaultSiegeWeaponId));
+                Assert.That(measurement.initialKeepDurability, Is.EqualTo(SiegeBalanceSettings.Default.KeepDurability));
+                Assert.That(measurement.profile, Is.EqualTo(SiegeSimulationProfile.BeginnerAimError));
+            }
+            Assert.That(average, Is.InRange(
+                SiegePacingSimulation.MinimumAverageSeconds,
+                SiegePacingSimulation.MaximumAverageSeconds));
+            Assert.That(earlyEnds, Is.LessThanOrEqualTo(SiegePacingSimulation.MaximumEarlyEndMatches));
+        }
     }
 }
