@@ -2118,7 +2118,11 @@ namespace CastleBusters
 
         private IEnumerator ExecuteAITurn()
         {
-            yield return new WaitForSeconds(1.5f);
+            // Arcade tempo: the old 1.5s here stacked with SimpleAI's own 1.5s pre-launch
+            // pause into 3.0s of dead air on EVERY enemy turn (~17% of a whole match spent
+            // watching nothing). Web-arcade siege games hand the rhythm back immediately;
+            // 0.4s + 0.5s keeps a readable beat without the wait.
+            yield return new WaitForSeconds(0.4f);
             var ai = FindObjectOfType<SimpleAI>();
             if (ai != null)
             {

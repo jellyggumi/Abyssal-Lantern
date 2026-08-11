@@ -39,11 +39,16 @@ namespace CastleBusters
         /// ±20% is roughly the point where a match stops reading as "about five minutes".</summary>
         public const float ToleranceFraction = 0.2f;
 
-        /// <summary>s — seconds a turn actually takes at the table, not the turn timer's cap.</summary>
-        public const float AverageTurnSeconds = 8.5f;
+        /// <summary>s — seconds a turn actually takes at the table, not the turn timer's cap.
+        /// Dropped from 8.5 when the AI's pre-shot dead air went 3.0s → 0.9s (arcade tempo
+        /// pass): enemy turns now spend their time on the shot, not the wait.</summary>
+        public const float AverageTurnSeconds = 7.5f;
 
-        /// <summary>d — effective on-target damage a side lands per turn.</summary>
-        public const float EffectiveDamagePerTurn = 42f;
+        /// <summary>d — effective on-target damage a side lands per turn. Retuned 42 → 37
+        /// alongside the tempo pass (baseShotDamage 120 → 106) so faster turns lengthen the
+        /// match in TURNS, keeping the decided-match estimate at the five-minute target
+        /// instead of silently shortening it.</summary>
+        public const float EffectiveDamagePerTurn = 37f;
 
         /// <summary>M = b·h + c</summary>
         public static float Material(int blocksPerKeep, float blockHealth, float coreHealth)
@@ -113,15 +118,18 @@ namespace CastleBusters
             this.beginnerAimError = beginnerAimError;
         }
 
-        /// <summary>Five-minute tuning: 12 * 90 + 360 durability against 120 base damage.</summary>
+        /// <summary>Five-minute tuning: 12 * 90 + 360 durability against 106 base damage at
+        /// 7.5s turns. The arcade tempo pass shortened the turn (8.5 → 7.5s) and the damage
+        /// came down with it (120 → 106) so the average beginner match stays inside the
+        /// 270–330s acceptance band — faster beats, same five-minute siege.</summary>
         public static SiegeBalanceSettings Default => new SiegeBalanceSettings(
             DefaultMapId,
             DefaultSiegeWeaponId,
             12,
             90f,
             360f,
-            120f,
-            8.5f,
+            106f,
+            7.5f,
             0.70f,
             0.09f);
 

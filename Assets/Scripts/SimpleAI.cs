@@ -25,7 +25,9 @@ namespace CastleBusters
         {
             if (unitPrefabs == null || unitPrefabs.Length == 0) { GameManager.Instance?.OnUnitLaunched(null); yield break; }
 
-            yield return new WaitForSeconds(1.5f);
+            // Half of the 0.9s AI beat (GameManager.ExecuteAITurn holds the other 0.4s) —
+            // enough of a pause to read as the enemy taking aim, not a wait.
+            yield return new WaitForSeconds(0.5f);
             var targetPos = FindTargetPosition() + new Vector2(Random.Range(-errorOffsetRange, errorOffsetRange), Random.Range(-errorOffsetRange, errorOffsetRange));
             var gameManager = GameManager.Instance;
 
