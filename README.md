@@ -14,7 +14,7 @@ holding up the course above comes down with it. Take the enemy keep before yours
 
 ![Unity](https://img.shields.io/badge/Unity-2022.3.62f2-blue.svg)
 ![Target](https://img.shields.io/badge/build-WebGL-informational.svg)
-![Tests](https://img.shields.io/badge/EditMode-346%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/EditMode-349%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ---
@@ -103,8 +103,14 @@ The walls had no such constraint, so the length went there.
 D(n) = n^p / (n^p + k^p)        k = 0.6 · rampTurns,  p = 1.8
 ```
 
-It replaced a smoothstep that pinned at 1.0 around turn 15 and stopped meaning anything
-after. Wind and AI accuracy read from `D(n)`, so late turns actually feel late.
+It replaced a smoothstep that pinned at 1.0 and stopped meaning anything after. Wind and AI
+accuracy read from `D(n)`, so late turns actually feel late.
+
+`k` is derived from the match-length model rather than configured, so the ramp stretches with
+the stage: a keep with taller walls is a longer match and gets a proportionally longer ramp.
+Pressure therefore tracks progress through the siege rather than an absolute turn number — at
+the shipped balance a match reads 0.27 at the opening third, 0.42 at the midpoint and 0.71 at
+the end, still climbing when the last course falls.
 
 ---
 
@@ -112,8 +118,8 @@ after. Wind and AI accuracy read from `D(n)`, so late turns actually feel late.
 
 | | |
 |---|---|
-| EditMode tests | **346 passing** |
-| PlayMode tests (core suite) | **45 / 46** |
+| EditMode tests | **349 passing** |
+| PlayMode tests (core suite) | **47–48 / 48** — one known flaky test (D-016) |
 | Modeled match length | 271 s vs 300 s target |
 | Keep material per side | 1340 (14 blocks × 85 + 150 core) |
 | Stages | 3, unlocked by best-of-three series |
