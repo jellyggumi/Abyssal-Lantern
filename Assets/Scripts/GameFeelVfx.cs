@@ -412,9 +412,6 @@ namespace CastleBusters
         private Image turnProgressFill;
         private Image playerTurnMarker;
         private Image enemyTurnMarker;
-        private Image launchReadyMarker;
-        private Image launchReadyHorizontalMarker;
-        private Image launchReadyVerticalMarker;
         private Image objectiveCoreMarker;
         private Image completionSealMarker;
         private CoreHealthBadge playerCoreBadge;
@@ -836,9 +833,12 @@ namespace CastleBusters
             // A wordless rail: faction chevrons, a pulsing crosshair for a legal shot, and a
             // diamond over the target core. Colour, side, shape, and motion all agree so the
             // signal remains usable when labels are hidden or unreadable.
+            // (The former bottom-center "launch ready" crosshair is gone — playtest feedback
+            // read it as meaningless: the slingshot itself plus its bobbing hint label ARE
+            // the launch affordance, and a second abstract diamond over the battlefield's
+            // bottom band only covered the action.)
             playerTurnMarker = CreateSignalMarker("PlayerTurnMarker", new Vector2(0.42f, 0.93f), new Color(0.25f, 0.75f, 1f, 1f), 34f, 45f);
             enemyTurnMarker = CreateSignalMarker("EnemyTurnMarker", new Vector2(0.58f, 0.93f), new Color(1f, 0.48f, 0.2f, 1f), 34f, -45f);
-            launchReadyMarker = CreateCrosshairMarker("LaunchReadyMarker", new Vector2(0.5f, 0.17f), new Color(1f, 0.82f, 0.22f, 1f));
             objectiveCoreMarker = CreateSignalMarker("ObjectiveCoreMarker", new Vector2(0.5f, 0.93f), new Color(1f, 0.82f, 0.22f, 1f), 22f, 45f);
             completionSealMarker = CreateSignalMarker("MatchCompleteSeal", new Vector2(0.5f, 0.93f), new Color(1f, 0.94f, 0.58f, 1f), 34f, 0f);
             completionSealMarker.gameObject.SetActive(false);
@@ -848,18 +848,6 @@ namespace CastleBusters
         {
             var marker = CreatePanel(name, anchor, new Vector2(0.5f, 0.5f), new Vector2(size, size), color).GetComponent<Image>();
             marker.rectTransform.localRotation = Quaternion.Euler(0f, 0f, rotation);
-            return marker;
-        }
-
-        private Image CreateCrosshairMarker(string name, Vector2 anchor, Color color)
-        {
-            var marker = CreateSignalMarker(name, anchor, color, 42f, 45f);
-            var horizontal = CreatePanel(name + "Horizontal", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(58f, 5f), color);
-            horizontal.transform.SetParent(marker.transform, false);
-            var vertical = CreatePanel(name + "Vertical", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(5f, 58f), color);
-            vertical.transform.SetParent(marker.transform, false);
-            launchReadyHorizontalMarker = horizontal.GetComponent<Image>();
-            launchReadyVerticalMarker = vertical.GetComponent<Image>();
             return marker;
         }
 
@@ -953,16 +941,7 @@ namespace CastleBusters
             if (objectiveCoreMarker != null) objectiveCoreMarker.gameObject.SetActive(signal.ObjectiveCoreHighlighted);
             if (completionSealMarker != null) completionSealMarker.gameObject.SetActive(signal.MatchComplete);
 
-            if (launchReadyMarker != null)
-            {
-                launchReadyMarker.gameObject.SetActive(true);
-                float pulse = signal.LaunchReady ? 1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.14f : 0.62f;
-                launchReadyMarker.rectTransform.localScale = Vector3.one * pulse;
-                var color = new Color(1f, 0.82f, 0.22f, signal.LaunchReady ? 1f : 0.22f);
-                launchReadyMarker.color = color;
-                if (launchReadyHorizontalMarker != null) launchReadyHorizontalMarker.color = color;
-                if (launchReadyVerticalMarker != null) launchReadyVerticalMarker.color = color;
-            }
+            // No bottom-center launch crosshair: LaunchReady dropped with its renderer.
         }
 
         private static void SetMarker(Image marker, bool active, float activeScale, Color color)

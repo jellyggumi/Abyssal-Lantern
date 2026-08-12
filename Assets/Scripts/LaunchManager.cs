@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace CastleBusters
 {
@@ -57,7 +58,18 @@ namespace CastleBusters
         private int trajectoryCollisionMask;
         private TextMeshProUGUI launchAlertText;
         private TextMeshPro launchPointHintLabel;
-        private string selectedUnitName = "Knight";
+        // Player-facing name (Korean, DeploymentRules.DisplayName vocabulary)...
+        private string selectedUnitName = "기사";
+        // ...and the stable English identifier telemetry aggregates by. Renaming the
+        // display must never fork the analytics key ("기사" vs "Knight" would split every
+        // per-unit aggregate the balance gates read).
+        private string selectedUnitTelemetryName = "Knight";
+        // Portrait of the projectile the turn will fire (playtest feedback: the guide
+        // showed a raw prefab name like EXPLOSIVEBARREL — an image reads instantly).
+        private Image selectedUnitPortrait;
+        // Keyboard aim preview is opt-in per turn: at idle the board stays clean; the
+        // arc+stats appear once the player actually touches an arrow key.
+        private bool keyboardAimTouchedThisTurn;
 
         /// <summary>True while the player is actively drawing the bowstring (drag in progress).</summary>
         public bool IsAiming => isDragging;
@@ -101,12 +113,12 @@ namespace CastleBusters
         {
             if (selectedUnitUsesDeployment)
             {
-                return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 배치 준비  ·  전장 클릭 → 설치";
+                return $"<b>{selectedUnitName}</b> 배치 준비  ·  전장 클릭 → 설치";
             }
 
             // One compact line: the unit cards already carry roster shortcuts, so this guide
             // only preserves readiness plus the launch gesture the player must perform.
-            string guide = $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  아무 곳이나 당겨 발사";
+            string guide = $"<b>{selectedUnitName}</b> 준비  ·  아무 곳이나 당겨 발사";
 
             // The one-shot turn may buy an emplacement INSTEAD of its shot, but a player
             // who is never told that will never find it. Only advertised once the breach
@@ -273,11 +285,34 @@ namespace CastleBusters
                     rectTransform.anchorMin = new Vector2(0.02f, 0.02f);
                     rectTransform.anchorMax = new Vector2(0.82f, 0.02f);
                     rectTransform.pivot = new Vector2(0f, 0f);
-                    rectTransform.anchoredPosition = Vector2.zero;
-                    rectTransform.sizeDelta = new Vector2(0f, 72f);
+                    // Text starts past the 64px portrait slot so the two never overprint.
+                    rectTransform.anchoredPosition = new Vector2(76f, 0f);
+                    rectTransform.sizeDelta = new Vector2(-76f, 72f);
 
                     controlGuideText = textComp;
                 }
+            }
+
+            // Projectile portrait (playtest feedback: "발사체 이미지로" — show WHAT fires,
+            // not just its name). Sits in the slot the guide text's 76px inset reserves.
+            if (selectedUnitPortrait == null)
+            {
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas != null)
+                {
+                    var go = new GameObject("SelectedUnitPortrait");
+                    go.transform.SetParent(canvas.transform, false);
+                    selectedUnitPortrait = go.AddComponent<Image>();
+                    selectedUnitPortrait.preserveAspect = true;
+                    selectedUnitPortrait.raycastTarget = false;
+                    var rt = go.GetComponent<RectTransform>();
+                    rt.anchorMin = rt.anchorMax = new Vector2(0.02f, 0.02f);
+                    rt.pivot = new Vector2(0f, 0f);
+                    rt.anchoredPosition = new Vector2(0f, 4f);
+                    rt.sizeDelta = new Vector2(64f, 64f);
+                    go.SetActive(false); // RefreshSelectedUnitPortrait shows it when art exists
+                }
+                RefreshSelectedUnitPortrait();
             }
 
             if (controlGuideText != null)
@@ -404,6 +439,7 @@ namespace CastleBusters
             if (launchPointIndicatorInstance != null) Destroy(launchPointIndicatorInstance);
             if (launchStatsText != null && launchStatsText.gameObject.name == "LaunchStatsText") Destroy(launchStatsText.gameObject);
             if (launchAlertText != null && launchAlertText.gameObject.name == "LaunchAlertText") Destroy(launchAlertText.gameObject);
+            if (selectedUnitPortrait != null) Destroy(selectedUnitPortrait.gameObject);
         }
 
         private void Start()
@@ -429,13 +465,20 @@ namespace CastleBusters
         {
             selectedUnitPrefab = unitPrefab;
             selectedUnitUsesDeployment = selectedCard.HasValue && DeploymentRules.IsDeployOnly(selectedCard.Value);
-            selectedUnitName = unitPrefab != null
-                ? ResolveSelectedUnitName(unitPrefab)
-                : selectedCard.HasValue
-                    ? DeploymentRules.DisplayName(selectedCard.Value)
-                    : ResolveSelectedUnitName(null);
+            selectedUnitTelemetryName = ResolveTelemetryName(unitPrefab, selectedCard);
+            selectedUnitName = ResolveDisplayName(unitPrefab, selectedCard);
             selectedLaunchBodyBounds = UnitController.EstimateLaunchedWorldColliderBounds(unitPrefab);
+            // A new selection is a new turn for aiming purposes: the keyboard preview is
+            // re-armed only by the next arrow press, so the board opens each turn clean.
+            keyboardAimTouchedThisTurn = false;
+            if (!isDragging)
+            {
+                if (trajectoryLine != null) trajectoryLine.positionCount = 0;
+                HideLaunchStats();
+                UpdateImpactMarker(false);
+            }
             if (controlGuideText != null) controlGuideText.text = BuildControlGuideText();
+            RefreshSelectedUnitPortrait();
             if (launchPointHintLabel != null)
             {
                 launchPointHintLabel.text = selectedUnitUsesDeployment
@@ -444,19 +487,63 @@ namespace CastleBusters
             }
         }
 
-        private string ResolveSelectedUnitName(GameObject unitPrefab)
+        /// <summary>Stable English analytics key (Telemetry aggregates by string equality).</summary>
+        private static string ResolveTelemetryName(GameObject unitPrefab, DeployCard? selectedCard)
         {
             if (unitPrefab != null && unitPrefab.TryGetComponent<UnitController>(out var unit))
             {
                 return unit.unitType.ToString();
             }
-
+            // The powder-keg projectile prefab carries no UnitController (it gains one at
+            // spawn — see SpawnAndLaunchOne); its gimmick identifies it.
+            if (unitPrefab != null && unitPrefab.GetComponent<ExplosiveGimmick>() != null)
+            {
+                return UnitType.Barrel.ToString();
+            }
+            if (selectedCard.HasValue) return selectedCard.Value.ToString();
             if (unitPrefab != null && !string.IsNullOrWhiteSpace(unitPrefab.name))
             {
                 return unitPrefab.name.Replace("(Clone)", string.Empty).Trim();
             }
-
             return "Unit";
+        }
+
+        /// <summary>
+        /// Player-facing name, always the DeploymentRules Korean vocabulary. The old path
+        /// leaked engine identifiers ("EXPLOSIVEBARREL 준비") whenever the prefab carried no
+        /// UnitController — a raw asset name is developer text, not game text.
+        /// </summary>
+        private static string ResolveDisplayName(GameObject unitPrefab, DeployCard? selectedCard)
+        {
+            if (selectedCard.HasValue) return DeploymentRules.DisplayName(selectedCard.Value);
+            if (unitPrefab != null && unitPrefab.TryGetComponent<UnitController>(out var unit))
+            {
+                switch (unit.unitType)
+                {
+                    case UnitType.Knight: return DeploymentRules.DisplayName(DeployCard.Knight);
+                    case UnitType.Archer: return DeploymentRules.DisplayName(DeployCard.Archer);
+                    case UnitType.Cannon: return DeploymentRules.DisplayName(DeployCard.Cannon);
+                    case UnitType.Barrel: return DeploymentRules.DisplayName(DeployCard.Barrel);
+                }
+            }
+            if (unitPrefab != null && unitPrefab.GetComponent<ExplosiveGimmick>() != null)
+            {
+                return DeploymentRules.DisplayName(DeployCard.Barrel);
+            }
+            return "부대";
+        }
+
+        /// <summary>
+        /// The projectile as an image beside the guide line (playtest feedback: a portrait
+        /// reads instantly where a name must be parsed). Higgsfield art keyed by the same
+        /// English identifier telemetry uses; no art → the icon simply stays hidden.
+        /// </summary>
+        private void RefreshSelectedUnitPortrait()
+        {
+            if (selectedUnitPortrait == null) return;
+            var sprite = HiggsfieldSpriteLibrary.LoadUi(selectedUnitTelemetryName);
+            selectedUnitPortrait.sprite = sprite;
+            selectedUnitPortrait.gameObject.SetActive(sprite != null);
         }
 
         private void Update()
@@ -563,19 +650,30 @@ namespace CastleBusters
         /// Keyboard fallback: arrows nudge angle/power, Space commits the tuned shot.
         /// A pointer click deliberately does NOT fire — committing a launch requires
         /// either the full pull gesture or an explicit Space press, never a bare tap.
+        /// The preview arc + power/angle readout are OPT-IN per turn: at idle they used to
+        /// render permanently at the bottom center ("발사! 파워 60% · 각도 45°" over a dotted
+        /// arc), which playtest feedback read as meaningless chrome. The first arrow press
+        /// summons them; a clean turn opens with a clean board.
         /// </summary>
         private void HandleKeyboardFineTune()
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow)) AdjustAimAngle(-angleStepDegrees);
-            if (Input.GetKeyDown(KeyCode.RightArrow)) AdjustAimAngle(angleStepDegrees);
-            if (Input.GetKeyDown(KeyCode.DownArrow)) AdjustAimPower(-powerStep);
-            if (Input.GetKeyDown(KeyCode.UpArrow)) AdjustAimPower(powerStep);
+            bool arrowTouched = false;
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) { AdjustAimAngle(-angleStepDegrees); arrowTouched = true; }
+            if (Input.GetKeyDown(KeyCode.RightArrow)) { AdjustAimAngle(angleStepDegrees); arrowTouched = true; }
+            if (Input.GetKeyDown(KeyCode.DownArrow)) { AdjustAimPower(-powerStep); arrowTouched = true; }
+            if (Input.GetKeyDown(KeyCode.UpArrow)) { AdjustAimPower(powerStep); arrowTouched = true; }
+            if (arrowTouched) keyboardAimTouchedThisTurn = true;
 
             if (isDragging) return; // an active pull owns the trajectory preview
 
+            // Space must stay armed with the tuned default even when the preview is hidden:
+            // the commit consumes the aim state, not the preview.
             launchVelocity = GetSeparatedAimVelocity();
-            DrawTrajectory(launchVelocity);
-            UpdateLaunchStats(launchVelocity);
+            if (keyboardAimTouchedThisTurn)
+            {
+                DrawTrajectory(launchVelocity);
+                UpdateLaunchStats(launchVelocity);
+            }
 
             if (Input.GetKeyDown(KeyCode.Space)) LaunchUnit();
         }
@@ -917,7 +1015,7 @@ namespace CastleBusters
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);
             TelemetrySink.Volley(
-                selectedUnitName,
+                selectedUnitTelemetryName, // analytics key stays English across UI renames
                 powerPercent,
                 angle,
                 GameManager.Instance != null ? GameManager.Instance.currentWindForce : 0f);

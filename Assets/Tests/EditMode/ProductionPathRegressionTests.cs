@@ -98,8 +98,8 @@ namespace CastleBusters.Tests
             Assert.That(trajectoryLine.positionCount, Is.Zero, "CancelAim must remove the trajectory preview.");
             Assert.That(rubberBandLine.positionCount, Is.Zero, "CancelAim must remove the rubber-band preview.");
             Assert.That(launchAlert.text, Is.Empty, "CancelAim must clear launch alerts left by the abandoned draw.");
-            Assert.That(controlGuide.text, Does.Contain("KNIGHT"),
-                "Cleanup must restore the selected unit identity instead of leaving stale aim copy.");
+            Assert.That(controlGuide.text, Does.Contain("기사"),
+                "Cleanup must restore the selected unit identity (Korean display vocabulary) instead of leaving stale aim copy.");
             Assert.That(controlGuide.text, Does.Contain("준비"), "Cleanup must restore the ready-state guide.");
             Assert.That(controlGuide.text, Does.Contain("당겨"),
                 "The restored Knight guide must explain the launch gesture (drag-from-anywhere pull).");

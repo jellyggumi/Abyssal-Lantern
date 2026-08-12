@@ -19,29 +19,26 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void PlayerAimState_HighlightsOnlyThePlayerFactionAndLaunchAffordance()
+        public void PlayerAimState_HighlightsOnlyThePlayerFactionAndObjective()
         {
             var state = PersistentSiegeHudState.From(GameState.PlayerTurn, true, false);
 
             Assert.IsTrue(state.PlayerFactionActive);
             Assert.IsFalse(state.EnemyFactionActive);
-            Assert.IsTrue(state.LaunchReady);
             Assert.IsTrue(state.ObjectiveCoreHighlighted);
             Assert.IsFalse(state.MatchComplete);
         }
 
         [Test]
-        public void ResolvingAndEnemyStates_RemoveTheLaunchAffordanceWhileRetainingTheCurrentFactionSignal()
+        public void ResolvingAndEnemyStates_RetainTheCurrentFactionSignal()
         {
             var resolving = PersistentSiegeHudState.From(GameState.PlayerTurn, true, true);
             var enemy = PersistentSiegeHudState.From(GameState.AITurn, false, false);
 
             Assert.IsTrue(resolving.PlayerFactionActive);
             Assert.IsFalse(resolving.EnemyFactionActive);
-            Assert.IsFalse(resolving.LaunchReady);
             Assert.IsTrue(enemy.EnemyFactionActive);
             Assert.IsFalse(enemy.PlayerFactionActive);
-            Assert.IsFalse(enemy.LaunchReady);
         }
 
         [Test]
@@ -52,7 +49,6 @@ namespace CastleBusters.Tests
             Assert.IsTrue(state.IsVisible);
             Assert.IsTrue(state.MatchComplete);
             Assert.IsFalse(state.ObjectiveCoreHighlighted);
-            Assert.IsFalse(state.LaunchReady);
         }
     }
 }
