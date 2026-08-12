@@ -31,7 +31,7 @@ namespace CastleBusters
 
         private readonly List<Vector3> trajectoryPoints = new List<Vector3>(310);
         private readonly RaycastHit2D[] trajectoryHits = new RaycastHit2D[16];
-        private readonly HashSet<int> previewCrossedGateIds = new HashSet<int>(8);
+        private readonly HashSet<EntityId> previewCrossedGateIds = new HashSet<EntityId>(8);
 
         private Vector2 dragStartPos;
         private Vector2 launchVelocity;
@@ -862,7 +862,7 @@ namespace CastleBusters
                 // Match the runtime mass reduction and linear damping applied to the launched
                 // Rigidbody2D so the preview uses the same fixed-step flight model.
                 mass = Mathf.Max(UnitController.MinRuntimeMass, prefabRb.mass * UnitController.RuntimeMassScale);
-                linearDrag = Mathf.Max(0f, prefabRb.drag);
+                linearDrag = Mathf.Max(0f, prefabRb.linearDamping);
             }
 
             Vector2 castSize = new Vector2(selectedLaunchBodyBounds.size.x, selectedLaunchBodyBounds.size.y);
@@ -946,7 +946,7 @@ namespace CastleBusters
                         if (candidate.distance > nearestDistance) continue;
 
                         var gate = candidate.collider.GetComponentInParent<EventGateGimmick>();
-                        if (gate == null || !previewCrossedGateIds.Add(gate.GetInstanceID())) continue;
+                        if (gate == null || !previewCrossedGateIds.Add(gate.GetEntityId())) continue;
                         currentVelocity *= gate.PreviewVelocityMultiplier;
                     }
 

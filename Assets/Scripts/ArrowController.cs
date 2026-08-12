@@ -122,7 +122,7 @@ namespace CastleBusters
                 }
             }
             
-            if (rb.velocity.sqrMagnitude > 0.1f) transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg, Vector3.forward);
+            if (rb.linearVelocity.sqrMagnitude > 0.1f) transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg, Vector3.forward);
         }
 
         public void Initialize(float damage, bool isPlayerArrow)
@@ -146,7 +146,7 @@ namespace CastleBusters
         private void ApplyModifier(float multiplier, Color color)
         {
             damageMultiplier = multiplier;
-            if (rb != null) rb.velocity *= multiplier;
+            if (rb != null) rb.linearVelocity *= multiplier;
 
             var sr = GetComponent<SpriteRenderer>();
             if (sr != null) sr.color = color;

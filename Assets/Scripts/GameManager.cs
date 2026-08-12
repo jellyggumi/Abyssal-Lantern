@@ -2077,7 +2077,7 @@ namespace CastleBusters
                 for (int i = 0; i < DestructibleBlock.Active.Count; i++)
                 {
                     var b = DestructibleBlock.Active[i];
-                    if (b.TryGetComponent<Rigidbody2D>(out var rb) && rb.bodyType == RigidbodyType2D.Dynamic && rb.velocity.magnitude > 0.2f)
+                    if (b.TryGetComponent<Rigidbody2D>(out var rb) && rb.bodyType == RigidbodyType2D.Dynamic && rb.linearVelocity.magnitude > 0.2f)
                     {
                         blocksMoving = true;
                         break;

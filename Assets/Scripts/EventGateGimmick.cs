@@ -48,7 +48,9 @@ namespace CastleBusters
         public float pulseSpeed = 3.5f;
         public float pulseAmount = 0.08f;
 
-        private readonly HashSet<int> processedInstanceIds = new HashSet<int>();
+        // EntityId, not int: Unity 6000 deprecated the EntityId->int cast, and the id is only
+        // ever used as a set key, so the wrapper type costs nothing here.
+        private readonly HashSet<EntityId> processedInstanceIds = new HashSet<EntityId>();
         private SpriteRenderer spriteRenderer;
         private Vector3 baseScale;
         private int spawnedCloneCount;
@@ -122,7 +124,7 @@ namespace CastleBusters
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other == null) return;
-            int id = other.gameObject.GetInstanceID();
+            EntityId id = other.gameObject.GetEntityId();
             if (!processedInstanceIds.Add(id)) return;
 
             // Portal-passage sparkle in the gate's identity tint, at the crossing point.
@@ -216,21 +218,21 @@ namespace CastleBusters
             float multiplier = effectType == EventGateEffectType.PowerUp || effectType == EventGateEffectType.Multiply
                 ? velocityMultiplier
                 : reduceVelocityMultiplier;
-            rb.velocity *= multiplier;
+            rb.linearVelocity *= multiplier;
         }
 
         private void MultiplyUnit(UnitController source)
         {
             if (source == null || spawnedCloneCount >= maxTotalClones) return;
             int count = Mathf.Clamp(cloneCount, 1, Mathf.Max(1, maxTotalClones - spawnedCloneCount));
-            Vector2 sourceVelocity = source.TryGetComponent<Rigidbody2D>(out var sourceRb) ? sourceRb.velocity : Vector2.right;
+            Vector2 sourceVelocity = source.TryGetComponent<Rigidbody2D>(out var sourceRb) ? sourceRb.linearVelocity : Vector2.right;
 
             for (int i = 0; i < count; i++)
             {
                 Vector3 offset = new Vector3(0f, (i + 1) * 0.28f, 0f);
                 var cloneGo = Instantiate(source.gameObject, source.transform.position + offset, source.transform.rotation);
                 cloneGo.name = source.gameObject.name + "_GateClone";
-                processedInstanceIds.Add(cloneGo.GetInstanceID());
+                processedInstanceIds.Add(cloneGo.GetEntityId());
                 if (cloneGo.TryGetComponent<UnitController>(out var clone))
                 {
                     clone.InitializeUnit(source.isPlayerUnit, UnitState.Launched);
@@ -245,17 +247,17 @@ namespace CastleBusters
         {
             if (source == null || spawnedCloneCount >= maxTotalClones) return;
             int count = Mathf.Clamp(cloneCount, 1, Mathf.Max(1, maxTotalClones - spawnedCloneCount));
-            Vector2 sourceVelocity = source.TryGetComponent<Rigidbody2D>(out var sourceRb) ? sourceRb.velocity : Vector2.right * source.speed;
+            Vector2 sourceVelocity = source.TryGetComponent<Rigidbody2D>(out var sourceRb) ? sourceRb.linearVelocity : Vector2.right * source.speed;
 
             for (int i = 0; i < count; i++)
             {
                 Vector3 offset = new Vector3(0f, (i + 1) * 0.16f, 0f);
                 var cloneGo = Instantiate(source.gameObject, source.transform.position + offset, source.transform.rotation);
                 cloneGo.name = source.gameObject.name + "_GateClone";
-                processedInstanceIds.Add(cloneGo.GetInstanceID());
+                processedInstanceIds.Add(cloneGo.GetEntityId());
                 if (cloneGo.TryGetComponent<Rigidbody2D>(out var cloneRb))
                 {
-                    cloneRb.velocity = sourceVelocity + new Vector2(0f, 0.35f * (i + 1));
+                    cloneRb.linearVelocity = sourceVelocity + new Vector2(0f, 0.35f * (i + 1));
                 }
                 spawnedCloneCount++;
             }
