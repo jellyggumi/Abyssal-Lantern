@@ -308,6 +308,13 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>How many collapse links deep this block sits. A block hit directly by a
+        /// volley is 0; a block broken by something falling on it is one deeper than the faller.
+        /// Set in <see cref="OnCollisionEnter2D"/>, read once at destruction so telemetry can
+        /// report cascade depth without walking the BFS. Purely observational — nothing in the
+        /// simulation reads it.</summary>
+        private int collapseChainDepth;
+
         protected virtual void DestroyBlock(bool? damageFromPlayer = null)
         {
             if (isDestroying) return;
@@ -345,6 +352,12 @@ namespace CastleBusters
                 if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(hitStopDuration);
                 if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(shakeDuration, shakeMagnitude);
             }
+
+            // Observation only (CLAUDE.md §2): telemetry reads the cascade, never steers it.
+            // Ground anchors are excluded for the same reason they skip premium break feedback
+            // (D-004) — 205 terrain tiles falling from one blast is not a reward event, and
+            // counting them would drown the keep-collapse signal G4/G7 actually measure.
+            if (!isGroundAnchor) TelemetrySink.BlockDestroyed(collapseChainDepth);
             // Resolve and award ownership before CastleController can end the match.
             // EndGame snapshots the current score into the results card, so a fatal block
             // must be credited before that transition.
@@ -392,7 +405,15 @@ namespace CastleBusters
             if (damage <= 0f) return;
 
             var otherBlock = collision.gameObject.GetComponent<DestructibleBlock>();
-            if (otherBlock != null && !otherBlock.isFalling) otherBlock.TakeDamage(damage);
+            if (otherBlock != null && !otherBlock.isFalling)
+            {
+                // One link deeper than whatever fell on it. Recorded before the damage so a
+                // block that dies on this hit carries the correct depth into DestroyBlock.
+                // Max, not assignment: a block struck twice keeps the deepest chain that
+                // reached it rather than the most recent one.
+                otherBlock.collapseChainDepth = Mathf.Max(otherBlock.collapseChainDepth, collapseChainDepth + 1);
+                otherBlock.TakeDamage(damage);
+            }
             collision.gameObject.GetComponent<UnitController>()?.TakeDamage(damage);
 
             if (collision.gameObject.CompareTag("Ground"))

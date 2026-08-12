@@ -1000,6 +1000,11 @@ namespace CastleBusters
             float angle = Mathf.Atan2(reportedVelocity.y, reportedVelocity.x) * Mathf.Rad2Deg;
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);
+            TelemetrySink.Volley(
+                selectedUnitName,
+                powerPercent,
+                angle,
+                GameManager.Instance != null ? GameManager.Instance.currentWindForce : 0f);
             GameFeelVfx.SpawnShockwaveRing(GetLaunchPosition(), new Color(0.55f, 0.9f, 1f, 0.45f), 1.25f, 0.3f);
             GameFeelVfx.SpawnFeedbackLabel(GetLaunchPosition() + Vector2.up * 0.45f, "LAUNCH!", new Color(0.7f, 0.95f, 1f, 1f), 1.7f, 0.45f);
             if (GameManager.Instance != null) GameManager.Instance.OnUnitLaunched(firstUnit);
