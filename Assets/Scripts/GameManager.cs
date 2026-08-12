@@ -302,7 +302,9 @@ namespace CastleBusters
             SetupGimmicks();
             SetupUIButtons();
             ApplyRuntimeSpriteAtlas();
-            HeroGrowth.Reset();
+            // Hero stacks deliberately NOT reset here — they now live for a whole
+            // best-of-3 series (ResetSeries owns them). A scene boot is a new GAME,
+            // not a new series.
             SpawnInitialUnits();
             ShowIntro();
         }
@@ -1655,7 +1657,8 @@ namespace CastleBusters
             // from the previous match are dead weight — clear them with the same cadence.
             CastleRuinFx.ResetForNewMatch();
             BrickPlacementController.Instance?.ClearPending();
-            HeroGrowth.Reset();
+            // Same as above: a new game inside a running series inherits the loot the
+            // player already earned. ResetSeries() is the only thing that clears it.
             GameplayUxDirector.SetDangerState(false);
             DeploymentController.Instance?.ResetEconomy();
             currentState = GameState.PlayerTurn;
@@ -2301,6 +2304,21 @@ namespace CastleBusters
             seriesEnemyWins = 0;
             seriesGamesPlayed = 0;
             seriesScoreTotal = 0;
+            // Hero growth is series-scoped meta progression, so it lives and dies with the
+            // series tally rather than with a single game.
+            //
+            // Before this, ItemSystem existed but every stack evaporated at the next match
+            // start, which left the mark economy with nothing to spend on: a series win paid
+            // 12 marks, the only purchase cost 12, and after one purchase the currency stopped
+            // meaning anything. That is the exact failure the genre survey recorded in Archery
+            // Bastions, whose level-396 player sat on a million unspent gold
+            // (.survey/siege-artillery-landscape/context.md).
+            //
+            // Tying the reset to ResetSeries() rather than to a match keeps one lifecycle
+            // instead of two: whatever starts a fresh series (rematch, title, stage change, a
+            // decided series) also starts fresh loot. RequestNextGame is the deliberate
+            // exception on both counts — it continues the series, so it carries the stacks.
+            HeroGrowth.Reset();
         }
 
 
