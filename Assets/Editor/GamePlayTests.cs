@@ -1308,7 +1308,7 @@ namespace CastleBusters.Tests
 
                 var templateBody = unitTemplateGo.AddComponent<Rigidbody2D>();
                 templateBody.mass = 1f;
-                templateBody.drag = 0.05f;
+                templateBody.linearDamping = 0.05f;
                 unitTemplateGo.AddComponent<BoxCollider2D>();
                 unitTemplateGo.AddComponent<UnitController>();
                 launchManager.SetSelectedUnit(unitTemplateGo);
@@ -1328,7 +1328,7 @@ namespace CastleBusters.Tests
                 {
                     expectedVelocity =
                         (expectedVelocity + Physics2D.gravity * launchManager.timeStep)
-                        / (1f + templateBody.drag * launchManager.timeStep);
+                        / (1f + templateBody.linearDamping * launchManager.timeStep);
                     expectedPosition += expectedVelocity * launchManager.timeStep;
 
                     Vector3 actual = trajectoryLine.GetPosition(step);
@@ -1703,8 +1703,8 @@ namespace CastleBusters.Tests
 
             gate.ApplyToUnit(unit);
 
-            Assert.AreEqual(4f, rb.velocity.x, 0.001f);
-            Assert.AreEqual(0f, rb.velocity.y, 0.001f);
+            Assert.AreEqual(4f, rb.linearVelocity.x, 0.001f);
+            Assert.AreEqual(0f, rb.linearVelocity.y, 0.001f);
 
             Object.DestroyImmediate(gateGo);
             Object.DestroyImmediate(unitGo);
@@ -1717,7 +1717,7 @@ namespace CastleBusters.Tests
             var rb = arrowGo.AddComponent<Rigidbody2D>();
             arrowGo.AddComponent<BoxCollider2D>();
             var arrow = arrowGo.AddComponent<ArrowController>();
-            rb.velocity = new Vector2(8f, 0f);
+            rb.linearVelocity = new Vector2(8f, 0f);
 
             var gateGo = new GameObject("MultiplierGate");
             var gate = gateGo.AddComponent<EventGateGimmick>();
@@ -1865,7 +1865,7 @@ namespace CastleBusters.Tests
             monitorMethod.Invoke(unit, null);
 
             // Assert that recovery was triggered: velocity.y should be 6.5f and groundedStuckTimer reset to 0
-            Assert.AreEqual(6.5f, rb.velocity.y, 0.001f);
+            Assert.AreEqual(6.5f, rb.linearVelocity.y, 0.001f);
             Assert.AreEqual(0f, (float)stuckTimerField.GetValue(unit), 0.001f);
 
             Object.DestroyImmediate(unitGo);
@@ -2535,12 +2535,12 @@ namespace CastleBusters.Tests
             // The unit is mid-hop (still clearly airborne) while blocked by the obstacle
             // directly ahead - exactly the state that used to re-trigger the hop every single
             // Update() frame and ratchet the unit off the top of the screen forever.
-            rb.velocity = new Vector2(0f, 4f);
+            rb.linearVelocity = new Vector2(0f, 4f);
 
             var moveMethod = typeof(UnitController).GetMethod("MoveTowardsTarget", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             moveMethod.Invoke(unit, null);
 
-            Assert.AreEqual(4f, rb.velocity.y, 0.001f, "Hop must not re-fire while already airborne.");
+            Assert.AreEqual(4f, rb.linearVelocity.y, 0.001f, "Hop must not re-fire while already airborne.");
 
             Object.DestroyImmediate(unitGo);
             Object.DestroyImmediate(obstacleGo);
@@ -2569,12 +2569,12 @@ namespace CastleBusters.Tests
             var targetField = typeof(UnitController).GetField("target", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             targetField.SetValue(unit, targetGo.transform);
 
-            rb.velocity = Vector2.zero; // resting on the ground, not mid-hop
+            rb.linearVelocity = Vector2.zero; // resting on the ground, not mid-hop
 
             var moveMethod = typeof(UnitController).GetMethod("MoveTowardsTarget", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             moveMethod.Invoke(unit, null);
 
-            Assert.AreEqual(5.5f, rb.velocity.y, 0.001f, "A grounded unit blocked by an obstacle should still hop.");
+            Assert.AreEqual(5.5f, rb.linearVelocity.y, 0.001f, "A grounded unit blocked by an obstacle should still hop.");
 
             Object.DestroyImmediate(unitGo);
             Object.DestroyImmediate(obstacleGo);
@@ -2594,15 +2594,15 @@ namespace CastleBusters.Tests
 
             unit.hardCeilingY = 20f;
             unitGo.transform.position = new Vector3(0f, 25f, 0f); // above the ceiling
-            rb.velocity = new Vector2(1.5f, 8f); // still climbing
+            rb.linearVelocity = new Vector2(1.5f, 8f); // still climbing
 
             var ceilingMethod = typeof(UnitController).GetMethod("EnforceHardCeiling", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             ceilingMethod.Invoke(unit, null);
 
             // Horizontal velocity is untouched - only the runaway upward climb is stopped so
             // gravity (still acting on the Dynamic rigidbody) takes back over from here.
-            Assert.AreEqual(1.5f, rb.velocity.x, 0.001f);
-            Assert.AreEqual(0f, rb.velocity.y, 0.001f);
+            Assert.AreEqual(1.5f, rb.linearVelocity.x, 0.001f);
+            Assert.AreEqual(0f, rb.linearVelocity.y, 0.001f);
 
             Object.DestroyImmediate(unitGo);
         }
@@ -2623,16 +2623,16 @@ namespace CastleBusters.Tests
 
             // Below the ceiling: a legitimate high arc must be left alone.
             unitGo.transform.position = new Vector3(0f, 19f, 0f);
-            rb.velocity = new Vector2(0f, 8f);
+            rb.linearVelocity = new Vector2(0f, 8f);
             ceilingMethod.Invoke(unit, null);
-            Assert.AreEqual(8f, rb.velocity.y, 0.001f, "Ceiling must not touch a unit still below it.");
+            Assert.AreEqual(8f, rb.linearVelocity.y, 0.001f, "Ceiling must not touch a unit still below it.");
 
             // Above the ceiling but already falling: must be left alone too - only upward
             // velocity ever gets clamped.
             unitGo.transform.position = new Vector3(0f, 25f, 0f);
-            rb.velocity = new Vector2(0f, -3f);
+            rb.linearVelocity = new Vector2(0f, -3f);
             ceilingMethod.Invoke(unit, null);
-            Assert.AreEqual(-3f, rb.velocity.y, 0.001f, "A unit already falling past the ceiling must not be touched.");
+            Assert.AreEqual(-3f, rb.linearVelocity.y, 0.001f, "A unit already falling past the ceiling must not be touched.");
 
             Object.DestroyImmediate(unitGo);
         }

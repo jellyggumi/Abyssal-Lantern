@@ -52,7 +52,7 @@ namespace CastleBusters
         private Color identityColor;
         // Tracks which units already got the Frost slow this eruption phase so FixedUpdate
         // (which runs every physics tick while Erupting) applies the debuff exactly once.
-        private readonly HashSet<int> frostSlowedThisEruption = new HashSet<int>();
+        private readonly HashSet<EntityId> frostSlowedThisEruption = new HashSet<EntityId>();
 
         /// <summary>Wraps elapsed time (plus offset) onto the cycle; never negative.</summary>
         public static float WrapCycleTime(float elapsed, float offset, float cycleTotal)
@@ -348,9 +348,9 @@ namespace CastleBusters
                     {
                         float dir = Mathf.Sign(hit.transform.position.x - transform.position.x);
                         if (Mathf.Approximately(dir, 0f)) dir = 1f;
-                        rb.velocity = new Vector2(dir * frostKnockSpeed, rb.velocity.y);
+                        rb.linearVelocity = new Vector2(dir * frostKnockSpeed, rb.linearVelocity.y);
                     }
-                    if (hit.TryGetComponent<UnitController>(out var frostUnit) && frostSlowedThisEruption.Add(frostUnit.GetInstanceID()))
+                    if (hit.TryGetComponent<UnitController>(out var frostUnit) && frostSlowedThisEruption.Add(frostUnit.GetEntityId()))
                     {
                         frostUnit.ApplyDebuff(frostSlowMultiplier, frostSlowDuration);
                     }
@@ -359,8 +359,8 @@ namespace CastleBusters
 
                 if (rb != null && rb.bodyType == RigidbodyType2D.Dynamic)
                 {
-                    float dv = LiftDeltaV(rb.velocity.y, liftAcceleration, maxLiftSpeed, Time.fixedDeltaTime);
-                    if (dv > 0f) rb.velocity += new Vector2(Random.Range(-0.35f, 0.35f) * Time.fixedDeltaTime * 10f, dv);
+                    float dv = LiftDeltaV(rb.linearVelocity.y, liftAcceleration, maxLiftSpeed, Time.fixedDeltaTime);
+                    if (dv > 0f) rb.linearVelocity += new Vector2(Random.Range(-0.35f, 0.35f) * Time.fixedDeltaTime * 10f, dv);
                 }
                 if (damageTick && hit.TryGetComponent<UnitController>(out var unit))
                 {

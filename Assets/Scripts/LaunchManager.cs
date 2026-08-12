@@ -31,7 +31,7 @@ namespace CastleBusters
 
         private readonly List<Vector3> trajectoryPoints = new List<Vector3>(310);
         private readonly RaycastHit2D[] trajectoryHits = new RaycastHit2D[16];
-        private readonly HashSet<int> previewCrossedGateIds = new HashSet<int>(8);
+        private readonly HashSet<EntityId> previewCrossedGateIds = new HashSet<EntityId>(8);
 
         private Vector2 dragStartPos;
         private Vector2 launchVelocity;
@@ -875,7 +875,7 @@ namespace CastleBusters
                 // Match the runtime mass reduction and linear damping applied to the launched
                 // Rigidbody2D so the preview uses the same fixed-step flight model.
                 mass = Mathf.Max(UnitController.MinRuntimeMass, prefabRb.mass * UnitController.RuntimeMassScale);
-                linearDrag = Mathf.Max(0f, prefabRb.drag);
+                linearDrag = Mathf.Max(0f, prefabRb.linearDamping);
             }
 
             Vector2 castSize = new Vector2(selectedLaunchBodyBounds.size.x, selectedLaunchBodyBounds.size.y);
@@ -959,7 +959,7 @@ namespace CastleBusters
                         if (candidate.distance > nearestDistance) continue;
 
                         var gate = candidate.collider.GetComponentInParent<EventGateGimmick>();
-                        if (gate == null || !previewCrossedGateIds.Add(gate.GetInstanceID())) continue;
+                        if (gate == null || !previewCrossedGateIds.Add(gate.GetEntityId())) continue;
                         currentVelocity *= gate.PreviewVelocityMultiplier;
                     }
 
@@ -1013,6 +1013,11 @@ namespace CastleBusters
             float angle = Mathf.Atan2(reportedVelocity.y, reportedVelocity.x) * Mathf.Rad2Deg;
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);
+            TelemetrySink.Volley(
+                selectedUnitName,
+                powerPercent,
+                angle,
+                GameManager.Instance != null ? GameManager.Instance.currentWindForce : 0f);
             GameFeelVfx.SpawnShockwaveRing(GetLaunchPosition(), new Color(0.55f, 0.9f, 1f, 0.45f), 1.25f, 0.3f);
             GameFeelVfx.SpawnFeedbackLabel(GetLaunchPosition() + Vector2.up * 0.45f, "LAUNCH!", new Color(0.7f, 0.95f, 1f, 1f), 1.7f, 0.45f);
             if (GameManager.Instance != null) GameManager.Instance.OnUnitLaunched(firstUnit);

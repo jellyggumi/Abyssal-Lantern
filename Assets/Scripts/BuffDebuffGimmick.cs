@@ -24,8 +24,8 @@ namespace CastleBusters
         // the SAME effectType within the window (jitter spam); a genuinely different effect
         // — e.g. this zone's effectType was reconfigured, or the unit crossed into a second
         // zone occupying the same collider — still applies immediately.
-        private readonly Dictionary<int, (GimmickEffectType type, float time)> lastAppliedByInstance =
-            new Dictionary<int, (GimmickEffectType type, float time)>();
+        private readonly Dictionary<EntityId, (GimmickEffectType type, float time)> lastAppliedByInstance =
+            new Dictionary<EntityId, (GimmickEffectType type, float time)>();
         private const float retriggerCooldownSeconds = 1.0f;
 
 
@@ -110,7 +110,7 @@ namespace CastleBusters
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other == null) return;
-            int id = other.gameObject.GetInstanceID();
+            EntityId id = other.gameObject.GetEntityId();
             float now = Application.isPlaying ? Time.time : 0f;
             if (lastAppliedByInstance.TryGetValue(id, out var last) &&
                 last.type == effectType && now - last.time < retriggerCooldownSeconds) return;

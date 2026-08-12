@@ -223,7 +223,7 @@ namespace CastleBusters
                     unit.TakeDamage(damage);
                     if (hit.attachedRigidbody != null)
                     {
-                        hit.attachedRigidbody.velocity = SpikeTrapRules.KnockbackVelocity(
+                        hit.attachedRigidbody.linearVelocity = SpikeTrapRules.KnockbackVelocity(
                             (Vector2)unit.transform.position, (Vector2)transform.position, knockSpeed, upwardBias);
                     }
                     GameFeelVfx.SpawnImpactBurst(hit.transform.position, new Color(0.85f, 0.2f, 0.15f, 0.9f), 0.9f);

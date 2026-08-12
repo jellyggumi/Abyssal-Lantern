@@ -452,7 +452,7 @@ namespace CastleBusters
             if (rb != null)
             {
                 rb.bodyType = RigidbodyType2D.Dynamic;
-                rb.velocity = velocity;
+                rb.linearVelocity = velocity;
             }
             if (trailRenderer == null) SetupTrailRenderer();
             if (trailRenderer != null) trailRenderer.emitting = true;
@@ -475,7 +475,7 @@ namespace CastleBusters
             if (rb != null)
             {
                 rb.bodyType = RigidbodyType2D.Dynamic;
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0f;
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
@@ -527,9 +527,9 @@ namespace CastleBusters
         private void EnforceHardCeiling()
         {
             if (rb == null) return;
-            if (transform.position.y > hardCeilingY && rb.velocity.y > 0f)
+            if (transform.position.y > hardCeilingY && rb.linearVelocity.y > 0f)
             {
-                rb.velocity = new Vector2(rb.velocity.x, 0f);
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
             }
         }
 
@@ -567,14 +567,14 @@ namespace CastleBusters
             }
 
 
-            if (rb.velocity.magnitude <= stuckVelocityThreshold)
+            if (rb.linearVelocity.magnitude <= stuckVelocityThreshold)
             {
                 stuckTimer += Time.fixedDeltaTime;
                 if (stuckTimer >= stuckDuration)
                 {
                     GameFeelVfx.SpawnFeedbackLabel(transform.position, "STUCK FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
                     currentState = UnitState.Grounded;
-                    rb.velocity = Vector2.zero;
+                    rb.linearVelocity = Vector2.zero;
                     rb.angularVelocity = 0f;
                     rb.constraints = RigidbodyConstraints2D.FreezeRotation;
                     if (trailRenderer != null) trailRenderer.emitting = false;
@@ -595,14 +595,14 @@ namespace CastleBusters
                 return;
             }
 
-            if (Mathf.Abs(rb.velocity.x) <= stuckVelocityThreshold)
+            if (Mathf.Abs(rb.linearVelocity.x) <= stuckVelocityThreshold)
             {
                 groundedStuckTimer += Time.fixedDeltaTime;
                 if (groundedStuckTimer >= stuckDuration)
                 {
                     GameFeelVfx.SpawnFeedbackLabel(transform.position, "STUCK RECOVERY", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
                     transform.position += new Vector3(0f, 0.5f, 0f);
-                    rb.velocity = new Vector2(rb.velocity.x, 6.5f);
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 6.5f);
                     groundedStuckTimer = 0f;
                 }
             }
@@ -643,7 +643,7 @@ namespace CastleBusters
             if (rb == null) rb = GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0f;
                 rb.bodyType = RigidbodyType2D.Kinematic;
                 rb.constraints = RigidbodyConstraints2D.FreezeAll;
@@ -740,17 +740,17 @@ namespace CastleBusters
             if (Mathf.Abs(campX - transform.position.x) < 1.2f)
             {
                 // Arrived: hold the camp (capture-zone occupancy does the winning).
-                rb.velocity = new Vector2(0f, rb.velocity.y);
+                rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
                 return;
             }
-            rb.velocity = new Vector2(dir * moveSpeed * speedMultiplier * 0.85f, rb.velocity.y);
+            rb.linearVelocity = new Vector2(dir * moveSpeed * speedMultiplier * 0.85f, rb.linearVelocity.y);
 
             // Same obstacle hop as the normal march.
             var hit = Physics2D.Raycast(transform.position, new Vector2(dir, 0f), 0.6f,
                 ~LayerMask.GetMask("PlayerUnit", "EnemyUnit"));
-            if (hit.collider != null && hit.collider.gameObject != gameObject && Mathf.Abs(rb.velocity.y) < 0.5f)
+            if (hit.collider != null && hit.collider.gameObject != gameObject && Mathf.Abs(rb.linearVelocity.y) < 0.5f)
             {
-                rb.velocity = new Vector2(rb.velocity.x, 5.5f);
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 5.5f);
             }
         }
 
@@ -814,7 +814,7 @@ namespace CastleBusters
             if (IsTargetInAttackRange())
             {
                 currentState = UnitState.Attacking;
-                if (rb != null) rb.velocity = new Vector2(0, rb.velocity.y);
+                if (rb != null) rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
                 return;
             }
 
@@ -822,7 +822,7 @@ namespace CastleBusters
             {
                 float dir = Mathf.Sign(target.position.x - transform.position.x);
                 TrackGroundDirectionFlips(dir);
-                rb.velocity = new Vector2(dir * moveSpeed * speedMultiplier, rb.velocity.y);
+                rb.linearVelocity = new Vector2(dir * moveSpeed * speedMultiplier, rb.linearVelocity.y);
 
                 // Jump over obstacles if blocked
                 Vector2 rayOrigin = transform.position;
@@ -835,17 +835,17 @@ namespace CastleBusters
                 // single Update() frame while still airborne from the previous hop, re-winning
                 // the race against gravity every tick and ratcheting straight off the top of the
                 // screen forever instead of a single clean hop over the obstacle.
-                if (hit.collider != null && hit.collider.gameObject != gameObject && Mathf.Abs(rb.velocity.y) < 0.5f)
+                if (hit.collider != null && hit.collider.gameObject != gameObject && Mathf.Abs(rb.linearVelocity.y) < 0.5f)
                 {
-                    rb.velocity = new Vector2(rb.velocity.x, 5.5f);
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 5.5f);
                 }
 
                 // Archer situational hop (§2): the target sits noticeably higher — jump to
                 // regain a firing line instead of hugging the wall below it.
-                if (unitType == UnitType.Archer && Mathf.Abs(rb.velocity.y) < 0.5f &&
+                if (unitType == UnitType.Archer && Mathf.Abs(rb.linearVelocity.y) < 0.5f &&
                     UnitCombos.ArcherShouldJump(transform.position.y, target.position.y))
                 {
-                    rb.velocity = new Vector2(rb.velocity.x, archerJumpVelocity);
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, archerJumpVelocity);
 
                 }
 
@@ -861,14 +861,14 @@ namespace CastleBusters
                             Vector2.Distance(transform.position, blocker.transform.position),
                             Vector2.Distance(transform.position, target.position), attackRange) &&
                         blocker.TryGetComponent<Rigidbody2D>(out var blockerRb) &&
-                        Mathf.Abs(blockerRb.velocity.y) < 0.5f)
+                        Mathf.Abs(blockerRb.linearVelocity.y) < 0.5f)
                     {
                         // Same fix as the obstacle hop above: this used to be
                         // Mathf.Max(blockerRb.velocity.y, 1.2f) with no airborne gate, so a
                         // blocker pinned in place every frame never dropped below 1.2 upward
                         // velocity and drifted off the top of the screen like a slow balloon.
                         // Gated + flat now: one clean pop per push, then gravity owns it again.
-                        blockerRb.velocity = new Vector2(dir * moveSpeed * knightPushForceMultiplier, 1.2f);
+                        blockerRb.linearVelocity = new Vector2(dir * moveSpeed * knightPushForceMultiplier, 1.2f);
 
                         GameFeelVfx.SpawnFeedbackLabel(blocker.transform.position + Vector3.up * 0.4f,
                             "PUSH!", new Color(1f, 0.9f, 0.5f, 0.9f), 1.5f, 0.35f);
@@ -1011,7 +1011,7 @@ namespace CastleBusters
                     arrowRb.gravityScale = 1f;
                     arrowSpeed *= 1.15f;
                 }
-                arrowRb.velocity = dir * arrowSpeed;
+                arrowRb.linearVelocity = dir * arrowSpeed;
                 arrow.transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg, Vector3.forward);
             }
             arrow.GetComponent<ArrowController>()?.Initialize(attackDamage * damageMultiplier, isPlayerUnit);
@@ -1118,7 +1118,7 @@ namespace CastleBusters
             if (trailRenderer != null) trailRenderer.emitting = false;
             if (rb != null)
             {
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0f;
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
@@ -1138,7 +1138,7 @@ namespace CastleBusters
             if (trailRenderer != null) trailRenderer.emitting = false;
             if (rb != null)
             {
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0f;
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
@@ -1316,7 +1316,7 @@ namespace CastleBusters
 
         public void ApplyLaunchPowerMultiplier(float velocityMultiplier, float damageAndSpeedMultiplier, float duration)
         {
-            if (rb != null) rb.velocity *= velocityMultiplier;
+            if (rb != null) rb.linearVelocity *= velocityMultiplier;
 
             if (damageAndSpeedMultiplier >= 1f)
             {

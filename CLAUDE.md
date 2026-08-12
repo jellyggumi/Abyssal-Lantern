@@ -6,7 +6,7 @@ together with the code, the tests, and the live run artifacts under
 
 > **Identity**: This repository is **castle-war** (formerly `Abyssal-Lantern`,
 > product previously `unknown-castle` / "Castle Busters"). It is a Unity
-> 2022.3.62f2 2D physics siege game being developed into a **faction-vs-faction
+> 6000.5.6f1 2D physics siege game being developed into a **faction-vs-faction
 > castle war** (reference genre: *Archery Bastions: Castle War*). The remote
 > rename `Abyssal-Lantern → castle-war` requires the repo owner (`jellyggumi`)
 > — until it lands, `origin` keeps the old URL; do not re-point it silently.
@@ -45,12 +45,12 @@ Rules:
 - Cite exact repository-relative paths as evidence. A claim is not established
   by a file existing; cite the measurement, command, or test result behind it.
 
-## 2. Engine perspective: Unity 2022.3.62f2 (2D URP, C#)
+## 2. Engine perspective: Unity 6000.5.6f1 (2D URP, C#)
 
 This is a **Unity 2D physics siege game** (entry: `Assets/Scenes/SampleScene`,
 code under `Assets/Scripts/`, tests under `Assets/Tests/`). Editor version is
 pinned by `ProjectSettings/ProjectVersion.txt` — always launch with
-`/Applications/Unity/Hub/Editor/2022.3.62f2/Unity.app/Contents/MacOS/Unity`.
+`/Applications/Unity/Hub/Editor/6000.5.6f1/Unity.app/Contents/MacOS/Unity`.
 
 - **Never apply the archived web-game guidance here.** The git history (and
   `_workspace/archive/`) contains the predecessor *Abyssal* HTML/Three.js web
@@ -108,7 +108,7 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
 
 - Full regression uses this command exactly:
   ```
-  "/Applications/Unity/Hub/Editor/2022.3.62f2/Unity.app/Contents/MacOS/Unity" \
+  "/Applications/Unity/Hub/Editor/6000.5.6f1/Unity.app/Contents/MacOS/Unity" \
     -batchmode -projectPath . -runTests -testPlatform EditMode \
     -testResults ./editmode-results.xml -logFile ./editmode-test.log
   ```

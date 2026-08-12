@@ -434,6 +434,7 @@ namespace CastleBusters
             if (StageInterludeController.Active != null) StageInterludeController.Active.Dismiss();
             if (webtoonPrologue != null) { webtoonPrologue.Dismiss(); webtoonPrologue = null; }
             if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
+            TelemetrySink.MatchStart(currentStage, enforceOneShotTurns ? "one-shot" : "roster");
             StartGame();
         }
 
@@ -2083,7 +2084,7 @@ namespace CastleBusters
                 for (int i = 0; i < DestructibleBlock.Active.Count; i++)
                 {
                     var b = DestructibleBlock.Active[i];
-                    if (b.TryGetComponent<Rigidbody2D>(out var rb) && rb.bodyType == RigidbodyType2D.Dynamic && rb.velocity.magnitude > 0.2f)
+                    if (b.TryGetComponent<Rigidbody2D>(out var rb) && rb.bodyType == RigidbodyType2D.Dynamic && rb.linearVelocity.magnitude > 0.2f)
                     {
                         blocksMoving = true;
                         break;
@@ -2108,6 +2109,9 @@ namespace CastleBusters
             // Every handoff owns aim cleanup. A lost pointer or expired grace must not carry
             // drag state, trajectory, or rubber-band visuals through the AI turn.
             LaunchManagerRef?.CancelAim();
+            // Turn boundary: the volley has fully resolved, so the collapse chain it caused is
+            // now complete and can be recorded as one reward event (see TelemetrySink.TurnResolved).
+            TelemetrySink.TurnResolved();
             turnCount++;
             isPlayerTurn = !isPlayerTurn;
             currentState = isPlayerTurn ? GameState.PlayerTurn : GameState.AITurn;
@@ -2265,6 +2269,14 @@ namespace CastleBusters
             // at 0-0, never keep accumulating across unrelated series.
             if (seriesDecided) ResetSeries();
 
+            // Recorded LAST: the series bookkeeping above decides `seriesWonByPlayer`, which is
+            // what "stage cleared" actually means here (a single game win mid-series does not
+            // clear a stage). Emitting earlier would credit a clear that had not happened.
+            TelemetrySink.MatchEnd(
+                victory,
+                turnCount,
+                (playerCore != null ? playerCore.currentHP : 0f) - (enemyCore != null ? enemyCore.currentHP : 0f),
+                seriesWonByPlayer);
         }
 
         // ---- Retention loop actions (results screen buttons / R key) ----

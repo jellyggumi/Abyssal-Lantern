@@ -333,7 +333,7 @@ namespace CastleBusters.Tests
                 prefabGo.transform.position = new Vector3(1000f, 1000f, 0f);
                 var prefabBody = prefabGo.AddComponent<Rigidbody2D>();
                 prefabBody.mass = 1f;
-                prefabBody.drag = 0.05f;
+                prefabBody.linearDamping = 0.05f;
                 prefabGo.AddComponent<BoxCollider2D>();
                 var prefabUnit = prefabGo.AddComponent<UnitController>();
                 prefabUnit.isPlayerUnit = false;
@@ -1247,7 +1247,7 @@ namespace CastleBusters.Tests
 
             Assert.AreEqual(settledX, barrel.transform.position.x, 0.01f,
                 "A fuse-armed Barrel must not walk after its placement collider has settled.");
-            Assert.AreEqual(0f, barrelBody.velocity.x, 0.01f,
+            Assert.AreEqual(0f, barrelBody.linearVelocity.x, 0.01f,
                 "A settled fuse-armed Barrel must hold zero horizontal locomotion velocity.");
 
             var targetObject = new GameObject("PaidBarrelAttackAndExplosionProbe");

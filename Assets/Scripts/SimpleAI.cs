@@ -45,7 +45,7 @@ namespace CastleBusters
             {
                 // Match the mass reduction UnitController.Awake() applies on spawn.
                 mass = Mathf.Max(UnitController.MinRuntimeMass, rb.mass * UnitController.RuntimeMassScale);
-                linearDrag = Mathf.Max(0f, rb.drag);
+                linearDrag = Mathf.Max(0f, rb.linearDamping);
             }
             if (prefab.TryGetComponent<UnitController>(out var prefabUnit))
             {

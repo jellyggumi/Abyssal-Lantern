@@ -257,12 +257,12 @@ namespace CastleBusters
             Vector2 wantPos = FlightRules.FlightPoint(appliedPhase, flightTime, sweepOriginX);
 
             Vector2 steer = (wantPos - (Vector2)transform.position) * FlightRules.SteerGain;
-            chariotRb.velocity = Vector2.Lerp(chariotRb.velocity, steer, Time.deltaTime * 4f);
-            chariotDir = Mathf.Abs(chariotRb.velocity.x) > 0.05f ? Mathf.Sign(chariotRb.velocity.x) : chariotDir;
+            chariotRb.linearVelocity = Vector2.Lerp(chariotRb.linearVelocity, steer, Time.deltaTime * 4f);
+            chariotDir = Mathf.Abs(chariotRb.linearVelocity.x) > 0.05f ? Mathf.Sign(chariotRb.linearVelocity.x) : chariotDir;
 
             // Face travel + bank into turns; wing-beat scale pulse sells the flight.
             if (spriteRenderer != null) spriteRenderer.flipX = chariotDir < 0f;
-            float bank = Mathf.Clamp(-chariotRb.velocity.x * 3.5f, -18f, 18f);
+            float bank = Mathf.Clamp(-chariotRb.linearVelocity.x * 3.5f, -18f, 18f);
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, 0f, bank), Time.deltaTime * 5f);
             float pulse = 1f + Mathf.Sin(Time.time * (7f + (int)appliedPhase * 3f)) * 0.04f;
 

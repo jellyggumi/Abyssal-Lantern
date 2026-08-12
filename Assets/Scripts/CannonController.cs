@@ -433,7 +433,7 @@ namespace CastleBusters
             var body = go.AddComponent<Rigidbody2D>();
             body.gravityScale = 1f;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            body.velocity = velocity;
+            body.linearVelocity = velocity;
 
             var circle = go.AddComponent<CircleCollider2D>();
             // Set before the scale above is read anywhere; localScale multiplies this, so the
@@ -535,10 +535,10 @@ namespace CastleBusters
         private void FixedUpdate()
         {
             if (detonated || rb == null) return;
-            if (rb.velocity.sqrMagnitude > 0.1f)
+            if (rb.linearVelocity.sqrMagnitude > 0.1f)
             {
                 transform.rotation = Quaternion.AngleAxis(
-                    Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg, Vector3.forward);
+                    Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg, Vector3.forward);
             }
             if (transform.position.y < ChariotRules.KillPlaneY)
             {

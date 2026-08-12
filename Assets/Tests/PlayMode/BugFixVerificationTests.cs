@@ -113,8 +113,8 @@ namespace CastleBusters.Tests
                 yield return new WaitForFixedUpdate();
             }
 
-            float inRangeSpeedX = inRangeRb.velocity.x;
-            float outOfRangeSpeedX = outOfRangeRb.velocity.x;
+            float inRangeSpeedX = inRangeRb.linearVelocity.x;
+            float outOfRangeSpeedX = outOfRangeRb.linearVelocity.x;
 
             Object.Destroy(inRangeGo);
             Object.Destroy(outOfRangeGo);
@@ -149,7 +149,7 @@ namespace CastleBusters.Tests
             // playableBounds safety check) without going through a real trajectory launch.
             unit.InitializeUnit(true, UnitState.Launched);
             var rb = unitGo.GetComponent<Rigidbody2D>();
-            if (rb != null) rb.velocity = Vector2.zero;
+            if (rb != null) rb.linearVelocity = Vector2.zero;
 
             for (int i = 0; i < 5; i++)
             {
@@ -182,7 +182,7 @@ namespace CastleBusters.Tests
 
             unit.InitializeUnit(true, UnitState.Launched);
             var rb = unitGo.GetComponent<Rigidbody2D>();
-            if (rb != null) rb.velocity = Vector2.zero;
+            if (rb != null) rb.linearVelocity = Vector2.zero;
 
             for (int i = 0; i < 5; i++)
             {
