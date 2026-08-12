@@ -163,10 +163,13 @@ namespace CastleBusters
             backgroundTint: new Color(1.0f, 0.9f, 0.7f, 1f),
             allowedGimmicks: new[] { FieldObstacleKind.Rune, FieldObstacleKind.SpikeTrap, FieldObstacleKind.Patrol },
             // A bastion is strongest at its wall line: the iron bulwark sits at the MIDDLE
-            // course, with plain stone behind it — breach the bulwark and the rest goes
-            // quickly. Wall HP total 3·30 + 4·85 + 5·150 + 6·85 = 1690 (+10% over
-            // all-stone), a deliberate step up from Stage1's 1435.
-            keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Stone, KeepTier.Iron, KeepTier.Stone });
+            // course. The approaches are rammed earth and timber, because a taller keep
+            // built of the same stone as Stage1 would simply take LONGER to knock down —
+            // 18 blocks of stone models at 373s against a 300s target. Wall HP total
+            // 3·30 + 4·30 + 5·150 + 6·85 = 1470, which lands at 328s: a bigger fortress
+            // that is not a longer grind, with the escalation carried by its faster field
+            // mutation and leaner obstacle cap instead.
+            keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Wood, KeepTier.Iron, KeepTier.Stone });
 
         // Stage3 "Volcanic Abyss": a vast long-range gorge, not just a wider Stage1.
         // Launch apron pushed from 14.5 to 18.5 (player-to-player distance 29 -> 37,
@@ -210,12 +213,13 @@ namespace CastleBusters
             mutateEveryNTurns: 4,
             backgroundTint: new Color(1.0f, 0.75f, 0.7f, 1f),
             allowedGimmicks: new[] { FieldObstacleKind.Barrel, FieldObstacleKind.MiniTower, FieldObstacleKind.SpikeTrap },
-            // The final citadel: a stone outwork makes even the first breach cost real
-            // shots, the charred timber palisade behind it burns away fast (volcanic ash
-            // reading), and the innermost course is iron. Wall HP total
-            // 3·85 + 5·30 + 6·85 + 7·150 = 1965 (+10% over all-stone) — the top of the
-            // campaign's 1435 → 1690 → 1965 durability ladder.
-            keepCourseMaterials: new[] { KeepTier.Stone, KeepTier.Wood, KeepTier.Stone, KeepTier.Iron });
+            // The final citadel: a vast charred palisade — three courses of timber the ash
+            // has dried to tinder — around a single iron heart guarding the core. It is the
+            // widest, tallest keep in the game at 21 blocks, and all-stone it would model at
+            // 414s: a seven-minute grind, not a five-minute siege. Timber keeps the
+            // silhouette huge while the match stays the intended length. Wall HP total
+            // 3·30 + 5·30 + 6·30 + 7·150 = 1470 → 328s.
+            keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Wood, KeepTier.Wood, KeepTier.Iron });
 
         public static StageLayout For(StageId id)
         {

@@ -2070,8 +2070,15 @@ namespace CastleBusters
             yield return new WaitForSeconds(PostImpactHoldSeconds);
 
 
+            // Settle window. QA measured a real handoff at 6.39s per shot, and this cap was
+            // most of it: the loop only exits early when NOTHING is moving, and a landed
+            // knight walking into the rubble keeps nudging blocks, so it ran the full window
+            // nearly every turn. At ~40 turns a match that is over two minutes of watching
+            // debris. 1.2s still lets a struck wall visibly topple before control changes;
+            // anything still rolling after that keeps rolling into the next turn, which is
+            // how arcade siege games have always handed over.
             float settleTimer = 0f;
-            while (settleTimer < 3f)
+            while (settleTimer < 1.2f)
             {
                 bool blocksMoving = false;
                 for (int i = 0; i < DestructibleBlock.Active.Count; i++)

@@ -107,3 +107,5 @@ Assets/InitTestScene*.unity.meta
 
 # Burst AOT output emitted next to the project during a WebGL build
 /Data/
+# Agent session scratch (input history, sessions) — never repo material
+.jeo/
