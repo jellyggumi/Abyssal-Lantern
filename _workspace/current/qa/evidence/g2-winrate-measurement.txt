@@ -1,0 +1,32 @@
+=== G2 MEASUREMENT ===
+settings: keep=1440 shot=106 aim=0.7 err=0.09 s/turn=7.5
+matches per series: 100
+G2 band: 45 %-55 %
+
+--- player always first (shipped turn order) ---
+  matches        : 100
+  player win rate: 87.0 %  (87/100)
+  first-mover    : 87.0 %
+  average turns  : 38.8
+  average length : 291s (model target 300s)
+  G2 band        : OUTSIDE
+--- alternating first move (balance isolated) ---
+  matches        : 100
+  player win rate: 49.0 %  (49/100)
+  first-mover    : 87.0 %
+  average turns  : 38.8
+  average length : 291s (model target 300s)
+  G2 band        : INSIDE
+
+--- skill sensitivity (alternating, so turn order is neutral) ---
+  aim +0.00 -> player win rate 49.0 %
+  aim +0.01 -> player win rate 60.0 %
+  aim +0.03 -> player win rate 90.0 %
+  aim +0.05 -> player win rate 96.0 %
+  aim +0.10 -> player win rate 100.0 %
+
+--- seed stability (alternating, 4 seeds) ---
+  seed       1: win 54.0 %  turns 38.8  291s
+  seed    1000: win 48.0 %  turns 38.7  291s
+  seed   20000: win 50.0 %  turns 38.8  291s
+  seed  999983: win 47.0 %  turns 38.8  291s
