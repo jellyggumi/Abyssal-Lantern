@@ -45,8 +45,11 @@ namespace CastleBusters.Tests
             Assert.AreEqual(3, layout.mutateEveryNTurns, "Stage1 mutation cadence must stay at the original every-3rd-turn");
 
             // Stage1's starting kegs must be the exact frozen GameManager fixture, not a
-            // stage-owned copy that could silently drift from it.
-            Assert.AreEqual(4, layout.barrelPositions.Length, "Stage1 must ship the original 4 starting kegs");
+            // stage-owned copy that could silently drift from it. Two, not the original
+            // four: the ±11 pair sat inside the launched Knight's muzzle spawn footprint
+            // and self-detonated the player's first volley (defect fix 2026-08-12 —
+            // KegPlacementSafetyTests now derives that band from the actual prefabs).
+            Assert.AreEqual(2, layout.barrelPositions.Length, "Stage1 ships the two wall-line kegs");
             Assert.AreEqual(GameManager.InitialBarrelPositions.Length, layout.barrelPositions.Length);
             for (int i = 0; i < layout.barrelPositions.Length; i++)
             {

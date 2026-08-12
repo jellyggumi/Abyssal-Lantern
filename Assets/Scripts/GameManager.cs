@@ -543,22 +543,26 @@ namespace CastleBusters
         // Widened strategic layout QA pass: the two keeps moved from ±7 to ±CoreAbsX so the
         // no-man's-land between the castles is a real midfield, and every gimmick family got
         // breathing room (nothing closer than ~1.5u to its neighbour). Envelope spans
-        // x in [-15, 15]; launch aprons sit at ±LaunchApronAbsX. Ground kegs keep >= 3.0u
-        // clearance from the muzzles (blast radius 2.2 — kegs hugging the apron self-detonated
-        // low-arc shots, review cycle 3 P1 #1) and 2.5u from the cores so a keg pop can never
-        // splash a healthy core. Static tables: layout test pins the spread.
+        // x in [-15, 15]; launch aprons sit at ±LaunchApronAbsX. Static tables: layout test
+        // pins the spread (KegPlacementSafetyTests derives the real clearances from prefabs).
         public const float CoreAbsX = 9f;            // was 7 — wider castle gap for strategy; SHARED across stages, never changes
         // Mutable (not const): StageLayout.launchApronAbsX overrides this once at StartGame()
         // for Stage3's wider player-to-player gap. Stage1/Stage2's 14.5 default keeps every
         // existing caller/test byte-identical when either is active (the only stages EditMode
         // tests ever see, since they call Awake()/CreateGround() directly and never Start()).
         public static float LaunchApronAbsX = 14.5f;  // was 12 — launch offset from core is 5.5
+        // Two kegs, not four (defect fix 2026-08-12): the old ±11 pair sat 3.5u from the
+        // muzzles — INSIDE the launched Knight's 2.64u-half-width spawn footprint plus keg
+        // half-width, so the player's very first knight volley contacted the keg on frame 1,
+        // detonated it 2.0u from their own core, and cost them 80 core HP before the shot
+        // ever flew (live QA ×2, [KegTrace]/[LaunchContactTrace] evidence). Both live
+        // sessions read as "core drains by itself". The ±6.5 pair stays: 8.0u from the
+        // muzzles, 2.5u from the cores (outside the 2.2u blast at rest), and sitting at the
+        // wall line it is the sanctioned breach tool — shoot it to crack the courses.
         public static readonly Vector3[] InitialBarrelPositions =
         {
-            new Vector3(-11f, 0.5f, 0f),
             new Vector3(-6.5f, 0.5f, 0f),
             new Vector3(6.5f, 0.5f, 0f),
-            new Vector3(11f, 0.5f, 0f),
         };
 
         public static readonly Vector3[] InitialRunePositions =
