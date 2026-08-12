@@ -151,6 +151,47 @@ namespace CastleBusters.Tests
         }
 
         [Test]
+        public void DeploymentController_OneShotCannonPlacement_ConsumesTheTurnShot()
+        {
+            var gameManager = CreateObject("OneShotCannonGameManager").AddComponent<GameManager>();
+            var deployment = CreateObject("OneShotCannonDeployment").AddComponent<DeploymentController>();
+
+            gameManager.enforceOneShotTurns = true;
+            gameManager.currentState = GameState.PlayerTurn;
+            SetPrivateField(gameManager, "isPlayerTurn", true);
+            SetPrivateField(gameManager, "turnCount", 6);
+
+            // EditMode never runs Awake, so the singleton TryDeploy reads must be wired by
+            // hand — otherwise the turn gate sees turn 0 and reports the cannon Locked.
+            var instanceProperty = typeof(GameManager).GetProperty(
+                nameof(GameManager.Instance), BindingFlags.Public | BindingFlags.Static);
+            var previousInstance = (GameManager)instanceProperty.GetValue(null);
+            instanceProperty.SetValue(null, gameManager);
+
+            try
+            {
+                // Auto-property backing fields: enough supply for the 12-cost battery, and the
+                // breach requirement already earned.
+                SetPrivateField(deployment, "<PlayerSupply>k__BackingField", 20f);
+                SetPrivateField(deployment, "<PlayerBreaches>k__BackingField",
+                    DeploymentRules.CannonBreachRequirement);
+
+                var reason = deployment.TryDeploy(DeployCard.Cannon, new Vector2(-3f, 1f), true);
+
+                Assert.That(reason, Is.EqualTo(DeployBlockReason.None),
+                    "With breach and supply met, siting the battery must succeed in the one-shot loop.");
+                Assert.That(gameManager.IsResolvingTurn, Is.True,
+                    "The emplacement is the turn's action — it must resolve the turn like a volley does.");
+                Assert.That(gameManager.TryCommitTurnShot(), Is.False,
+                    "A turn that bought an installation must not also be able to fire.");
+            }
+            finally
+            {
+                instanceProperty.SetValue(null, previousInstance);
+            }
+        }
+
+        [Test]
         public void DeploymentController_SpawnCannon_NeutralizesUnitDefaultsForStationaryInstallation()
         {
             var deployment = CreateObject("CannonSpawnRegressionDeployment").AddComponent<DeploymentController>();

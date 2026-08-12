@@ -143,7 +143,7 @@ namespace CastleBusters.Tests
         [Test]
         public void KeepMaterials_DurabilityClimbsAcrossTheCampaign()
         {
-            // 1405 → 1660 → 1880: each unlock should present a genuinely tougher fortress,
+            // 1435 → 1690 → 1965: each unlock should present a genuinely tougher fortress,
             // through materials and height together, never a step down.
             float s1 = WallHitPoints(StageDefinitions.Stage1);
             float s2 = WallHitPoints(StageDefinitions.Stage2);

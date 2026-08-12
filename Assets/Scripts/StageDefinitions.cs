@@ -124,8 +124,8 @@ namespace CastleBusters
             allowedGimmicks: new[] { FieldObstacleKind.Barrel, FieldObstacleKind.MiniTower, FieldObstacleKind.Rune, FieldObstacleKind.Patrol },
             // 목책 전초 → 석재 성벽 → 철재 내성: the approach is soft and teaches the breach,
             // the wall line holds, the course shielding the core gleams. Wall HP total
-            // 2·30 + 3·85 + 4·85 + 5·150 = 1405, which puts the MatchLengthModel estimate
-            // at ~315s — closer to the 300s target than the old all-stone 1190 (~271s).
+            // 3·30 + 3·85 + 4·85 + 5·150 = 1435, which puts the MatchLengthModel estimate
+            // at ~321s — inside the five-minute band, closer than all-stone ever was.
             keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Stone, KeepTier.Stone, KeepTier.Iron });
 
         // Stage2 "Desolate Dunes": a close-quarters fortress duel, not a smaller Stage1.
@@ -164,8 +164,8 @@ namespace CastleBusters
             allowedGimmicks: new[] { FieldObstacleKind.Rune, FieldObstacleKind.SpikeTrap, FieldObstacleKind.Patrol },
             // A bastion is strongest at its wall line: the iron bulwark sits at the MIDDLE
             // course, with plain stone behind it — breach the bulwark and the rest goes
-            // quickly. Wall HP total 2·30 + 4·85 + 5·150 + 6·85 = 1660 (+15% over
-            // all-stone), a deliberate step up from Stage1's 1405.
+            // quickly. Wall HP total 3·30 + 4·85 + 5·150 + 6·85 = 1690 (+10% over
+            // all-stone), a deliberate step up from Stage1's 1435.
             keepCourseMaterials: new[] { KeepTier.Wood, KeepTier.Stone, KeepTier.Iron, KeepTier.Stone });
 
         // Stage3 "Volcanic Abyss": a vast long-range gorge, not just a wider Stage1.
@@ -213,8 +213,8 @@ namespace CastleBusters
             // The final citadel: a stone outwork makes even the first breach cost real
             // shots, the charred timber palisade behind it burns away fast (volcanic ash
             // reading), and the innermost course is iron. Wall HP total
-            // 2·85 + 5·30 + 6·85 + 7·150 = 1880 (+11% over all-stone) — the top of the
-            // campaign's 1405 → 1660 → 1880 durability ladder.
+            // 3·85 + 5·30 + 6·85 + 7·150 = 1965 (+10% over all-stone) — the top of the
+            // campaign's 1435 → 1690 → 1965 durability ladder.
             keepCourseMaterials: new[] { KeepTier.Stone, KeepTier.Wood, KeepTier.Stone, KeepTier.Iron });
 
         public static StageLayout For(StageId id)

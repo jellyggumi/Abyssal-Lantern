@@ -630,8 +630,12 @@ namespace CastleBusters
 
         /// <summary>Fixed height of a forward outpost, in blocks. Deliberately not scaled by
         /// stage: it is an outwork the attacker clears on the way in, not part of the
-        /// fortress the stage is tuning.</summary>
-        public const int OutpostHeightBlocks = 2;
+        /// fortress the stage is tuning. Raised 2 → 3 in the scale pass (slingshot shrunk
+        /// 2.2u → 1.6u at the same time): the keep's silhouette now rises from the very
+        /// first course, and every stage's fortress visibly towers over the launcher.
+        /// Stage1's material total moves 1405 → 1435, keeping the decided-match estimate
+        /// at ~321s — inside the five-minute band without touching the damage tuning.</summary>
+        public const int OutpostHeightBlocks = 3;
 
         /// <summary>
         /// The keep, from the battlefield inward. A "castle" used to be a single one-block

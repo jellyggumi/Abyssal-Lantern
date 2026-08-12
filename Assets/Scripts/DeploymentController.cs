@@ -141,9 +141,38 @@ namespace CastleBusters
             var gm = GameManager.Instance;
             if (gm != null && gm.EnforcesOneShotTurns)
             {
-                // The new loop has no pre-shot placement decision for either faction.
-                DisarmDeployMode();
-                SetHudVisible(false);
+                // One-shot loop: the volley itself is rule-driven, but the CANNON is an
+                // installation, not a launch — it remains the one thing a turn may buy
+                // INSTEAD of its shot. Placing it consumes the turn (TryDeploy commits the
+                // one-shot gate), so "one action per turn" holds: fire, or emplace artillery.
+                SelectedCard = DeployCard.Cannon;
+                bool playerCanAct = gm.currentState == GameState.PlayerTurn
+                    && gm.IsPlayerTurn && !gm.IsResolvingTurn;
+
+                EnsureHud();
+                SetHudVisible(playerCanAct);
+                if (!playerCanAct)
+                {
+                    DisarmDeployMode();
+                    return;
+                }
+
+                float oneShotDt = Time.deltaTime;
+                PlayerSupply = SupplyRules.Regen(PlayerSupply, oneShotDt);
+                for (int i = 0; i < playerCooldowns.Length; i++)
+                {
+                    playerCooldowns[i] = Mathf.Max(0f, playerCooldowns[i] - oneShotDt);
+                }
+
+                HandlePlayerInput();
+                UpdateGhost();
+                hudRefreshTimer -= Time.unscaledDeltaTime;
+                if (hudRefreshTimer <= 0f)
+                {
+                    hudRefreshTimer = HudRefreshInterval;
+                    UpdateHud();
+                }
+                // No AI deployment in the one-shot loop: the enemy turn is its shot.
                 return;
             }
             bool battleLive = gm != null &&
@@ -286,6 +315,15 @@ namespace CastleBusters
                 return DeployBlockReason.Supply;
             }
 
+            // One-shot loop: an installation IS the turn's action. Commit the one-shot gate
+            // BEFORE spending supply or spawning, so a turn that has already fired cannot
+            // also emplace, and a placement can never be paid for without owning the turn.
+            bool consumesOneShotTurn = isPlayer && gm != null && gm.EnforcesOneShotTurns;
+            if (consumesOneShotTurn && !gm.TryCommitTurnShot())
+            {
+                return DeployBlockReason.Cooldown;
+            }
+
             if (!SpawnDeployed(card, position, isPlayer))
             {
                 return DeployBlockReason.Locked;
@@ -300,6 +338,16 @@ namespace CastleBusters
             {
                 EnemySupply = remaining;
                 enemyCooldowns[(int)card] = DeploymentRules.CooldownOf(card);
+            }
+
+            if (consumesOneShotTurn)
+            {
+                // The emplacement was this turn's action: resolve and hand over exactly as
+                // a launch does (OnUnitLaunched tolerates null — nothing is in flight).
+                DisarmDeployMode();
+                GameFeelVfx.SpawnFeedbackLabel(position + Vector2.up * 0.9f, "화포 설치 — 턴 종료",
+                    new Color(0.7f, 0.95f, 1f, 1f), 1.7f, 0.45f);
+                gm.OnUnitLaunched(null);
             }
             return DeployBlockReason.None;
         }

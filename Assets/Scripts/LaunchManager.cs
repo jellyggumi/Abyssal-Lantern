@@ -16,7 +16,10 @@ namespace CastleBusters
 
         [Header("Trajectory Line")]
         public LineRenderer trajectoryLine;
-        public int trajectoryResolution = 150;
+        // 300 × 0.02s = 6 seconds of predicted flight. 150 truncated a full-power lob
+        // mid-air on wide stages, so the arc the player pulled against simply ended in
+        // the sky — the preview must always reach the impact or leave the board.
+        public int trajectoryResolution = 300;
         public float timeStep = 0.02f;
 
         [Header("Visuals")]
@@ -26,7 +29,7 @@ namespace CastleBusters
         public TMP_Text controlGuideText;
         public LineRenderer rubberBandLine;
 
-        private readonly List<Vector3> trajectoryPoints = new List<Vector3>(160);
+        private readonly List<Vector3> trajectoryPoints = new List<Vector3>(310);
         private readonly RaycastHit2D[] trajectoryHits = new RaycastHit2D[16];
         private readonly HashSet<int> previewCrossedGateIds = new HashSet<int>(8);
 
@@ -160,11 +163,10 @@ namespace CastleBusters
                     if (native > 0.0001f)
                     {
                         // The slingshot reads as a physical siege machine standing on the
-                        // apron, but at 3.1u it stood taller than a 2-block wall and level
-                        // with a 3-block one — the engine dwarfing the fortress it is meant
-                        // to be battering. 2.2u keeps it substantial while leaving every
-                        // castle silhouette clearly the larger thing on the board.
-                        float target = gateKey == GimmickAnimLibrary.SlingshotAnim ? 2.2f : 2.4f;
+                        // apron, but even at 2.2u it still rivalled a wall course. 1.6u makes
+                        // the fortress unambiguously the giant on the board and the slingshot
+                        // the tool battering it — the proportion every siege game sells.
+                        float target = gateKey == GimmickAnimLibrary.SlingshotAnim ? 1.6f : 2.4f;
                         float s = target / native;
                         go.transform.localScale = new Vector3(s, s, 1f);
                     }
@@ -173,7 +175,7 @@ namespace CastleBusters
                     {
                         // Ground offset tracks the height above: 0.85 was tuned for the 3.1u
                         // frame, so it scales with it or the machine sinks into the apron.
-                        go.transform.localPosition = new Vector3(0f, 0.85f * (2.2f / 3.1f), 0f);
+                        go.transform.localPosition = new Vector3(0f, 0.85f * (1.6f / 3.1f), 0f);
                         sr.color = Color.white; // no cyan portal wash over the wood/leather
                     }
                     // TryAttach re-derives scale from frame 0 to preserve the world footprint,
