@@ -99,3 +99,6 @@ Assets/InitTestScene*.unity.meta
 # Unity auto-merges package link.xml into Assets during a build; regenerated each time
 /Assets/packages-merged-link/
 /Assets/packages-merged-link.meta
+
+# Agent session scratch (input history, sessions) — never repo material
+.jeo/
