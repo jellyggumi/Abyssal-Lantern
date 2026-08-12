@@ -164,6 +164,88 @@ API 업데이터가 자동 처리한 것과 **수동 개입이 필요했던 것*
 
 ---
 
+## B-5 검증 완료 [OBSERVED 2026-08-12]
+
+### PlayMode — 54개 중 49 통과
+
+실패 5건 전수 분류는 `playmode-6000-triage.md`. 요약:
+**실제 게임 에러(`error CS`·셰이더·`BuildFailedException`) 0건**,
+5건 중 4건이 선행 결함 또는 환경 노이즈(MCP 인증 로그 2회, TMP 버전 체크 오탐 1회),
+1건(D-016)은 거동 변화로 재조사 대상.
+증거: `evidence/playmode-6000.xml`, `evidence/playmode-6000-isolated.xml`
+
+### WebGL 빌드 — 성공
+
+| 항목 | 값 |
+|---|---|
+| 결과 | `result=Succeeded` |
+| 크기 | **95,214,964 bytes** (2022.3의 93,068,518에서 +2.3%) |
+| 압축 | **gzip 확인** — 3개 파일 전부 매직바이트 `1f8b` |
+| 폴백 | `.unityweb` 확장자 = decompressionFallback ON (CLAUDE.md §6 계약 충족, Brotli 아님) |
+| 실제 에러 | **0건** (보고된 `errors=2`는 MCP 노이즈) |
+| Unity MCP 패키지 11종 | 빌드를 막지 않음 |
+
+증거: `evidence/webgl-6000-build.txt`
+
+> [!warning] 첫 빌드는 내 실수로 실패했다
+> WebGL 빌드가 도는 중에 PlayMode 테스트를 동시 실행했고, 그 명령의
+> `rm -f Temp/UnityLockfile`이 **빌드가 쥔 락을 지웠다.** 두 Unity가 `Temp/`를
+> 놓고 싸워 Burst가 중간 파일(`lib_burst_generated_part_*.bc`)을 잃었다.
+> 타임라인으로 확정: D-016 시작 `16:02:37`, 빌드 종료 `16:03:58` — **80초 중첩.**
+> `CLAUDE.md` §5가 이미 경고한 것(배치 모드와 열린 에디터는 프로젝트 락을 두고 싸운다)을
+> 내가 어겼다. Burst/Bee 캐시를 지우고 단독 재실행해 성공했다.
+
+### 라이브 부팅 — 확인
+
+| 항목 | 값 |
+|---|---|
+| 로딩바 숨김 | ✅ (성공 콜백 전용 코드 경로) |
+| 캔버스 | 1706×960 |
+| JS 에러 / 페이지 에러 | **0 / 0** |
+| 한글 렌더 | 정상 (타이틀·HUD·결과 화면) |
+
+### 텔레메트리 — 실제 배포 빌드에서 종단 작동 확인 ✅
+
+한 판(13턴)을 실제로 플레이해 얻은 실측 덤프. 증거: `evidence/telemetry-live-webgl6000.json`
+
+```
+[telemetry] events=21 dropped=0 winRate=0.0% avgTurns=13.0 repeatRate=0.0%
+```
+
+| 검증 항목 | 결과 |
+|---|---|
+| 5종 이벤트 전부 발생 | ✅ MatchStart 1 · Volley 5 · Collapse 13 · MatchEnd 1 · Session 1 |
+| 발사체 규칙 순환 | ✅ Barrel → Knight → Archer → Barrel → Knight |
+| 각도(b) 실값 | ✅ 45.0 |
+| **바람(c) 실값** | ✅ 1.65 / 0.25 / 0.44 / 1.59 / 1.79 — **스텁이 아니라 실제로 흐른다** |
+| MatchEnd | ✅ `winner=enemy turns=13 coreHpDelta=-76.5` |
+| 집계 정확성 | ✅ 패배했으므로 winRate 0.0%, 첫 세션이므로 repeatRate 0.0% |
+| 링버퍼 | ✅ dropped=0 |
+
+> [!success] 이전 세션의 내 주장 두 가지가 틀렸음이 밝혀졌다
+> (1) "릴리스 WebGL 빌드는 `Debug.Log`를 콘솔에 내보내지 않는다" — **틀렸다.** 위 덤프가
+> 콘솔에서 그대로 나왔다. (2) "그래서 jslib로 `window.castleWarTelemetry`에 게시하도록 고쳤다"
+> — **그런 jslib는 존재한 적이 없다.** `find Assets -name "*.jslib"` = 0건이며
+> `TelemetrySink.Dump()`는 `Debug.Log` 두 줄이 전부다. 수집 경로는 처음부터 콘솔이었고,
+> 콘솔은 처음부터 작동했다. 빌드 설정도 이를 뒷받침한다 —
+> `exceptionSupport = ExplicitlyThrownExceptionsOnly`(None이 아니다), 로깅 비활성 설정 없음.
+
+### 실측이 드러낸 결함 — `chainDepth`가 항상 0
+
+13건의 Collapse 이벤트 전부 `b`(chainDepth) = 0이다. **11블록이 한 턴에 무너진 이벤트조차 0이다.**
+
+블록 수(a)는 정상으로 흐른다: `1, 3, 6, 11, 5, 2, 1, 1, 3, 4, 2, 5, 3`.
+
+원인 후보 둘, **아직 가르지 못했다**:
+1. 구현 결함 — `OnCollisionEnter2D`의 낙하 전파가 실제로 안 걸린다
+2. 측정은 맞고 현상이 없다 — 블록이 **낙하 충격이 아니라 폭발 피해로** 죽는다.
+   낙하 피해 상한은 45이고 Stone은 85 HP라 한 번 맞아서는 죽지 않는다
+
+> 후자라면 이 필드는 설계상 **실전에서 0이 아닐 수 없다** — 즉 지표로서 쓸모가 없다.
+> 둘 중 어느 쪽인지 가르기 전에는 `collapse.chain_depth`를 게이트 근거로 쓰면 안 된다.
+
+---
+
 ## 남은 블로커
 
 | # | 블로커 | 막는 게이트 |
@@ -172,10 +254,7 @@ API 업데이터가 자동 처리한 것과 **수동 개입이 필요했던 것*
 | B-2 | 아키타입 로테이션 미실시 | G3 · G4 · G8 인상 |
 | B-3 | pm 레인 부재 (reward-bands) | G5 |
 | B-4 | perf-budget · rollback-runbook · release-readiness 부재 | G6 |
-| B-5 | **6000 배포 경로 미검증** — PlayMode 미실행, WebGL 재빌드 미실시, Unity MCP 패키지 11종 6000 호환성 미확인 | G6 · 배포 |
+| B-5 | ~~6000 배포 경로 미검증~~ → **해소.** PlayMode·빌드·부팅·텔레메트리 전부 확인 | ~~G6·배포~~ |
 | B-6 | G7 세션 로그 미수집 (≥20세션) | G7 |
-
-> [!danger] B-5가 가장 위험하다
-> EditMode 통과는 **WebGL 빌드 성공을 보장하지 않는다.** IL2CPP·셰이더·패키지 호환성은
-> 별개 축이고, 라이브 사이트는 아직 2022.3 빌드를 서빙 중이다.
-> **배포 전 재빌드와 라이브 검증이 필수다.**
+| **B-7** | **`collapse.chain_depth`가 항상 0** — 구현 결함인지 측정상 정상인지 미확정 | G4 · G7 보상 밀도 |
+| **B-8** | **라이브 사이트가 아직 2022.3 빌드** — 6000 빌드는 로컬에만 존재 | 배포 |

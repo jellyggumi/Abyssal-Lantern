@@ -1,0 +1,175 @@
+{
+ "summary": "[telemetry] events=21 dropped=0 winRate=0.0% avgTurns=13.0 repeatRate=0.0%",
+ "captured": "2026-08-12 local WebGL 6000 build, browser console",
+ "events": [
+  {
+   "kind": "MatchStart",
+   "label": "Stage1",
+   "a": 0.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 1.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 3.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 6.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 11.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Volley",
+   "label": "ExplosiveBarrel",
+   "a": 60.357147,
+   "b": 45.0,
+   "c": 1.6479671,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 5.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Volley",
+   "label": "Knight",
+   "a": 60.357147,
+   "b": 45.0,
+   "c": 0.25398374,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 2.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 1.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Volley",
+   "label": "Archer",
+   "a": 60.357147,
+   "b": 45.0,
+   "c": 0.43665624,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 1.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 3.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Volley",
+   "label": "ExplosiveBarrel",
+   "a": 60.357147,
+   "b": 45.0,
+   "c": 1.5895576,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 4.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 2.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Volley",
+   "label": "Knight",
+   "a": 60.357147,
+   "b": 45.0,
+   "c": 1.7911105,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 5.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Collapse",
+   "label": "",
+   "a": 3.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "MatchEnd",
+   "label": "enemy",
+   "a": 13.0,
+   "b": -76.5,
+   "c": 0.0,
+   "d": 0.0
+  },
+  {
+   "kind": "Session",
+   "label": "",
+   "a": 0.0,
+   "b": 0.0,
+   "c": 0.0,
+   "d": 0.0
+  }
+ ],
+ "dropped": 0
+}
