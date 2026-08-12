@@ -141,30 +141,59 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void KeepMaterials_DurabilityClimbsAcrossTheCampaign()
+        public void EveryStage_HoldsTheTargetMatchLength()
         {
-            // 1435 → 1690 → 1965: each unlock should present a genuinely tougher fortress,
-            // through materials and height together, never a step down.
-            float s1 = WallHitPoints(StageDefinitions.Stage1);
-            float s2 = WallHitPoints(StageDefinitions.Stage2);
-            float s3 = WallHitPoints(StageDefinitions.Stage3);
+            // This replaced a "durability climbs across the campaign" pin, which was the
+            // wrong property to defend and hid a real defect: heights climb 3→4→5, so a
+            // later keep carries 18 and 21 blocks against Stage1's 15. Stacking a material
+            // ladder on top of that made Stage2 model at 373s and Stage3 at 429s — a
+            // seven-minute grind — while the pacing gate only ever measured Stage1 and
+            // stayed green. A later stage must be a different fight, not a longer one:
+            // escalation belongs to the field mutation cadence, obstacle cap, wind, and AI
+            // aim, all of which already climb. Every stage is measured here.
+            float tolerance = MatchLengthModel.TargetMatchSeconds * MatchLengthModel.ToleranceFraction;
 
-            Assert.Less(s1, s2, "Stage2's bastion must out-endure Stage1's plains keep");
-            Assert.Less(s2, s3, "Stage3's citadel must out-endure Stage2's bastion");
+            foreach (var layout in new[] { StageDefinitions.Stage1, StageDefinitions.Stage2, StageDefinitions.Stage3 })
+            {
+                float material = WallHitPoints(layout) + CastleCoreGimmick.CoreMaxHP;
+                float seconds = MatchLengthModel.SecondsToDecide(
+                    material,
+                    MatchLengthModel.EffectiveDamagePerTurn,
+                    MatchLengthModel.AverageTurnSeconds);
+
+                Assert.That(seconds,
+                    Is.EqualTo(MatchLengthModel.TargetMatchSeconds).Within(tolerance),
+                    $"{layout.displayName} models at {seconds:F0}s against a {MatchLengthModel.TargetMatchSeconds:F0}s target");
+            }
+        }
+
+        [Test]
+        public void TallerStages_UseLighterMaterialSoSizeIsNotDuration()
+        {
+            // The design consequence of the rule above, pinned so a future "make the last
+            // stage tougher" edit cannot quietly reintroduce the seven-minute match: as the
+            // keep grows in blocks, its average block must get cheaper to break.
+            float s1 = WallHitPoints(StageDefinitions.Stage1) / GameManager.BlocksPerKeep(StageDefinitions.Stage1.wallHeightBlocks);
+            float s2 = WallHitPoints(StageDefinitions.Stage2) / GameManager.BlocksPerKeep(StageDefinitions.Stage2.wallHeightBlocks);
+            float s3 = WallHitPoints(StageDefinitions.Stage3) / GameManager.BlocksPerKeep(StageDefinitions.Stage3.wallHeightBlocks);
+
+            Assert.Greater(s1, s2, "Stage2 is the bigger keep, so its average block must be softer than Stage1's");
+            Assert.Greater(s2, s3, "Stage3 is bigger still, so its average block must be softer than Stage2's");
         }
 
         [Test]
         public void KeepMaterials_StayNearTheAllStoneBaseline()
         {
             // Materials are level design, not a stealth balance patch: each stage's mixed
-            // profile must stay within −10%/+25% of what the same courses would total in
-            // plain stone, so pacing shifts stay a deliberate, reviewed decision.
+            // profile must stay within −20%/+25% of what the same courses would total in
+            // plain stone, so pacing shifts stay a deliberate, reviewed decision. The lower
+            // bound is what the taller keeps spend to hold the five-minute target.
             float stoneHp = LoadedHp("StoneBlockData");
             foreach (var layout in new[] { StageDefinitions.Stage1, StageDefinitions.Stage2, StageDefinitions.Stage3 })
             {
                 float mixed = WallHitPoints(layout);
                 float allStone = GameManager.BlocksPerKeep(layout.wallHeightBlocks) * stoneHp;
-                Assert.That(mixed / allStone, Is.InRange(0.9f, 1.25f),
+                Assert.That(mixed / allStone, Is.InRange(0.8f, 1.25f),
                     $"{layout.displayName}: mixed-material walls ({mixed}) drift too far from the all-stone baseline ({allStone})");
             }
         }

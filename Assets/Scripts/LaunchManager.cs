@@ -115,7 +115,20 @@ namespace CastleBusters
 
             // One compact line: the unit cards already carry roster shortcuts, so this guide
             // only preserves readiness plus the launch gesture the player must perform.
-            return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  푸른 링 드래그 → 발사";
+            string guide = $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  푸른 링 드래그 → 발사";
+
+            // The one-shot turn may buy an emplacement INSTEAD of its shot, but a player
+            // who is never told that will never find it. Only advertised once the breach
+            // requirement is actually met, so the line names an action available now.
+            var deployment = DeploymentController.Instance;
+            var gm = GameManager.Instance;
+            if (gm != null && gm.EnforcesOneShotTurns && deployment != null &&
+                DeploymentRules.BreachSatisfied(DeployCard.Cannon, deployment.BreachesFor(true)))
+            {
+                guide += "  ·  D → 화포 설치(턴 소모)";
+            }
+
+            return guide;
         }
 
 

@@ -92,10 +92,25 @@ namespace CastleBusters.Tests
             Debug.Log("Testing Knight unit...");
             gameManager.SelectUnit(0);
             launchManager.SimulateLaunch(new Vector2(10f, 5f));
-            yield return new WaitForSecondsRealtime(3f);
             Debug.Log("✅ Knight launched successfully");
 
-            // Test 2: Verify game state transitions
+            // Test 2: Verify game state transitions.
+            // This used to sleep a flat 3s and then assert the handoff, which was never what
+            // resolution costs: the volley has to land, the board holds for
+            // PostImpactHoldSeconds, and then blocks and arrows have to settle (up to 3s on
+            // their own). The fixed sleep therefore failed on any shot that took a moment
+            // longer to come to rest — a statement about the stopwatch, not the mechanic.
+            // Wait for the handoff the mechanic actually promises, bounded well past the
+            // resolver's own 12s watchdog so a genuinely wedged projectile still fails here
+            // instead of hanging the suite.
+            float waited = 0f;
+            while (gameManager.currentState == GameState.PlayerTurn && waited < 20f)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            Debug.Log($"Turn handoff observed after {waited:F2}s");
+
             Assert.AreEqual(GameState.AITurn, gameManager.currentState, "Should transition to AI turn after player launches");
             Debug.Log("✅ Game state transitioned correctly");
 
