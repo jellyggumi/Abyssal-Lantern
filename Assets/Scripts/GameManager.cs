@@ -183,6 +183,19 @@ namespace CastleBusters
         }
 
         /// <summary>
+        /// First-play coaching hold: while the guide is walking a brand-new player through
+        /// their very first draw, the turn clock must not forfeit the turn mid-instruction.
+        /// Tops the timer up to <paramref name="minimumSeconds"/> without ever shortening it,
+        /// and only during a live player turn — the caller caps total held time so an
+        /// abandoned session still forfeits normally (FirstPlayGuide.MaxTimerHoldSeconds).
+        /// </summary>
+        public void HoldTurnTimerForCoaching(float minimumSeconds)
+        {
+            if (currentState != GameState.PlayerTurn || !isPlayerTurn || isResolvingTurn) return;
+            turnTimer = Mathf.Max(turnTimer, minimumSeconds);
+        }
+
+        /// <summary>
         /// Turns the ramp is spread over, derived from how long this stage's match actually
         /// runs rather than read from the inspector.
         ///
@@ -1668,6 +1681,9 @@ namespace CastleBusters
             UpdateUI();
             RefreshLastStandButton();
             GameplayUxDirector.NotifyTurnChanged(true);
+            // First profile boot only: step-by-step objectives over the live board
+            // (2026-08-12 first-contact feedback — see FirstPlayGuide's header).
+            FirstPlayCoachController.EnsureForFirstPlay();
         }
 
         private void Update()

@@ -36,6 +36,10 @@ namespace CastleBusters.Tests
             GameplayUxDirector.ResetSessionStats();         // SessionMaxCombo, read back by combo banners
             SiegePrototypeEconomy.ResetDemo();       // marks and the one-time banner entitlement
             StageProgressStore.ResetSessionMirror();   // the session's unlock frontier
+            // The first-play coach keys off the editor's real PlayerPrefs: on a fresh
+            // profile it would appear in exactly one arbitrary test and hold that test's
+            // turn clock. Suppression (not key deletion) keeps the developer's own pref.
+            FirstPlayCoachController.SuppressForSession = true;
 
             InvokeStatic(typeof(GameManager), "ResetSeries");
             SetStaticField(typeof(GameManager), "webtoonIntroShown", true);
