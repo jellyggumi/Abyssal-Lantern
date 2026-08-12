@@ -31,6 +31,42 @@
 언젠가 어긋나므로 하나로 묶었다. `RequestNextGame`은 양쪽 모두에서 의도적 예외다 —
 시리즈를 이어가므로 스택도 이어간다.
 
+
+---
+
+## 이 변경이 깬 계약, 그리고 그걸 어떻게 처리했나
+
+`RuntimeReliabilityRegressionTests.NewSceneBoot_ResetsPriorMatchHeroGrowthBeforeInitialUnitsSpawn`
+이 **정반대를 단언하고 있었다** — "새 씬 부팅은 이전 판 스택을 지워야 한다". 전체 PlayMode를
+돌리기 전까지 보이지 않았다.
+
+테스트를 지우거나 단언을 뒤집지 않았다. 갈라서 봐야 할 게 둘이었다:
+
+| | 낡은 것 | 여전히 유효한 것 |
+|---|---|---|
+| 수단 | 생 `LoadScene()` | — |
+| 계약 | — | 새로 시작하는 경기는 이전 판 보너스를 갖지 않는다 |
+
+**수단만 낡았다.** 프로덕션에 생 씬 로드로 새 경기를 시작하는 경로는 없다. 리로드 진입점은
+넷뿐이고 셋은 지운다:
+
+| 진입점 | `ResetSeries()` | 스택 |
+|---|---|---|
+| `RequestRematch` (재대결) | 부름 | 지워짐 |
+| `RequestTitle` (타이틀) | 부름 | 지워짐 |
+| `RequestStage` (다음 스테이지) | 부름 | 지워짐 |
+| `RequestNextGame` (다음 경기) | **안 부름** | **유지** |
+
+그래서 테스트를 **실제 진입점 셋 전부**를 도는 것으로 다시 썼다
+(`FreshStartEntryPoints_ClearPriorMatchHeroGrowthBeforeInitialUnitsSpawn`). 보호 범위는
+오히려 넓어졌다 — 전에는 어떤 프로덕션 경로도 아닌 것 하나를 재고 있었다.
+
+그리고 반대편을 새로 세웠다 (`NextGame_KeepsHeroGrowthAndBakesItIntoTheNextSpawn`):
+캐리오버가 다음 경기가 스폰하는 유닛의 `attackDamage`까지 실제로 도달하는지 잰다. 이게
+없으면 캐리오버를 통째로 지워도 스위트가 초록으로 남는다.
+
+> 계약을 바꿀 때 낡은 테스트를 조용히 고치면 무엇을 잃었는지 아무도 모른다. 무엇이 수단이고
+> 무엇이 계약인지 갈라서, 계약은 더 실제에 가까운 수단으로 다시 세웠다.
 ---
 
 ## 왜 이걸 골랐나

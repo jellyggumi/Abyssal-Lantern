@@ -778,51 +778,143 @@ namespace CastleBusters.Tests
         }
 
 
+        /// <summary>
+        /// A fresh siege must not start with the previous match's loot baked into its units.
+        ///
+        /// This once loaded the scene directly and asserted the boot itself scrubbed the
+        /// stacks. That stopped describing the game when hero growth became series-scoped
+        /// (design/hero-growth-persistence.md): a boot is no longer the thing that clears
+        /// loot, ResetSeries() is, and "다음 경기" deliberately boots without clearing so a
+        /// series keeps what it earned.
+        ///
+        /// The protection is unchanged and the mechanism is now the real one. Every reload
+        /// entry point that means "start over" - Rematch, Title, Stage - is exercised here,
+        /// rather than a raw LoadScene() that no production path performs.
+        /// </summary>
         [UnityTest]
-        [Timeout(60000)]
-        public IEnumerator NewSceneBoot_ResetsPriorMatchHeroGrowthBeforeInitialUnitsSpawn()
+        [Timeout(120000)]
+        public IEnumerator FreshStartEntryPoints_ClearPriorMatchHeroGrowthBeforeInitialUnitsSpawn()
         {
-            HeroGrowth.Reset();
-            HeroGrowth.Grant(true, HeroItemType.Sword);
-            HeroGrowth.Grant(true, HeroItemType.Shield);
-            HeroGrowth.Grant(true, HeroItemType.Boots);
+            var freshStarts = new (string label, System.Action invoke)[]
+            {
+                ("REMATCH", () => GameManager.RequestRematch()),
+                ("TITLE", () => GameManager.RequestTitle()),
+                ("STAGE", () => GameManager.RequestStage(StageId.Stage1, true))
+            };
 
+            // ReloadArena() reloads whichever scene is ACTIVE, so these entry points only
+            // mean anything from inside a live arena - which is also the only place a player
+            // can reach them. Called from the runner's empty scene they reload that instead
+            // and no GameManager ever appears.
+            //
+            // The guard covers the Unity MCP plugin's authorization error, which a scene load
+            // can emit when no local hub is listening and which NUnit charges to whichever
+            // test is running. Four reloads here make that likely rather than rare. It stays
+            // armed for the rest of the test - the runner re-arms per test, so it never
+            // reaches another fixture, and teardown reloads as well.
+            LogAssert.ignoreFailingMessages = true;
             GameManager.PendingStage = StageId.Stage1;
             SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
             yield return null;
             yield return new WaitForSecondsRealtime(1.5f);
 
-            Assert.Zero(HeroGrowth.Stacks(true, HeroItemType.Sword),
-                "A new scene boot must clear prior-match player sword stacks before initial units spawn");
-            Assert.Zero(HeroGrowth.Stacks(true, HeroItemType.Shield),
-                "A new scene boot must clear prior-match player shield stacks before initial units spawn");
-            Assert.Zero(HeroGrowth.Stacks(true, HeroItemType.Boots),
-                "A new scene boot must clear prior-match player boot stacks before initial units spawn");
+            foreach (var (label, invoke) in freshStarts)
+            {
+                HeroGrowth.Reset();
+                HeroGrowth.Grant(true, HeroItemType.Sword);
+                HeroGrowth.Grant(true, HeroItemType.Shield);
+                HeroGrowth.Grant(true, HeroItemType.Boots);
+
+                GameManager.PendingStage = StageId.Stage1;
+                invoke();
+                yield return null;
+                yield return new WaitForSecondsRealtime(1.5f);
+
+                foreach (var type in GrowthTypes)
+                {
+                    Assert.Zero(HeroGrowth.Stacks(true, type),
+                        $"{label} starts a new series, so it must clear prior-match player {type} stacks before initial units spawn");
+                }
+
+                var gameManager = GameManager.Instance;
+                Assert.IsNotNull(gameManager, $"{label} must create a GameManager in the reloaded scene");
+
+                var playerUnitCount = 0;
+                foreach (var unit in Object.FindObjectsOfType<UnitController>())
+                {
+                    if (!unit.isPlayerUnit) continue;
+
+                    playerUnitCount++;
+                    var template = InitialUnitTemplate(gameManager, unit.unitType);
+                    Assert.IsNotNull(template, $"The initial {unit.unitType} prefab must expose UnitController stats");
+
+                    var expectedMaxHP = template.unitData != null ? template.unitData.maxHP : template.maxHP;
+                    var expectedDamage = template.unitData != null ? template.unitData.attackDamage : template.attackDamage;
+                    var expectedSpeed = template.unitData != null ? template.unitData.moveSpeed : template.moveSpeed;
+                    Assert.AreEqual(expectedMaxHP, unit.maxHP, 0.0001f,
+                        $"{label}: initial {unit.unitType} health must not retain a prior-match shield bonus");
+                    Assert.AreEqual(expectedDamage, unit.attackDamage, 0.0001f,
+                        $"{label}: initial {unit.unitType} damage must not retain a prior-match sword bonus");
+                    Assert.AreEqual(expectedSpeed, unit.moveSpeed, 0.0001f,
+                        $"{label}: initial {unit.unitType} speed must not retain a prior-match boots bonus");
+                }
+
+                Assert.AreEqual(3, playerUnitCount, $"{label} must start with its three unmodified player units");
+            }
+
+            HeroGrowth.Reset();
+        }
+
+        /// <summary>
+        /// The counterpart, and the reason the test above had to change: "다음 경기" is the one
+        /// reload that keeps the series alive, so the loot must survive it and reach the units
+        /// the next game spawns. Without this, deleting the carry-over would leave the suite green.
+        /// </summary>
+        [UnityTest]
+        [Timeout(60000)]
+        public IEnumerator NextGame_KeepsHeroGrowthAndBakesItIntoTheNextSpawn()
+        {
+            // Boot the arena first for the same reason as the test above: RequestNextGame()
+            // reloads the ACTIVE scene, so from the runner's empty scene it would prove
+            // nothing. Relying on a previous test to have left the arena loaded would make
+            // this pass or fail on run order.
+            LogAssert.ignoreFailingMessages = true;
+            GameManager.PendingStage = StageId.Stage1;
+            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+            yield return null;
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            // Granted after the boot, which is where a game actually earns loot.
+            HeroGrowth.Reset();
+            HeroGrowth.Grant(true, HeroItemType.Sword);
+
+            GameManager.RequestNextGame();
+            yield return null;
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            Assert.AreEqual(1, HeroGrowth.Stacks(true, HeroItemType.Sword),
+                "다음 경기 continues the series, so earned loot must survive the reload");
 
             var gameManager = GameManager.Instance;
-            Assert.IsNotNull(gameManager, "The new scene must create its GameManager");
+            Assert.IsNotNull(gameManager, "다음 경기 must create a GameManager in the reloaded scene");
 
-            var playerUnitCount = 0;
+            var checkedUnits = 0;
             foreach (var unit in Object.FindObjectsOfType<UnitController>())
             {
                 if (!unit.isPlayerUnit) continue;
 
-                playerUnitCount++;
                 var template = InitialUnitTemplate(gameManager, unit.unitType);
-                Assert.IsNotNull(template, $"The initial {unit.unitType} prefab must expose UnitController stats");
+                if (template == null) continue;
 
-                var expectedMaxHP = template.unitData != null ? template.unitData.maxHP : template.maxHP;
-                var expectedDamage = template.unitData != null ? template.unitData.attackDamage : template.attackDamage;
-                var expectedSpeed = template.unitData != null ? template.unitData.moveSpeed : template.moveSpeed;
-                Assert.AreEqual(expectedMaxHP, unit.maxHP, 0.0001f,
-                    $"Initial {unit.unitType} health must not retain a prior-match shield bonus");
-                Assert.AreEqual(expectedDamage, unit.attackDamage, 0.0001f,
-                    $"Initial {unit.unitType} damage must not retain a prior-match sword bonus");
-                Assert.AreEqual(expectedSpeed, unit.moveSpeed, 0.0001f,
-                    $"Initial {unit.unitType} speed must not retain a prior-match boots bonus");
+                var baseDamage = template.unitData != null ? template.unitData.attackDamage : template.attackDamage;
+                if (baseDamage <= 0f) continue;
+
+                checkedUnits++;
+                Assert.AreEqual(baseDamage * 1.15f, unit.attackDamage, 0.0001f,
+                    $"A carried sword must reach the next game's {unit.unitType}, not just the counter");
             }
 
-            Assert.AreEqual(3, playerUnitCount, "A new siege must start with its three unmodified player units");
+            Assert.Greater(checkedUnits, 0, "The next game must spawn player units for the carried loot to reach");
             HeroGrowth.Reset();
         }
 
