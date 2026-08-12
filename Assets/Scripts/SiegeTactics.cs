@@ -163,7 +163,9 @@ namespace CastleBusters
     /// </summary>
     public static class LaunchRingRules
     {
-        public const float RingRadius = 3.5f;   // LaunchManager.launchActivationRadius
+        // World-layout clearance around each sling muzzle (input itself is drag-from-
+        // anywhere; this radius only keeps spawned solids out of the launch arc).
+        public const float RingRadius = 3.5f;
         // Mutable (not const): GameManager.ApplyStageLayout() overrides these to
         // ±StageLayout.launchApronAbsX at Start() for the active stage. Defaults mirror
         // Stage1 (GameManager.LaunchApronAbsX=14.5) so EditMode tests — which never call

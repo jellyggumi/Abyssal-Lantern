@@ -215,7 +215,7 @@ namespace CastleBusters
                 case Step.Goal:
                     return "턴제 공성전 — 적 성의 심장(황금 코어)을 먼저 부수면 승리";
                 case Step.Draw:
-                    return "새총의 푸른 링 안을 누르세요";
+                    return "아무 곳이나 누른 채 뒤로 당기세요";
                 case Step.Release:
                     return "뒤로 당겼다 놓으면 당긴 반대쪽으로 발사됩니다";
                 case Step.EnemyReply:

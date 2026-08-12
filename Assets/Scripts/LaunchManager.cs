@@ -8,7 +8,6 @@ namespace CastleBusters
     {
         [Header("Launch Settings")]
         public Transform launchPoint;
-        public float launchActivationRadius = 3.5f;
         public float maxDragDistance = 4.2f;
         public float launchForceMultiplier = 6f;
         public float maxLaunchVelocity = 25.2f;
@@ -53,17 +52,9 @@ namespace CastleBusters
         // True when the affordance is textured art (slingshot / gate frames) rather than the
         // procedural cyan ring — art must not be tinted, only alpha-pulsed.
         private bool launchPointIndicatorIsArt;
-        private GameObject invalidStartMarkerInstance;
-        private LineRenderer boundaryLine;
-        private const int BoundaryPointCount = 73;
-        private readonly Vector3[] boundaryPoints = new Vector3[BoundaryPointCount];
-        private Vector2 lastBoundaryCenter = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
-        private float lastBoundaryRadius = -1f;
-        private float boundaryFlashTimer = 0f;
+        // Weak-pull coaching flash: colors the guide line back to normal when it expires.
+        private float weakPullFlashTimer = 0f;
         private int trajectoryCollisionMask;
-        private float invalidStartMarkerTimer;
-        private readonly Color boundaryNormalColor = new Color(0.2f, 0.6f, 1f, 0.35f);
-        private readonly Color boundaryFlashColor = new Color(1f, 0.2f, 0.2f, 0.95f);
         private TextMeshProUGUI launchAlertText;
         private TextMeshPro launchPointHintLabel;
         private string selectedUnitName = "Knight";
@@ -115,7 +106,7 @@ namespace CastleBusters
 
             // One compact line: the unit cards already carry roster shortcuts, so this guide
             // only preserves readiness plus the launch gesture the player must perform.
-            string guide = $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  푸른 링 드래그 → 발사";
+            string guide = $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  아무 곳이나 당겨 발사";
 
             // The one-shot turn may buy an emplacement INSTEAD of its shot, but a player
             // who is never told that will never find it. Only advertised once the breach
@@ -209,7 +200,7 @@ namespace CastleBusters
                 launchPointHintLabel.fontSize = 2.4f;
                 launchPointHintLabel.sortingOrder = 18;
                 launchPointHintLabel.color = new Color(0.75f, 0.95f, 1f, 0.92f);
-                launchPointHintLabel.text = "▼ 여기서 장전 ▼";
+                launchPointHintLabel.text = "▼ 발사 준비 ▼";
             }
 
             if (impactMarkerPrefab != null)
@@ -225,16 +216,6 @@ namespace CastleBusters
                 sr.sortingOrder = 12;
                 go.SetActive(false);
                 impactMarkerInstance = go;
-            }
-
-            if (invalidStartMarkerInstance == null)
-            {
-                var go = new GameObject("InvalidLaunchStartMarker");
-                var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = CreateCircleSprite(0.32f, new Color(1f, 0.1f, 0.05f, 0.82f));
-                sr.sortingOrder = 13;
-                go.SetActive(false);
-                invalidStartMarkerInstance = go;
             }
 
             if (rubberBandLine == null)
@@ -331,48 +312,8 @@ namespace CastleBusters
                 }
             }
 
-            if (boundaryLine == null)
-            {
-                var go = new GameObject("DefaultBoundaryLine");
-                go.transform.SetParent(transform);
-                boundaryLine = go.AddComponent<LineRenderer>();
-                boundaryLine.positionCount = 73;
-                boundaryLine.startWidth = 0.10f;
-                boundaryLine.endWidth = 0.10f;
-                boundaryLine.loop = true;
-                boundaryLine.material = new Material(Shader.Find("Sprites/Default"));
-                boundaryLine.startColor = boundaryNormalColor;
-                boundaryLine.endColor = boundaryNormalColor;
-                boundaryLine.sortingOrder = 7;
-                UpdateBoundaryLineGeometry();
-            }
-        }
-
-        private void UpdateBoundaryLineGeometry()
-        {
-            if (boundaryLine == null) return;
-
-            Vector2 center = GetLaunchAnchorPosition();
-            bool shapeChanged = boundaryLine.positionCount != BoundaryPointCount;
-            if (!shapeChanged
-                && center == lastBoundaryCenter
-                && Mathf.Approximately(launchActivationRadius, lastBoundaryRadius))
-            {
-                return;
-            }
-
-            boundaryLine.positionCount = BoundaryPointCount;
-            for (int i = 0; i < BoundaryPointCount; i++)
-            {
-                float angle = i * 5f * Mathf.Deg2Rad;
-                boundaryPoints[i] = new Vector3(
-                    center.x + Mathf.Cos(angle) * launchActivationRadius,
-                    center.y + Mathf.Sin(angle) * launchActivationRadius,
-                    0f);
-            }
-            boundaryLine.SetPositions(boundaryPoints);
-            lastBoundaryCenter = center;
-            lastBoundaryRadius = launchActivationRadius;
+            // No boundary ring: input is drag-from-anywhere, so a circle around the sling
+            // would re-teach the removed "press here" rule the moment it appeared.
         }
 
         private void UpdateLaunchStats(Vector2 velocity)
@@ -460,7 +401,6 @@ namespace CastleBusters
         private void OnDestroy()
         {
             if (impactMarkerInstance != null) Destroy(impactMarkerInstance);
-            if (invalidStartMarkerInstance != null) Destroy(invalidStartMarkerInstance);
             if (launchPointIndicatorInstance != null) Destroy(launchPointIndicatorInstance);
             if (launchStatsText != null && launchStatsText.gameObject.name == "LaunchStatsText") Destroy(launchStatsText.gameObject);
             if (launchAlertText != null && launchAlertText.gameObject.name == "LaunchAlertText") Destroy(launchAlertText.gameObject);
@@ -579,30 +519,10 @@ namespace CastleBusters
                 launchPointHintLabel.transform.localPosition = new Vector3(0f, 1.45f + Mathf.Sin(Time.time * 7f) * 0.16f, 0f);
             }
 
-            UpdateBoundaryLineGeometry();
-
-            if (invalidStartMarkerTimer > 0f)
+            if (weakPullFlashTimer > 0f)
             {
-                invalidStartMarkerTimer -= Time.deltaTime;
-                float pulse = 1f + Mathf.Sin(Time.time * 18f) * 0.25f;
-                if (invalidStartMarkerInstance != null)
-                {
-                    invalidStartMarkerInstance.transform.localScale = Vector3.one * pulse;
-                    if (invalidStartMarkerTimer <= 0f) invalidStartMarkerInstance.SetActive(false);
-                }
-            }
-
-            if (boundaryFlashTimer > 0f)
-            {
-                boundaryFlashTimer -= Time.deltaTime;
-                float t = Mathf.Clamp01(boundaryFlashTimer);
-                Color c = Color.Lerp(boundaryNormalColor, boundaryFlashColor, t);
-                if (boundaryLine != null)
-                {
-                    boundaryLine.startColor = c;
-                    boundaryLine.endColor = c;
-                }
-                if (boundaryFlashTimer <= 0f && controlGuideText != null)
+                weakPullFlashTimer -= Time.deltaTime;
+                if (weakPullFlashTimer <= 0f && controlGuideText != null)
                 {
                     controlGuideText.text = BuildControlGuideText();
                     controlGuideText.color = new Color(0.8f, 0.95f, 1f, 0.95f);
@@ -666,38 +586,36 @@ namespace CastleBusters
 
             if (pressed)
             {
-                if (IsWithinLaunchAffordance(pointerWorldPos))
+                if (UnityEngine.EventSystems.EventSystem.current != null
+                    && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
                 {
-                    if (UnityEngine.EventSystems.EventSystem.current != null)
-                    {
-                        if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
-                    }
-
-                    isDragging = true;
-                    dragStartPos = GetLaunchAnchorPosition();
-                    launchVelocity = Vector2.zero;
-                    if (trajectoryLine != null) trajectoryLine.positionCount = trajectoryResolution;
-                    if (launchAlertText != null) launchAlertText.text = "DRAW THE SIEGE LINE";
-                    if (controlGuideText != null)
-                    {
-                        controlGuideText.text = $"{selectedUnitName} 조준 중 — 궤적과 바람을 보고 발사";
-                        controlGuideText.color = new Color(0.94f, 0.98f, 1f, 0.95f);
-                    }
+                    return; // UI owns this press (cards, buttons, skip)
                 }
-                else
+
+                // Drag-from-anywhere (first-contact playtest, 2026-08-12): requiring the
+                // press to start inside the 3.5u ring made the very first gesture a
+                // precision test — most new players pressed the castle they wanted to hit
+                // and got scolded. Any off-UI press now starts the draw; the pull is
+                // measured FROM THE PRESS POINT, so a press is always a zero-power start
+                // and the gesture (not the cursor's absolute position) is what aims.
+                isDragging = true;
+                dragStartPos = pointerWorldPos;
+                launchVelocity = Vector2.zero;
+                if (trajectoryLine != null) trajectoryLine.positionCount = trajectoryResolution;
+                if (launchAlertText != null) launchAlertText.text = "DRAW THE SIEGE LINE";
+                if (controlGuideText != null)
                 {
-                    if (UnityEngine.EventSystems.EventSystem.current == null || !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-                    {
-                        TriggerBoundaryFlash(pointerWorldPos);
-                    }
+                    controlGuideText.text = $"{selectedUnitName} 조준 중 — 궤적과 바람을 보고 발사";
+                    controlGuideText.color = new Color(0.94f, 0.98f, 1f, 0.95f);
                 }
             }
 
             if (isDragging && held)
             {
-                launchVelocity = CalculateLaunchVelocity(pointerWorldPos);
+                Vector2 anchorSpacePointer = ToAnchorSpace(pointerWorldPos);
+                launchVelocity = CalculateLaunchVelocity(anchorSpacePointer);
                 DrawTrajectory(launchVelocity);
-                UpdateRubberBand(pointerWorldPos);
+                UpdateRubberBand(anchorSpacePointer);
                 UpdateLaunchStats(launchVelocity);
             }
 
@@ -717,41 +635,26 @@ namespace CastleBusters
             }
         }
 
-        public void TriggerBoundaryFlash(Vector2? invalidWorldPosition = null)
+        /// <summary>
+        /// Maps a drag gesture that started at <see cref="dragStartPos"/> onto the sling
+        /// anchor: the pull the player performs anywhere on screen is replayed as if it
+        /// had started on the pouch. Starting AT the anchor degenerates to identity, which
+        /// is why every anchor-press test and the keyboard path are unaffected.
+        /// </summary>
+        private Vector2 ToAnchorSpace(Vector2 pointerWorldPosition)
         {
-            boundaryFlashTimer = 1.0f;
-            if (controlGuideText != null)
-            {
-                controlGuideText.text = "⚠️ 푸른 링 안에서 드래그를 시작하세요";
-                controlGuideText.color = Color.red;
-            }
-            if (launchAlertText != null)
-            {
-                launchAlertText.text = "⚠️ 푸른 링으로 돌아가세요";
-            }
-            if (invalidWorldPosition.HasValue && invalidStartMarkerInstance != null)
-            {
-                invalidStartMarkerInstance.transform.position = new Vector3(invalidWorldPosition.Value.x, invalidWorldPosition.Value.y, 0f);
-                invalidStartMarkerInstance.transform.localScale = Vector3.one;
-                invalidStartMarkerInstance.SetActive(true);
-                invalidStartMarkerTimer = 0.65f;
-            }
+            return GetLaunchAnchorPosition() + (pointerWorldPosition - dragStartPos);
         }
 
         private void TriggerWeakLaunchFeedback()
         {
-            boundaryFlashTimer = 0.45f;
+            weakPullFlashTimer = 0.45f;
             if (launchAlertText != null) launchAlertText.text = "더 깊게 당긴 뒤 발사";
             if (controlGuideText != null)
             {
                 controlGuideText.text = BuildControlGuideText();
                 controlGuideText.color = new Color(1f, 0.78f, 0.25f, 0.95f);
             }
-        }
-
-        public bool IsWithinLaunchAffordance(Vector2 worldPosition)
-        {
-            return launchPoint != null && Vector2.Distance(worldPosition, launchPoint.position) <= launchActivationRadius;
         }
 
         /// <summary>

@@ -1,0 +1,12 @@
+{
+  "file": "ux_drag_gesture.png",
+  "prompt": "2D game UI pictogram, single icon centered on a pure flat solid magenta background (#FF00FF). A wordless drag-back gesture cue for a slingshot siege game: one simple bold white hand cursor pressing down, a thick curved white motion arrow sweeping from the hand toward the lower-left corner, three short speed lines behind the arrow. Flat vector style, very thick dark outlines, high contrast, minimal detail, readable at 64x64 pixels. No text, no letters, no numbers, no background scenery.",
+  "tool": "Higgsfield CLI (flux_2); PIL 12.2.0 edge-flood keying + crop/downsize via key_gesture.py",
+  "model": "flux_2 pro, Higgsfield (job 1575dd00-073e-41aa-b2f0-a5de938d6953, seed 537251)",
+  "generatedAt": "2026-08-12T12:40:29Z",
+  "checksumSha256": "d371ed18d4ca0752a04880cb9b705355c1f907560c79ef1c4c549f3d7021e672",
+  "runtimeEligible": true,
+  "notes": "Wordless drag-back gesture cue for the first-play coach Draw step (drag-from-anywhere control, 2026-08-12). CLAUDE.md \u00a73 priority order: Codex CLI (gti) returned HTTP 429 \u2014 same shared-backend quota exhaustion recorded in task #17, resets Aug 16 \u2014 so generation fell back to Higgsfield, the path that produced the slingshot/keep art. 1 credit spent (balance 2.5 \u2192 1.5).",
+  "width": 256,
+  "height": 256
+}

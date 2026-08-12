@@ -446,14 +446,11 @@ namespace CastleBusters.Tests
             Assert.IsNotNull(lm.rubberBandLine, "Rubber band line should be initialized!");
             Assert.AreEqual(0, lm.rubberBandLine.positionCount, "Rubber band line should have 0 positions initially!");
             
-            var invalidMarkerField = typeof(LaunchManager).GetField("invalidStartMarkerInstance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var invalidMarker = (GameObject)invalidMarkerField.GetValue(lm);
-            Assert.IsNotNull(invalidMarker, "Invalid launch-start marker should be initialized!");
-            Assert.IsFalse(invalidMarker.activeSelf, "Invalid launch-start marker should be hidden initially!");
-
-            lm.TriggerBoundaryFlash(new Vector2(3f, 4f));
-            Assert.IsTrue(invalidMarker.activeSelf, "Invalid launch-start marker should appear at the bad input position!");
-            Assert.AreEqual(new Vector3(3f, 4f, 0f), invalidMarker.transform.position);
+            // Drag-from-anywhere: the invalid-start scold marker and boundary ring were
+            // removed with the ring input rule — any off-UI press is now a valid draw start,
+            // so there is no "bad input position" left to flag.
+            Assert.IsNull(typeof(LaunchManager).GetField("invalidStartMarkerInstance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance),
+                "The invalid-start marker must stay deleted: it narrates a press-inside-the-ring rule that no longer exists.");
 
 
             // Clean up
@@ -516,6 +513,65 @@ namespace CastleBusters.Tests
             // Clean up
             Object.DestroyImmediate(go);
             Object.DestroyImmediate(dummyUnitPrefab);
+        }
+
+        [Test]
+        public void LaunchManager_DragFromAnywhere_AimsByGestureNotByAbsolutePosition()
+        {
+            // First-contact playtest (2026-08-12): requiring the press to start inside the
+            // 3.5u ring made the first gesture a precision test. The contract now: ANY
+            // off-UI press starts a draw at zero power, and only the pull vector (pointer
+            // relative to the press point) aims — two identical gestures performed at the
+            // ring and at midfield must produce identical launch velocities.
+            var goNear = new GameObject("DragAnywhereNear");
+            var goFar = new GameObject("DragAnywhereFar");
+            var launchPointGo = new GameObject("DragAnywhereLaunchPoint");
+            try
+            {
+                launchPointGo.transform.position = new Vector3(-12f, 1f, 0f);
+                Vector2 gesture = new Vector2(-3f, -3f); // pull down-left => throw up-right
+
+                Vector2 VelocityForPressAt(GameObject host, Vector2 pressPoint)
+                {
+                    var lm = host.AddComponent<LaunchManager>();
+                    lm.launchPoint = launchPointGo.transform;
+                    lm.maxDragDistance = 4.2f;
+                    lm.launchForceMultiplier = 6f;
+                    lm.maxLaunchVelocity = 25.2f;
+                    lm.minLaunchVelocity = 3f;
+
+                    var handleInput = typeof(LaunchManager).GetMethod("HandleInput",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    lm.SetSimulatedPointer(pressPoint, true, true, false);
+                    handleInput.Invoke(lm, null);
+                    Assert.IsTrue(lm.IsAiming, $"An off-UI press at {pressPoint} must start a draw.");
+
+                    var velocityField = typeof(LaunchManager).GetField("launchVelocity",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    Assert.AreEqual(0f, ((Vector2)velocityField.GetValue(lm)).magnitude, 0.0001f,
+                        "A press with no pull yet must be a zero-power start — never an instant aimed shot.");
+
+                    lm.SetSimulatedPointer(pressPoint + gesture, false, true, false);
+                    handleInput.Invoke(lm, null);
+                    return (Vector2)velocityField.GetValue(lm);
+                }
+
+                Vector2 nearVelocity = VelocityForPressAt(goNear, launchPointGo.transform.position);
+                Vector2 farVelocity = VelocityForPressAt(goFar, new Vector2(3f, 4f)); // midfield press
+
+                Assert.Greater(nearVelocity.x, 0f, "Pulling down-left must throw up-right (slingshot).");
+                Assert.Greater(nearVelocity.y, 0f, "Pulling down-left must throw up-right (slingshot).");
+                Assert.AreEqual(nearVelocity.x, farVelocity.x, 0.001f,
+                    "The same pull gesture must aim identically wherever the press started.");
+                Assert.AreEqual(nearVelocity.y, farVelocity.y, 0.001f,
+                    "The same pull gesture must aim identically wherever the press started.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(goNear);
+                Object.DestroyImmediate(goFar);
+                Object.DestroyImmediate(launchPointGo);
+            }
         }
 
         [Test]

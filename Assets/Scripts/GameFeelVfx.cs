@@ -669,7 +669,7 @@ namespace CastleBusters
 
         public static void NotifyIdleNudge()
         {
-            Instance?.ShowToast("푸른 링에서 당겨 발사", new Color(0.55f, 0.9f, 1f, 0.95f), 1.4f);
+            Instance?.ShowToast("아무 곳이나 눌러 뒤로 당기면 발사", new Color(0.55f, 0.9f, 1f, 0.95f), 1.4f);
         }
 
         public static void NotifyAimGrace(float graceSeconds)

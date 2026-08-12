@@ -101,7 +101,8 @@ namespace CastleBusters.Tests
             Assert.That(controlGuide.text, Does.Contain("KNIGHT"),
                 "Cleanup must restore the selected unit identity instead of leaving stale aim copy.");
             Assert.That(controlGuide.text, Does.Contain("준비"), "Cleanup must restore the ready-state guide.");
-            Assert.That(controlGuide.text, Does.Contain("드래그"), "The restored Knight guide must explain the launch gesture.");
+            Assert.That(controlGuide.text, Does.Contain("당겨"),
+                "The restored Knight guide must explain the launch gesture (drag-from-anywhere pull).");
             Assert.That(controlGuide.text, Does.Contain("발사"), "The restored Knight guide must explain the launch action.");
             Assert.That(controlGuide.color, Is.EqualTo(new Color(0.8f, 0.95f, 1f, 0.95f)),
                 "Cleanup must restore the normal ready-guide color after contaminated aim feedback.");
