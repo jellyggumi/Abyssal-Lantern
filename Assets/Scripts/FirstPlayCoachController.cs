@@ -82,10 +82,12 @@ namespace CastleBusters
                 return;
             }
 
-            // A cutscene or the intro owns the screen; coaching text over a frozen black
-            // board narrates nothing. Hide, and keep the step dwell from ticking meanwhile.
-            bool boardLive = gm.currentState != GameState.Intro && Time.timeScale > 0f;
-            if (bannerGroup != null) bannerGroup.alpha = boardLive ? bannerGroup.alpha : 0f;
+            // Only a real screen owner (intro card, narration cutscene) hides coaching and
+            // pauses observation. NOT a bare timeScale check: hit-stops zero the timescale
+            // for a tenth of a second on every good hit, and pausing observation there is
+            // exactly how the flag-sampled guide missed a whole resolve window in live QA.
+            bool boardLive = gm.currentState != GameState.Intro && StageInterludeController.Active == null;
+            if (bannerGroup != null && !boardLive) bannerGroup.alpha = 0f;
             if (!boardLive)
             {
                 stepEnteredAt = Time.unscaledTime;
@@ -97,7 +99,8 @@ namespace CastleBusters
                 isPlayerTurn: gm.IsPlayerTurn,
                 isAiming: launchManager != null && launchManager.IsAiming,
                 isResolvingTurn: gm.IsResolvingTurn,
-                isGameOver: gm.currentState == GameState.GameOver);
+                isGameOver: gm.currentState == GameState.GameOver,
+                turnCount: gm.TurnCount);
 
             if (guide.Advance(obs))
             {

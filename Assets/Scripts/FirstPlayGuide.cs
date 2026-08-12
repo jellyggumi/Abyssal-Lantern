@@ -11,10 +11,16 @@ namespace CastleBusters
     ///
     /// This type owns the step order, the advance rules, and the instruction text. It holds
     /// no engine state and reads only an <see cref="Observation"/> snapshot per frame, so
-    /// EditMode pins the whole contract: which action advances which step, when the turn
-    /// clock may be held, and that every step carries a player-readable instruction.
-    /// The runtime surface (banner, arrow, skip button, persistence) lives in
-    /// <see cref="FirstPlayCoachController"/>.
+    /// EditMode pins the whole contract. The runtime surface (banner, arrow, skip button,
+    /// persistence) lives in <see cref="FirstPlayCoachController"/>.
+    ///
+    /// Transition design rule: post-shot steps anchor on <see cref="Observation.TurnCount"/>,
+    /// never on the transient <c>IsResolvingTurn</c>/<c>IsAiming</c> flags alone. Hit-stops
+    /// freeze the clock mid-resolve and a fast volley can resolve inside one swallowed
+    /// sampling window — live QA (2026-08-12) caught the flag-sampled version regressing to
+    /// the draw step after a fully committed shot precisely because the resolve window was
+    /// never sampled. The turn counter is durable: whatever frames were missed, "the player's
+    /// turn ended" and "the enemy's turn happened" remain readable facts.
     /// </summary>
     public sealed class FirstPlayGuide
     {
@@ -24,7 +30,8 @@ namespace CastleBusters
             Goal,
             /// <summary>Point at the slingshot: press inside the ring. Advances when a draw starts.</summary>
             Draw,
-            /// <summary>Pull back and release. Advances when the shot is actually committed.</summary>
+            /// <summary>Pull back and release. Advances when the player's turn actually ends
+            /// (shot committed and resolved, however briefly the flags flickered).</summary>
             Release,
             /// <summary>The enemy answers. Advances when control returns to the player.</summary>
             EnemyReply,
@@ -44,14 +51,23 @@ namespace CastleBusters
             /// <summary>True while a committed volley resolves (GameManager.IsResolvingTurn).</summary>
             public readonly bool IsResolvingTurn;
             public readonly bool IsGameOver;
+            /// <summary>GameManager.TurnCount — increments at every turn boundary.</summary>
+            public readonly int TurnCount;
 
-            public Observation(bool acknowledged, bool isPlayerTurn, bool isAiming, bool isResolvingTurn, bool isGameOver)
+            public Observation(
+                bool acknowledged,
+                bool isPlayerTurn,
+                bool isAiming,
+                bool isResolvingTurn,
+                bool isGameOver,
+                int turnCount)
             {
                 Acknowledged = acknowledged;
                 IsPlayerTurn = isPlayerTurn;
                 IsAiming = isAiming;
                 IsResolvingTurn = isResolvingTurn;
                 IsGameOver = isGameOver;
+                TurnCount = turnCount;
             }
         }
 
@@ -69,10 +85,13 @@ namespace CastleBusters
         public Step Current { get; private set; } = Step.Goal;
         public bool IsFinished => Current == Step.Done;
 
-        // EnemyReply completes on the player's NEXT turn, which is only recognizable after
-        // the enemy's turn was actually seen — without this latch the step would complete on
-        // the very frame it was entered (the player's own turn is still winding down).
-        private bool sawEnemyTurn;
+        // The player turn the Release step was entered on. A weak pull leaves this turn
+        // running (back to Draw); any turn advance past it proves the shot was spent.
+        private int releaseTurn;
+        // The turn the shot was committed on. EnemyReply completes when the count reaches
+        // shotTurn + 2: +1 is the enemy's reply, +2 is control back with the player — true
+        // even when every intermediate frame was swallowed by a hit-stop.
+        private int shotTurn;
 
         /// <summary>
         /// While true the runtime may keep the player's turn clock from expiring: the player
@@ -106,29 +125,42 @@ namespace CastleBusters
                     return false;
 
                 case Step.Draw:
-                    if (obs.IsAiming)
+                    if (obs.IsAiming && obs.IsPlayerTurn)
                     {
                         Current = Step.Release;
+                        releaseTurn = obs.TurnCount;
                         return true;
                     }
                     // Keyboard path: Space commits a shot without ever entering the drag
-                    // state. A committed volley must never leave the coach pointing at the
-                    // slingshot, so the resolve observation skips straight to the reply beat.
+                    // state. A resolving player volley is proof a shot happened.
                     if (obs.IsResolvingTurn && obs.IsPlayerTurn)
                     {
                         Current = Step.EnemyReply;
+                        shotTurn = obs.TurnCount;
                         return true;
                     }
                     return false;
 
                 case Step.Release:
-                    if (obs.IsResolvingTurn)
+                    // The committed shot observed live (flags caught mid-resolve).
+                    if (obs.IsResolvingTurn && obs.IsPlayerTurn)
                     {
                         Current = Step.EnemyReply;
+                        shotTurn = releaseTurn;
                         return true;
                     }
-                    // Released too weak (the launcher refused the shot) or cancelled: back to
-                    // the draw instruction instead of narrating a launch that never happened.
+                    // The committed shot proven after the fact: the turn advanced past the
+                    // one the pull started on. Covers resolve windows swallowed whole by
+                    // hit-stop sampling gaps AND a forfeit mid-pull — either way the enemy
+                    // reply is now the honest next beat.
+                    if (obs.TurnCount > releaseTurn)
+                    {
+                        Current = Step.EnemyReply;
+                        shotTurn = releaseTurn;
+                        return true;
+                    }
+                    // Released too weak (the launcher refused the shot): same turn, no
+                    // resolve, no pull. Back to the draw instruction.
                     if (!obs.IsAiming)
                     {
                         Current = Step.Draw;
@@ -137,8 +169,9 @@ namespace CastleBusters
                     return false;
 
                 case Step.EnemyReply:
-                    if (!obs.IsPlayerTurn) sawEnemyTurn = true;
-                    if (sawEnemyTurn && obs.IsPlayerTurn && !obs.IsResolvingTurn)
+                    // shotTurn+1 was the enemy's turn; at shotTurn+2 control is back with
+                    // the player. The count carries this fact even across missed frames.
+                    if (obs.IsPlayerTurn && !obs.IsResolvingTurn && obs.TurnCount >= shotTurn + 2)
                     {
                         Current = Step.FreePlay;
                         return true;
