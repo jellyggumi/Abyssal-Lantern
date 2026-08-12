@@ -104,3 +104,6 @@ Assets/InitTestScene*.unity.meta
 /*.slnx
 /*.sln
 /*.csproj
+
+# Burst AOT output emitted next to the project during a WebGL build
+/Data/
