@@ -148,26 +148,35 @@ TMP는 상자를 넘쳐 그린다. 글리프 실측(`textBounds`)으로 바꾸�
 
 | 검사 | 결과 | 실행 시점 | 증거 |
 |---|---|---|---|
-| `HudCanvasContractTests` (3) | 통과 | 병합 전 | 단일 캔버스 · 하한 · 남의 캔버스 불변 |
-| `HudScaleFloorTests` (4) | 통과 | 병합 전 | 클램프 · 비례 · 퇴화 입력 |
-| `HudOverlapTests` (1) | 통과 | 병합 전 | `qa/evidence/hud-fix/hud-overlap.md` |
-| `HudFixEvidenceCapture` (1) | 통과 | 병합 전 | `qa/evidence/hud-fix/` 4개 창 |
-| EditMode 전체 | **401/401** | 병합 전 | `qa/evidence/editmode-hud-canvas-fix.xml` |
-| PlayMode 전체 | **73/77** | 병합 전 | `qa/evidence/playmode-hud-canvas-fix.xml` |
-| EditMode 전체 | 405/405 | 병합 후 | **증거 없음** |
-| 글리프 감사 (main 게이트) | 406/406 | 병합 후 | **증거 없음** |
+| `HudCanvasContractTests` (3) | 통과 | **병합 후** | `qa/evidence/playmode-hud-contract-postmerge.xml` |
+| `HudScaleFloorTests` (4) | 통과 | **병합 후** | 동일 |
+| `HudOverlapTests` (1) | 통과 | **병합 후** | 동일 · `qa/evidence/hud-fix/hud-overlap.md` |
+| `HudFixEvidenceCapture` (1) | 통과 | **병합 후** | 동일 · `qa/evidence/hud-fix/` 4개 창 |
+| `HudCanvasSourceGuardTests` (2) | 통과 | **병합 후** | `qa/evidence/editmode-postmerge-407.xml` |
+| EditMode 전체 | **406/407** | **병합 후** | 동일 |
+| 글리프 감사 (main 게이트) | **406/406 커버** | **병합 후** | `qa/evidence/glyph-audit-postmerge.log` |
+| PlayMode 전체 | 73/77 | 병합 전 | `qa/evidence/playmode-hud-canvas-fix.xml` |
 
-> **병합 후 두 값은 미검증으로 취급한다.** 실행 출력에서 읽은 값이지만, 스크래치 정리에서
-> XML·로그를 지우며 보관본을 남기지 않았다. 하네스 규칙은 *"증거 경로 누락 = 주장 값과
-> 무관하게 FAIL"* 이다 — 값이 맞는지와 별개로 게이트를 통과시킬 수 없다.
-> 재실행해 `evidence/`에 보관하는 것이 남은 작업이다.
+EditMode 실패 1건(`ArcherVolley_ArrowCounts_MatchKind`)은 **단독 실행에서 통과**한다
+(3/3, MCP 플러그인 인증 오류가 그때 실행 중인 테스트에 붙는 환경 노이즈).
+
+> **증거를 한 번 잃었다가 되찾았다.** 초판은 병합 후 수치 둘을 "증거 없음"으로 적었다 —
+> 스크래치 정리에서 XML·로그를 지우며 보관본을 남기지 않았기 때문이다. 재실행해 채웠고,
+> 순서를 바꿨다: **정리 전에 보관한다.**
 >
-> 재발 방지: **정리 전에 보관한다.** 이번엔 `mem.xml`(병합 후)이 아니라
-> `fem.xml`(병합 전)을 보관한 뒤 원본을 지웠다.
+> 병합 후 PlayMode 전체는 사용자가 직접 확인하겠다고 해 중단했다. 병합 전 기록 73/77이
+> 남아 있고 실패 4건은 전부 기존 결함이다.
 
-회귀 방어의 요점: `HudLabelSizes_ClearTheLegibilityFloorAtTheSmallestWindow`가
-출하 당시 크기(17/15/14pt)를 넣으면 **즉시 빨간불**이 된다. 이 결함이 다시
-들어오면 소리가 난다.
+회귀 방어는 두 겹이다:
+
+1. **소스 가드** — `HudCanvasSourceGuardTests`가 `Assets/Scripts` 전체를 읽어
+   `Find*Object*<Canvas>`를 금지한다(`HudCanvas.cs`만 예외). EditMode라 초 단위다.
+   가드 자체가 발화하는지도 검사한다 — 아무것도 매치 못 하는 정규식은 조용히 통과한다.
+2. **런타임 계약** — `HudLabelSizes_...`가 출하 당시 크기(17/15/14pt)를 넣으면
+   즉시 빨간불이 된다.
+
+겹이 필요한 이유는 실제로 겪었다. 1이 없던 사이 병합이 새 호출부를 들여왔고,
+그때 2는 `TextMeshProUGUI`만 세고 있어서 `Image` 하나를 통과시켰다.
 
 ---
 

@@ -47,7 +47,18 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
-        /// Every gameplay HUD label shares one canvas, so one scaler governs all of them.
+        /// Every gameplay HUD graphic shares one canvas, so one scaler governs all of them.
+        ///
+        /// Scoped by ownership rather than by a list of component types or names, because both
+        /// of those drift. The first version counted TextMeshProUGUI only and a merge landed a
+        /// new Image (SelectedUnitPortrait) on the old FindObjectOfType path — the exact defect
+        /// this test exists to catch — with the suite green. Widening it to every Graphic then
+        /// swept in the cold open's own video frame, which is not a HUD element at all.
+        ///
+        /// The rule that holds without a list: a canvas another system built belongs to that
+        /// system. In this repo such a canvas is always either parented under its owner's
+        /// GameObject (NarrativeVideoIntro, FirstPlayCoachController) or added onto it
+        /// (IntroScreenController). The HUD canvas is a bare scene root that owns nothing else.
         /// </summary>
         [UnityTest]
         [Timeout(120000)]
@@ -58,31 +69,40 @@ namespace CastleBusters.Tests
             var hud = GameObject.Find(HudCanvas.CanvasName);
             Assert.IsNotNull(hud, $"The HUD canvas '{HudCanvas.CanvasName}' must exist once a match is running");
 
-            // Every Graphic, not just text. The first version of this counted TextMeshProUGUI
-            // only, and a merge promptly landed a new Image (SelectedUnitPortrait) that took
-            // the old FindObjectOfType<Canvas>() path — the exact defect this test exists to
-            // catch — while the suite stayed green. A contract that covers one component type
-            // does not cover the rule.
             var strays = new List<string>();
             foreach (var g in Object.FindObjectsByType<Graphic>(FindObjectsSortMode.None))
             {
                 if (!g.isActiveAndEnabled) continue;
                 var canvas = g.canvas;
-                if (canvas == null) continue;   // not drawn at all — a separate defect, filed as UX-001/002
-                // The intro/webtoon/results screens own their own canvases by design; only the
-                // gameplay HUD is under this contract.
-                if (canvas.GetComponentInParent<IntroScreenController>() != null) continue;
-                if (canvas.GetComponentInParent<WebtoonPrologueController>() != null) continue;
-                // Children of a HUD element travel with their parent; only roots are placed.
-                if (g.transform.parent != null
-                    && g.transform.parent.GetComponentInParent<Canvas>() == canvas
-                    && canvas.name == HudCanvas.CanvasName) continue;
-                if (canvas.name != HudCanvas.CanvasName) strays.Add($"{g.name}({g.GetType().Name}) → {canvas.name}");
+                if (canvas == null) continue;   // not drawn at all — a separate defect, UX-001/002
+                if (canvas.name == HudCanvas.CanvasName) continue;
+                if (IsOwnedByAnotherSystem(canvas)) continue;
+                strays.Add($"{g.name}({g.GetType().Name}) → {canvas.name}");
             }
 
             Assert.IsEmpty(strays,
                 "Every gameplay HUD graphic must live on the one HUD canvas; a split means two "
                 + "scalers and two sizes. Strays: " + string.Join(", ", strays));
+        }
+
+        /// <summary>
+        /// True when this canvas was built by, and belongs to, some system other than the HUD.
+        /// Structural, so a system added later is covered without editing this test.
+        /// </summary>
+        private static bool IsOwnedByAnotherSystem(Canvas canvas)
+        {
+            // Parented under its owner — the canvas is part of that object's own hierarchy.
+            if (canvas.transform.parent != null) return true;
+
+            // Or the owner put the Canvas on itself. Anything beyond the components a bare
+            // canvas needs means some behaviour claims this object.
+            foreach (var behaviour in canvas.GetComponents<MonoBehaviour>())
+            {
+                if (behaviour == null) continue;
+                if (behaviour is HudScaleFloor || behaviour is MobileSafeArea) continue;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
