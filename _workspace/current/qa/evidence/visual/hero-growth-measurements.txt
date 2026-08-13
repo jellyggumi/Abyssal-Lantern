@@ -15,14 +15,14 @@ unit Knight damage=20.0 maxHP=100.0 speed=2.00
 ## hg-3-nextgame
 stacks sword=1 shield=1 boots=1
 mult damage=1.150 hp=1.200 speed=1.120
+unit Knight damage=23.0 maxHP=120.0 speed=2.24
+unit Knight damage=23.0 maxHP=120.0 speed=2.24
 unit Archer damage=23.0 maxHP=96.0 speed=2.80
-unit Knight damage=23.0 maxHP=120.0 speed=2.24
-unit Knight damage=23.0 maxHP=120.0 speed=2.24
 
 ## hg-4-rematch
 stacks sword=0 shield=0 boots=0
 mult damage=1.000 hp=1.000 speed=1.000
-unit Knight damage=20.0 maxHP=100.0 speed=2.00
 unit Archer damage=20.0 maxHP=80.0 speed=2.50
+unit Knight damage=20.0 maxHP=100.0 speed=2.00
 unit Knight damage=20.0 maxHP=100.0 speed=2.00
 

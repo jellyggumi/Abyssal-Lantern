@@ -37,9 +37,14 @@ namespace CastleBusters
             if (canvas == null) return;
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler == null) scaler = canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            // HudScaleFloor owns the gameplay HUD's scaling algorithm. Safe-area setup may
+            // add missing infrastructure, but must never replace that legibility floor.
+            if (canvas.GetComponent<HudScaleFloor>() == null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
             if (canvas.GetComponent<GraphicRaycaster>() == null) canvas.gameObject.AddComponent<GraphicRaycaster>();
             GetContentRoot(canvas);
         }

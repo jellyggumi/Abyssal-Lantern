@@ -16,6 +16,18 @@ namespace CastleBusters.Tests
             Assert.That(OneShotSiegeRules.ProjectileForTurn(4), Is.EqualTo(OneShotSiegeRules.Projectile.Barrel));
         }
 
+        [TestCase(0, 0.5f)]
+        [TestCase(1, 1f)]
+        [TestCase(2, 1f)]
+        public void OpeningVolleyDamageMultiplier_OnlyReducesTheFirstCompletedTurn(
+            int completedTurns,
+            float expectedMultiplier)
+        {
+            Assert.That(
+                OneShotSiegeRules.OpeningVolleyDamageMultiplier(completedTurns),
+                Is.EqualTo(expectedMultiplier));
+        }
+
         [Test]
         public void Velocity_ChangesAngleAndPowerIndependently()
         {

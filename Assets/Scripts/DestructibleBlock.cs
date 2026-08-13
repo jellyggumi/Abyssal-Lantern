@@ -197,6 +197,12 @@ namespace CastleBusters
             }
         }
 
+        // Carries a just-captured opening-volley multiplier from the 3-arg TakeDamage entry
+        // point (below) down into this class's own 2-arg virtual implementation, without
+        // changing the 2-arg signature CastleCoreGimmick overrides (out of scope here) — see
+        // TakeDamage(float, bool?, float) for why this indirection exists.
+        private float sourceMultiplierInFlight = 1f;
+
         public virtual void TakeDamage(float damage)
         {
             TakeDamage(damage, null);
@@ -204,6 +210,15 @@ namespace CastleBusters
 
         public virtual void TakeDamage(float damage, bool? damageFromPlayer)
         {
+            if (isDestroying) return;
+
+            // Centrally transfers owner + multiplier to a sibling ExplosiveGimmick (a field
+            // keg's detonator) before this hit can possibly destroy the block, covering every
+            // caller of this virtual entry point — melee/arrow/cannon/explosion via the 3-arg
+            // overload below, and environmental/falling/trap callers directly here, which never
+            // set sourceMultiplierInFlight and so correctly forward null owner at scale 1.
+            GetComponent<ExplosiveGimmick>()?.SetDamageContext(damageFromPlayer, sourceMultiplierInFlight);
+
             if (isFalling && currentHP <= 0) return;
             float prevRatio = maxHP > 0f ? currentHP / maxHP : 0f;
             currentHP -= damage;
@@ -237,6 +252,31 @@ namespace CastleBusters
             // wholeness milestones) — presentation-only observer, reads state, never writes it.
             CastleRuinFx.NotifyBlockDamaged(this, damage, prevRatio, maxHP > 0f ? currentHP / maxHP : 0f);
             if (currentHP <= 0) DestroyBlock(damageFromPlayer);
+        }
+
+        /// <summary>
+        /// Central entry point for callers carrying a captured opening-volley multiplier
+        /// (melee, arrow, cannon splash, explosion chains). <paramref name="damage"/> must
+        /// already be the final scaled amount — this never re-applies the multiplier to it,
+        /// it only propagates <paramref name="sourceMultiplier"/> as metadata to a sibling
+        /// ExplosiveGimmick so a keg finished off by this hit detonates with the same origin
+        /// scale, then dispatches through the virtual 2-arg overload so subclass rules (e.g.
+        /// CastleCoreGimmick's shield/damage budget) still run unchanged.
+        /// </summary>
+        public void TakeDamage(float damage, bool? damageFromPlayer, float sourceMultiplier)
+        {
+            if (isDestroying) return;
+
+            float previous = sourceMultiplierInFlight;
+            sourceMultiplierInFlight = sourceMultiplier;
+            try
+            {
+                TakeDamage(damage, damageFromPlayer);
+            }
+            finally
+            {
+                sourceMultiplierInFlight = previous;
+            }
         }
 
         private void UpdateVisuals()

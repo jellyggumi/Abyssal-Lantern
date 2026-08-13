@@ -1,6 +1,7 @@
 using System.Reflection;
 using CastleBusters;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace CastleBusters.Tests
 {
@@ -30,10 +31,74 @@ namespace CastleBusters.Tests
         }
 
         [SetUp]
-        public void SetUp() => HeroGrowth.Reset();
+        public void SetUp() => ResetSeries();
 
         [TearDown]
-        public void TearDown() => HeroGrowth.Reset();
+        public void TearDown() => ResetSeries();
+
+        [Test]
+        public void SubsystemRegistrationInitializer_ClearsHeroStacksAndSeriesTalliesForNewRuntimeSession()
+        {
+            MethodInfo initializer = System.Array.Find(
+                typeof(GameManager).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static),
+                method =>
+                {
+                    var attribute = method.GetCustomAttribute<RuntimeInitializeOnLoadMethodAttribute>();
+                    return attribute != null &&
+                           attribute.loadType == RuntimeInitializeLoadType.SubsystemRegistration;
+                });
+
+            Assert.That(initializer, Is.Not.Null,
+                "GameManager needs one SubsystemRegistration owner that clears every series-scoped static when domain reload is disabled.");
+
+            var types = new[] { HeroItemType.Sword, HeroItemType.Shield, HeroItemType.Boots };
+            foreach (bool isPlayer in new[] { true, false })
+            {
+                foreach (HeroItemType type in types)
+                {
+                    HeroGrowth.Grant(isPlayer, type);
+                    Assert.That(HeroGrowth.Stacks(isPlayer, type), Is.EqualTo(1), "precondition");
+                }
+            }
+
+            var tallyNames = new[]
+            {
+                "seriesPlayerWins",
+                "seriesEnemyWins",
+                "seriesGamesPlayed",
+                "seriesScoreTotal"
+            };
+            var tallyFields = new FieldInfo[tallyNames.Length];
+            for (int i = 0; i < tallyNames.Length; i++)
+            {
+                tallyFields[i] = typeof(GameManager).GetField(
+                    tallyNames[i],
+                    BindingFlags.NonPublic | BindingFlags.Static);
+                Assert.That(tallyFields[i], Is.Not.Null,
+                    $"{tallyNames[i]} must remain part of the best-of-three series state");
+                tallyFields[i].SetValue(null, i + 1);
+                Assert.That(tallyFields[i].GetValue(null), Is.EqualTo(i + 1), "precondition");
+            }
+
+            // Invoke Unity's new-runtime-session hook directly. Loading a scene here would be
+            // wrong: ordinary scene reloads must preserve both the tally and hero growth.
+            initializer.Invoke(null, null);
+
+            foreach (bool isPlayer in new[] { true, false })
+            {
+                foreach (HeroItemType type in types)
+                {
+                    Assert.That(HeroGrowth.Stacks(isPlayer, type), Is.Zero,
+                        $"{(isPlayer ? "player" : "enemy")} {type} must not leak into a new runtime session");
+                }
+            }
+
+            foreach (FieldInfo tallyField in tallyFields)
+            {
+                Assert.That(tallyField.GetValue(null), Is.Zero,
+                    $"{tallyField.Name} must reset with hero growth under the same lifecycle owner");
+            }
+        }
 
         [Test]
         public void ResetSeries_ClearsHeroStacks()

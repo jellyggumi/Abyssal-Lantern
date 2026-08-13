@@ -111,6 +111,7 @@ Assets/InitTestScene*.unity.meta
 /Data/
 # Agent session scratch (input history, sessions) — never repo material
 .jeo/
+/.serena/project.local.yml
 
 # Unity crash-recovery scene dumps — written by the editor after a hard kill,
 # never authored, and stale the moment the real scene is saved.

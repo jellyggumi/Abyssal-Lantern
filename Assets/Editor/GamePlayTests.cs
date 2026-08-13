@@ -3598,7 +3598,7 @@ namespace CastleBusters.Tests
                 Assert.Greater(Vector2.Distance(rootGo.transform.position, blockGo.transform.position),
                     root.explosionRadius,
                     "Precondition: only the chained explosion can reach the scored block.");
-                root.SetDamageOwner(true);
+                root.SetDamageContext(true);
 
                 root.Explode();
 
