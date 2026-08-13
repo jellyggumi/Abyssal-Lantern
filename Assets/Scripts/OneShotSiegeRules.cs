@@ -17,6 +17,8 @@ namespace CastleBusters
             Projectile.Barrel
         };
 
+        public const float OpeningVolleyDamageScale = 0.5f;
+
         /// <summary>
         /// Both factions use the same predictable round cycle.  A round is two turns, so each
         /// side receives the same automatically selected projectile before the cycle advances.
@@ -27,6 +29,23 @@ namespace CastleBusters
             int round = Mathf.Max(0, completedTurns) / 2;
             return projectileCycle[round % projectileCycle.Length];
         }
+
+        /// <summary>
+        /// The side that shoots first gets tempo before the defender can answer. Reducing only
+        /// that opening volley to 50% removes the measured 87% first-mover win rate without
+        /// changing projectile identity, later-turn damage, or who takes the first shot.
+        /// </summary>
+        public static float OpeningVolleyDamageMultiplier(int completedTurns)
+            => completedTurns <= 0 ? OpeningVolleyDamageScale : 1f;
+
+        /// <summary>
+        /// Pure apply boundary: multiplies damage by an already-captured multiplier. Never
+        /// reads GameManager or any other mutable state — callers must capture the multiplier
+        /// once (GameManager.CaptureDamageMultiplier) at action/projectile creation and carry
+        /// the returned value through every delayed impact, so this is safe to call at impact
+        /// time without re-deriving eligibility from whatever turn happens to be active then.
+        /// </summary>
+        public static float ApplyDamageMultiplier(float damage, float multiplier) => damage * multiplier;
 
         public static float ClampAngle(float degrees) => Mathf.Clamp(degrees, 10f, 80f);
         public static float ClampPower(float normalizedPower) => Mathf.Clamp01(normalizedPower);

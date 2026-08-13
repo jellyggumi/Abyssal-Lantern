@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.RegularExpressions;
 using CastleBusters;
 using NUnit.Framework;
 using UnityEngine;
@@ -35,43 +36,89 @@ namespace CastleBusters.Tests
         public void SetUp()
         {
             HeroGrowth.Reset();
-            // The Unity MCP plugin logs an authorization failure when no local hub is
-            // listening, and NUnit fails whichever test is running when an unhandled [Error]
-            // arrives. That is environment noise, not a result — but it is only ignored for
-            // the tests in this fixture, never suite-wide.
-            LogAssert.ignoreFailingMessages = true;
         }
+
 
         [TearDown]
         public void TearDown()
         {
+            try
+            {
+                EndSceneReloadLogCapture();
+            }
+            finally
+            {
+                HeroGrowth.Reset();
+            }
+        }
+
+        private static readonly Regex McpSceneReloadError = new Regex(
+            @"(?:^|<b>McpManagerClientHub</b></color> )(?:Server forcefully disconnected this plugin\. Reason: Authorization failed\. Token may be missing, invalid, or revoked\.|Version handshake failed: No response from server\.)$");
+
+        private static readonly System.Collections.Generic.List<(string condition, LogType type)>
+            SceneReloadFailures = new System.Collections.Generic.List<(string condition, LogType type)>();
+        private static bool capturingSceneReloadLogs;
+
+        private static void BeginSceneReloadLogCapture()
+        {
+            SceneReloadFailures.Clear();
+            capturingSceneReloadLogs = true;
+            Application.logMessageReceived += CaptureSceneReloadFailure;
+            LogAssert.ignoreFailingMessages = true;
+        }
+
+        private static void EndSceneReloadLogCapture()
+        {
+            if (!capturingSceneReloadLogs) return;
+
+            Application.logMessageReceived -= CaptureSceneReloadFailure;
             LogAssert.ignoreFailingMessages = false;
-            HeroGrowth.Reset();
+            capturingSceneReloadLogs = false;
+            try
+            {
+                foreach (var failure in SceneReloadFailures)
+                {
+                    Assert.That(failure.type, Is.EqualTo(LogType.Error),
+                        $"Scene reload emitted an unexpected {failure.type}: {failure.condition}");
+                    Assert.That(failure.condition, Does.Match(McpSceneReloadError.ToString()),
+                        $"Scene reload emitted an unexpected error: {failure.condition}");
+                }
+            }
+            finally
+            {
+                SceneReloadFailures.Clear();
+            }
+        }
+
+        private static void CaptureSceneReloadFailure(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
+                SceneReloadFailures.Add((condition, type));
+        }
+
+        private static IEnumerator ReloadArena(System.Action reload)
+        {
+            BeginSceneReloadLogCapture();
+            try
+            {
+                reload();
+                yield return null;
+                yield return new WaitForSecondsRealtime(1.5f);
+            }
+            finally
+            {
+                EndSceneReloadLogCapture();
+            }
         }
 
         private static IEnumerator BootArena()
         {
-            // Re-armed here, not just in SetUp: the runner re-arms LogAssert per test phase, so
-            // a flag set in SetUp is already gone by the time a scene load lets the Unity MCP
-            // plugin log its authorization failure. Set immediately before the reload and it
-            // covers the window that actually produces the noise.
-            LogAssert.ignoreFailingMessages = true;
-            GameManager.PendingStage = StageId.Stage1;
-            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
-            LogAssert.ignoreFailingMessages = true;
+            yield return ReloadArena(() =>
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+            });
             Assert.IsNotNull(GameManager.Instance, "the arena must have a GameManager after loading");
-        }
-
-        /// <summary>Waits out a reload triggered by a results-screen action, keeping the
-        /// MCP-noise guard armed across the window that produces it.</summary>
-        private static IEnumerator SettleReload()
-        {
-            LogAssert.ignoreFailingMessages = true;
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
-            LogAssert.ignoreFailingMessages = true;
         }
 
         [UnityTest]
@@ -86,8 +133,7 @@ namespace CastleBusters.Tests
             Assert.AreEqual(2, HeroGrowth.Stacks(true, HeroItemType.Sword), "precondition");
 
             // The real "다음 경기" action: continues the series and rebuilds the arena.
-            GameManager.RequestNextGame();
-            yield return SettleReload();
+            yield return ReloadArena(GameManager.RequestNextGame);
 
             Assert.AreEqual(2, HeroGrowth.Stacks(true, HeroItemType.Sword),
                 "loot earned earlier in the series must survive the reload into the next game");
@@ -107,8 +153,7 @@ namespace CastleBusters.Tests
             Assert.AreEqual(1, HeroGrowth.Stacks(true, HeroItemType.Sword), "precondition");
 
             // Rematch deliberately abandons the series, so it must abandon the loot with it.
-            GameManager.RequestRematch();
-            yield return SettleReload();
+            yield return ReloadArena(GameManager.RequestRematch);
 
             Assert.AreEqual(0, HeroGrowth.Stacks(true, HeroItemType.Sword),
                 "a rematch starts a new series at 0-0, so it cannot inherit the old one's loot");
@@ -124,8 +169,7 @@ namespace CastleBusters.Tests
             HeroGrowth.Grant(true, HeroItemType.Shield);
             Assert.AreEqual(1, HeroGrowth.Stacks(true, HeroItemType.Shield), "precondition");
 
-            GameManager.RequestTitle();
-            yield return SettleReload();
+            yield return ReloadArena(GameManager.RequestTitle);
 
             Assert.AreEqual(0, HeroGrowth.Stacks(true, HeroItemType.Shield),
                 "returning to the title abandons the campaign, and the loot goes with it");
@@ -141,12 +185,10 @@ namespace CastleBusters.Tests
 
             HeroGrowth.Grant(true, HeroItemType.Sword);          // game 1 loot
 
-            GameManager.RequestNextGame();
-            yield return SettleReload();
+            yield return ReloadArena(GameManager.RequestNextGame);
             HeroGrowth.Grant(true, HeroItemType.Sword);          // game 2 loot
 
-            GameManager.RequestNextGame();
-            yield return SettleReload();
+            yield return ReloadArena(GameManager.RequestNextGame);
             HeroGrowth.Grant(true, HeroItemType.Sword);          // game 3 loot
 
             Assert.AreEqual(3, HeroGrowth.Stacks(true, HeroItemType.Sword),

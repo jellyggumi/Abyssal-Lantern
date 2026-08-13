@@ -284,11 +284,10 @@ namespace CastleBusters
         {
             var canvas = HudCanvas.Resolve();
             if (canvas == null) return;
-            MobileSafeArea.ConfigureCanvas(canvas);
 
             // Panel for block selection
             blockUIPanel = new GameObject("BlockSelectionPanel");
-            blockUIPanel.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
+            blockUIPanel.transform.SetParent(HudCanvas.Root(), false);
             var panelRt = blockUIPanel.AddComponent<RectTransform>();
             panelRt.anchorMin = new Vector2(0.5f, 0f);
             panelRt.anchorMax = new Vector2(0.5f, 0f);

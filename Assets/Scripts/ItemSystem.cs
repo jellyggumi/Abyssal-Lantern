@@ -6,9 +6,9 @@ namespace CastleBusters
     public enum HeroItemType { Sword, Shield, Boots }
 
     /// <summary>
-    /// Per-side hero growth (content pass): destroying gimmicks drops loot; any unit of a
-    /// side collecting it raises that side's PERMANENT (per-match) hero stats. Pure static
-    /// state with explicit Reset so EditMode tests pin the stacking math.
+    /// Per-side hero growth: destroying gimmicks drops loot; any unit collecting it raises that
+    /// side's stats for the current best-of-three series. A new runtime session clears the
+    /// static state; scene reloads within the series deliberately do not.
     /// </summary>
     public static class HeroGrowth
     {
@@ -21,6 +21,7 @@ namespace CastleBusters
         private static readonly int[] swords = new int[2];
         private static readonly int[] shields = new int[2];
         private static readonly int[] boots = new int[2];
+
 
         private static int Side(bool isPlayer) => isPlayer ? 0 : 1;
 

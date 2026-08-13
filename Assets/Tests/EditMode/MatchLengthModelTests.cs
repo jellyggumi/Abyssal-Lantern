@@ -85,6 +85,28 @@ namespace CastleBusters.Tests
         }
 
         [Test]
+        public void FixedAimScenario_AppliesOpeningCompensationToFirstShotOnly()
+        {
+            var settings = new SiegeBalanceSettings(
+                SiegeBalanceSettings.DefaultMapId,
+                SiegeBalanceSettings.DefaultSiegeWeaponId,
+                wallBlockCount: 0,
+                wallBlockHp: 0f,
+                coreHp: 150f,
+                baseShotDamage: 100f,
+                secondsPerTurn: 1f,
+                fixedAimQuality: 1f,
+                beginnerAimError: 0f);
+
+            SiegeMatchMeasurement measurement = SiegePacingSimulation.RunFixedAim(settings);
+
+            Assert.That(
+                measurement.turns,
+                Is.EqualTo(4),
+                "one compensated opening shot followed by full-strength shots must decide this boundary duel on turn four");
+        }
+
+        [Test]
         public void BeginnerAimError_TwentyMatchGateMeetsFiveMinuteDistribution()
         {
             var measurements = SiegePacingSimulation.RunBeginnerSeries(SiegeBalanceSettings.Default, 20260811);

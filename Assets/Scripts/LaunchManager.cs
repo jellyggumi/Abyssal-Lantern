@@ -246,11 +246,11 @@ namespace CastleBusters
 
             if (launchStatsText == null)
             {
-                var canvas = HudCanvas.Resolve();
-                if (canvas != null)
+                var root = HudCanvas.Root();
+                if (root != null)
                 {
                     var go = new GameObject("LaunchStatsText");
-                    go.transform.SetParent(canvas.transform, false);
+                    go.transform.SetParent(root, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
                     textComp.fontSize = HudCanvas.PrimaryLabelSize;
                     textComp.color = Color.white;
@@ -268,11 +268,11 @@ namespace CastleBusters
 
             if (controlGuideText == null)
             {
-                var canvas = HudCanvas.Resolve();
-                if (canvas != null)
+                var root = HudCanvas.Root();
+                if (root != null)
                 {
                     var go = new GameObject("ControlGuideText");
-                    go.transform.SetParent(canvas.transform, false);
+                    go.transform.SetParent(root, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
                     textComp.fontSize = HudCanvas.SecondaryLabelSize;
                     textComp.color = new Color(0.8f, 0.95f, 1f, 0.95f);
@@ -297,11 +297,11 @@ namespace CastleBusters
             // not just its name). Sits in the slot the guide text's 76px inset reserves.
             if (selectedUnitPortrait == null)
             {
-                var canvas = HudCanvas.Resolve();
-                if (canvas != null)
+                var root = HudCanvas.Root();
+                if (root != null)
                 {
                     var go = new GameObject("SelectedUnitPortrait");
-                    go.transform.SetParent(canvas.transform, false);
+                    go.transform.SetParent(root, false);
                     selectedUnitPortrait = go.AddComponent<Image>();
                     selectedUnitPortrait.preserveAspect = true;
                     selectedUnitPortrait.raycastTarget = false;
@@ -327,11 +327,11 @@ namespace CastleBusters
 
             if (launchAlertText == null)
             {
-                var canvas = HudCanvas.Resolve();
-                if (canvas != null)
+                var root = HudCanvas.Root();
+                if (root != null)
                 {
                     var go = new GameObject("LaunchAlertText");
-                    go.transform.SetParent(canvas.transform, false);
+                    go.transform.SetParent(root, false);
                     launchAlertText = go.AddComponent<TextMeshProUGUI>();
                     launchAlertText.fontSize = HudCanvas.PrimaryLabelSize;
                     launchAlertText.color = new Color(1f, 0.25f, 0.2f, 1f);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using CastleBusters;
 using NUnit.Framework;
 using TMPro;
@@ -36,27 +37,82 @@ namespace CastleBusters.Tests
         private static string EvidenceDir =>
             Path.Combine(Directory.GetParent(Application.dataPath).FullName,
                 "_workspace/current/qa/evidence/hud-fix");
+        private static readonly Regex McpSceneReloadError = new Regex(
+            @"(?:^|<b>McpManagerClientHub</b></color> )(?:Server forcefully disconnected this plugin\. Reason: Authorization failed\. Token may be missing, invalid, or revoked\.|Version handshake failed: No response from server\.)$");
+
+        private static readonly List<(string condition, LogType type)>
+            SceneReloadFailures = new List<(string condition, LogType type)>();
+        private static bool capturingSceneReloadLogs;
 
         [SetUp]
         public void SetUp()
         {
             Directory.CreateDirectory(EvidenceDir);
-            LogAssert.ignoreFailingMessages = true;
         }
 
         [TearDown]
-        public void TearDown() => LogAssert.ignoreFailingMessages = false;
+        public void TearDown() => EndSceneReloadLogCapture();
+        private static void BeginSceneReloadLogCapture()
+        {
+            SceneReloadFailures.Clear();
+            capturingSceneReloadLogs = true;
+            Application.logMessageReceived += CaptureSceneReloadFailure;
+            LogAssert.ignoreFailingMessages = true;
+        }
+
+        private static void EndSceneReloadLogCapture()
+        {
+            if (!capturingSceneReloadLogs) return;
+
+            Application.logMessageReceived -= CaptureSceneReloadFailure;
+            LogAssert.ignoreFailingMessages = false;
+            capturingSceneReloadLogs = false;
+            try
+            {
+                foreach (var failure in SceneReloadFailures)
+                {
+                    Assert.That(failure.type, Is.EqualTo(LogType.Error),
+                        $"Scene reload emitted an unexpected {failure.type}: {failure.condition}");
+                    Assert.That(failure.condition, Does.Match(McpSceneReloadError.ToString()),
+                        $"Scene reload emitted an unexpected error: {failure.condition}");
+                }
+            }
+            finally
+            {
+                SceneReloadFailures.Clear();
+            }
+        }
+
+        private static void CaptureSceneReloadFailure(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
+                SceneReloadFailures.Add((condition, type));
+        }
+
+        private static IEnumerator ReloadArena(System.Action reload)
+        {
+            BeginSceneReloadLogCapture();
+            try
+            {
+                reload();
+                yield return null;
+                yield return new WaitForSecondsRealtime(1.5f);
+            }
+            finally
+            {
+                EndSceneReloadLogCapture();
+            }
+        }
 
         [UnityTest]
         [Timeout(120000)]
         public IEnumerator HudReadouts_DoNotCoverEachOther()
         {
-            LogAssert.ignoreFailingMessages = true;
-            GameManager.PendingStage = StageId.Stage1;
-            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
-            LogAssert.ignoreFailingMessages = true;
+            yield return ReloadArena(() =>
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+            });
 
             var gm = GameManager.Instance;
             Assert.IsNotNull(gm, "The arena must have a GameManager");

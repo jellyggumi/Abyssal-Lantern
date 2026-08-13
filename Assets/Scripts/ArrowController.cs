@@ -30,6 +30,13 @@ namespace CastleBusters
         private bool isPlayerArrow;
         private bool hasHit;
         private float damageMultiplier = 1.0f;
+        // Opening-volley multiplier, captured once by the shooter (UnitController.ShootArrow)
+        // at the moment this arrow was created and stored separately from damageMultiplier
+        // (buff/debuff, applied via ApplyBuff/ApplyDebuff mid-flight). Applied exactly once to
+        // this arrow's own direct hit, and forwarded unmodified to whatever it ignites after a
+        // delayed impact (a field keg's ExplosiveGimmick) — never recomputed from mutable turn
+        // state at OnTriggerEnter2D time, so a turn handoff mid-flight cannot change it.
+        private float sourceMultiplier = 1.0f;
         private Rigidbody2D rb;
 
         public static readonly List<ArrowController> Active = new List<ArrowController>();
@@ -125,9 +132,10 @@ namespace CastleBusters
             if (rb.linearVelocity.sqrMagnitude > 0.1f) transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg, Vector3.forward);
         }
 
-        public void Initialize(float damage, bool isPlayerArrow)
+        public void Initialize(float damage, float sourceMultiplier, bool isPlayerArrow)
         {
             this.damage = damage;
+            this.sourceMultiplier = sourceMultiplier;
             this.isPlayerArrow = isPlayerArrow;
             FitArrowToPlayableScale();
             Destroy(gameObject, lifetime);
@@ -162,7 +170,7 @@ namespace CastleBusters
                 GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.9f, 0.6f, 0.8f), 0.35f);
                 GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.9f, 0.45f, 0.55f), 0.45f, 0.22f);
                 GameFeelVfx.SpawnFeedbackLabel(transform.position, "HIT", new Color(1f, 0.95f, 0.45f, 1f), 1.7f, 0.45f);
-                unit.TakeDamage(damage * damageMultiplier, isPlayerArrow);
+                unit.TakeDamage(OneShotSiegeRules.ApplyDamageMultiplier(damage * damageMultiplier, sourceMultiplier), isPlayerArrow, sourceMultiplier);
                 hasHit = true;
                 Destroy(gameObject);
                 return;
@@ -171,7 +179,7 @@ namespace CastleBusters
             var explosive = collision.GetComponent<ExplosiveGimmick>();
             if (explosive != null && unit == null)
             {
-                explosive.SetDamageOwner(isPlayerArrow);
+                explosive.SetDamageContext(isPlayerArrow, sourceMultiplier);
                 explosive.Explode();
                 hasHit = true;
                 Destroy(gameObject);
@@ -184,7 +192,7 @@ namespace CastleBusters
                 GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.9f, 0.6f, 0.8f), 0.35f);
                 GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.9f, 0.45f, 0.55f), 0.45f, 0.22f);
                 GameFeelVfx.SpawnFeedbackLabel(transform.position, "HIT", new Color(1f, 0.95f, 0.45f, 1f), 1.7f, 0.45f);
-                block.TakeDamage(damage * damageMultiplier, isPlayerArrow);
+                block.TakeDamage(OneShotSiegeRules.ApplyDamageMultiplier(damage * damageMultiplier, sourceMultiplier), isPlayerArrow, sourceMultiplier);
                 hasHit = true;
                 Destroy(gameObject);
                 return;
