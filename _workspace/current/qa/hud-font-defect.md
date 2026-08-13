@@ -148,17 +148,18 @@ TMP는 상자를 넘쳐 그린다. 글리프 실측(`textBounds`)으로 바꾸�
 
 | 검사 | 결과 | 실행 시점 | 증거 |
 |---|---|---|---|
-| `HudCanvasContractTests` (3) | 통과 | **병합 후** | `qa/evidence/playmode-hud-contract-postmerge.xml` |
-| `HudScaleFloorTests` (4) | 통과 | **병합 후** | 동일 |
-| `HudOverlapTests` (1) | 통과 | **병합 후** | 동일 · `qa/evidence/hud-fix/hud-overlap.md` |
-| `HudFixEvidenceCapture` (1) | 통과 | **병합 후** | 동일 · `qa/evidence/hud-fix/` 4개 창 |
-| `HudCanvasSourceGuardTests` (2) | 통과 | **병합 후** | `qa/evidence/editmode-postmerge-407.xml` |
-| EditMode 전체 | **406/407** | **병합 후** | 동일 |
-| 글리프 감사 (main 게이트) | **406/406 커버** | **병합 후** | `qa/evidence/glyph-audit-postmerge.log` |
+| `HudCanvasContractTests` (3) | 통과 | **최종 병합 후** | `qa/evidence/playmode-hud-contract-final.xml` |
+| `HudScaleFloorTests` (4) | 통과 | **최종 병합 후** | 동일 |
+| `HudOverlapTests` (1) | 통과 · 겹침 0 | **최종 병합 후** | 동일 · `qa/evidence/hud-fix/hud-overlap.md` |
+| `HudFixEvidenceCapture` (1) | 통과 | **최종 병합 후** | 동일 · `qa/evidence/hud-fix/` 4개 창 |
+| `HudCanvasSourceGuardTests` (2) | 통과 | **최종 병합 후** | `qa/evidence/editmode-final-417.xml` |
+| EditMode 전체 | **417/417** | **최종 병합 후** | 동일 |
+| 글리프 감사 (main 게이트) | **410/410 커버** | **최종 병합 후** | `qa/evidence/glyph-audit-final.log` |
 | PlayMode 전체 | 73/77 | 병합 전 | `qa/evidence/playmode-hud-canvas-fix.xml` |
 
-EditMode 실패 1건(`ArcherVolley_ArrowCounts_MatchKind`)은 **단독 실행에서 통과**한다
-(3/3, MCP 플러그인 인증 오류가 그때 실행 중인 테스트에 붙는 환경 노이즈).
+최종 실행은 EditMode 실패 0이다. 중간 실행에서 한 번 나온
+`ArcherVolley_ArrowCounts_MatchKind` 실패는 단독 3/3 통과였다 — MCP 플러그인 인증 오류가
+그때 실행 중인 테스트에 붙는 환경 노이즈이고, 매 실행 다른 테스트에 붙는다.
 
 > **증거를 한 번 잃었다가 되찾았다.** 초판은 병합 후 수치 둘을 "증거 없음"으로 적었다 —
 > 스크래치 정리에서 XML·로그를 지우며 보관본을 남기지 않았기 때문이다. 재실행해 채웠고,
