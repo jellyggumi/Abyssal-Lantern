@@ -1916,6 +1916,9 @@ namespace CastleBusters.Tests
             Assert.IsNotNull(clinchEnemyCore, "The continued series game must expose an enemy core to win through public damage.");
             BreachCoreWithinTheVolleyBudget(clinchGameManager, clinchEnemyCore);
             yield return WaitForResultsScreen();
+            // A decided Stage1 clinch arms the 5s unscaled auto-advance. Keep every synchronous
+            // assertion and interaction through the Title click in this frame so the results
+            // screen cannot reload underneath the fixture.
 
             var clinchResults = Object.FindObjectOfType<ResultsScreenController>();
             Assert.IsNotNull(clinchResults, "The clinching game must render its actual results screen.");
