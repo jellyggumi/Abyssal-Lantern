@@ -1,6 +1,6 @@
 ## ux-1-title
 state=Intro playerTurn=False turn=0
-onscreen text=19 buttons=9
+onscreen text=18 buttons=9
 
 ## ux-2-match-start
 state=PlayerTurn playerTurn=True turn=0

@@ -341,6 +341,77 @@ namespace CastleBusters.Tests
 
         [UnityTest]
         [Timeout(60000)]
+        public IEnumerator FatalFieldKegHit_FirstSameFrameContextRemainsAuthoritativeThroughDeferredOnDestroy()
+        {
+            yield return LoadAndBeginSiege();
+
+            const float targetHp = 500f;
+            var gameManager = GameManager.Instance;
+            var snapshot = new OpeningVolleyStateSnapshot(gameManager);
+            float originalTimeScale = Time.timeScale;
+            Random.State originalRandomState = Random.state;
+            GameObject fieldKegObject = null;
+            GameObject targetObject = null;
+            var isolatedKegPosition = new Vector3(48f, 12f, 0f);
+
+            try
+            {
+                PrepareCommittedOpeningShot(gameManager);
+                float capturedMultiplier = GameManager.CaptureDamageMultiplier(true);
+                Assert.That(capturedMultiplier, Is.EqualTo(0.5f).Within(0.0001f),
+                    "The fatal first hit must carry the committed player's opening multiplier.");
+
+                fieldKegObject = CreateFieldKeg(
+                    gameManager,
+                    "OpeningVolleyFatalContextRace_FieldKeg",
+                    isolatedKegPosition);
+                var kegBlock = fieldKegObject.GetComponent<DestructibleBlock>();
+                targetObject = CreateDamageTarget(
+                    "OpeningVolleyFatalContextRace_SplashTarget",
+                    isolatedKegPosition + Vector3.up * 1.2f,
+                    isPlayer: false,
+                    targetHp);
+                var target = targetObject.GetComponent<UnitController>();
+                Vector2Int scoreBefore = ReadScoreboard(gameManager);
+
+                kegBlock.TakeDamage(
+                    kegBlock.currentHP,
+                    damageFromPlayer: true,
+                    sourceMultiplier: capturedMultiplier);
+                Assert.That(kegBlock.currentHP, Is.LessThanOrEqualTo(0f),
+                    "The first hit must synchronously enter the fatal destruction path.");
+                Assert.That(fieldKegObject != null, Is.True,
+                    "Unity must still be deferring Destroy/OnDestroy when the competing hit is delivered.");
+
+                // No yield: this competing enemy hit arrives in the same frame, after destruction
+                // started but before ExplosiveGimmick.OnDestroy consumes the fatal hit's context.
+                kegBlock.TakeDamage(
+                    kegBlock.maxHP,
+                    damageFromPlayer: false,
+                    sourceMultiplier: 1f);
+
+                yield return WaitForExplosionOutcome(
+                    fieldKegObject,
+                    target,
+                    targetHp,
+                    requireFieldKegDestroyed: true);
+
+                AssertPlayerScoreDelta(gameManager, scoreBefore, expectedPlayerDelta: 100);
+            }
+            finally
+            {
+                HitStopManager.Instance?.CancelPendingHitStop();
+                Time.timeScale = originalTimeScale;
+                Random.state = originalRandomState;
+                DestroyPickupsAt(isolatedKegPosition);
+                if (fieldKegObject != null) Object.Destroy(fieldKegObject);
+                if (targetObject != null) Object.Destroy(targetObject);
+                snapshot.Restore(gameManager);
+            }
+        }
+
+        [UnityTest]
+        [Timeout(60000)]
         public IEnumerator ArcherArrow_CapturedOpeningMultiplierHitsProductionFieldKegBeforeHandoff()
         {
             yield return LoadAndBeginSiege();

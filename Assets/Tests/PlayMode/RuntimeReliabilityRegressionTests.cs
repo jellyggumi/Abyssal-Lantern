@@ -1924,7 +1924,6 @@ namespace CastleBusters.Tests
             Assert.AreEqual(1, LeaderboardStore.Load().entries.Count,
                 "The decided series must write exactly one ranked entry after the clinch.");
             clinchGameManager.CheckVictoryConditions();
-            yield return null;
             Assert.AreEqual(SiegePrototypeEconomy.SeriesVictoryMarks, SiegePrototypeEconomy.Balance,
                 "Rechecking a completed game-over state must not issue the clinch reward twice.");
 
@@ -1935,7 +1934,6 @@ namespace CastleBusters.Tests
             Assert.IsTrue(prototypeBannerButton.interactable,
                 "The rendered prototype banner exchange must initially be clickable with a clinch reward.");
             prototypeBannerButton.onClick.Invoke();
-            yield return null;
             Assert.IsTrue(SiegePrototypeEconomy.HasBattleBannerSeal,
                 "Clicking the rendered prototype banner must unlock the one-time seal.");
             Assert.Zero(SiegePrototypeEconomy.Balance,

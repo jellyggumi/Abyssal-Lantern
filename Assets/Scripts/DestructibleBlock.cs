@@ -210,6 +210,8 @@ namespace CastleBusters
 
         public virtual void TakeDamage(float damage, bool? damageFromPlayer)
         {
+            if (isDestroying) return;
+
             // Centrally transfers owner + multiplier to a sibling ExplosiveGimmick (a field
             // keg's detonator) before this hit can possibly destroy the block, covering every
             // caller of this virtual entry point — melee/arrow/cannon/explosion via the 3-arg
@@ -263,6 +265,8 @@ namespace CastleBusters
         /// </summary>
         public void TakeDamage(float damage, bool? damageFromPlayer, float sourceMultiplier)
         {
+            if (isDestroying) return;
+
             float previous = sourceMultiplierInFlight;
             sourceMultiplierInFlight = sourceMultiplier;
             try

@@ -12,7 +12,7 @@
 | 게이트 | 측정값 | 방법 | 증거 | 판정 |
 |---|---|---|---|---|
 | G1 세계관 | — | 문자열 전수 감사 | — | **FAIL (미측정)** |
-| G2 밸런스 | **2026-08-12: 선공 87.0% / 교대 49.0%** (**출시 턴 순서만으로 38%p 격차**) → **2026-08-13: 고정 선공 47.0% / 교대 53.0% / 첫-무버 47.0%** (모두 45–55 밴드 내) | 대칭 AI 심 100매치 + 1000매치 회귀 assertion; production PlayMode에서 turn-0 capture → 지연 impact 경로 검증 | `evidence/g2-winrate-measurement.txt`, `TestResults/g2-opening-balance.log`, `TestResults/pr44-final-editmode-v2.xml` (45/45), `TestResults/pr44-damage-hardened-v4.xml` (12/12), `TestResults/pr44-final-playmode-v4.xml` (54/54) | **FAIL — 수치 밴드와 runtime route correctness는 확인; 대칭 ≥20매치 runtime 승률 표본 부재** |
+| G2 밸런스 | **2026-08-12: 선공 87.0% / 교대 49.0%** (**출시 턴 순서만으로 38%p 격차**) → **2026-08-13: 고정 선공 47.0% / 교대 53.0% / 첫-무버 47.0%** (모두 45–55 밴드 내) | 대칭 AI 심 100매치 + 1000매치 회귀 assertion; production PlayMode에서 turn-0 capture → 지연 impact 경로 검증 | `evidence/g2-winrate-measurement.txt`, `TestResults/g2-opening-balance.log`, `TestResults/pr44-final-editmode-v2.xml` (45/45), `TestResults/pr44-damage-hardened-v5.xml` (13/13), `TestResults/pr44-final-playmode-v4.xml` (54/54 prior full baseline) | **FAIL — 수치 밴드와 runtime route correctness는 확인; 대칭 ≥20매치 runtime 승률 표본 부재** |
 | G3 아키타입 | — | 로테이션 5종 ×5매치 | `playtest-report.md` (빈 표) | **FAIL (미실시)** |
 | G4 몰입 | — | 구조화 채점 8장면 | `playtest-report.md` (빈 표) | **FAIL (미실시)** |
 | G5 매출 | — | 공정성 심 + pm 감사 | — | **FAIL (pm 레인 부재)** |
@@ -43,7 +43,7 @@
 
 고정/첫-무버/교대 조건 모두 **45–55 밴드 내**로 수렴. 1000매치 회귀에서도 경계 내 안정(assertion pass).
 
-G2가 FAIL인 이유는 damage route가 아니라 **대칭 ≥20매치 runtime 승률 측정 부재**다. Turn-0의 0.5 ownership capture는 production PlayMode에서 committed melee, arrow, cannon splash, launched-barrel fuse, launched-unit → production field-keg handoff까지 12/12 통과했고, 지연 impact와 chain explosion도 turn handoff 뒤 같은 capture를 적용한다 (`TestResults/pr44-damage-hardened-v4.xml`). 전체 focused PlayMode 회귀도 54/54다 (`TestResults/pr44-final-playmode-v4.xml`). 반면 `SiegeDuelSimulation`은 실제 AI 오차 곡선·Last Stand·플레이어 입력을 포함하지 않으므로, 45–55%의 full-match runtime 결론이나 G2 PASS는 아직 주장할 수 없다.
+G2가 FAIL인 이유는 damage route가 아니라 **대칭 ≥20매치 runtime 승률 측정 부재**다. Turn-0의 0.5 ownership capture는 production PlayMode에서 committed melee, arrow, cannon splash, launched-barrel fuse, launched-unit → production field-keg handoff와 같은 프레임의 경쟁 hit까지 13/13 통과했다. 첫 fatal hit 이후의 damage entry는 ownership/multiplier를 덮어쓰지 않으며, 지연 impact와 chain explosion도 turn handoff 뒤 같은 capture를 적용한다 (`TestResults/pr44-damage-hardened-v5.xml`). 전체 focused PlayMode 기준선도 54/54다 (`TestResults/pr44-final-playmode-v4.xml`; 새 fatal-context 회귀 추가 전 기준선). 반면 `SiegeDuelSimulation`은 실제 AI 오차 곡선·Last Stand·플레이어 입력을 포함하지 않으므로, 45–55%의 full-match runtime 결론이나 G2 PASS는 아직 주장할 수 없다.
 
 ---
 
