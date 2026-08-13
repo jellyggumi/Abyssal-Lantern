@@ -195,11 +195,16 @@ namespace CastleBusters
             windCapEnd: 7.7f,
             cameraDesiredWorldWidth: 54f,
             cameraMaxHalfHeight: 13.5f,
+            // Wing kegs only, both outside the keep entirely. The inner pair was ±11.5 —
+            // 2.5u from a core with a 2.2u blast, the same too-thin margin that let Stage1's
+            // kegs splash their own core once bodies shoved them (2026-08-13). ±12.5 clears
+            // the core by 3.5u and the muzzle by 9.0u; ±16.5 clears the muzzle by 5.0u.
+            // Neither sits in a wall column (|x| ∈ [3.5, 7.5]), so nothing ejects them.
             barrelPositions: new[]
             {
                 new Vector3(-16.5f, 0.5f, 0f),
-                new Vector3(-11.5f, 0.5f, 0f),
-                new Vector3(11.5f, 0.5f, 0f),
+                new Vector3(-12.5f, 0.5f, 0f),
+                new Vector3(12.5f, 0.5f, 0f),
                 new Vector3(16.5f, 0.5f, 0f),
             },
             // Campaign redistribution: fortress height now rises 2 -> 3 -> 4 across the

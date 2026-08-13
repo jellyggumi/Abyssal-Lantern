@@ -722,7 +722,10 @@ namespace CastleBusters.Tests
                 ?.transform.Find("TurnToastText")
                 ?.GetComponent<TMPro.TextMeshProUGUI>();
             Assert.IsNotNull(toastText, "A public launch must report power through the visible runtime toast.");
-            Assert.AreEqual("CLEAN SIEGE ARC: Knight  52% / 0°", toastText.text,
+            // 기사, not "Knight": display naming moved to the DeploymentRules Korean
+            // vocabulary (task 48). Telemetry keeps its own English key, so this rename
+            // cannot fork per-unit analytics.
+            Assert.AreEqual("CLEAN SIEGE ARC: 기사  52% / 0°", toastText.text,
                 "Launch reporting must use the actual 1.30x LAST STAND velocity, not the pre-buff aimed velocity.");
             Assert.AreEqual(LastStand.Phase.Consumed, gameManager.playerLastStand,
                 "The launch whose buffed power was reported must consume the active one-shot phase.");
@@ -732,6 +735,13 @@ namespace CastleBusters.Tests
         public IEnumerator LaunchToast_SuppressesConcurrentComboBannerWhileRetainingComboState()
         {
             yield return LoadAndBeginStage(StageId.Stage1);
+            // This test is about the TOAST's combo suppression, so the combo counter must
+            // only move when this test moves it. Clearing the garrison makes that true.
+            // It used to be true by accident: units carried a 5.28u collider that jammed
+            // them near their spawn, so nobody reached a wall inside the test window. Sizing
+            // hitboxes to the art (2026-08-13) let them actually advance and fight, and real
+            // block breaks started incrementing the combo mid-assertion (observed x6 vs x3).
+            ClearLiveUnitsForQuietBoard();
 
             Assert.IsNotNull(GameplayUxDirector.Instance, "A begun siege must initialize the gameplay UX director before HUD feedback is registered");
             GameplayUxDirector.ResetSessionStats();
@@ -850,7 +860,15 @@ namespace CastleBusters.Tests
             const float targetHalfHeight = 8.4f;
             const float sixteenthByNinth = 16f / 9f;
             var stages = new[] { StageId.Stage1, StageId.Stage2, StageId.Stage3 };
-            var expectedSixteenByNineSizes = new[] { 10.96875f, 10.209375f, 13.21875f };
+            // Derived, not literal: the board widened 2026-08-13, and hard-coded sizes
+            // pinned the OLD board instead of the rule (height follows authored width).
+            var expectedSixteenByNineSizes = new float[stages.Length];
+            for (var s = 0; s < stages.Length; s++)
+            {
+                expectedSixteenByNineSizes[s] = Mathf.Max(
+                    targetHalfHeight,
+                    StageDefinitions.For(stages[s]).cameraDesiredWorldWidth / (2f * sixteenthByNinth));
+            }
             var aspects = new[] { 4f / 3f, 16f / 10f, 21f / 9f };
 
             for (var i = 0; i < stages.Length; i++)
@@ -1161,6 +1179,12 @@ namespace CastleBusters.Tests
         public IEnumerator DeploymentController_TryDeploy_PaidBarrelArmsFuseAndDetonatesWithoutWalkingOrAttacking()
         {
             yield return LoadAndBeginStage(StageId.Stage1);
+            // The subject is the FUSE — that a deployed keg waits, holds still, and detonates
+            // on its own clock. A live garrison invalidates that: since hitboxes were sized
+            // to the art (2026-08-13) enemy bodies actually advance and can now destroy the
+            // keg before its fuse elapses, which is correct siege behaviour and simply not
+            // what this test measures. The probe target below is the one body it wants.
+            ClearLiveUnitsForQuietBoard();
 
             var gameManager = GameManager.Instance;
             var deployment = DeploymentController.Instance;
@@ -1333,8 +1357,16 @@ namespace CastleBusters.Tests
             Assert.AreEqual(3, GimmickFrameAnimator.LoopFrameAt(0.9999f, 0.25f, stage1Frames.Length));
             Assert.AreEqual(0, GimmickFrameAnimator.LoopFrameAt(1f, 0.25f, stage1Frames.Length));
 
+            // Stage1 no longer ships a static keg (2026-08-13: no legal column exists
+            // between the wall line and the core — see GameManager.InitialBarrelPositions),
+            // so the skin is inspected on a keg spawned through the SAME field-director
+            // entry the live game uses. The subject is unchanged: which art a Stage1 keg
+            // resolves, not whether one happens to be lying on the board at boot.
+            GameManager.Instance.SpawnFieldBarrel(new Vector3(0f, 0.5f, 0f));
+            yield return null;
+
             var barrel = Object.FindObjectOfType<ExplosiveGimmick>();
-            Assert.IsNotNull(barrel, "Stage1 must retain its existing explosive barrel placement");
+            Assert.IsNotNull(barrel, "A field-spawned Stage1 keg must exist to carry the skin");
             var barrelRenderer = barrel.GetComponent<SpriteRenderer>();
             Assert.IsNotNull(barrelRenderer, "Stage1 barrel must retain its SpriteRenderer");
             var animator = barrel.GetComponent<GimmickFrameAnimator>();
@@ -1862,6 +1894,20 @@ namespace CastleBusters.Tests
             yield return new WaitForSecondsRealtime(0.5f);
             Assert.AreEqual(GameState.PlayerTurn, GameManager.Instance.currentState,
                 "Beginning the siege must hand control to the player before teardown coverage runs");
+        }
+
+        /// <summary>
+        /// Removes the match-start garrison so a test can measure ONE subject on a still
+        /// board. Only for tests whose subject is not combat: a keg's fuse clock, a toast's
+        /// suppression window. Never use it to make a combat test pass — a body that dies to
+        /// an advancing enemy is the game working.
+        /// </summary>
+        private static void ClearLiveUnitsForQuietBoard()
+        {
+            foreach (var unit in Object.FindObjectsOfType<UnitController>())
+            {
+                if (unit != null) Object.DestroyImmediate(unit.gameObject);
+            }
         }
 
         private static UnitController InitialUnitTemplate(GameManager gameManager, UnitType unitType)

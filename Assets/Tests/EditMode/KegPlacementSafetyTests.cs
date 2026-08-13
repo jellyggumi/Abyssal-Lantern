@@ -34,9 +34,18 @@ namespace CastleBusters.Tests
         /// settling) with headroom: kegs are dynamic bodies and combat shoves them.</summary>
         private const float DriftMargin = 0.8f;
 
-        /// <summary>Rest-position margin over the blast radius. Deliberately smaller than
-        /// DriftMargin: drifted-then-detonated is earned play, resting splash is not.</summary>
-        private const float BlastRestMargin = 0.25f;
+        /// <summary>
+        /// Rest-position margin over the blast radius.
+        ///
+        /// Was 0.25u until 2026-08-13, on the reasoning that "drifted-then-detonated is
+        /// earned play, resting splash is not". A live PlayMode probe disproved the split:
+        /// the ±6.5 keg rested 2.5u from a 2.2u blast — inside this margin — and a friendly
+        /// GARRISON ARCHER's stray arrow detonated it into its own core for 80. Nobody
+        /// earned that; the keg simply sat close enough that ordinary crossfire reached it.
+        /// A resting keg must clear the blast by the same drift allowance the muzzle band
+        /// uses, because combat moves kegs whether or not anyone aimed at them.
+        /// </summary>
+        private const float BlastRestMargin = DriftMargin;
 
         private static GameObject LoadPrefab(string path)
         {
@@ -118,6 +127,38 @@ namespace CastleBusters.Tests
                             $"{stage.displayName}: keg at x={keg.x} rests {distance:F2}u from the core at " +
                             $"x={coreX} — inside blast {KegBlastRadius():F1} + rest margin {BlastRestMargin}. " +
                             "Any stray detonation splashes a core nobody aimed at.");
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void EveryStage_KegsRestOutsideEveryKeepWallColumn()
+        {
+            // The invariant this suite was missing, and the one that actually broke twice:
+            // a keg authored INSIDE a wall column is depenetrated out of it on the first
+            // physics step, and the wall stands between the muzzle and the core — so the
+            // ejection is always COREWARD. Measured live 2026-08-13: kegs authored at ±6.5
+            // and at ±5.8 both came to rest at −7.13, 2.18u from a 2.2u blast, and splashed
+            // their own core for 80 with nobody aiming at anything. Clearance measured at
+            // spawn is meaningless if the spawn point is inside masonry.
+            float kegHalf = KegHalfWidth();
+
+            foreach (var stage in new[] { StageDefinitions.Stage1, StageDefinitions.Stage2, StageDefinitions.Stage3 })
+            {
+                foreach (var keg in stage.barrelPositions)
+                {
+                    foreach (var course in GameManager.KeepProfile)
+                    {
+                        foreach (float columnX in new[] { -course.AbsX, course.AbsX })
+                        {
+                            // Blocks are 1u wide, so a column owns ±0.5u around its centre.
+                            float required = 0.5f + kegHalf;
+                            Assert.Greater(Mathf.Abs(keg.x - columnX), required,
+                                $"{stage.displayName}: keg at x={keg.x} overlaps the keep column at " +
+                                $"x={columnX} (needs >{required:F2}u). Physics will eject it toward the " +
+                                "core and its blast will land on masonry nobody attacked.");
+                        }
                     }
                 }
             }

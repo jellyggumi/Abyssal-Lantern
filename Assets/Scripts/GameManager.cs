@@ -551,19 +551,23 @@ namespace CastleBusters
         // existing caller/test byte-identical when either is active (the only stages EditMode
         // tests ever see, since they call Awake()/CreateGround() directly and never Start()).
         public static float LaunchApronAbsX = 17.0f;  // widened board pass 2026-08-13 (was 14.5)
-        // Two kegs, not four (defect fix 2026-08-12): the old ±11 pair sat 3.5u from the
-        // muzzles — INSIDE the launched Knight's 2.64u-half-width spawn footprint plus keg
-        // half-width, so the player's very first knight volley contacted the keg on frame 1,
-        // detonated it 2.0u from their own core, and cost them 80 core HP before the shot
-        // ever flew (live QA ×2, [KegTrace]/[LaunchContactTrace] evidence). Both live
-        // sessions read as "core drains by itself". The ±6.5 pair stays: 8.0u from the
-        // muzzles, 2.5u from the cores (outside the 2.2u blast at rest), and sitting at the
-        // wall line it is the sanctioned breach tool — shoot it to crack the courses.
-        public static readonly Vector3[] InitialBarrelPositions =
-        {
-            new Vector3(-6.5f, 0.5f, 0f),
-            new Vector3(6.5f, 0.5f, 0f),
-        };
+        // Stage1 ships with ZERO starting kegs (2026-08-13), matching the Stage2 precedent:
+        // "a fortress isn't handed free explosives at its own gate — hazards are earned
+        // mid-match via the field director instead".
+        //
+        // This is a measurement, not taste. The keep courses occupy |x| ∈ [3.5, 7.5] and the
+        // core collider spans ~7.85–10.15, so the only strip between the wall line and the
+        // core is 0.35u wide — narrower than a keg. Every static position authored here sat
+        // INSIDE a wall column and was ejected by depenetration, always COREWARD because the
+        // wall stands on the core side: ±11 detonated at the muzzle (task 47), then ±6.5 and
+        // ±5.8 both walked to −7.13 and splashed the core from 2.18u against a 2.2u blast.
+        // Freezing X (see SpawnExplosiveBarrel) stops the slide but cannot conjure a legal
+        // column that does not exist.
+        //
+        // Kegs still reach the board: the field director's barrel lanes (0, ±2.5) are safe by
+        // construction — midfield, clear of every wall column, 6.5u+ from either core. They
+        // are earned there instead of handed out inside the masonry.
+        public static readonly Vector3[] InitialBarrelPositions = System.Array.Empty<Vector3>();
 
         public static readonly Vector3[] InitialRunePositions =
         {
@@ -590,14 +594,95 @@ namespace CastleBusters
             director.maxFieldObstacles = ActiveLayout.maxFieldObstacles;
         }
 
+        /// <summary>
+        /// Clears kegs authored directly into the scene that sit somewhere no keg may legally
+        /// rest — by RULE, never by a hard-coded coordinate.
+        ///
+        /// SampleScene ships two ExplosiveBarrel instances at (±7, 1.5): straight on the inner
+        /// wall column, 2.0u from a core with a 2.2u blast. The previous cleanup matched only
+        /// |x| ≈ CoreAbsX — written when cores stood at ±7. When they moved to ±9 the rule
+        /// silently stopped matching and stranded those kegs on the masonry, where they
+        /// splashed the player's OWN core for 80 whenever anything set one off, including a
+        /// friendly garrison archer's stray arrow. No amount of tuning the code keg table
+        /// could reach them, and KegPlacementSafetyTests audits StageLayout.barrelPositions,
+        /// so it never saw them either: a scene is not a table.
+        ///
+        /// Each keg is judged by its OWN explosionRadius rather than a copy of that number
+        /// kept here. That is the whole defect in miniature: the old rule froze a coordinate,
+        /// the world moved, and the frozen copy went quietly wrong. A keg that carries a
+        /// bigger blast is therefore held to a bigger clearance automatically, and there is
+        /// no second number to drift.
+        /// </summary>
+        /// <remarks>
+        /// Runs before the stage table spawns its kegs. Those are governed by
+        /// KegPlacementSafetyTests, which derives the same clearances from the prefabs; the
+        /// ordering keeps one authority per keg rather than two agreeing by luck.
+        /// </remarks>
+        private void ClearIllegallyPlacedSceneKegs()
+        {
+            // Drift: a resting keg gets shoved by combat before anything detonates it, so the
+            // margin has to cover where it ENDS UP, not where it was authored. Mirrors
+            // KegPlacementSafetyTests.DriftMargin.
+            const float driftMargin = 0.8f;
+            // Half a wall block. A structural constant of the keep, not art: SpawnCastleWall
+            // stacks 1x1 blocks, so this does not move when a sprite is redrawn.
+            const float halfBlock = 0.5f;
+
+            foreach (var keg in FindObjectsOfType<ExplosiveGimmick>())
+            {
+                if (keg == null) continue;
+                var position = (Vector2)keg.transform.position;
+
+                // Both clearances come off the keg itself. Freezing either as a literal here
+                // is what went wrong the first time: re-art the keg wider or give it a bigger
+                // blast and a frozen copy silently stops describing it, which is how two kegs
+                // ended up resting on the masonry with nothing objecting.
+                var body = keg.GetComponent<Collider2D>();
+                float kegHalfWidth = body != null ? body.bounds.extents.x : 0.5f;
+                float coreClearance = keg.explosionRadius + driftMargin;
+                float wallClearance = halfBlock + kegHalfWidth;
+
+                bool tooCloseToCore = false;
+                foreach (float coreX in new[] { -CoreAbsX, CoreAbsX })
+                {
+                    // Cores rest at y=0.5; measure the real 2D distance the blast itself uses.
+                    if (Vector2.Distance(position, new Vector2(coreX, 0.5f)) < coreClearance)
+                    {
+                        tooCloseToCore = true;
+                        break;
+                    }
+                }
+
+                bool insideWallColumn = false;
+                foreach (var course in KeepProfile)
+                {
+                    if (Mathf.Abs(Mathf.Abs(position.x) - course.AbsX) < wallClearance)
+                    {
+                        insideWallColumn = true;
+                        break;
+                    }
+                }
+
+                if (tooCloseToCore || insideWallColumn) Destroy(keg.gameObject);
+            }
+        }
+
         private void SetupGimmicks()
         {
             // y=0.5 sits a 1x1 dynamic body flush on the y=0 ground surface (top ground row is
             // centered at y=-0.5). Spawning higher made barrels/cores visibly drop on the first
             // physics tick and left cores outside BFS adjacency range of the ground.
-            // Per-stage composition, not a shared fixture: Stage1 keeps the original
-            // bridge-hugging kegs, Stage2 ships with none (earned mid-match instead), Stage3
-            // spreads them into the wings. See StageDefinitions for the concept rationale.
+            // Per-stage composition, not a shared fixture: Stage1 and Stage2 ship with no
+            // starting kegs (earned mid-match via the field director), Stage3 spreads a pair
+            // into the wings. See StageDefinitions for the concept rationale.
+            //
+            // The scene sweep runs FIRST, and that order is the contract: it exists to judge
+            // kegs the code table never saw, so it must finish before the table's own kegs
+            // exist. Those are governed solely by KegPlacementSafetyTests, which derives its
+            // clearances from the prefabs; letting this sweep also see them would put a
+            // second, hardcoded copy of those numbers in charge of deleting them, and the two
+            // would drift apart exactly the way the rule below already drifted once.
+            ClearIllegallyPlacedSceneKegs();
             foreach (var pos in ActiveLayout.barrelPositions) SpawnExplosiveBarrel(pos);
 
             SpawnCastleCores();
@@ -860,19 +945,6 @@ namespace CastleBusters
                     }
                 }
             }
-            var allGo = FindObjectsOfType<GameObject>();
-            foreach (var go in allGo)
-            {
-                if (go != null && go.name == "ExplosiveBarrel")
-                {
-                    float x = go.transform.position.x;
-                    float y = go.transform.position.y;
-                    if (Mathf.Abs(y - 1.5f) < 0.1f && (Mathf.Abs(x - (-CoreAbsX)) < 0.1f || Mathf.Abs(x - CoreAbsX) < 0.1f))
-                    {
-                        Destroy(go);
-                    }
-                }
-            }
 
             BlockData defaultData = null;
             if (playerCastle != null)
@@ -977,11 +1049,12 @@ namespace CastleBusters
         }
 
         // Vertical-hazard vents flank the chariot's sweep (±3.2 reach) and stay a lane
-        // inside the ±6.5 kegs, so each hazard family owns its own column of the midfield.
+        // inside the ±5.8 kegs, so each hazard family owns its own column of the midfield.
+        // Moved 5.4 → 4.6 with the kegs to preserve that one-lane separation.
         public static readonly Vector3[] VentPositions =
         {
-            new Vector3(-5.4f, 0.15f, 0f),  // magma geyser, player approach
-            new Vector3(5.4f, 0.15f, 0f),   // petal burst, enemy approach
+            new Vector3(-4.6f, 0.15f, 0f),  // magma geyser, player approach
+            new Vector3(4.6f, 0.15f, 0f),   // petal burst, enemy approach
         };
 
         // (§3) Vents are event pieces now — see GimmickFieldDirector.NotifyTurnAdvanced.
@@ -1010,6 +1083,17 @@ namespace CastleBusters
             var rb = barrel.AddComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.mass = 2.0f;
+            // Freeze X (2026-08-13). A keg is authored at a position chosen for its blast
+            // clearance to the nearest core — and then bodies shoved it. Measured live: the
+            // ±5.8 keg walked to −7.13, i.e. 1.33u COREWARD (never away: units advance from
+            // the muzzle side, so the shove has a direction), landing 2.18u from a core with
+            // a 2.2u blast and splashing it for 80 with nobody aiming at anything.
+            // Chasing that with a bigger authored margin is unwinnable — drift has no bound.
+            // Freezing X makes placement safety a property of the layout instead of a race
+            // against physics. Y stays free, because a keg whose support is destroyed SHOULD
+            // fall: that collapse is real siege play, and falling cannot change its distance
+            // to a core.
+            rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
 
             var block = barrel.AddComponent<DestructibleBlock>();
             block.maxHP = block.currentHP = 20f;
