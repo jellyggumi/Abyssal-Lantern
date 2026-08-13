@@ -1,0 +1,12 @@
+default font: LiberationSans SDF
+  atlas 1024x1024 pointSize=86 padding=9 renderMode=SDFAA_HINTED population=Static
+  hasE=True hasK=True
+fallbacks: 1
+  - NotoSansKR-Dynamic padding=4 hasE=False
+
+size | ink% | 근거: 흰 픽셀 / 글자 영역
+---|---|---
+17 | 5.455% | probe-17.png
+34 | 5.961% | probe-34.png
+68 | 7.832% | probe-68.png
+136 | 15.000% | probe-136.png

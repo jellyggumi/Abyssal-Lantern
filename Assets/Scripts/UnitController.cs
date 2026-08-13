@@ -512,6 +512,10 @@ namespace CastleBusters
             }
             if (trailRenderer == null) SetupTrailRenderer();
             if (trailRenderer != null) trailRenderer.emitting = true;
+            // Opens this shot's readback window (design/visibility-spec-v2.md §3). Both the
+            // player path and SimpleAI funnel through Launch(), so one call covers both sides —
+            // and the enemy arc is the half of the complaint that had no answer at all.
+            ShotTraceDirector.BeginShot(isPlayerUnit, DeploymentRules.DisplayName(unitType), transform.position);
         }
 
         /// <summary>
@@ -571,6 +575,11 @@ namespace CastleBusters
                         rb.AddForce(windAcceleration * rb.mass, ForceMode2D.Force);
                     }
                 }
+
+                // Post-action readback, layer one (design/visibility-spec-v2.md §3): the arc a
+                // shot flew is kept after it lands so aim learning can accumulate across shots.
+                // Observation only — the director owns inert renderers and never writes back here.
+                ShotTraceDirector.Sample(transform.position);
 
                 MonitorLaunchedUnitSafety();
             }

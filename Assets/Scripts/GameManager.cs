@@ -286,6 +286,11 @@ namespace CastleBusters
         {
             if (Instance == this) Instance = null;
 
+            // The HUD canvas is per-scene, and its cached reference outlives the scene that
+            // owns it. Unity does not reload the domain between PlayMode tests, so a stale
+            // cache would hand the next scene a destroyed canvas.
+            HudCanvas.Forget();
+
             // Test-isolation guard: a PlayMode session mutates these statics (LaunchApronAbsX,
             // LaunchRingRules ring positions) via ApplyStageLayout() at Start() for whatever
             // stage was active. Unity does NOT reload the domain on exiting Play Mode, so
@@ -315,7 +320,9 @@ namespace CastleBusters
             SetupGimmicks();
             SetupUIButtons();
             ApplyRuntimeSpriteAtlas();
-            HeroGrowth.Reset();
+            // Hero stacks deliberately NOT reset here — they now live for a whole
+            // best-of-3 series (ResetSeries owns them). A scene boot is a new GAME,
+            // not a new series.
             SpawnInitialUnits();
             ShowIntro();
         }
@@ -1108,6 +1115,21 @@ namespace CastleBusters
 
         private void SetupUIButtons()
         {
+            // The scene wires turnText/timerText onto the scene's own ConstantPixelSize canvas,
+            // so their text held a fixed pixel height while every code-built HUD label scaled
+            // with the window — the same readout was 4.2% of screen height on a small window
+            // and 1.1% on a 4K one. Moving them onto the HUD canvas puts the whole HUD on one
+            // rule; their authored anchors and position carry over untouched.
+            HudCanvas.Adopt(turnText);
+            // windText and scoreText have no Canvas ancestor at all, so TMP drew nothing while
+            // UpdateUI kept writing to them every turn — wind strength and the running score
+            // were computed and formatted for an audience of nobody. Adoption is what makes
+            // them appear; measured landing zones are left (80-213) and right (427-560) of the
+            // turn banner, no overlap (`qa/evidence/font/orphan-labels.md`).
+            HudCanvas.Adopt(windText);
+            HudCanvas.Adopt(scoreText);
+            HudCanvas.Adopt(timerText);
+
             knightButton?.onClick.AddListener(() => SelectUnit(0));
             archerButton?.onClick.AddListener(() => SelectUnit(1));
             cannonButton?.onClick.AddListener(() => SelectUnit(2));
@@ -1755,8 +1777,13 @@ namespace CastleBusters
             // block/castle object identity; a scene reload spawns fresh objects, so stale keys
             // from the previous match are dead weight — clear them with the same cadence.
             CastleRuinFx.ResetForNewMatch();
+            // Same cadence, same reason: a spent arc describes a board that no longer exists.
+            // SubsystemRegistration fires on domain init but NOT on the scene-reload rematch,
+            // so the previous match's traces would otherwise open the new one.
+            ShotTraceDirector.ResetForNewMatch();
             BrickPlacementController.Instance?.ClearPending();
-            HeroGrowth.Reset();
+            // Same as above: a new game inside a running series inherits the loot the
+            // player already earned. ResetSeries() is the only thing that clears it.
             GameplayUxDirector.SetDangerState(false);
             DeploymentController.Instance?.ResetEconomy();
             currentState = GameState.PlayerTurn;
@@ -2202,6 +2229,12 @@ namespace CastleBusters
                 yield return null;
             }
 
+            // Worms fixes this timing: damage is reported "after any player's turn, when all
+            // movement has ceased". Sealing here — past the flight watchdog, the post-impact
+            // hold, and the settle loop — is what lets the readback state a finished fact
+            // instead of racing the collapse it describes (design/visibility-spec-v2.md §2).
+            ShotTraceDirector.Seal();
+
             if (lm != null) lm.enabled = true;
             isResolvingTurn = false;
             EndTurn();
@@ -2259,9 +2292,18 @@ namespace CastleBusters
             if (turnText != null) turnText.text = isPlayerTurn ? "YOUR SIEGE TURN" : "ENEMY BATTERY";
             if (windText != null)
             {
-                string direction = currentWindForce > 0.15f ? "EAST >>>" : currentWindForce < -0.15f ? "<<< WEST" : "CALM -";
-                string strength = Mathf.Abs(currentWindForce) >= 3.5f ? "GALE" : Mathf.Abs(currentWindForce) >= 1.5f ? "BREEZE" : "STEADY";
-                windText.text = $"BANNER WIND {direction}\n{strength} {Mathf.Abs(currentWindForce):F1}";
+                // One line, because the box is one line tall. As two lines the glyphs ran
+                // 88px down a 27px rect and covered the supply gauge, the deploy toggle and
+                // the friendly core badge — invisible until windText was first parented to a
+                // canvas and actually drawn (`qa/evidence/hud-fix/hud-overlap.md`).
+                //
+                // "EAST" and ">>>" said the same thing, so the arrows carry direction and the
+                // number carries strength. GALE/BREEZE/STEADY was a word for a number already
+                // on screen beside it.
+                string direction = currentWindForce > 0.15f ? ">>>" : currentWindForce < -0.15f ? "<<<" : "—";
+                windText.text = Mathf.Abs(currentWindForce) < 0.15f
+                    ? "WIND CALM"
+                    : $"WIND {direction} {Mathf.Abs(currentWindForce):F1}";
                 windText.color = Mathf.Abs(currentWindForce) >= 3.5f ? new Color(1f, 0.78f, 0.25f, 1f) : new Color(0.65f, 0.9f, 1f, 1f);
             }
             if (scoreText != null) scoreText.text = $"SIEGE SCORE  {playerScore} - {enemyScore}";
@@ -2405,6 +2447,21 @@ namespace CastleBusters
             seriesEnemyWins = 0;
             seriesGamesPlayed = 0;
             seriesScoreTotal = 0;
+            // Hero growth is series-scoped meta progression, so it lives and dies with the
+            // series tally rather than with a single game.
+            //
+            // Before this, ItemSystem existed but every stack evaporated at the next match
+            // start, which left the mark economy with nothing to spend on: a series win paid
+            // 12 marks, the only purchase cost 12, and after one purchase the currency stopped
+            // meaning anything. That is the exact failure the genre survey recorded in Archery
+            // Bastions, whose level-396 player sat on a million unspent gold
+            // (.survey/siege-artillery-landscape/context.md).
+            //
+            // Tying the reset to ResetSeries() rather than to a match keeps one lifecycle
+            // instead of two: whatever starts a fresh series (rematch, title, stage change, a
+            // decided series) also starts fresh loot. RequestNextGame is the deliberate
+            // exception on both counts — it continues the series, so it carries the stacks.
+            HeroGrowth.Reset();
         }
 
 

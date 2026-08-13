@@ -196,6 +196,13 @@ namespace CastleBusters
 
             if (damage <= 0f) return;
 
+            // Readback (design/visibility-spec-v2.md §3-R3) records what the gauge will show:
+            // this is the damage that survived both the shield absorb and the full-health
+            // volley cap. Reporting the raw roll instead would tell the player they took 140
+            // while the bar moved 30 — a readback that disagrees with the thing being read is
+            // worse than none.
+            ShotTraceDirector.NoteCoreDamage(damage);
+
             // Legacy crystal-core art has only one loop, so damage art must own the renderer
             // and the loop stops. The staged castle keep instead KEEPS animating and swaps to
             // the frame set for its new damage band — the keep crumbles on screen rather than

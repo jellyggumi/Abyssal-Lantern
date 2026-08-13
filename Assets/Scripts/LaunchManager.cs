@@ -246,13 +246,13 @@ namespace CastleBusters
 
             if (launchStatsText == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("LaunchStatsText");
                     go.transform.SetParent(canvas.transform, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
-                    textComp.fontSize = 24;
+                    textComp.fontSize = HudCanvas.PrimaryLabelSize;
                     textComp.color = Color.white;
                     textComp.alignment = TextAlignmentOptions.Center;
 
@@ -268,13 +268,13 @@ namespace CastleBusters
 
             if (controlGuideText == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("ControlGuideText");
                     go.transform.SetParent(canvas.transform, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
-                    textComp.fontSize = 22;
+                    textComp.fontSize = HudCanvas.SecondaryLabelSize;
                     textComp.color = new Color(0.8f, 0.95f, 1f, 0.95f);
                     textComp.outlineWidth = 0.18f;
                     textComp.outlineColor = new Color(0.02f, 0.015f, 0.01f, 0.95f);
@@ -297,7 +297,7 @@ namespace CastleBusters
             // not just its name). Sits in the slot the guide text's 76px inset reserves.
             if (selectedUnitPortrait == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("SelectedUnitPortrait");
@@ -327,13 +327,13 @@ namespace CastleBusters
 
             if (launchAlertText == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("LaunchAlertText");
                     go.transform.SetParent(canvas.transform, false);
                     launchAlertText = go.AddComponent<TextMeshProUGUI>();
-                    launchAlertText.fontSize = 26;
+                    launchAlertText.fontSize = HudCanvas.PrimaryLabelSize;
                     launchAlertText.color = new Color(1f, 0.25f, 0.2f, 1f);
                     launchAlertText.alignment = TextAlignmentOptions.Center;
                     launchAlertText.text = "";
@@ -546,6 +546,20 @@ namespace CastleBusters
             selectedUnitPortrait.gameObject.SetActive(sprite != null);
         }
 
+        /// <summary>
+        /// <c>GameManager.WaitAndEndTurn</c> disables this component while a volley resolves, and
+        /// a disabled Update cannot retract what it drew. Without this the aim guidance freezes
+        /// on screen for the whole resolution — the same false-instruction defect as UX-003b,
+        /// just arriving through the component lifecycle instead of the turn state.
+        /// </summary>
+        private void OnDisable()
+        {
+            if (controlGuideText != null && controlGuideText.gameObject.activeSelf)
+            {
+                controlGuideText.gameObject.SetActive(false);
+            }
+        }
+
         private void Update()
         {
             // Aim and deploy are mutually exclusive verbs: while placement is armed the same
@@ -604,6 +618,21 @@ namespace CastleBusters
             {
                 launchPointHintLabel.gameObject.SetActive(isPlayerTurn && !isDragging && !deployArmed);
                 launchPointHintLabel.transform.localPosition = new Vector3(0f, 1.45f + Mathf.Sin(Time.time * 7f) * 0.16f, 0f);
+            }
+
+            // UX-003b: this line reads "아무 곳이나 당겨 발사", and it used to stay on screen
+            // through the enemy turn while three separate paths refused the drag. An instruction
+            // the game will not honour is not guidance, it is a trap — and the survey of twelve
+            // comparable titles found none that ships one (`design/visibility-spec-v2.md` §5-A).
+            // Gated on the same `canAim` the input path uses, so the label and the rule cannot
+            // disagree. Deploy mode keeps it: there the line describes placement, which IS live.
+            if (controlGuideText != null)
+            {
+                bool guidanceIsTrue = canAim || deployArmed;
+                if (controlGuideText.gameObject.activeSelf != guidanceIsTrue)
+                {
+                    controlGuideText.gameObject.SetActive(guidanceIsTrue);
+                }
             }
 
             if (weakPullFlashTimer > 0f)

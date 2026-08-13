@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="9" result="Passed" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:43Z" duration="21.0875605">
+  <test-suite type="TestSuite" id="1101" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="76" result="Passed" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:43Z" duration="21.087561" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1095" name="CastleBusters.PlayModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="76" result="Passed" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:43Z" duration="21.082105" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="69734" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1096" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="76" result="Passed" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:43Z" duration="21.081043" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1097" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="76" result="Passed" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:43Z" duration="21.080012" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1035" name="HudCanvasContractTests" fullname="CastleBusters.Tests.HudCanvasContractTests" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:34Z" duration="12.345624" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1036" name="GameplayHudLabels_AllShareTheOneHudCanvas" fullname="CastleBusters.Tests.HudCanvasContractTests.GameplayHudLabels_AllShareTheOneHudCanvas" methodname="GameplayHudLabels_AllShareTheOneHudCanvas" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" seed="513752720" result="Passed" start-time="2026-08-13 06:50:22Z" end-time="2026-08-13 06:50:26Z" duration="4.522603" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+<color=#ffaa00>warn:</color> [15:50:24:4782] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> ConnectionManager[b9f009e5-f785-4cc2-a136-cf8932dac344] ExecuteHubMethodAsync Connection became inactive while invoking 'PerformVersionHandshake' on endpoint: /hub/mcp-server. Error: The 'InvokeCoreAsync' method cannot be called if the connection is not active
+<color=#ff6b6b>fail:</color> [15:50:24:4786] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> McpManagerClientHub Version handshake failed: No response from server.
+<color=#ffaa00>warn:</color> [15:50:24:4791] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> McpManagerClientHub Version handshake failed (1/3). Reason: Version handshake failed with null response.
+]]></output>
+            </test-case>
+            <test-case id="1037" name="HudLabelSizes_ClearTheLegibilityFloorAtTheSmallestWindow" fullname="CastleBusters.Tests.HudCanvasContractTests.HudLabelSizes_ClearTheLegibilityFloorAtTheSmallestWindow" methodname="HudLabelSizes_ClearTheLegibilityFloorAtTheSmallestWindow" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" seed="858724232" result="Passed" start-time="2026-08-13 06:50:26Z" end-time="2026-08-13 06:50:31Z" duration="4.182093" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1038" name="HudSetup_DoesNotRewriteAnotherSystemsCanvas" fullname="CastleBusters.Tests.HudCanvasContractTests.HudSetup_DoesNotRewriteAnotherSystemsCanvas" methodname="HudSetup_DoesNotRewriteAnotherSystemsCanvas" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" seed="1953104129" result="Passed" start-time="2026-08-13 06:50:31Z" end-time="2026-08-13 06:50:34Z" duration="3.632533" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1044" name="HudFixEvidenceCapture" fullname="CastleBusters.Tests.HudFixEvidenceCapture" classname="CastleBusters.Tests.HudFixEvidenceCapture" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-08-13 06:50:34Z" end-time="2026-08-13 06:50:39Z" duration="4.571946" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1045" name="Hud_CapturedAcrossWindowSizes" fullname="CastleBusters.Tests.HudFixEvidenceCapture.Hud_CapturedAcrossWindowSizes" methodname="Hud_CapturedAcrossWindowSizes" classname="CastleBusters.Tests.HudFixEvidenceCapture" runstate="Runnable" seed="1466663931" result="Passed" start-time="2026-08-13 06:50:34Z" end-time="2026-08-13 06:50:39Z" duration="4.569291" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="240000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1048" name="HudOverlapTests" fullname="CastleBusters.Tests.HudOverlapTests" classname="CastleBusters.Tests.HudOverlapTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-08-13 06:50:39Z" end-time="2026-08-13 06:50:43Z" duration="4.151170" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1049" name="HudReadouts_DoNotCoverEachOther" fullname="CastleBusters.Tests.HudOverlapTests.HudReadouts_DoNotCoverEachOther" methodname="HudReadouts_DoNotCoverEachOther" classname="CastleBusters.Tests.HudOverlapTests" runstate="Runnable" seed="171117071" result="Passed" start-time="2026-08-13 06:50:39Z" end-time="2026-08-13 06:50:43Z" duration="4.148204" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1039" name="HudScaleFloorTests" fullname="CastleBusters.Tests.HudScaleFloorTests" classname="CastleBusters.Tests.HudScaleFloorTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-13 06:50:43Z" end-time="2026-08-13 06:50:43Z" duration="0.005552" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1040" name="AboveTheFloor_ScaleIsProportionalToScreenHeight" fullname="CastleBusters.Tests.HudScaleFloorTests.AboveTheFloor_ScaleIsProportionalToScreenHeight" methodname="AboveTheFloor_ScaleIsProportionalToScreenHeight" classname="CastleBusters.Tests.HudScaleFloorTests" runstate="Runnable" seed="1608886734" result="Passed" start-time="2026-08-13 06:50:43Z" end-time="2026-08-13 06:50:43Z" duration="0.002143" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1041" name="BelowTheFloor_ScaleStopsShrinking" fullname="CastleBusters.Tests.HudScaleFloorTests.BelowTheFloor_ScaleStopsShrinking" methodname="BelowTheFloor_ScaleStopsShrinking" classname="CastleBusters.Tests.HudScaleFloorTests" runstate="Runnable" seed="1234030068" result="Passed" start-time="2026-08-13 06:50:43Z" end-time="2026-08-13 06:50:43Z" duration="0.000103" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1043" name="DegenerateScreenHeight_DoesNotProduceAZeroScale" fullname="CastleBusters.Tests.HudScaleFloorTests.DegenerateScreenHeight_DoesNotProduceAZeroScale" methodname="DegenerateScreenHeight_DoesNotProduceAZeroScale" classname="CastleBusters.Tests.HudScaleFloorTests" runstate="Runnable" seed="803790123" result="Passed" start-time="2026-08-13 06:50:43Z" end-time="2026-08-13 06:50:43Z" duration="0.000069" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1042" name="EveryHudSize_ClearsTheLegibilityFloorAtAnyWindow" fullname="CastleBusters.Tests.HudScaleFloorTests.EveryHudSize_ClearsTheLegibilityFloorAtAnyWindow" methodname="EveryHudSize_ClearsTheLegibilityFloorAtAnyWindow" classname="CastleBusters.Tests.HudScaleFloorTests" runstate="Runnable" seed="398618633" result="Passed" start-time="2026-08-13 06:50:43Z" end-time="2026-08-13 06:50:43Z" duration="0.000128" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<color=#ff6b6b>fail:</color> [15:50:43:4336] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

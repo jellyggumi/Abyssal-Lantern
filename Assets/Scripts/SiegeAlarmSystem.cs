@@ -64,16 +64,10 @@ namespace CastleBusters
         private void EnsureUi()
         {
             if (feedRoot != null) return;
-            canvas = null;
-            foreach (var c in FindObjectsOfType<Canvas>())
-            {
-                if (c.GetComponent<IntroScreenController>() != null) continue;
-                if (c.GetComponent<ResultsScreenController>() != null) continue;
-                canvas = c;
-                break;
-            }
+            // Same named canvas every HUD system uses; see HudCanvas for why the old
+            // iteration-order hunt had to go.
+            canvas = HudCanvas.Resolve();
             if (canvas == null) return;
-            MobileSafeArea.ConfigureCanvas(canvas);
 
             var rootGo = new GameObject("SiegeAlarmFeed");
             rootGo.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
@@ -85,7 +79,7 @@ namespace CastleBusters
             var stripGo = new GameObject("FlowStateStrip");
             stripGo.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
             flowStrip = stripGo.AddComponent<TextMeshProUGUI>();
-            flowStrip.fontSize = 17f;
+            flowStrip.fontSize = HudCanvas.SecondaryLabelSize;
             flowStrip.fontStyle = FontStyles.Bold;
             flowStrip.alignment = TextAlignmentOptions.Center;
             flowStrip.enableWordWrapping = false;
@@ -131,7 +125,7 @@ namespace CastleBusters
             go.transform.SetParent(feedRoot, false);
             var text = go.AddComponent<TextMeshProUGUI>();
             text.text = $"▶ {message}";
-            text.fontSize = 16f;
+            text.fontSize = HudCanvas.SecondaryLabelSize;
             text.fontStyle = FontStyles.Bold;
             text.color = color;
             text.alignment = TextAlignmentOptions.Left;
@@ -209,15 +203,10 @@ namespace CastleBusters
                 if (flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(false);
                 return;
             }
-            if (gm.IsPlayerTurn && !gm.IsResolvingTurn)
-            {
-                if (flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(false);
-                return;
-            }
-            if (!flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(true);
 
             string text;
             Color color;
+
             if (gm.IsResolvingTurn)
             {
                 // Animated ellipsis: motion in the strip itself proves the game is alive.
@@ -225,12 +214,42 @@ namespace CastleBusters
                 text = $"볼리 해결 중{new string('.', dots)}"; // dots only: sword glyph missing from base TMP font
                 color = new Color(1f, 0.82f, 0.35f, 1f);
             }
-            else
+            else if (!gm.IsPlayerTurn)
             {
                 int dots = 1 + (int)(Time.time * 2.5f) % 3;
-                text = $"적 포격 준비 중{new string('.', dots)}  ·  클릭: 벽돌 예약";
+                text = $"적 포격 준비 중{new string('.', dots)}";
+                // The brick-reservation prompt used to be baked into this literal and shown on
+                // every enemy turn, while BrickPlacementController returned early in the one-shot
+                // loop and swallowed the click. Twelve comparable titles were surveyed and none
+                // displays an instruction the game refuses to honour
+                // (`.survey/siege-visibility-and-telegraph/`). Asking the rules instead of
+                // asserting them means the prompt returns by itself when the window reopens.
+                bool deployArmed = DeploymentController.Instance != null && DeploymentController.Instance.DeployModeArmed;
+                if (BrickPlacementRules.DesignationOpen(gm.EnforcesOneShotTurns, true, deployArmed))
+                {
+                    text += "  ·  클릭: 벽돌 예약";
+                }
                 color = new Color(1f, 0.55f, 0.4f, 1f);
             }
+            else if (!string.IsNullOrEmpty(ShotTraceDirector.LatestLine))
+            {
+                // The player's turn is exactly when last turn's result is worth reading — it is
+                // the input to this turn's aim. Post-action readback, layer three
+                // (design/visibility-spec-v2.md §3-R3); the arc and impact marker on the field
+                // are layer one, and this line says what they cost.
+                text = ShotTraceDirector.LatestLine;
+                color = ShotTraceDirector.LatestLineByPlayer
+                    ? new Color(0.62f, 0.88f, 1f, 1f)
+                    : new Color(1f, 0.68f, 0.55f, 1f);
+            }
+            else
+            {
+                // Nothing has resolved yet (opening turn). Silence beats a placeholder.
+                if (flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(false);
+                return;
+            }
+
+            if (!flowStrip.gameObject.activeSelf) flowStrip.gameObject.SetActive(true);
             flowStrip.text = text;
             flowStrip.color = color;
         }

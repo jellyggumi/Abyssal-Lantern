@@ -106,7 +106,13 @@ namespace CastleBusters
             // are mutually exclusive).
             bool deployArmed = DeploymentController.Instance != null && DeploymentController.Instance.DeployModeArmed;
 
-            if (!hintShownThisTurn && !deployArmed)
+            // One predicate, both surfaces. The HUD strip asks BrickPlacementRules the same
+            // question before it offers "클릭: 벽돌 예약", so the instruction and the gate cannot
+            // drift apart — which is exactly how the screen came to promise a click this method
+            // was already refusing (`design/visibility-spec-v2.md` §5-A).
+            if (!BrickPlacementRules.DesignationOpen(gm.EnforcesOneShotTurns, true, deployArmed)) return;
+
+            if (!hintShownThisTurn)
             {
                 hintShownThisTurn = true;
                 GameFeelVfx.SpawnFeedbackLabel(new Vector3(0f, 4.5f, 0f),
@@ -114,7 +120,6 @@ namespace CastleBusters
                     new Color(0.75f, 0.9f, 1f, 0.95f), 2.2f, 0.9f);
             }
 
-            if (deployArmed) return;
             if (!Input.GetMouseButtonDown(0)) return;
             if (UnityEngine.EventSystems.EventSystem.current != null &&
                 UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
@@ -277,7 +282,7 @@ namespace CastleBusters
 
         private void CreateBlockUI()
         {
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = HudCanvas.Resolve();
             if (canvas == null) return;
             MobileSafeArea.ConfigureCanvas(canvas);
 
