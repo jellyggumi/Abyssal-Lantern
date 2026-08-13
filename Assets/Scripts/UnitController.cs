@@ -137,6 +137,14 @@ namespace CastleBusters
         // Carries the side that caused the fatal hit through delayed Barrel detonation.
         // Null means environmental/self-expiry with no external killer.
         private bool? fatalDamageFromPlayer;
+        // Opening-volley multiplier captured once at Launch()/DeployGrounded(), right after
+        // isPlayerUnit is assigned by the caller. Drives launched collision impact damage and
+        // a Barrel's own fuse-timeout/collision explosion — never recomputed at impact time.
+        private float launchDamageMultiplier = 1f;
+        // Mirrors fatalDamageFromPlayer: the killer's own captured multiplier, remembered
+        // through delayed Barrel detonation so a fatal hit's origin scale (not this unit's own
+        // launch scale) drives the resulting explosion.
+        private float fatalDamageMultiplier = 1f;
 
         public UnitState CurrentState => currentState;
         /// <summary>True while this live powder keg is waiting for its armed fuse to resolve.</summary>
@@ -496,6 +504,11 @@ namespace CastleBusters
         {
             currentState = UnitState.Launched;
             stuckTimer = 0f;
+            // Captured now, immediately after isPlayerUnit is assigned by the caller
+            // (LaunchManager.SpawnAndLaunchOne) and before anything can carry this body across
+            // a turn boundary — the launched flight, any fuse, and the eventual Barrel
+            // explosion must all use THIS scale, not whatever turn is active when they resolve.
+            launchDamageMultiplier = GameManager.CaptureDamageMultiplier(isPlayerUnit);
             ApplyHeroGrowth();
             // Comeback chokepoint: an Active LAST STAND on this side buffs damage/radius and
             // boosts the launch itself, exactly once.
@@ -527,6 +540,9 @@ namespace CastleBusters
             currentState = UnitState.Grounded;
             stuckTimer = 0f;
             groundedStuckTimer = 0f;
+            // Same capture as Launch(): DeploymentController assigns isPlayerUnit before
+            // calling this, and a deployed Barrel skips flight straight into BeginFuse below.
+            launchDamageMultiplier = GameManager.CaptureDamageMultiplier(isPlayerUnit);
             ApplyHeroGrowth();
             if (rb != null)
             {
@@ -1025,17 +1041,20 @@ namespace CastleBusters
             GameFeelVfx.SpawnFeedbackLabel(target.position, unitType == UnitType.Knight ? "SMASH" : "HIT", new Color(1f, 0.92f, 0.45f, 1f), 1.9f, 0.45f);
             GameplayUxDirector.NotifyImpact(target.position, unitType == UnitType.Knight ? "SMASH" : "HIT", new Color(1f, 0.92f, 0.45f, 1f));
 
+            // Immediate action: capture once, right here, then apply exactly once below.
+            float multiplier = GameManager.CaptureDamageMultiplier(isPlayerUnit);
+
             // Cycle 16: Knight deals 1.8x damage to blocks
             float damage = attackDamage * damageMultiplier;
             var block = target.GetComponent<DestructibleBlock>();
             if (block != null)
             {
                 if (unitType == UnitType.Knight) damage *= 1.8f;
-                block.TakeDamage(damage, isPlayerUnit);
+                block.TakeDamage(OneShotSiegeRules.ApplyDamageMultiplier(damage, multiplier), isPlayerUnit, multiplier);
             }
             else
             {
-                target.GetComponent<UnitController>()?.TakeDamage(damage, isPlayerUnit);
+                target.GetComponent<UnitController>()?.TakeDamage(OneShotSiegeRules.ApplyDamageMultiplier(damage, multiplier), isPlayerUnit, multiplier);
             }
         }
 
@@ -1070,10 +1089,19 @@ namespace CastleBusters
                 arrowRb.linearVelocity = dir * arrowSpeed;
                 arrow.transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg, Vector3.forward);
             }
-            arrow.GetComponent<ArrowController>()?.Initialize(attackDamage * damageMultiplier, isPlayerUnit);
+            // Immediate action: capture once, at creation. The arrow stores this separately
+            // and applies it once at its own (possibly delayed) impact — see ArrowController.
+            float multiplier = GameManager.CaptureDamageMultiplier(isPlayerUnit);
+            arrow.GetComponent<ArrowController>()?.Initialize(attackDamage * damageMultiplier, multiplier, isPlayerUnit);
         }
 
-        public void TakeDamage(float damage, bool? damageFromPlayer = null)
+        /// <summary>
+        /// damage must already be the final scaled amount (callers apply their own captured
+        /// multiplier before calling this). sourceMultiplier is metadata only — carried through
+        /// to fatalDamageMultiplier so a fatal hit's origin scale (not this unit's own launch
+        /// scale) drives the Barrel explosion it may trigger, never re-applied to damage here.
+        /// </summary>
+        public void TakeDamage(float damage, bool? damageFromPlayer = null, float sourceMultiplier = 1f)
         {
             if (currentState == UnitState.Dead) return;
             currentHP -= damage;
@@ -1084,6 +1112,7 @@ namespace CastleBusters
             if (currentHP <= 0)
             {
                 fatalDamageFromPlayer = damageFromPlayer;
+                fatalDamageMultiplier = sourceMultiplier;
                 Die();
             }
         }
@@ -1116,8 +1145,10 @@ namespace CastleBusters
                     return;
                 }
 
-                float impactDamage = attackDamage * 1.5f;
-                otherUnit.TakeDamage(impactDamage, isPlayerUnit);
+                // Launched collision: uses the scale captured at Launch(), never recomputed
+                // from whatever turn is active when this body happens to land its hit.
+                float impactDamage = OneShotSiegeRules.ApplyDamageMultiplier(attackDamage * 1.5f, launchDamageMultiplier);
+                otherUnit.TakeDamage(impactDamage, isPlayerUnit, launchDamageMultiplier);
                 if (impactDamage > 0f)
                 {
                     GameFeelVfx.PlayImpactSfx(Mathf.Clamp(impactDamage / 120f, 0.18f, 0.55f));
@@ -1132,14 +1163,14 @@ namespace CastleBusters
 
             if (explosive != null)
             {
-                explosive.SetDamageOwner(isPlayerUnit);
+                explosive.SetDamageContext(isPlayerUnit, launchDamageMultiplier);
                 explosive.Explode();
             }
 
             if (block != null)
             {
-                float impactDamage = attackDamage * 1.5f;
-                block.TakeDamage(impactDamage, isPlayerUnit);
+                float impactDamage = OneShotSiegeRules.ApplyDamageMultiplier(attackDamage * 1.5f, launchDamageMultiplier);
+                block.TakeDamage(impactDamage, isPlayerUnit, launchDamageMultiplier);
                 if (impactDamage > 0f)
                 {
                     GameFeelVfx.PlayImpactSfx(Mathf.Clamp(impactDamage / 35f, 0.45f, 1.8f));
@@ -1219,7 +1250,9 @@ namespace CastleBusters
             }
             if (currentState != UnitState.Dead)
             {
+                // Self-timeout: this body is its own killer, at its own captured launch scale.
                 fatalDamageFromPlayer = isPlayerUnit;
+                fatalDamageMultiplier = launchDamageMultiplier;
                 Die();
             }
         }
@@ -1229,7 +1262,7 @@ namespace CastleBusters
             var expGimmick = GetComponent<ExplosiveGimmick>();
             if (expGimmick != null)
             {
-                expGimmick.SetDamageOwner(fatalDamageFromPlayer);
+                expGimmick.SetDamageContext(fatalDamageFromPlayer, fatalDamageMultiplier);
                 expGimmick.Explode();
                 if (GameManager.Instance != null) GameManager.Instance.OnUnitDied(this, fatalDamageFromPlayer);
                 if (Application.isPlaying) Destroy(gameObject); else DestroyImmediate(gameObject);
@@ -1255,13 +1288,17 @@ namespace CastleBusters
             if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.05f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.65f);
 
+            // Legacy fallback (no ExplosiveGimmick sibling): fatalDamageMultiplier already
+            // carries either this body's own launch scale (fuse timeout) or the killer's
+            // captured scale (external fatal hit) — applied once, here, never recomputed.
+            float outgoingExplosionDamage = OneShotSiegeRules.ApplyDamageMultiplier(explosionDamage, fatalDamageMultiplier);
             var blocks = DestructibleBlock.ActiveOrScene;
             for (int i = blocks.Count - 1; i >= 0; i--)
             {
                 var block = blocks[i];
                 if (block != null && Vector2.Distance(transform.position, block.transform.position) <= explosionRadius)
                 {
-                    block.TakeDamage(explosionDamage, fatalDamageFromPlayer);
+                    block.TakeDamage(outgoingExplosionDamage, fatalDamageFromPlayer, fatalDamageMultiplier);
                 }
             }
             var units = ActiveOrScene;
@@ -1270,7 +1307,7 @@ namespace CastleBusters
                 var unit = units[i];
                 if (unit != null && unit != this && Vector2.Distance(transform.position, unit.transform.position) <= explosionRadius)
                 {
-                    unit.TakeDamage(explosionDamage, fatalDamageFromPlayer);
+                    unit.TakeDamage(outgoingExplosionDamage, fatalDamageFromPlayer, fatalDamageMultiplier);
                 }
             }
 

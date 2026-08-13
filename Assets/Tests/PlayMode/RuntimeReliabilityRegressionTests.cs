@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine.EventSystems;
 using UnityEngine;
@@ -17,12 +18,73 @@ namespace CastleBusters.Tests
             HeroItemType.Boots
         };
 
+        private static readonly Regex McpSceneReloadError = new Regex(
+            @"(?:^|<b>McpManagerClientHub</b></color> )(?:Server forcefully disconnected this plugin\. Reason: Authorization failed\. Token may be missing, invalid, or revoked\.|Version handshake failed: No response from server\.)$");
+
+        private readonly System.Collections.Generic.List<(string condition, LogType type)>
+            sceneReloadFailures = new System.Collections.Generic.List<(string condition, LogType type)>();
+        private bool capturingSceneReloadLogs;
+        private bool captureMcpErrorsInTearDown;
+
+        private void BeginSceneReloadLogCapture()
+        {
+            sceneReloadFailures.Clear();
+            capturingSceneReloadLogs = true;
+            Application.logMessageReceived += CaptureSceneReloadFailure;
+            LogAssert.ignoreFailingMessages = true;
+        }
+
+        private void EndSceneReloadLogCapture()
+        {
+            if (!capturingSceneReloadLogs) return;
+
+            Application.logMessageReceived -= CaptureSceneReloadFailure;
+            LogAssert.ignoreFailingMessages = false;
+            capturingSceneReloadLogs = false;
+            try
+            {
+                foreach (var failure in sceneReloadFailures)
+                {
+                    Assert.That(failure.type, Is.EqualTo(LogType.Error),
+                        $"Scene reload emitted an unexpected {failure.type}: {failure.condition}");
+                    Assert.That(failure.condition, Does.Match(McpSceneReloadError.ToString()),
+                        $"Scene reload emitted an unexpected error: {failure.condition}");
+                }
+            }
+            finally
+            {
+                sceneReloadFailures.Clear();
+            }
+        }
+
+        private void CaptureSceneReloadFailure(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
+                sceneReloadFailures.Add((condition, type));
+        }
+
+        private IEnumerator ReloadAllowingKnownMcpErrors(System.Action reload)
+        {
+            BeginSceneReloadLogCapture();
+            try
+            {
+                reload();
+                yield return null;
+                yield return new WaitForSecondsRealtime(1.5f);
+            }
+            finally
+            {
+                EndSceneReloadLogCapture();
+            }
+        }
+
         private readonly int[,] originalGrowthStacks = new int[2, 3];
         private float originalTimeScale;
         private StageId originalPendingStage;
         private GameObject spawnedShockwaveRing;
         private Scene temporaryTestScene;
         private bool hasTemporaryTestScene;
+        private GameManager chariotSchedulerOwner;
         private const string StageProgressPrefsKey = "CastleBusters.StageProgress.v1";
         private const string WarChestBalancePrefsKey = "CastleBusters.PrototypeWarChest.Balance";
         private const string BattleBannerSealPrefsKey = "CastleBusters.PrototypeWarChest.BattleBannerSeal";
@@ -71,6 +133,8 @@ namespace CastleBusters.Tests
         [UnityTearDown]
         public IEnumerator RestoreRuntimeState()
         {
+            ClearChariotRuntimeState(chariotSchedulerOwner);
+            chariotSchedulerOwner = null;
             if (spawnedShockwaveRing != null) Object.Destroy(spawnedShockwaveRing);
 
             Time.timeScale = 1f;
@@ -78,14 +142,8 @@ namespace CastleBusters.Tests
             // Restore persistent player data before a scene operation: in EditMode,
             // LoadScene can throw and must not strand test-mutated progression/economy prefs.
             RestorePlayerPrefsState();
-            if (hasTemporaryTestScene && temporaryTestScene.IsValid() && temporaryTestScene.isLoaded)
-            {
-                SceneManager.SetActiveScene(temporaryTestScene);
-            }
-            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-            yield return null;
-            yield return null;
-
+            // GameManager.Start applies growth while spawning units, so restore the captured
+            // stacks before the replacement scene can bake test-mutated values into them.
             HeroGrowth.Reset();
             for (var side = 0; side < 2; side++)
             {
@@ -97,7 +155,22 @@ namespace CastleBusters.Tests
                     }
                 }
             }
-
+            if (hasTemporaryTestScene && temporaryTestScene.IsValid() && temporaryTestScene.isLoaded)
+            {
+                SceneManager.SetActiveScene(temporaryTestScene);
+            }
+            if (captureMcpErrorsInTearDown)
+            {
+                captureMcpErrorsInTearDown = false;
+                yield return ReloadAllowingKnownMcpErrors(
+                    () => SceneManager.LoadScene("SampleScene", LoadSceneMode.Single));
+            }
+            else
+            {
+                SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+                yield return null;
+                yield return null;
+            }
 
             Time.timeScale = originalTimeScale;
             spawnedShockwaveRing = null;
@@ -262,34 +335,55 @@ namespace CastleBusters.Tests
         [UnityTest]
         public IEnumerator UnitController_FriendlyBodyContact_DoesNotSettleLaunchedUnit()
         {
+            temporaryTestScene = SceneManager.CreateScene(
+                "RuntimeReliabilityFriendlyContactScene",
+                new CreateSceneParameters(LocalPhysicsMode.Physics2D));
+            hasTemporaryTestScene = true;
+            Assert.IsTrue(SceneManager.SetActiveScene(temporaryTestScene),
+                "The friendly-contact probe requires an isolated scene.");
+
+            var contactPhysics = temporaryTestScene.GetPhysicsScene2D();
+            Assert.IsTrue(contactPhysics.IsValid(),
+                "The friendly-contact probe requires a valid isolated 2D physics scene.");
+
             GameObject launchedGo = null;
             GameObject teammateGo = null;
             try
             {
+                var launchedPosition = new Vector3(0f, 5f, 0f);
                 launchedGo = new GameObject("FriendlyContactLaunchedUnit");
-                launchedGo.transform.position = new Vector3(0f, 5f, 0f);
+                launchedGo.transform.position = launchedPosition;
                 var launchedBody = launchedGo.AddComponent<Rigidbody2D>();
                 launchedBody.gravityScale = 0f;
-                launchedGo.AddComponent<BoxCollider2D>();
+                var launchedCollider = launchedGo.AddComponent<BoxCollider2D>();
                 var launchedUnit = launchedGo.AddComponent<UnitController>();
                 launchedUnit.isPlayerUnit = true;
 
                 teammateGo = new GameObject("FriendlyContactGroundedUnit");
-                teammateGo.transform.position = launchedGo.transform.position;
+                teammateGo.transform.position = launchedPosition + Vector3.right * 2f;
                 var teammateBody = teammateGo.AddComponent<Rigidbody2D>();
-                teammateGo.AddComponent<BoxCollider2D>();
+                var teammateCollider = teammateGo.AddComponent<BoxCollider2D>();
                 var teammate = teammateGo.AddComponent<UnitController>();
                 teammate.isPlayerUnit = true;
                 teammate.DeployGrounded();
                 teammateBody.bodyType = RigidbodyType2D.Kinematic;
                 float teammateHpBefore = teammate.currentHP;
 
-                yield return null;
-
                 launchedUnit.Launch(Vector2.right * 4f);
+                teammateGo.transform.position = launchedPosition;
+                Physics2D.IgnoreCollision(launchedCollider, teammateCollider, false);
                 Physics2D.SyncTransforms();
-                yield return new WaitForFixedUpdate();
 
+                var contactObserved = false;
+                for (var simulationStep = 0; simulationStep < 4 && !contactObserved; simulationStep++)
+                {
+                    Assert.IsTrue(contactPhysics.Simulate(Time.fixedDeltaTime),
+                        "The isolated friendly-contact physics scene must accept a bounded simulation step.");
+                    contactObserved = launchedCollider.IsTouching(teammateCollider);
+                }
+
+                Assert.IsTrue(contactObserved,
+                    "Precondition: the launched body must make real physics contact with its teammate.");
                 Assert.AreEqual(UnitState.Launched, launchedUnit.CurrentState,
                     "Contact with a live friendly body must not consume the projectile's flight or settle it.");
                 Assert.AreEqual(teammateHpBefore, teammate.currentHP, 0.0001f,
@@ -297,8 +391,8 @@ namespace CastleBusters.Tests
             }
             finally
             {
-                if (launchedGo != null) Object.Destroy(launchedGo);
-                if (teammateGo != null) Object.Destroy(teammateGo);
+                if (launchedGo != null) Object.DestroyImmediate(launchedGo);
+                if (teammateGo != null) Object.DestroyImmediate(teammateGo);
                 foreach (var gameObject in Object.FindObjectsOfType<GameObject>())
                 {
                     if (gameObject.name == "ImpactBurst") Object.Destroy(gameObject);
@@ -434,7 +528,9 @@ namespace CastleBusters.Tests
         [Timeout(60000)]
         public IEnumerator ChariotDestroyedByPublicBlockDamage_SpawnsExactlyOneItemPickup()
         {
+            ClearChariotRuntimeState(GameManager.Instance);
             yield return LoadAndBeginStage(StageId.Stage1);
+            chariotSchedulerOwner = GameManager.Instance;
 
             var chariot = ActiveChariot();
             Assert.IsNotNull(chariot, "Precondition: the active siege must contain a chariot");
@@ -453,7 +549,12 @@ namespace CastleBusters.Tests
             Assert.AreEqual(pickupsBefore + 1, Object.FindObjectsOfType<ItemPickup>().Length,
                 "The destroyed chariot must not create a duplicate item pickup on a subsequent frame");
 
-            yield return new WaitForSecondsRealtime(ChariotRules.RespawnDelaySeconds + 0.5f);
+            var respawnDeadline = Time.realtimeSinceStartup + ChariotRules.RespawnDelaySeconds + 2f;
+            while (ActiveChariotCount() == 0 && Time.realtimeSinceStartup < respawnDeadline)
+            {
+                yield return null;
+            }
+
             Assert.IsTrue(chariot == null, "The destroyed chariot instance must not survive its public damage path");
             Assert.AreEqual(1, ActiveChariotCount(), "A live chariot destruction must schedule exactly one replacement chariot");
             Assert.AreNotSame(chariot, ActiveChariot(), "The post-delay chariot must be a new gameplay instance");
@@ -826,16 +927,15 @@ namespace CastleBusters.Tests
             // can reach them. Called from the runner's empty scene they reload that instead
             // and no GameManager ever appears.
             //
-            // The guard covers the Unity MCP plugin's authorization error, which a scene load
-            // can emit when no local hub is listening and which NUnit charges to whichever
-            // test is running. Four reloads here make that likely rather than rare. It stays
-            // armed for the rest of the test - the runner re-arms per test, so it never
-            // reaches another fixture, and teardown reloads as well.
-            LogAssert.ignoreFailingMessages = true;
-            GameManager.PendingStage = StageId.Stage1;
-            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
+            // A detached local MCP hub may emit either known error while a reload tears down
+            // the plugin. Capture only the bounded reload window and validate every failing
+            // log against that allowlist afterward; zero MCP errors is also valid.
+            captureMcpErrorsInTearDown = true;
+            yield return ReloadAllowingKnownMcpErrors(() =>
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+            });
 
             foreach (var (label, invoke) in freshStarts)
             {
@@ -845,9 +945,7 @@ namespace CastleBusters.Tests
                 HeroGrowth.Grant(true, HeroItemType.Boots);
 
                 GameManager.PendingStage = StageId.Stage1;
-                invoke();
-                yield return null;
-                yield return new WaitForSecondsRealtime(1.5f);
+                yield return ReloadAllowingKnownMcpErrors(invoke);
 
                 foreach (var type in GrowthTypes)
                 {
@@ -897,19 +995,18 @@ namespace CastleBusters.Tests
             // reloads the ACTIVE scene, so from the runner's empty scene it would prove
             // nothing. Relying on a previous test to have left the arena loaded would make
             // this pass or fail on run order.
-            LogAssert.ignoreFailingMessages = true;
-            GameManager.PendingStage = StageId.Stage1;
-            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
+            captureMcpErrorsInTearDown = true;
+            yield return ReloadAllowingKnownMcpErrors(() =>
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+            });
 
             // Granted after the boot, which is where a game actually earns loot.
             HeroGrowth.Reset();
             HeroGrowth.Grant(true, HeroItemType.Sword);
 
-            GameManager.RequestNextGame();
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
+            yield return ReloadAllowingKnownMcpErrors(GameManager.RequestNextGame);
 
             Assert.AreEqual(1, HeroGrowth.Stacks(true, HeroItemType.Sword),
                 "다음 경기 continues the series, so earned loot must survive the reload");
@@ -1859,6 +1956,97 @@ namespace CastleBusters.Tests
                 "The rendered TitleButton route must ResetDemo's one-time banner unlock.");
         }
 
+        [UnityTest]
+        [Timeout(60000)]
+        public IEnumerator BestOfThreePlayerClinch_ClearsHeroGrowthBeforeNextStageInitialSpawn()
+        {
+            StageProgressStore.Save(StageId.Stage1);
+            typeof(GameManager)
+                .GetMethod("ResetSeries", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                ?.Invoke(null, null);
+
+            yield return LoadAndBeginStage(StageId.Stage1);
+
+            var firstGameManager = GameManager.Instance;
+            var firstEnemyCore = FindCore(false);
+            Assert.IsNotNull(firstEnemyCore,
+                "The first actual siege must expose an enemy core to establish the live 1-0 series boundary.");
+            BreachCoreWithinTheVolleyBudget(firstGameManager, firstEnemyCore);
+            yield return WaitForResultsScreen();
+
+            HeroGrowth.Grant(true, HeroItemType.Sword);
+            HeroGrowth.Grant(true, HeroItemType.Shield);
+            HeroGrowth.Grant(true, HeroItemType.Boots);
+
+            var nextGameButton = Object.FindObjectOfType<ResultsScreenController>()
+                ?.transform.Find("MobileSafeArea/NextGameButton")
+                ?.GetComponent<UnityEngine.UI.Button>();
+            Assert.IsNotNull(nextGameButton,
+                "A 1-0 actual results screen must expose the rendered next-game action.");
+            Assert.IsTrue(nextGameButton.interactable,
+                "The rendered next-game action must remain clickable after the first win.");
+            nextGameButton.onClick.Invoke();
+            yield return WaitForReloadedPlayerTurn(firstGameManager);
+
+            foreach (var type in GrowthTypes)
+            {
+                Assert.AreEqual(1, HeroGrowth.Stacks(true, type),
+                    $"The earned {type} stack must reach the live clinching game before the series is decided.");
+            }
+
+            var clinchGameManager = GameManager.Instance;
+            var clinchEnemyCore = FindCore(false);
+            Assert.IsNotNull(clinchEnemyCore,
+                "The continued series game must expose an enemy core to clinch through public damage.");
+            BreachCoreWithinTheVolleyBudget(clinchGameManager, clinchEnemyCore);
+            yield return WaitForResultsScreen();
+
+            foreach (var type in GrowthTypes)
+            {
+                Assert.Zero(HeroGrowth.Stacks(true, type),
+                    $"Deciding the live series at 2-0 must clear the player {type} stack immediately.");
+            }
+
+            var clinchResults = Object.FindObjectOfType<ResultsScreenController>();
+            var nextStageButton = clinchResults
+                ?.transform.Find("MobileSafeArea/NextStageButton")
+                ?.GetComponent<UnityEngine.UI.Button>();
+            Assert.IsNotNull(nextStageButton,
+                "A Stage1 series clinch must render the public next-stage action.");
+            Assert.IsTrue(nextStageButton.interactable,
+                "The rendered next-stage action must be clickable after Stage2 unlocks.");
+            nextStageButton.onClick.Invoke();
+            yield return WaitForReloadedGameManager(clinchGameManager);
+
+            var stage2GameManager = GameManager.Instance;
+            Assert.AreEqual(StageId.Stage2, stage2GameManager.currentStage,
+                "The rendered next-stage action must rebuild the arena as Stage2.");
+
+            var playerUnitCount = 0;
+            foreach (var unit in Object.FindObjectsOfType<UnitController>())
+            {
+                if (!unit.isPlayerUnit) continue;
+
+                playerUnitCount++;
+                var template = InitialUnitTemplate(stage2GameManager, unit.unitType);
+                Assert.IsNotNull(template,
+                    $"The Stage2 initial {unit.unitType} prefab must expose base unit stats.");
+
+                var baseMaxHP = template.unitData != null ? template.unitData.maxHP : template.maxHP;
+                var baseDamage = template.unitData != null ? template.unitData.attackDamage : template.attackDamage;
+                var baseSpeed = template.unitData != null ? template.unitData.moveSpeed : template.moveSpeed;
+                Assert.AreEqual(baseMaxHP, unit.maxHP, 0.0001f,
+                    $"Stage2 initial {unit.unitType} health must not retain the clinched series' shield stack.");
+                Assert.AreEqual(baseDamage, unit.attackDamage, 0.0001f,
+                    $"Stage2 initial {unit.unitType} damage must not retain the clinched series' sword stack.");
+                Assert.AreEqual(baseSpeed, unit.moveSpeed, 0.0001f,
+                    $"Stage2 initial {unit.unitType} speed must not retain the clinched series' boots stack.");
+            }
+
+            Assert.AreEqual(3, playerUnitCount,
+                "The public Stage2 transition must spawn its three initial player units with base stats.");
+        }
+
         /// <summary>
         /// Breaks an enemy core the way the balance rules actually allow. A core that begins a
         /// turn at full health absorbs at most FullHealthVolleyDamageCap (140) that turn, and
@@ -1995,6 +2183,24 @@ namespace CastleBusters.Tests
             yield return new WaitForSecondsRealtime(0.5f);
             Assert.AreEqual(GameState.PlayerTurn, GameManager.Instance.currentState,
                 "Beginning the siege must hand control to the player before teardown coverage runs");
+        }
+
+        private static void ClearChariotRuntimeState(GameManager schedulerOwner)
+        {
+            if (schedulerOwner != null) schedulerOwner.StopAllCoroutines();
+
+            foreach (var movingGimmick in Object.FindObjectsOfType<MovingGimmick>())
+            {
+                if (movingGimmick != null && movingGimmick.chariotMode)
+                {
+                    Object.DestroyImmediate(movingGimmick.gameObject);
+                }
+            }
+
+            foreach (var pickup in Object.FindObjectsOfType<ItemPickup>())
+            {
+                if (pickup != null) Object.DestroyImmediate(pickup.gameObject);
+            }
         }
 
         /// <summary>

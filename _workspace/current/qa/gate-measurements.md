@@ -2,7 +2,7 @@
 
 - run-id: 20260809-castle-war-stage1 (cycle 2)
 - owner: game-qa lane (측정) / director (판정)
-- date: 2026-08-12
+- date: 2026-08-13
 - 규칙: **측정값 + 측정 방법 + 증거 경로** 세 가지가 없으면 FAIL. 형용사는 게이트를 통과하지 못한다.
 
 ---
@@ -12,7 +12,7 @@
 | 게이트 | 측정값 | 방법 | 증거 | 판정 |
 |---|---|---|---|---|
 | G1 세계관 | — | 문자열 전수 감사 | — | **FAIL (미측정)** |
-| G2 밸런스 | **선공 87.0% / 교대 49.0%** | 대칭 AI 심 100매치 | `evidence/g2-winrate-measurement.txt` | **FAIL (선공 밴드 밖)** |
+| G2 밸런스 | **2026-08-12: 선공 87.0% / 교대 49.0%** (**출시 턴 순서만으로 38%p 격차**) → **2026-08-13: 고정 선공 47.0% / 교대 53.0% / 첫-무버 47.0%** (모두 45–55 밴드 내) | 대칭 AI 심 100매치 + 1000매치 회귀 assertion; production PlayMode에서 turn-0 capture → 지연 impact 경로 검증 | `evidence/g2-winrate-measurement.txt`, `TestResults/g2-opening-balance.log`, `TestResults/pr44-final-editmode-v2.xml` (45/45), `TestResults/pr44-damage-hardened-v4.xml` (12/12), `TestResults/pr44-final-playmode-v4.xml` (54/54) | **FAIL — 수치 밴드와 runtime route correctness는 확인; 대칭 ≥20매치 runtime 승률 표본 부재** |
 | G3 아키타입 | — | 로테이션 5종 ×5매치 | `playtest-report.md` (빈 표) | **FAIL (미실시)** |
 | G4 몰입 | — | 구조화 채점 8장면 | `playtest-report.md` (빈 표) | **FAIL (미실시)** |
 | G5 매출 | — | 공정성 심 + pm 감사 | — | **FAIL (pm 레인 부재)** |
@@ -20,11 +20,32 @@
 | G7 코어루프 | — | `Telemetry.RepeatRate()` ≥20세션 | — | **FAIL (미측정)** |
 | G8 참신성 | 빈도 ✅ / 인상 — | 서베이 12표본 + 채점 | `.survey/siege-artillery-landscape/` | **FAIL (절반)** |
 
-**통과: 0 / 8.** 대부분 "나쁘다"가 아니라 "아직 재지 않았다"였다.
-G2는 이제 **재고 나서 실패한** 첫 게이트다 — 아래 §G2 참조.
+**통과: 0 / 8.** G2 수치 밴드와 production PlayMode damage-route correctness는 확인됐다. 그러나 대칭 ≥20매치 runtime 승률 표본이 없어 G2는 FAIL이며, 나머지 게이트도 각 증거 블로커가 남아 있다.
 
 ---
-## G2 — 측정 완료, 실패 [OBSERVED 2026-08-12]
+
+---
+## G2 — 재측정 완료, 첫-무버 교정됨 [OBSERVED 2026-08-13]
+
+**경과**: PR#44 당김 발사체 개편 후 열린 퀵 스팟 진행. 기준선 2026-08-12 87.0% 대비 출시 턴 순서 이점을 0.5 배수로 정정.
+
+측정: `SiegeDuelSimulation`, 100매치, `SiegeBalanceSettings.Default`(추가 개편 없음)
+명령: `Unity -batchmode -quit -executeMethod CastleBusters.EditorTools.G2Measurement.Run`
+증거: `TestResults/g2-opening-balance.log` (100매치), G2 회귀 1000매치 밴드 통과 (`TestResults/pr44-final-editmode-v2.xml` 내 assertion pass)
+
+| 조건 | 플레이어 승률 | 선공 승률 | 평균 턴 | 평균 길이 | G2 밴드 |
+|---|---|---|---|---|---|
+| **고정 선공 (출시 턴 순서)** | **47.0%** | 47.0% | 39.4 | 295s | **INSIDE** |
+| **교대 (밸런스 격리)** | **53.0%** | 53.0% | 39.4 | 295s | **INSIDE** |
+| 회귀 1000매치 (첫-무버·고정) | — | — | — | — | **INSIDE** (밴드 assertion pass; exact aggregate values were not emitted) |
+
+### 해석 — 0.5 배수 적용 후 밴드 수렴
+
+고정/첫-무버/교대 조건 모두 **45–55 밴드 내**로 수렴. 1000매치 회귀에서도 경계 내 안정(assertion pass).
+
+G2가 FAIL인 이유는 damage route가 아니라 **대칭 ≥20매치 runtime 승률 측정 부재**다. Turn-0의 0.5 ownership capture는 production PlayMode에서 committed melee, arrow, cannon splash, launched-barrel fuse, launched-unit → production field-keg handoff까지 12/12 통과했고, 지연 impact와 chain explosion도 turn handoff 뒤 같은 capture를 적용한다 (`TestResults/pr44-damage-hardened-v4.xml`). 전체 focused PlayMode 회귀도 54/54다 (`TestResults/pr44-final-playmode-v4.xml`). 반면 `SiegeDuelSimulation`은 실제 AI 오차 곡선·Last Stand·플레이어 입력을 포함하지 않으므로, 45–55%의 full-match runtime 결론이나 G2 PASS는 아직 주장할 수 없다.
+
+---
 
 측정: `SiegeDuelSimulation`, 100매치, `SiegeBalanceSettings.Default`
 (keep 1440 / shot 106 / aim 0.70 / err 0.09 / 7.5s per turn)

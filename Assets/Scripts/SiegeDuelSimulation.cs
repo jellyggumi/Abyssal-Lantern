@@ -46,9 +46,12 @@ namespace CastleBusters
 
         public float PlayerWinRate => matches == 0 ? -1f : (float)playerWins / matches;
 
-        /// <summary>G2's band. -1 (no data) fails, exactly as an out-of-band rate does.</summary>
+        /// <summary>
+        /// G2's point-estimate band. A numerically balanced result cannot approve the gate until
+        /// it also meets the declared minimum sample size.
+        /// </summary>
         public bool InsideG2Band =>
-            matches > 0 &&
+            matches >= SiegeDuelSimulation.RequiredMatches &&
             PlayerWinRate >= SiegeDuelSimulation.G2LowerBound &&
             PlayerWinRate <= SiegeDuelSimulation.G2UpperBound;
     }
@@ -134,7 +137,9 @@ namespace CastleBusters
                     ? playerBase + playerRng.NextSignedUnit() * settings.beginnerAimError
                     : enemyBase + enemyRng.NextSignedUnit() * settings.beginnerAimError;
 
-                float damage = settings.baseShotDamage * multiplier * Mathf.Clamp01(quality);
+                float damage = settings.baseShotDamage * multiplier *
+                    OneShotSiegeRules.OpeningVolleyDamageMultiplier(turns) *
+                    Mathf.Clamp01(quality);
 
                 if (playerToAct) enemyKeep -= damage;
                 else playerKeep -= damage;

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using CastleBusters;
 using NUnit.Framework;
 using UnityEngine;
@@ -29,6 +30,12 @@ namespace CastleBusters.Tests
                 "_workspace/current/qa/evidence/visual");
 
         private readonly StringBuilder measurements = new StringBuilder();
+        private static readonly Regex McpSceneReloadError = new Regex(
+            @"(?:^|<b>McpManagerClientHub</b></color> )(?:Server forcefully disconnected this plugin\. Reason: Authorization failed\. Token may be missing, invalid, or revoked\.|Version handshake failed: No response from server\.)$");
+
+        private static readonly System.Collections.Generic.List<(string condition, LogType type)>
+            SceneReloadFailures = new System.Collections.Generic.List<(string condition, LogType type)>();
+        private static bool capturingSceneReloadLogs;
 
         [SetUp]
         public void SetUp()
@@ -38,27 +45,80 @@ namespace CastleBusters.Tests
             // so without this the second test's file also carries the first test's rows.
             measurements.Clear();
             HeroGrowth.Reset();
-            // A scene load lets the Unity MCP plugin log an authorization failure when no local
-            // hub is listening, and NUnit charges that to whichever test is running. Scoped to
-            // this fixture only.
-            LogAssert.ignoreFailingMessages = true;
         }
 
         [TearDown]
         public void TearDown()
         {
+            try
+            {
+                EndSceneReloadLogCapture();
+            }
+            finally
+            {
+                HeroGrowth.Reset();
+            }
+        }
+
+        private static void BeginSceneReloadLogCapture()
+        {
+            SceneReloadFailures.Clear();
+            capturingSceneReloadLogs = true;
+            Application.logMessageReceived += CaptureSceneReloadFailure;
+            LogAssert.ignoreFailingMessages = true;
+        }
+
+        private static void EndSceneReloadLogCapture()
+        {
+            if (!capturingSceneReloadLogs) return;
+
+            Application.logMessageReceived -= CaptureSceneReloadFailure;
             LogAssert.ignoreFailingMessages = false;
-            HeroGrowth.Reset();
+            capturingSceneReloadLogs = false;
+            try
+            {
+                foreach (var failure in SceneReloadFailures)
+                {
+                    Assert.That(failure.type, Is.EqualTo(LogType.Error),
+                        $"Scene reload emitted an unexpected {failure.type}: {failure.condition}");
+                    Assert.That(failure.condition, Does.Match(McpSceneReloadError.ToString()),
+                        $"Scene reload emitted an unexpected error: {failure.condition}");
+                }
+            }
+            finally
+            {
+                SceneReloadFailures.Clear();
+            }
+        }
+
+        private static void CaptureSceneReloadFailure(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
+                SceneReloadFailures.Add((condition, type));
+        }
+
+        private static IEnumerator ReloadArena(System.Action reload)
+        {
+            BeginSceneReloadLogCapture();
+            try
+            {
+                reload();
+                yield return null;
+                yield return new WaitForSecondsRealtime(1.5f);
+            }
+            finally
+            {
+                EndSceneReloadLogCapture();
+            }
         }
 
         private static IEnumerator BootArena()
         {
-            LogAssert.ignoreFailingMessages = true;
-            GameManager.PendingStage = StageId.Stage1;
-            SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-            yield return null;
-            yield return new WaitForSecondsRealtime(1.5f);
-            LogAssert.ignoreFailingMessages = true;
+            yield return ReloadArena(() =>
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+            });
         }
 
         /// <summary>

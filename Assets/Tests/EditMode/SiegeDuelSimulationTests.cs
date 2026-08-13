@@ -62,20 +62,18 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void PlayerAlwaysFirst_ExposesAStructuralAdvantage()
+        public void FixedPlayerFirst_DefaultSeries_StaysInsideG2Band()
         {
-            // THE FINDING this instrument was built to surface. Both sides need the same number
-            // of turns to break a keep, so whoever shoots first arrives one turn earlier and the
-            // aim spread is far too narrow to overturn it. This is a property of the balance
-            // model, not a bug in the sim — and the shipped game always gives the player the
-            // first shot.
+            // The shipped turn order gives the player the first shot. Enlarge the sample beyond
+            // the 100-match gate minimum so one seed's sampling noise cannot hide whether the
+            // opening-volley compensation actually removes that structural edge.
+            const int balanceSampleMatches = 1000;
             var results = SiegeDuelSimulation.RunSeries(
-                Settings, seed: 1, matches: SiegeDuelSimulation.RequiredMatches, alternateFirstMove: false);
+                Settings, seed: 1, matches: balanceSampleMatches, alternateFirstMove: false);
             var series = SiegeDuelSimulation.Summarize(results, Settings.secondsPerTurn);
 
-            Assert.Greater(series.PlayerWinRate, SiegeDuelSimulation.G2UpperBound,
-                "first-mover advantage must show up as an out-of-band win rate, not be smoothed away");
-            Assert.IsFalse(series.InsideG2Band, "an out-of-band rate must fail the gate check");
+            Assert.IsTrue(series.InsideG2Band,
+                $"equal skill with the player always first must land in 45-55%, got {series.PlayerWinRate:P1}");
         }
 
         [Test]
@@ -93,15 +91,38 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void FirstMoverWinRate_IsReportedSeparatelyFromPlayerWinRate()
+        public void InsideG2Band_RejectsBalancedSeriesUntilRequiredMatches()
         {
-            // The diagnostic that tells a reader WHICH of the two situations they are looking at.
+            int undersizedMatches = SiegeDuelSimulation.RequiredMatches - 2;
+            var undersized = new SiegeDuelSeries(
+                undersizedMatches, undersizedMatches / 2, 0f, 0f, 0.5f);
+            var adequatelyPowered = new SiegeDuelSeries(
+                SiegeDuelSimulation.RequiredMatches,
+                SiegeDuelSimulation.RequiredMatches / 2,
+                0f,
+                0f,
+                0.5f);
+
+            Assert.IsFalse(undersized.InsideG2Band,
+                "a 50% point estimate must not approve G2 below the declared sample size");
+            Assert.IsTrue(adequatelyPowered.InsideG2Band,
+                "a 50% point estimate at the declared sample size must approve G2");
+        }
+
+        [Test]
+        public void AlternatingFirstMove_CompensationRemovesStructuralOrderAdvantage()
+        {
+            // A larger alternating sample measures the order effect directly without comparing
+            // two correlated point estimates from one seed.
+            const int balanceSampleMatches = SiegeDuelSimulation.RequiredMatches * 10;
             var results = SiegeDuelSimulation.RunSeries(
-                Settings, seed: 42, matches: 100, alternateFirstMove: true);
+                Settings, seed: 42, matches: balanceSampleMatches, alternateFirstMove: true);
             var series = SiegeDuelSimulation.Summarize(results, Settings.secondsPerTurn);
 
-            Assert.Greater(series.firstMoverWinRate, series.PlayerWinRate,
-                "whoever moves first should win more often than the player does under alternation");
+            Assert.That(
+                series.firstMoverWinRate,
+                Is.InRange(SiegeDuelSimulation.G2LowerBound, SiegeDuelSimulation.G2UpperBound),
+                $"alternating equal-skill play must leave first-mover wins inside 45-55%, got {series.firstMoverWinRate:P1}");
         }
 
         [Test]

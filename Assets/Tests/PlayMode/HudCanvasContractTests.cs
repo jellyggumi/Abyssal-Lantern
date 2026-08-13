@@ -24,26 +24,271 @@ namespace CastleBusters.Tests
     /// </summary>
     public class HudCanvasContractTests
     {
-        [SetUp]
-        public void SetUp() => LogAssert.ignoreFailingMessages = true;
-
-        [TearDown]
-        public void TearDown() => LogAssert.ignoreFailingMessages = false;
 
         private static IEnumerator BootMatch()
         {
-            LogAssert.ignoreFailingMessages = true;
             GameManager.PendingStage = StageId.Stage1;
             SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
             yield return null;
             yield return new WaitForSecondsRealtime(1.5f);
-            LogAssert.ignoreFailingMessages = true;
 
             var gm = GameManager.Instance;
             Assert.IsNotNull(gm, "The arena must have a GameManager");
             gm.BeginSiege();
             yield return null;
             yield return new WaitForSecondsRealtime(1.5f);
+        }
+
+        private enum RuntimeHudBuilder
+        {
+            BrickPlacement,
+            Launch
+        }
+
+        private sealed class RuntimeHudFixture
+        {
+            public GameObject foreignCanvas;
+            public GameObject generatedBrickController;
+            public GameManager gameManager;
+            public bool originalGameManagerEnabled;
+            public bool originalOneShotSetting;
+            public DeploymentController deployment;
+            public bool originalDeploymentEnabled;
+            public LaunchManager launchManager;
+            public bool originalLaunchManagerEnabled;
+            public Canvas hudCanvas;
+            public RectTransform hudRoot;
+        }
+
+        private static T FindInScene<T>(Scene scene) where T : Component
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                var component = root.GetComponentInChildren<T>(true);
+                if (component != null)
+                {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        private static void ConfigureRuntimeHudFixture(
+            RuntimeHudFixture fixture,
+            RuntimeHudBuilder builder,
+            Scene scene)
+        {
+            Assert.AreEqual(scene, SceneManager.GetActiveScene(),
+                "The runtime fixture must bind components only after SampleScene is active");
+
+            fixture.gameManager = FindInScene<GameManager>(scene);
+            Assert.IsNotNull(fixture.gameManager, "The loaded arena must register its GameManager in Awake");
+            fixture.originalGameManagerEnabled = fixture.gameManager.enabled;
+            fixture.originalOneShotSetting = fixture.gameManager.enforceOneShotTurns;
+            fixture.gameManager.enabled = false;
+
+            fixture.deployment = fixture.gameManager.GetComponent<DeploymentController>();
+            if (fixture.deployment != null)
+            {
+                fixture.originalDeploymentEnabled = fixture.deployment.enabled;
+                fixture.deployment.enabled = false;
+            }
+
+            fixture.launchManager = FindInScene<LaunchManager>(scene);
+            Assert.IsNotNull(fixture.launchManager, "SampleScene must contain its production LaunchManager");
+            fixture.originalLaunchManagerEnabled = fixture.launchManager.enabled;
+            if (builder == RuntimeHudBuilder.BrickPlacement)
+            {
+                fixture.launchManager.enabled = false;
+            }
+
+            // The scene-authored Canvas plus this earlier runtime canvas make an unordered
+            // FindObjectOfType<Canvas> path observably wrong: neither is the canonical HUD.
+            // GameManager, DeploymentController, and the non-target builder are disabled before
+            // their first Start/Update, so only the builder named by this test can create it.
+            fixture.foreignCanvas = new GameObject(
+                "EarlierForeignCanvas",
+                typeof(Canvas),
+                typeof(CanvasScaler));
+
+            if (builder == RuntimeHudBuilder.BrickPlacement)
+            {
+                fixture.gameManager.enforceOneShotTurns = false;
+                fixture.generatedBrickController = new GameObject("RuntimeBrickPlacementController");
+                fixture.generatedBrickController.AddComponent<BrickPlacementController>();
+            }
+        }
+
+        private static IEnumerator BootRuntimeHudBuilder(
+            RuntimeHudFixture fixture,
+            RuntimeHudBuilder builder)
+        {
+            var sceneConfigured = false;
+            System.Exception setupFailure = null;
+
+            void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+            {
+                if (scene.name != "SampleScene")
+                {
+                    return;
+                }
+
+                try
+                {
+                    ConfigureRuntimeHudFixture(fixture, builder, scene);
+                }
+                catch (System.Exception exception)
+                {
+                    setupFailure = exception;
+                }
+                finally
+                {
+                    sceneConfigured = true;
+                }
+            }
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            try
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                var loadOperation = SceneManager.LoadSceneAsync("SampleScene", LoadSceneMode.Single);
+                Assert.IsNotNull(loadOperation, "SampleScene must begin loading");
+                yield return loadOperation;
+            }
+            finally
+            {
+                SceneManager.sceneLoaded -= OnSceneLoaded;
+            }
+
+            if (setupFailure != null)
+            {
+                throw setupFailure;
+            }
+
+            Assert.IsTrue(sceneConfigured,
+                "SampleScene must be configured from its sceneLoaded lifecycle callback");
+
+            // sceneLoaded performs isolation after Awake/OnEnable and before Start. These
+            // explicit player-loop turns then exercise LaunchManager.Start and
+            // BrickPlacementController.Update without relying on a wall-clock delay.
+            yield return null;
+            yield return null;
+
+            var hudObject = GameObject.Find(HudCanvas.CanvasName);
+            Assert.IsNotNull(hudObject,
+                "The target runtime builder must create the named gameplay canvas "
+                + "rather than adopting either pre-existing canvas");
+            fixture.hudCanvas = hudObject.GetComponent<Canvas>();
+            Assert.IsNotNull(fixture.hudCanvas, "The canonical HUD object must own a Canvas");
+
+            fixture.hudRoot = HudCanvas.Root();
+            Assert.IsNotNull(fixture.hudRoot, "The canonical HUD canvas must expose its safe-area root");
+            Assert.AreSame(fixture.hudCanvas.transform, fixture.hudRoot.parent,
+                "HudCanvas.Root must belong directly to the canonical gameplay canvas");
+        }
+
+
+        private static void AssertScaleFloorStillOwns(RuntimeHudFixture fixture, string builderName)
+        {
+            var floor = fixture.hudCanvas.GetComponent<HudScaleFloor>();
+            Assert.IsNotNull(floor, $"{builderName} construction must retain the HUD scale-floor component");
+            Assert.IsTrue(floor.isActiveAndEnabled,
+                $"{builderName} construction must not disable the component that enforces the legibility floor");
+
+            var scaler = fixture.hudCanvas.GetComponent<CanvasScaler>();
+            Assert.IsNotNull(scaler, "The canonical HUD canvas must own a CanvasScaler");
+            Assert.AreEqual(CanvasScaler.ScaleMode.ConstantPixelSize, scaler.uiScaleMode,
+                $"{builderName} construction must leave HudScaleFloor, not CanvasScaler's screen mode, in control");
+        }
+
+        private static void CleanUp(RuntimeHudFixture fixture)
+        {
+            if (fixture.generatedBrickController != null)
+            {
+                Object.DestroyImmediate(fixture.generatedBrickController);
+            }
+            if (fixture.foreignCanvas != null)
+            {
+                Object.DestroyImmediate(fixture.foreignCanvas);
+            }
+            if (fixture.launchManager != null)
+            {
+                fixture.launchManager.enabled = fixture.originalLaunchManagerEnabled;
+            }
+            if (fixture.deployment != null)
+            {
+                fixture.deployment.enabled = fixture.originalDeploymentEnabled;
+            }
+            if (fixture.gameManager != null)
+            {
+                fixture.gameManager.enforceOneShotTurns = fixture.originalOneShotSetting;
+                fixture.gameManager.enabled = fixture.originalGameManagerEnabled;
+            }
+            fixture.generatedBrickController = null;
+            fixture.foreignCanvas = null;
+            fixture.launchManager = null;
+            fixture.deployment = null;
+            fixture.gameManager = null;
+            fixture.hudRoot = null;
+            fixture.hudCanvas = null;
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator BrickPlacementController_RuntimeBuilderUsesCanonicalHudWithoutDisablingScaleFloor()
+        {
+            var fixture = new RuntimeHudFixture();
+            try
+            {
+                yield return BootRuntimeHudBuilder(fixture, RuntimeHudBuilder.BrickPlacement);
+
+                RectTransform blockPanel = null;
+                foreach (var candidate in Object.FindObjectsByType<RectTransform>(
+                             FindObjectsInactive.Include,
+                             FindObjectsSortMode.None))
+                {
+                    if (candidate.name != "BlockSelectionPanel") continue;
+                    blockPanel = candidate;
+                    break;
+                }
+
+                Assert.IsNotNull(blockPanel,
+                    "BrickPlacementController.Update must build its block-selection panel in roster mode");
+                Assert.AreSame(fixture.hudRoot, blockPanel.parent,
+                    "BrickPlacementController must parent its generated panel under HudCanvas.Root, "
+                    + "not either pre-existing canvas");
+                AssertScaleFloorStillOwns(fixture, nameof(BrickPlacementController));
+            }
+            finally
+            {
+                CleanUp(fixture);
+            }
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator LaunchManager_RuntimeBuilderUsesCanonicalHudWithoutDisablingScaleFloor()
+        {
+            var fixture = new RuntimeHudFixture();
+            try
+            {
+                yield return BootRuntimeHudBuilder(fixture, RuntimeHudBuilder.Launch);
+
+                Assert.IsNotNull(fixture.launchManager.launchStatsText,
+                    "LaunchManager.Start must generate its launch-stats label");
+                Assert.IsNotNull(fixture.launchManager.controlGuideText,
+                    "LaunchManager.Start must generate its control-guide label");
+                Assert.AreSame(fixture.hudRoot, fixture.launchManager.launchStatsText.transform.parent,
+                    "LaunchManager must parent LaunchStatsText under HudCanvas.Root, not either pre-existing canvas");
+                Assert.AreSame(fixture.hudRoot, fixture.launchManager.controlGuideText.transform.parent,
+                    "LaunchManager must parent ControlGuideText under HudCanvas.Root, not either pre-existing canvas");
+                AssertScaleFloorStillOwns(fixture, nameof(LaunchManager));
+            }
+            finally
+            {
+                CleanUp(fixture);
+            }
         }
 
         /// <summary>
@@ -150,7 +395,6 @@ namespace CastleBusters.Tests
         [Timeout(120000)]
         public IEnumerator HudSetup_DoesNotRewriteAnotherSystemsCanvas()
         {
-            LogAssert.ignoreFailingMessages = true;
             GameManager.PendingStage = StageId.Stage1;
             SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
             yield return null;

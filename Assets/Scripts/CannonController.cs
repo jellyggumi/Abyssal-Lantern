@@ -402,6 +402,12 @@ namespace CastleBusters
         public float splashRadius = CannonRules.ShellSplashRadius;
         public bool isPlayerShell = true;
         public float lifetime = 8f;
+        // Opening-volley multiplier captured once at Spawn (below), applied exactly once at
+        // Detonate and forwarded unmodified to every target and static keg the splash reaches
+        // — never recomputed from mutable turn state at Detonate time, so a shell's minutes-
+        // long ballistic arc (the battery fires on its own reload clock, not the volley gate)
+        // cannot pick up a different scale than the one active when it left the muzzle.
+        private float sourceMultiplier = 1f;
 
         private bool detonated;
         private Rigidbody2D rb;
@@ -453,6 +459,7 @@ namespace CastleBusters
             shell.damage = damage;
             shell.splashRadius = splashRadius;
             shell.isPlayerShell = isPlayerShell;
+            shell.sourceMultiplier = GameManager.CaptureDamageMultiplier(isPlayerShell);
             shell.rb = body;
 
             // Attached after the collider-matched scale above, because the trail sizes its
@@ -501,6 +508,9 @@ namespace CastleBusters
             if (detonated) return;
             detonated = true;
             Vector2 at = transform.position;
+            // Applied once, here, from the multiplier captured at Spawn — never re-derived
+            // from the turn active at the moment this shell happens to land.
+            float outgoingDamage = OneShotSiegeRules.ApplyDamageMultiplier(damage, sourceMultiplier);
 
             var units = UnitController.ActiveOrScene;
             for (int i = 0; i < units.Count; i++)
@@ -508,7 +518,7 @@ namespace CastleBusters
                 var u = units[i];
                 if (u == null || u.isPlayerUnit == isPlayerShell || u.CurrentState == UnitState.Dead) continue;
                 if (Vector2.Distance(at, u.transform.position) > splashRadius) continue;
-                u.TakeDamage(damage, isPlayerShell);
+                u.TakeDamage(outgoingDamage, isPlayerShell, sourceMultiplier);
             }
 
             var blocks = DestructibleBlock.Active;
@@ -519,7 +529,7 @@ namespace CastleBusters
                 var castle = b.GetComponentInParent<CastleController>();
                 if (castle != null && castle.isPlayerCastle == isPlayerShell) continue;
                 if (Vector2.Distance(at, b.transform.position) > splashRadius) continue;
-                b.TakeDamage(damage, isPlayerShell);
+                b.TakeDamage(outgoingDamage, isPlayerShell, sourceMultiplier);
             }
 
             // Static battlefield kegs have no UnitController/HP. Cannon splash still owns
@@ -528,7 +538,7 @@ namespace CastleBusters
             {
                 if (explosive == null || explosive.GetComponent<UnitController>() != null) continue;
                 if (Vector2.Distance(at, explosive.transform.position) > splashRadius) continue;
-                explosive.SetDamageOwner(isPlayerShell);
+                explosive.SetDamageContext(isPlayerShell, sourceMultiplier);
                 explosive.Explode();
             }
 

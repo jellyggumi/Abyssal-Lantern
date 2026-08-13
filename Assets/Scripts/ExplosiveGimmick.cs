@@ -31,12 +31,33 @@ namespace CastleBusters
         // Cached sibling body: OnDestroy previously did a GetComponent per destruction.
         private DestructibleBlock cachedBlock;
         private bool? damageFromPlayer;
+        // Captured once at the moment this detonation's cause was decided (arrow/unit impact,
+        // cannon splash, chain-reacting neighbor, or DestructibleBlock.TakeDamage transferring
+        // context before a melee/arrow/cannon kill) and never recomputed from mutable turn
+        // state here at explode time. Defaults to 1 so untouched/environmental detonations
+        // (fall-through-floor Update below, or a bare Explode() call) apply no scaling.
+        private float sourceMultiplier = 1f;
 
-        /// <summary>Assigns the side that caused this detonation so delayed chains keep ownership.</summary>
-        public void SetDamageOwner(bool? isPlayer)
+        /// <summary>
+        /// Assigns the side + opening-volley multiplier that caused this detonation, captured
+        /// once by the caller at action/projectile creation, so delayed chains keep both the
+        /// ownership and the origin scale. sourceMultiplier defaults to 1 for the (still
+        /// supported) owner-only call shape.
+        /// </summary>
+        public void SetDamageContext(bool? isPlayer, float sourceMultiplier = 1f)
         {
             damageFromPlayer = isPlayer;
+            this.sourceMultiplier = sourceMultiplier;
         }
+        /// <summary>
+        /// Rebinds the damageable field-keg body after GameManager normalizes a shared prefab
+        /// instance. The same prefab remains unbound when used as a launched UnitController.
+        /// </summary>
+        public void BindDestructibleBlock()
+        {
+            cachedBlock = GetComponent<DestructibleBlock>();
+        }
+
 
 
         // Also called (idempotently) from ApplyTemporaryPotencyMultiplier: a barrel that gets
@@ -214,13 +235,15 @@ namespace CastleBusters
             if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.075f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.45f, 0.2f);
 
+            float outgoingDamage = OneShotSiegeRules.ApplyDamageMultiplier(explosionDamage, sourceMultiplier);
+
             var blocks = DestructibleBlock.ActiveOrScene;
             for (int i = blocks.Count - 1; i >= 0; i--)
             {
                 var block = blocks[i];
                 if (block != null && block.gameObject != gameObject && Vector2.Distance(transform.position, block.transform.position) <= explosionRadius)
                 {
-                    block.TakeDamage(explosionDamage, damageFromPlayer);
+                    block.TakeDamage(outgoingDamage, damageFromPlayer, sourceMultiplier);
                 }
             }
 
@@ -230,7 +253,7 @@ namespace CastleBusters
                 var unit = units[i];
                 if (unit != null && Vector2.Distance(transform.position, unit.transform.position) <= explosionRadius)
                 {
-                    unit.TakeDamage(explosionDamage, damageFromPlayer);
+                    unit.TakeDamage(outgoingDamage, damageFromPlayer, sourceMultiplier);
                 }
             }
 
@@ -241,7 +264,7 @@ namespace CastleBusters
                 if (other == null || other == this || other.hasExploded) continue;
                 if (other.GetComponent<UnitController>() != null) continue;
                 if (Vector2.Distance(transform.position, other.transform.position) > explosionRadius) continue;
-                other.SetDamageOwner(damageFromPlayer);
+                other.SetDamageContext(damageFromPlayer, sourceMultiplier);
                 other.Explode();
             }
 

@@ -78,8 +78,9 @@ namespace CastleBusters
     /// <summary>
     /// Explicit input values for the repeatable siege pacing measurement.  This is deliberately
     /// data-only: scene physics can use these values, but visual systems must not alter a result.
-    /// Damage per shot is <c>baseShotDamage * automaticProjectileMultiplier * aimQuality</c> and
-    /// one keep's durability is <c>wallBlockCount * wallBlockHp + coreHp</c>.
+    /// Damage per shot is <c>baseShotDamage * automaticProjectileMultiplier *
+    /// openingVolleyMultiplier * aimQuality</c>; one keep's durability is
+    /// <c>wallBlockCount * wallBlockHp + coreHp</c>.
     /// </summary>
     public sealed class SiegeBalanceSettings
     {
@@ -239,7 +240,8 @@ namespace CastleBusters
 
                 aimQuality = Mathf.Clamp01(aimQuality);
                 float projectileMultiplier = AutomaticProjectileMultipliers[(turns / 2) % AutomaticProjectileMultipliers.Length];
-                float damage = settings.baseShotDamage * projectileMultiplier * aimQuality;
+                float damage = settings.baseShotDamage * projectileMultiplier *
+                               OneShotSiegeRules.OpeningVolleyDamageMultiplier(turns) * aimQuality;
 
                 if ((turns & 1) == 0) enemyKeep -= damage;
                 else playerKeep -= damage;

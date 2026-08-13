@@ -174,6 +174,28 @@ namespace CastleBusters
         public float TurnTimeRemaining => turnTimer;
         public int TurnCount => turnCount;
         public bool EnforcesOneShotTurns => enforceOneShotTurns;
+        /// <summary>
+        /// Pure capture boundary for the one-shot opening compensation. Call exactly once at
+        /// action or projectile creation, after the player's shot has been committed, never at
+        /// impact. Only player-owned damage from that committed opening volley receives the
+        /// reduction; enemy, unowned, pre-commit, and later-turn damage remain at full strength.
+        /// The returned multiplier must be carried by the caller through every delayed
+        /// projectile, fuse, and chained explosion, then applied with the pure
+        /// <see cref="OneShotSiegeRules.ApplyDamageMultiplier"/> at each eventual impact.
+        /// </summary>
+        public static float CaptureDamageMultiplier(bool? damageFromPlayer)
+        {
+            var gameManager = Instance;
+            if (gameManager == null || !gameManager.EnforcesOneShotTurns ||
+                damageFromPlayer != true || !gameManager.IsPlayerTurn ||
+                !gameManager.oneShotTurnGate.ShotCommitted)
+            {
+                return 1f;
+            }
+
+            return OneShotSiegeRules.OpeningVolleyDamageMultiplier(gameManager.TurnCount);
+        }
+
 
         /// <summary>Called by launchers immediately before a projectile is instantiated.</summary>
         public bool TryCommitTurnShot()
@@ -1077,36 +1099,37 @@ namespace CastleBusters
 
         private GameObject SpawnExplosiveBarrel(Vector3 position)
         {
-            if (explosiveBarrelPrefab != null) return Instantiate(explosiveBarrelPrefab, position, Quaternion.identity);
+            GameObject barrel;
+            if (explosiveBarrelPrefab != null)
+            {
+                barrel = Instantiate(explosiveBarrelPrefab, position, Quaternion.identity);
+            }
+            else
+            {
+                barrel = new GameObject("ExplosiveBarrel") { transform = { position = position } };
+                // SpriteRenderer added bare: ExplosiveGimmick.Awake() immediately assigns the
+                // real powder-keg art and recomputes scale/collider from it.
+                barrel.AddComponent<SpriteRenderer>();
+                barrel.AddComponent<BoxCollider2D>().size = new Vector2(1f, 1f);
+            }
 
-            var barrel = new GameObject("ExplosiveBarrel") { transform = { position = position } };
-            // SpriteRenderer added bare: ExplosiveGimmick.Awake() immediately assigns the
-            // real powder-keg art (GimmickSpriteLibrary Barrel) and recomputes scale/collider
-            // from it, so any sprite/color set here is discarded before the first frame
-            // renders. DestructibleBlock.Awake() runs first but no-ops (blockData is null
-            // until ApplyBlockData is called explicitly), so it never touches the sprite.
-            barrel.AddComponent<SpriteRenderer>();
-            barrel.AddComponent<BoxCollider2D>().size = new Vector2(1f, 1f);
-            var rb = barrel.AddComponent<Rigidbody2D>();
+            // The shared prefab is also the launched/purchased barrel, where LaunchManager adds
+            // UnitController and X must stay free for its trajectory. Normalize only this
+            // pre-placed field-keg instance rather than changing the shared asset.
+            var rb = barrel.GetComponent<Rigidbody2D>() ?? barrel.AddComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.mass = 2.0f;
-            // Freeze X (2026-08-13). A keg is authored at a position chosen for its blast
-            // clearance to the nearest core — and then bodies shoved it. Measured live: the
-            // ±5.8 keg walked to −7.13, i.e. 1.33u COREWARD (never away: units advance from
-            // the muzzle side, so the shove has a direction), landing 2.18u from a core with
-            // a 2.2u blast and splashing it for 80 with nobody aiming at anything.
-            // Chasing that with a bigger authored margin is unwinnable — drift has no bound.
-            // Freezing X makes placement safety a property of the layout instead of a race
-            // against physics. Y stays free, because a keg whose support is destroyed SHOULD
-            // fall: that collapse is real siege play, and falling cannot change its distance
-            // to a core.
+            // A field keg is authored at a position chosen for blast clearance. Freeze X so
+            // units cannot shove it coreward; keep Y free so destroyed support still drops it.
             rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
 
-            var block = barrel.AddComponent<DestructibleBlock>();
+            var block = barrel.GetComponent<DestructibleBlock>() ?? barrel.AddComponent<DestructibleBlock>();
             block.maxHP = block.currentHP = 20f;
             block.scoreValue = 50;
-            var exp = barrel.AddComponent<ExplosiveGimmick>();
-            exp.targetWorldSize = 1.7f; // Scaled up by 1.41x (from 1.2f to 1.7f)
+
+            var explosive = barrel.GetComponent<ExplosiveGimmick>() ?? barrel.AddComponent<ExplosiveGimmick>();
+            explosive.targetWorldSize = 1.7f;
+            explosive.BindDestructibleBlock();
             return barrel;
         }
 
@@ -2430,6 +2453,16 @@ namespace CastleBusters
         private static int seriesEnemyWins;
         private static int seriesGamesPlayed;
         private static int seriesScoreTotal;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetRuntimeSessionState()
+        {
+            PendingStage = StageId.Stage1;
+            webtoonIntroShown = false;
+            pendingStageInterlude = false;
+            skipIntroOnce = false;
+            ResetSeries();
+        }
 
         private static void ResetSeries()
         {

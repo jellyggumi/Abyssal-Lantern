@@ -190,5 +190,55 @@ namespace CastleBusters.Tests
                 "a soldier wider than ~1.5u re-opens the muzzle-footprint defect family: it " +
                 "starts overlapping neighbouring board furniture the moment it spawns");
         }
+
+        [Test]
+        public void SpawnFieldBarrel_ShippedPrefab_IsNormalizedToFallbackGameplayContract()
+        {
+            var prefab = LoadPrefab("Assets/Prefabs/ExplosiveBarrel.prefab");
+            var managerObject = new GameObject("BarrelPrefabParityGameManager")
+            {
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            managerObject.SetActive(false);
+            GameObject spawned = null;
+
+            try
+            {
+                var gameManager = managerObject.AddComponent<GameManager>();
+                gameManager.explosiveBarrelPrefab = prefab;
+
+                spawned = gameManager.SpawnFieldBarrel(new Vector3(123f, 45f, 0f));
+
+                Assert.That(spawned, Is.Not.Null,
+                    "SpawnFieldBarrel must return the shipped prefab instance it created.");
+
+                var block = spawned.GetComponent<DestructibleBlock>();
+                Assert.That(block, Is.Not.Null,
+                    "A field Barrel must be damageable regardless of whether it came from the prefab or fallback path.");
+                Assert.That(block.maxHP, Is.EqualTo(20f),
+                    "The prefab path must normalize the Barrel to the fallback's 20 maximum HP.");
+                Assert.That(block.currentHP, Is.EqualTo(20f),
+                    "The prefab path must normalize the live Barrel to full 20 HP.");
+                Assert.That(block.scoreValue, Is.EqualTo(50),
+                    "Destroying a prefab-backed field Barrel must award the same 50 score as the fallback.");
+
+                var body = spawned.GetComponent<Rigidbody2D>();
+                Assert.That(body, Is.Not.Null,
+                    "A field Barrel must retain the physical body used by collapse and impact gameplay.");
+                Assert.That(body.mass, Is.EqualTo(2f),
+                    "The prefab path must normalize Barrel mass to the fallback's 2 units.");
+                Assert.That(body.constraints, Is.EqualTo(
+                        RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation),
+                    "A field Barrel must freeze horizontal drift and rotation while leaving vertical collapse legal.");
+
+                Assert.That(spawned.GetComponent<ExplosiveGimmick>(), Is.Not.Null,
+                    "A field Barrel must retain its explosion behavior after prefab normalization.");
+            }
+            finally
+            {
+                if (spawned != null) Object.DestroyImmediate(spawned);
+                Object.DestroyImmediate(managerObject);
+            }
+        }
     }
 }

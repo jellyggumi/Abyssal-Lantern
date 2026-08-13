@@ -4,6 +4,14 @@ Verification notes and per-pass history, moved out of the README on 2026-08-11 t
 front page a game introduction. Nothing here was deleted; entries are newest first as they
 were written.
 
+### PR #44 hero-growth, HUD, opening damage ownership, and regression closure (2026-08-13)
+
+- Hero Growth now carries its independent side stacks across games in one best-of-three series and resets them on rematch, title return, stage selection, fresh runtime boot, and the next series after a decided result.
+- Gameplay HUD construction now uses the canonical HUD canvas and preserves its scale floor, preventing alternate-canvas ownership and undersized runtime scaling.
+- Opening-volley first-mover compensation now captures the player-owned 0.5 damage context when an action is committed or a deploy is created, then applies it at impact. Committed melee, arrows, cannon splash, launched-barrel fuse, and launched-unit → production field-keg handoff preserve ownership through delayed impacts, chained explosions, and turn handoff.
+- The balance model now places fixed-first, alternating, and first-mover conditions inside the 45–55 band. G2 remains **FAIL** because no symmetric ≥20-match runtime win-rate sample exists; route correctness is not a full-match balance claim.
+- Deterministic regression evidence is green: EditMode **45/45** (`TestResults/pr44-final-editmode-v2.xml`), damage-route PlayMode **12/12** (`TestResults/pr44-damage-hardened-v4.xml`), and full focused PlayMode **54/54** (`TestResults/pr44-final-playmode-v4.xml`). This entry records PR #44 behavior only; merge and deployment are not claimed.
+
 ## Validation
 - C# project build was verified with `dotnet build CastleBusters.csproj --no-restore` (plus the Editor and Tests assemblies) — 0 errors.
 - Unity MCP verification (native tools against the live Editor): `tests-run` EditMode — **44/44 passed**; `tests-run` PlayMode `AutoPlayTest` — intro state asserted, `BeginSiege()` handoff asserted at timescale 1, capture sequence completed (`IntroCapture.png`, `GameplayCapture_1..6.png`).
