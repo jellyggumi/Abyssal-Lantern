@@ -342,11 +342,19 @@ namespace CastleBusters
         }
 
         // The placeholder sprites were authored at 32 px/unit; art imported from Resources
-        // arrives at 100. Normalising to the original world widths keeps every tuned
-        // offset (muzzle height, trunnion pivot, barrel reach) valid — presentation may
-        // not silently resize a gameplay object.
-        private const float BaseWorldWidth = 28f / 32f;
-        private const float BarrelWorldWidth = 30f / 32f;
+        // arrives at 100. Normalising to these world widths keeps every tuned offset
+        // (muzzle height, trunnion pivot, barrel reach) valid — presentation may not
+        // silently resize a gameplay object.
+        //
+        // CannonArtScale 1.0 → 1.5 (2026-08-13 request: 포 크기 확대). The battery reads as
+        // the heaviest thing a turn can buy, so at one block wide it was losing that fight
+        // against the soldiers it costs a whole turn to replace. Scaling the ART and the
+        // trunnion offset together keeps the barrel on its pivot; CannonRules.MuzzleHeight
+        // is deliberately NOT scaled — the shell's origin is ballistics, and moving it
+        // would retune every solved arc.
+        private const float CannonArtScale = 1.5f;
+        private const float BaseWorldWidth = (28f / 32f) * CannonArtScale;
+        private const float BarrelWorldWidth = (30f / 32f) * CannonArtScale;
 
         private static void FitSpriteWidth(SpriteRenderer renderer, float targetWorldWidth)
         {

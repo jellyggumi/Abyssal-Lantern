@@ -170,8 +170,8 @@ namespace CastleBusters
         // ±StageLayout.launchApronAbsX at Start() for the active stage. Defaults mirror
         // Stage1 (GameManager.LaunchApronAbsX=14.5) so EditMode tests — which never call
         // GameManager.Start() — keep seeing the original Stage1 ring positions.
-        public static float PlayerRingX = -14.5f;
-        public static float EnemyRingX = 14.5f;
+        public static float PlayerRingX = -17.0f;
+        public static float EnemyRingX = 17.0f;
         public const float RingY = 0.5f;
 
         public static bool IsInsideRing(Vector2 position)

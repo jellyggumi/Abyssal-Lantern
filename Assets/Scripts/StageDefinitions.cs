@@ -109,12 +109,12 @@ namespace CastleBusters
         // must be a total no-op. This is the fixed baseline Stage2/Stage3 are judged against.
         public static readonly StageLayout Stage1 = new StageLayout(
             StageId.Stage1, "SIEGE PLAINS / 공성 평원",
-            launchApronAbsX: 14.5f,
-            groundHalfWidth: 20f,
-            groundAnchorAbsX: 10f,
-            gateAbsX: 15f,
-            windCapEnd: 6.5f,
-            cameraDesiredWorldWidth: 39f,
+            launchApronAbsX: 17.0f,
+            groundHalfWidth: 23f,
+            groundAnchorAbsX: 11.5f,
+            gateAbsX: 17.5f,
+            windCapEnd: 7.0f,
+            cameraDesiredWorldWidth: 45f,
             cameraMaxHalfHeight: 11.2f,
             barrelPositions: GameManager.InitialBarrelPositions,
             wallHeightBlocks: 3,
@@ -149,12 +149,12 @@ namespace CastleBusters
         // background tint reinforces the desert mood.
         public static readonly StageLayout Stage2 = new StageLayout(
             StageId.Stage2, "DESOLATE DUNES / 황량한 모래언덕",
-            launchApronAbsX: 13.5f,
-            groundHalfWidth: 19f,
-            groundAnchorAbsX: 9.5f,
-            gateAbsX: 14f,
-            windCapEnd: 6.2f,
-            cameraDesiredWorldWidth: 36.3f,
+            launchApronAbsX: 15.8f,
+            groundHalfWidth: 21.8f,
+            groundAnchorAbsX: 10.9f,
+            gateAbsX: 16.3f,
+            windCapEnd: 6.7f,
+            cameraDesiredWorldWidth: 41.9f,
             cameraMaxHalfHeight: 10.4f,
             barrelPositions: System.Array.Empty<Vector3>(),
             wallHeightBlocks: 4,
@@ -188,19 +188,24 @@ namespace CastleBusters
         // Fiery reddish background tint reinforces the volcanic mood.
         public static readonly StageLayout Stage3 = new StageLayout(
             StageId.Stage3, "VOLCANIC ABYSS / 화산 심연",
-            launchApronAbsX: 18.5f,
-            groundHalfWidth: 24f,
-            groundAnchorAbsX: 12f,
-            gateAbsX: 19f,
-            windCapEnd: 7.2f,
-            cameraDesiredWorldWidth: 47f,
+            launchApronAbsX: 21.5f,
+            groundHalfWidth: 27f,
+            groundAnchorAbsX: 13.5f,
+            gateAbsX: 22f,
+            windCapEnd: 7.7f,
+            cameraDesiredWorldWidth: 54f,
             cameraMaxHalfHeight: 13.5f,
+            // Wing kegs only, both outside the keep entirely. The inner pair was ±11.5 —
+            // 2.5u from a core with a 2.2u blast, the same too-thin margin that let Stage1's
+            // kegs splash their own core once bodies shoved them (2026-08-13). ±12.5 clears
+            // the core by 3.5u and the muzzle by 9.0u; ±16.5 clears the muzzle by 5.0u.
+            // Neither sits in a wall column (|x| ∈ [3.5, 7.5]), so nothing ejects them.
             barrelPositions: new[]
             {
-                new Vector3(-14.0f, 0.5f, 0f),
-                new Vector3(-11.5f, 0.5f, 0f),
-                new Vector3(11.5f, 0.5f, 0f),
-                new Vector3(14.0f, 0.5f, 0f),
+                new Vector3(-16.5f, 0.5f, 0f),
+                new Vector3(-12.5f, 0.5f, 0f),
+                new Vector3(12.5f, 0.5f, 0f),
+                new Vector3(16.5f, 0.5f, 0f),
             },
             // Campaign redistribution: fortress height now rises 2 -> 3 -> 4 across the
             // sequential unlock order. Stage3 previously kept Stage1's 2 — the only stage

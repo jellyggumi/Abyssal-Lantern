@@ -110,9 +110,14 @@ namespace CastleBusters.Tests
         [Test]
         public void LaunchRing_RejectsMuzzlePositions_AllowsMidfield()
         {
-            Assert.IsTrue(LaunchRingRules.IsInsideRing(new Vector2(-14.5f, 0.5f)), "player muzzle center");
-            Assert.IsTrue(LaunchRingRules.IsInsideRing(new Vector2(14.5f, 0.5f)), "enemy muzzle center");
-            Assert.IsTrue(LaunchRingRules.IsInsideRing(new Vector2(-12.0f, 0.5f)), "inside ring radius");
+            // Derived, not literal: the board widened (apron 14.5 → 17.0, 2026-08-13) and a
+            // hard-coded 14.5 pinned the OLD board rather than the rule under test.
+            float apron = LaunchRingRules.EnemyRingX;
+            float inside = apron - (LaunchRingRules.RingRadius * 0.7f);
+
+            Assert.IsTrue(LaunchRingRules.IsInsideRing(new Vector2(-apron, 0.5f)), "player muzzle center");
+            Assert.IsTrue(LaunchRingRules.IsInsideRing(new Vector2(apron, 0.5f)), "enemy muzzle center");
+            Assert.IsTrue(LaunchRingRules.IsInsideRing(new Vector2(-inside, 0.5f)), "inside ring radius");
             Assert.IsFalse(LaunchRingRules.IsInsideRing(new Vector2(0f, 0.5f)), "bridge center is free");
             Assert.IsFalse(LaunchRingRules.IsInsideRing(new Vector2(-7.5f, 0.5f)), "wall slot is free");
             Assert.IsFalse(LaunchRingRules.IsInsideRing(new Vector2(7.5f, 0.5f)), "enemy wall slot is free");

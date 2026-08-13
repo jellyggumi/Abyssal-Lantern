@@ -1687,18 +1687,34 @@ namespace CastleBusters.Tests
 
                     Physics2D.SyncTransforms();
 
-                    Assert.AreEqual(0.48f, instance.transform.localScale.x, 0.0001f,
-                        $"{prefabPath} must render at the enlarged 0.48 visual scale.");
-                    Assert.AreEqual(0.48f, instance.transform.localScale.y, 0.0001f,
-                        $"{prefabPath} must render uniformly at the enlarged visual scale.");
+                    // The contract is now authored world size, not a sprite multiplier
+                    // (2026-08-13). Three different sprites reach one soldier — prefab
+                    // placeholder, generated frame on disk, atlas-packed frame at runtime —
+                    // so a pinned localScale pinned whichever sprite the editor happened to
+                    // hold. What must hold is the BODY: it draws at bodyWorldHeight and
+                    // collides at bodyWorldHeight × coverage, on every one of those paths.
+                    // Measured against the sprite the sizing path RESOLVES (the generated
+                    // frame the animator will display), not the prefab's placeholder — the
+                    // placeholder is exactly the stale art the old rule was sizing against.
+                    Sprite resolved = UnitController.ResolveDisplayedSprite(unit, spriteRenderer);
+                    Assert.IsNotNull(resolved, $"{prefabPath} must resolve a body sprite to fit.");
+                    float renderedHeight = resolved.bounds.size.y * instance.transform.localScale.y;
+                    Assert.AreEqual(unit.bodyWorldHeight, renderedHeight, 0.001f,
+                        $"{prefabPath} must draw at its authored world height whatever sprite is current.");
+                    Assert.AreEqual(instance.transform.localScale.x, instance.transform.localScale.y, 0.0001f,
+                        $"{prefabPath} must scale uniformly.");
 
-                    Vector2 expectedOldWorldFootprint =
-                        spriteRenderer.sprite.bounds.size * (0.42f * unit.colliderVisualCoverage);
+                    Vector2 expectedFootprint = UnitController.BodyWorldColliderSize(
+                        unit.bodyWorldHeight, unit.colliderVisualCoverage);
                     Vector2 actualWorldFootprint = box.bounds.size;
-                    Assert.AreEqual(expectedOldWorldFootprint.x, actualWorldFootprint.x, 0.0001f,
-                        $"{prefabPath} collider width must preserve the old 0.42-scale sprite coverage.");
-                    Assert.AreEqual(expectedOldWorldFootprint.y, actualWorldFootprint.y, 0.0001f,
-                        $"{prefabPath} collider height must preserve the old 0.42-scale sprite coverage.");
+                    Assert.AreEqual(expectedFootprint.x, actualWorldFootprint.x, 0.0001f,
+                        $"{prefabPath} collider width must equal the authored body footprint.");
+                    Assert.AreEqual(expectedFootprint.y, actualWorldFootprint.y, 0.0001f,
+                        $"{prefabPath} collider height must equal the authored body footprint.");
+
+                    // The whole point of the change: hitbox and picture are the same object.
+                    Assert.That(actualWorldFootprint.y, Is.EqualTo(renderedHeight * unit.colliderVisualCoverage).Within(0.001f),
+                        $"{prefabPath} hitbox must track the rendered art, not a stale sprite scale.");
                 }
                 finally
                 {

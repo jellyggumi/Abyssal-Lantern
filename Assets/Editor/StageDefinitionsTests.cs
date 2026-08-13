@@ -30,12 +30,18 @@ namespace CastleBusters.Tests
             var layout = StageDefinitions.Stage1;
             Assert.AreEqual(StageId.Stage1, layout.id);
             Assert.IsFalse(layout.locked, "Stage1 must always be selectable");
-            Assert.AreEqual(14.5f, layout.launchApronAbsX, 0.001f, "Stage1 launch apron must match the original GameManager.LaunchApronAbsX default");
-            Assert.AreEqual(20f, layout.groundHalfWidth, 0.001f);
-            Assert.AreEqual(10f, layout.groundAnchorAbsX, 0.001f);
-            Assert.AreEqual(15f, layout.gateAbsX, 0.001f);
-            Assert.AreEqual(6.5f, layout.windCapEnd, 0.001f);
-            Assert.AreEqual(39f, layout.cameraDesiredWorldWidth, 0.001f);
+            // Refrozen to the widened board (2026-08-13: 맵 폭 확대). Stage1 is the baseline
+            // every other stage is judged against, so the freeze tracks current intent —
+            // what it still guarantees is that GameManager's mirrored default and this
+            // table cannot drift apart.
+            Assert.AreEqual(17.0f, layout.launchApronAbsX, 0.001f, "Stage1 launch apron (widened board)");
+            Assert.AreEqual(GameManager.LaunchApronAbsX, layout.launchApronAbsX, 0.001f,
+                "Stage1 apron must stay identical to the GameManager default it mirrors");
+            Assert.AreEqual(23f, layout.groundHalfWidth, 0.001f);
+            Assert.AreEqual(11.5f, layout.groundAnchorAbsX, 0.001f);
+            Assert.AreEqual(17.5f, layout.gateAbsX, 0.001f);
+            Assert.AreEqual(7.0f, layout.windCapEnd, 0.001f);
+            Assert.AreEqual(45f, layout.cameraDesiredWorldWidth, 0.001f);
             Assert.AreEqual(11.2f, layout.cameraMaxHalfHeight, 0.001f);
             // Moved from 2 deliberately, not drifted: keeps were raised a course across every
             // stage to pull a decided match toward the five-minute target (MatchLengthModel).
@@ -45,11 +51,14 @@ namespace CastleBusters.Tests
             Assert.AreEqual(3, layout.mutateEveryNTurns, "Stage1 mutation cadence must stay at the original every-3rd-turn");
 
             // Stage1's starting kegs must be the exact frozen GameManager fixture, not a
-            // stage-owned copy that could silently drift from it. Two, not the original
-            // four: the ±11 pair sat inside the launched Knight's muzzle spawn footprint
-            // and self-detonated the player's first volley (defect fix 2026-08-12 —
-            // KegPlacementSafetyTests now derives that band from the actual prefabs).
-            Assert.AreEqual(2, layout.barrelPositions.Length, "Stage1 ships the two wall-line kegs");
+            // stage-owned copy that could silently drift from it. Zero of them, matching
+            // Stage2: the keep courses own |x| ∈ [3.5, 7.5] and the core spans ~7.85–10.15,
+            // so no legal static column exists between the wall line and the core. Kegs
+            // authored there were depenetrated coreward and splashed their own core twice
+            // (2026-08-12 ±11 at the muzzle, 2026-08-13 ±6.5/±5.8 into the core). Kegs now
+            // arrive through the field director's midfield lanes instead.
+            Assert.AreEqual(0, layout.barrelPositions.Length,
+                "Stage1 ships no starting kegs — hazards are earned mid-match");
             Assert.AreEqual(GameManager.InitialBarrelPositions.Length, layout.barrelPositions.Length);
             for (int i = 0; i < layout.barrelPositions.Length; i++)
             {

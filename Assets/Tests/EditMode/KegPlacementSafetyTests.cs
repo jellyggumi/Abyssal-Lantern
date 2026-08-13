@@ -34,9 +34,18 @@ namespace CastleBusters.Tests
         /// settling) with headroom: kegs are dynamic bodies and combat shoves them.</summary>
         private const float DriftMargin = 0.8f;
 
-        /// <summary>Rest-position margin over the blast radius. Deliberately smaller than
-        /// DriftMargin: drifted-then-detonated is earned play, resting splash is not.</summary>
-        private const float BlastRestMargin = 0.25f;
+        /// <summary>
+        /// Rest-position margin over the blast radius.
+        ///
+        /// Was 0.25u until 2026-08-13, on the reasoning that "drifted-then-detonated is
+        /// earned play, resting splash is not". A live PlayMode probe disproved the split:
+        /// the ±6.5 keg rested 2.5u from a 2.2u blast — inside this margin — and a friendly
+        /// GARRISON ARCHER's stray arrow detonated it into its own core for 80. Nobody
+        /// earned that; the keg simply sat close enough that ordinary crossfire reached it.
+        /// A resting keg must clear the blast by the same drift allowance the muzzle band
+        /// uses, because combat moves kegs whether or not anyone aimed at them.
+        /// </summary>
+        private const float BlastRestMargin = DriftMargin;
 
         private static GameObject LoadPrefab(string path)
         {
@@ -124,19 +133,62 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void LaunchedBodyFootprint_MatchesTheLiveDefectTraceScale()
+        public void EveryStage_KegsRestOutsideEveryKeepWallColumn()
         {
-            // The footprint band only protects the muzzle if the resolver keeps reporting
-            // the REAL launched collider. The live trace measured the Knight at 2.64u
-            // half-width (5.28u collider vs 0.93u rendered art — the documented mismatch).
-            // If this shrinks, someone has done the collider/art rebalance: delete this
-            // guard together with that work, and re-derive every keg position, because the
-            // footprint band and possibly the removed ±11 wing kegs become renegotiable.
-            Bounds knight = UnitController.EstimateLaunchedWorldColliderBounds(
-                LoadPrefab("Assets/Prefabs/Knight.prefab"));
-            Assert.That(knight.extents.x, Is.EqualTo(2.64f).Within(0.15f),
-                "Knight launched half-width moved — the keg placement bands were derived " +
-                "against 2.64u (live trace 2026-08-12). Re-derive stage keg positions.");
+            // The invariant this suite was missing, and the one that actually broke twice:
+            // a keg authored INSIDE a wall column is depenetrated out of it on the first
+            // physics step, and the wall stands between the muzzle and the core — so the
+            // ejection is always COREWARD. Measured live 2026-08-13: kegs authored at ±6.5
+            // and at ±5.8 both came to rest at −7.13, 2.18u from a 2.2u blast, and splashed
+            // their own core for 80 with nobody aiming at anything. Clearance measured at
+            // spawn is meaningless if the spawn point is inside masonry.
+            float kegHalf = KegHalfWidth();
+
+            foreach (var stage in new[] { StageDefinitions.Stage1, StageDefinitions.Stage2, StageDefinitions.Stage3 })
+            {
+                foreach (var keg in stage.barrelPositions)
+                {
+                    foreach (var course in GameManager.KeepProfile)
+                    {
+                        foreach (float columnX in new[] { -course.AbsX, course.AbsX })
+                        {
+                            // Blocks are 1u wide, so a column owns ±0.5u around its centre.
+                            float required = 0.5f + kegHalf;
+                            Assert.Greater(Mathf.Abs(keg.x - columnX), required,
+                                $"{stage.displayName}: keg at x={keg.x} overlaps the keep column at " +
+                                $"x={columnX} (needs >{required:F2}u). Physics will eject it toward the " +
+                                "core and its blast will land on masonry nobody attacked.");
+                        }
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void LaunchedBodyFootprint_EqualsTheAuthoredBodyAndStaysUnderOneBlock()
+        {
+            // History: this guard was written on 2026-08-12 pinning 2.64u, the half-width a
+            // Knight ACTUALLY had when its collider was derived from whichever sprite was
+            // current — 5.28u of hitbox behind 0.93u of art, which is how a launched knight
+            // detonated a keg 3.3u away on frame 1. The 2026-08-13 pass replaced that rule
+            // with an authored body size, so the guard now pins the property that matters:
+            // the launched footprint IS the authored body, and a soldier is not wider than
+            // the wall blocks it is thrown at.
+            var prefab = LoadPrefab("Assets/Prefabs/Knight.prefab");
+            var unit = prefab.GetComponent<UnitController>();
+            Assert.IsNotNull(unit, "the knight prefab must carry its UnitController");
+
+            Bounds knight = UnitController.EstimateLaunchedWorldColliderBounds(prefab);
+            Vector2 authored = UnitController.BodyWorldColliderSize(
+                unit.bodyWorldHeight, unit.colliderVisualCoverage);
+
+            Assert.That(knight.size.x, Is.EqualTo(authored.x).Within(0.001f),
+                "the launched footprint must equal the authored body — no sprite may resize it");
+            Assert.That(knight.size.y, Is.EqualTo(authored.y).Within(0.001f),
+                "the launched footprint must equal the authored body — no sprite may resize it");
+            Assert.That(knight.size.x, Is.LessThan(1.5f),
+                "a soldier wider than ~1.5u re-opens the muzzle-footprint defect family: it " +
+                "starts overlapping neighbouring board furniture the moment it spawns");
         }
     }
 }
