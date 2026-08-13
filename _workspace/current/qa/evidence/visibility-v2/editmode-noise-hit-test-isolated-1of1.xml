@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.4589042">
+  <test-suite type="TestSuite" id="1000" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="444" result="Passed" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.458904" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1240" name="Assembly-CSharp-Editor.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.426216" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="62368" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1241" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.419751" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1242" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.415232" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1092" name="GamePlayTests" fullname="CastleBusters.Tests.GamePlayTests" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" testcasecount="97" result="Passed" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.389615" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1148" name="CreateGround_AnchorsBottomRowsAndFlanks_KeepsBridgeBreakable" fullname="CastleBusters.Tests.GamePlayTests.CreateGround_AnchorsBottomRowsAndFlanks_KeepsBridgeBreakable" methodname="CreateGround_AnchorsBottomRowsAndFlanks_KeepsBridgeBreakable" classname="CastleBusters.Tests.GamePlayTests" runstate="Runnable" seed="1128303191" result="Passed" start-time="2026-08-13 12:47:16Z" end-time="2026-08-13 12:47:16Z" duration="0.347218" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<color=#ff6b6b>fail:</color> [21:47:16:6203] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

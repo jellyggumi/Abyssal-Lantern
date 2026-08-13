@@ -246,6 +246,27 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>
+        /// The same roster vocabulary, keyed by the runtime unit rather than the card.
+        ///
+        /// A projectile in flight knows its <see cref="UnitType"/> but not the card that paid
+        /// for it, and the readback line has to name it in the words the HUD already uses.
+        /// Routed through the card overload so there is exactly one place these nouns live —
+        /// the alternative leaked raw asset names to the player once already ("EXPLOSIVEBARREL
+        /// 준비", task #48).
+        /// </summary>
+        public static string DisplayName(UnitType type)
+        {
+            switch (type)
+            {
+                case UnitType.Knight: return DisplayName(DeployCard.Knight);
+                case UnitType.Archer: return DisplayName(DeployCard.Archer);
+                case UnitType.Cannon: return DisplayName(DeployCard.Cannon);
+                case UnitType.Barrel: return DisplayName(DeployCard.Barrel);
+                default: return "부대";
+            }
+        }
+
         /// <summary>The Cannon is an installation: it is placed, never launched (§2).</summary>
         public static bool IsDeployOnly(DeployCard card) => card == DeployCard.Cannon;
 

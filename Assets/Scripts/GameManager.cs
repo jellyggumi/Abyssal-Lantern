@@ -1777,6 +1777,10 @@ namespace CastleBusters
             // block/castle object identity; a scene reload spawns fresh objects, so stale keys
             // from the previous match are dead weight — clear them with the same cadence.
             CastleRuinFx.ResetForNewMatch();
+            // Same cadence, same reason: a spent arc describes a board that no longer exists.
+            // SubsystemRegistration fires on domain init but NOT on the scene-reload rematch,
+            // so the previous match's traces would otherwise open the new one.
+            ShotTraceDirector.ResetForNewMatch();
             BrickPlacementController.Instance?.ClearPending();
             // Same as above: a new game inside a running series inherits the loot the
             // player already earned. ResetSeries() is the only thing that clears it.
@@ -2224,6 +2228,12 @@ namespace CastleBusters
                 settleTimer += Time.deltaTime;
                 yield return null;
             }
+
+            // Worms fixes this timing: damage is reported "after any player's turn, when all
+            // movement has ceased". Sealing here — past the flight watchdog, the post-impact
+            // hold, and the settle loop — is what lets the readback state a finished fact
+            // instead of racing the collapse it describes (design/visibility-spec-v2.md §2).
+            ShotTraceDirector.Seal();
 
             if (lm != null) lm.enabled = true;
             isResolvingTurn = false;

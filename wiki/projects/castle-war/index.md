@@ -31,6 +31,14 @@ owner action. Public beat: WebGL build on the
   so generation ran on Higgsfield (`flux_2` + `flux_kontext`); stages 1–2 are
   image-conditioned edits of stage 0, so all three are the same castle.
   See [[wiki/projects/castle-war/siege-art]].
+- **Visibility: post-action readback** (2026-08-13): the answer to *"적이 어떻게
+  쏘는지 안 보인다"* flipped from adding UI to keeping the last shot readable — the
+  arc persists past impact, an impact marker ends it, and one line reports what the
+  turn cost. A survey of twelve titles refuted the draft's pre-action telegraph
+  (0.9s window, zero enemy-turn inputs) and its seven new UI elements (a documented
+  "icon mess" failure path); six of those placeholders were deleted. Precedent is
+  Rampart (1990) — structurally the same game, no telegraph at all.
+  See [[wiki/projects/castle-war/visibility-readback]].
 - Cycle: Stage 1 concept pivot — see
   `_workspace/current/production/task-manifest.md` (live) for tasks.
 - Rule file: repository `CLAUDE.md` (AGENTS.md points to it).
@@ -44,6 +52,8 @@ owner action. Public beat: WebGL build on the
   [[wiki/projects/castle-war/deployment-economy]]
 - Launcher + castle keep art (새총, 성, 3단계 파괴 애니메이션):
   [[wiki/projects/castle-war/siege-art]]
+- Visibility / post-action readback (궤적 잔존, 착탄 마커, 턴 판독 한 줄):
+  [[wiki/projects/castle-war/visibility-readback]]
 - Legacy history: [[castle-busters-phase-1-analysis]],
   [[castle-busters-phase-2-completion]] (under `wiki/reports/`)
 
