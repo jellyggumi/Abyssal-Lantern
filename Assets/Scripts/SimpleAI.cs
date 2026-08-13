@@ -15,6 +15,18 @@ namespace CastleBusters
 
         public void TakeTurn() => StartCoroutine(PerformLaunch());
 
+        // The enemy apron had no visual at all — AILaunchPoint carries one component, its
+        // Transform. That absence, not the aim timing, is why the enemy's shot had no author:
+        // there was nothing on screen to attribute it to.
+        private LauncherView launcherView;
+
+        private LauncherView ResolveLauncherView()
+        {
+            if (launcherView != null) return launcherView;
+            launcherView = LauncherView.CreateEnemyLauncher(launchPoint);
+            return launcherView;
+        }
+
         private Vector2 GetLaunchPosition()
         {
             Vector2 anchor = launchPoint != null ? (Vector2)launchPoint.position : (Vector2)transform.position;
@@ -25,10 +37,20 @@ namespace CastleBusters
         {
             if (unitPrefabs == null || unitPrefabs.Length == 0) { GameManager.Instance?.OnUnitLaunched(null); yield break; }
 
-            // Half of the 0.9s AI beat (GameManager.ExecuteAITurn holds the other 0.4s) —
-            // enough of a pause to read as the enemy taking aim, not a wait.
-            yield return new WaitForSeconds(0.5f);
+            // Aim FIRST, then wait. The order used to be reversed, and the comment on the wait
+            // already described what it was supposed to be — "enough of a pause to read as the
+            // enemy taking aim" — while the aim was computed after it. So the window existed and
+            // was empty; the intent was right and the sequence was wrong. Nothing is added to the
+            // 0.9s beat here, which matters because the games that spend more AI time are the
+            // games whose players cut it back (GameSpot faulted Worms Armageddon for exactly
+            // that), and this project already reclaimed 2.1s of dead air and reinvested it in
+            // more turns. `.survey/siege-impact-vfx-and-attack-motion/synthesis.md` §2
             var targetPos = FindTargetPosition() + new Vector2(Random.Range(-errorOffsetRange, errorOffsetRange), Random.Range(-errorOffsetRange, errorOffsetRange));
+
+            // Now the pause has something to show: the machine loads while it aims.
+            ResolveLauncherView()?.BeginWindup();
+            yield return new WaitForSeconds(0.5f);
+
             var gameManager = GameManager.Instance;
 
             var automaticPrefab = gameManager != null && gameManager.EnforcesOneShotTurns
@@ -72,6 +94,18 @@ namespace CastleBusters
             UnitController.SnapColliderAboveGround(unitGo, launchPoint != null ? launchPoint.position.y : transform.position.y);
             var unit = unitGo.GetComponent<UnitController>();
             if (unit != null) { unit.isPlayerUnit = false; unit.Launch(velocity); GameManager.Instance?.RegisterAIUnit(unit); }
+
+            // The machine kicks, and the shot is finally audible. NotifyLaunch used to be called
+            // from the player's LaunchManager only, so every enemy volley was silent — and an
+            // auditory signal reaches central processing in 8-10ms against 20-40ms for a visual
+            // one, which makes this the cheapest attribution channel on the board.
+            launcherView?.NotifyFired(velocity);
+            float powerPercent = velocity.magnitude / Mathf.Max(0.01f, maxLaunchVelocity) * 100f;
+            float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
+            if (angle < 0f) angle += 360f;
+            GameplayUxDirector.NotifyEnemyLaunch(
+                unit != null ? DeploymentRules.DisplayName(unit.unitType) : "부대", powerPercent, angle);
+
             GameManager.Instance?.OnUnitLaunched(unit);
         }
 

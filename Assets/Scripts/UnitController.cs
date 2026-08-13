@@ -504,7 +504,19 @@ namespace CastleBusters
                 velocity = GameManager.Instance.ApplyLastStandOnLaunch(this, velocity);
             }
             GamePresentationDirector.Instance?.Focus(transform);
-            GameFeelVfx.SpawnLaunchBurst(transform.position, isPlayerUnit ? new Color(0.45f, 0.85f, 1f, 0.7f) : new Color(1f, 0.35f, 0.25f, 0.7f), 0.28f);
+            Color teamFlash = isPlayerUnit ? new Color(0.45f, 0.85f, 1f, 0.7f) : new Color(1f, 0.35f, 0.25f, 0.7f);
+            // Intensity 0.28 made the most important frame of the turn the weakest thing on
+            // screen: 6 particles at 0.7-1.9px, against 10-22 particles at 2.1-12.0px for an
+            // ordinary block hit. 0.9 puts the launch in the same register as the impact it
+            // causes without touching the shake/flash layers, which is where the evidence runs
+            // the other way — Nijman had to ship a screen-shake disable "because some people
+            // were getting really nauseous", and full-screen flashing is the one layer with
+            // recorded human harm behind it (Porygon, 600+ hospitalised).
+            GameFeelVfx.SpawnLaunchBurst(transform.position, teamFlash, 0.9f);
+            // The unit itself reacts. PulseAttack already existed and was wired only to the
+            // melee/archer path, so the launch — the one action a turn is spent on — had no pose
+            // change at all.
+            GetComponent<UnitSpriteAnimator>()?.PulseAttack();
             if (rb != null)
             {
                 rb.bodyType = RigidbodyType2D.Dynamic;

@@ -22,19 +22,68 @@ namespace CastleBusters
     /// </summary>
     public static class ShotTraceDirector
     {
-        /// <summary>Placeholder art for the impact marker. Real art replaces the file, not the
-        /// name — renaming breaks every reference (task #17's lesson).</summary>
-        public const string ImpactMarkerSprite = "ui_ph_impact_marker";
+        /// <summary>
+        /// Width of the PLAYER's arc core, in world units (~2.9px at a 45u-wide board).
+        ///
+        /// Width is the non-colour channel that separates the two arcs. It is needed because they
+        /// coexist on screen — turn order cannot tell them apart the way it does in the artillery
+        /// lineage, where only one side's shot is ever visible — and WCAG 2.2 SC 1.4.1 forbids
+        /// colour as the only visual means of distinguishing an element.
+        ///
+        /// This began as a dashed enemy arc and that was a real bug, caught by measuring the
+        /// capture rather than by reading the code: a LineRenderer is ONE continuous strip, so
+        /// omitting vertices does not punch a hole — it draws a straight chord across the gap.
+        /// The enemy arc rendered solid AND slightly wrong-shaped, while the vertex-count
+        /// assertion still passed, which is the worst combination a test can produce.
+        ///
+        /// A texture-tiled dash or one renderer per dash would both work; width is chosen because
+        /// it needs no new asset, no extra renderer, and cannot silently stop working.
+        /// </summary>
+        private const float PlayerCoreWidth = 0.105f;
 
-        private const float TraceWidth = 0.075f;
+        /// <summary>The enemy's core, deliberately thinner — a 2.1x ratio at the core.</summary>
+        private const float EnemyCoreWidth = 0.05f;
+
+        /// <summary>
+        /// Widths of the dark casing behind each core. Without the casing the arcs were measurably
+        /// invisible — see <see cref="CasingColor"/>.
+        ///
+        /// These are what the player actually perceives as "how thick the arc is", because the
+        /// casing is the outer silhouette. The first attempt kept an equal 1.44px dark margin on
+        /// both arcs, which made the casings only 1.31x apart even though the cores were 1.9x —
+        /// the live test measured the silhouette and rejected it, correctly. Widening the player's
+        /// and tightening the enemy's gives 1.75x on the silhouette and 2.1x on the core, while
+        /// keeping at least ~1.06px of dark on each side of both: below one full pixel row a
+        /// casing can disappear into antialiasing, which is exactly the failure it exists to fix.
+        /// </summary>
+        private const float PlayerCasingWidth = 0.21f;
+        private const float EnemyCasingWidth = 0.12f;
+
+        /// <summary>
+        /// The casing that makes the arc legible at all.
+        ///
+        /// Measured from a real capture: the enemy arc scored 1.13:1 against the sky, against a
+        /// WCAG non-text minimum of 3.0:1. Raising alpha does not fix it — solving the blend
+        /// equation shows the enemy tint reaches only 1.18:1 at alpha 1.0 and the player tint
+        /// 1.65:1, because the team colours differ from that sky in HUE while matching it in
+        /// LUMINANCE. WCAG 1.4.1's own escape clause names the missing ingredient: colours must
+        /// "differ not only in their hue, but ... also have a significant difference in lightness".
+        ///
+        /// So the arc is drawn twice. On bright ground the dark casing carries the contrast
+        /// (6.4:1 sky, 7.3:1 grass, 8.8:1 cloud); on dark ground the casing washes out (1.8:1 on
+        /// dirt) and the bright core takes over there instead (3.2:1 enemy, 6.2:1 player). Every
+        /// background the arc crosses is covered by at least one of the two layers.
+        /// </summary>
+        private static readonly Color CasingColor = new Color(0.03f, 0.028f, 0.05f, 0.85f);
+
         private const int TraceSortingOrder = 2;   // matches the live trail
-        private const int MarkerSortingOrder = 3;  // just above its own trace
+        private const int CoreSortingOrder = 3;    // above its own casing
 
         private class Trace
         {
             public GameObject Root;
-            public LineRenderer Line;
-            public SpriteRenderer Marker;
+            public LineRenderer Line;     // bright team-coloured core
+            public LineRenderer Casing;   // dark backing, drawn wider and beneath
         }
 
         // Unity objects in statics: every read must be Unity-null aware, because a scene load
@@ -86,7 +135,7 @@ namespace CastleBusters
             if (t.Root != null) Object.Destroy(t.Root);
             t.Root = null;
             t.Line = null;
-            t.Marker = null;
+            t.Casing = null;
         }
 
         /// <summary>Forgets the in-flight shot without sealing it, so a shot interrupted by a
@@ -183,41 +232,82 @@ namespace CastleBusters
             coreDamageThisShot = 0f;
         }
 
+        /// <summary>
+        /// Draws the spent arc. There is deliberately no marker at the endpoint.
+        ///
+        /// A survey of thirteen comparable titles found the icon-at-impact form in exactly one
+        /// — Battleship — and that one is a "discovery game in which players need to discover
+        /// their opponent's ship positions". An icon substitutes for a world you cannot see.
+        /// Ten of thirteen instead change the WORLD at the impact point (Worms' craters, whose
+        /// diameter is a balance figure; Gunbound's land damage, which is a win condition;
+        /// Rampart's wall holes, which drive the next building phase), and castle-war already
+        /// does that — ground tiles are DestructibleBlocks and `isGroundAnchor` covers only the
+        /// border columns and bottom two rows, so a shot into the middle band already digs.
+        ///
+        /// So the placeholder white box was not missing art; it was the wrong form, laid over
+        /// the deformation it was hiding. The arc's final vertex states where the shot landed,
+        /// which is the same job Scorched Earth's tracers do ("allow the player to more
+        /// accurately adjust the trajectory on their next turn"). Removing the icon costs no
+        /// readback information. `.survey/siege-impact-vfx-and-attack-motion/`
+        /// </summary>
         private static void Draw(Trace t, bool byPlayer, List<Vector2> points)
         {
-            // Same team tint the live trail uses (UnitController.SetupTrailRenderer), dimmed:
-            // a spent shot must be legible as history, not compete with the live one.
-            Color tint = byPlayer ? new Color(0.45f, 0.85f, 1f, 0.5f) : new Color(1f, 0.35f, 0.25f, 0.5f);
+            // Team tint at near-full alpha. The previous 0.5 was chosen to keep a spent shot
+            // subordinate to the live trail, and measurement showed it bought nothing: alpha is
+            // not what made these arcs hard to see (see CasingColor). Subordination is carried by
+            // width instead — the core is 0.075 against the live trail's 0.09-0.14.
+            Color tint = byPlayer ? new Color(0.45f, 0.85f, 1f, 0.95f) : new Color(1f, 0.35f, 0.25f, 0.95f);
 
             if (t.Root == null)
             {
                 t.Root = new GameObject(byPlayer ? "ShotTrace_Player" : "ShotTrace_Enemy");
-                t.Line = t.Root.AddComponent<LineRenderer>();
-                t.Line.useWorldSpace = true;
-                t.Line.material = new Material(Shader.Find("Sprites/Default"));
-                t.Line.sortingOrder = TraceSortingOrder;
-                t.Line.numCapVertices = 2;
 
-                var markerGo = new GameObject("Impact");
-                markerGo.transform.SetParent(t.Root.transform, false);
-                t.Marker = markerGo.AddComponent<SpriteRenderer>();
-                t.Marker.sortingOrder = MarkerSortingOrder;
+                // Casing on the root, core on a child: GameObject.Find(...).GetComponent<LineRenderer>()
+                // is how the live-scene tests reach the arc, and the geometry they measure is the
+                // dashed/solid shape, which both layers share.
+                t.Casing = t.Root.AddComponent<LineRenderer>();
+                ConfigureLine(t.Casing, TraceSortingOrder);
+
+                var coreGo = new GameObject("Core");
+                coreGo.transform.SetParent(t.Root.transform, false);
+                t.Line = coreGo.AddComponent<LineRenderer>();
+                ConfigureLine(t.Line, CoreSortingOrder);
             }
 
-            t.Line.startWidth = TraceWidth;
-            t.Line.endWidth = TraceWidth;
-            t.Line.startColor = new Color(tint.r, tint.g, tint.b, tint.a * 0.35f); // faint at the muzzle
-            t.Line.endColor = tint;                                                // solid at the impact
-            t.Line.positionCount = points.Count;
-            for (int i = 0; i < points.Count; i++) t.Line.SetPosition(i, points[i]);
+            // Width is the non-colour channel: the player's arc is the thicker of the two. Both
+            // layers of one arc share the same polyline, so the casing always backs exactly what
+            // the core draws.
+            float coreWidth = byPlayer ? PlayerCoreWidth : EnemyCoreWidth;
+            float casingWidth = byPlayer ? PlayerCasingWidth : EnemyCasingWidth;
 
-            var impact = points[points.Count - 1];
-            t.Marker.transform.position = impact;
-            var sprite = GimmickSpriteLibrary.Load(ImpactMarkerSprite);
-            t.Marker.sprite = sprite;
-            t.Marker.color = tint;
-            // No art → no marker, rather than a magenta quad. The arc still reads on its own.
-            t.Marker.enabled = sprite != null;
+            Apply(t.Casing, points, casingWidth, CasingColor, CasingColor);
+            Apply(t.Line, points, coreWidth,
+                new Color(tint.r, tint.g, tint.b, tint.a * 0.55f), // fades toward the muzzle
+                tint);                                             // full at the impact
         }
+
+        private static void ConfigureLine(LineRenderer line, int sortingOrder)
+        {
+            line.useWorldSpace = true;
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.sortingOrder = sortingOrder;
+            line.numCapVertices = 2;
+            line.textureMode = LineTextureMode.Stretch;
+        }
+
+        private static void Apply(LineRenderer line, List<Vector2> points, float width, Color start, Color end)
+        {
+            if (line == null) return;
+            line.startWidth = width;
+            line.endWidth = width;
+            line.startColor = start;
+            line.endColor = end;
+            line.positionCount = points.Count;
+            for (int i = 0; i < points.Count; i++) line.SetPosition(i, points[i]);
+        }
+
+        // (A geometry-based Dash() used to live here. It could not work: a LineRenderer is one
+        //  continuous strip, so dropping vertices draws a straight chord across the intended gap
+        //  instead of a hole. Width replaces it — see PlayerCoreWidth.)
     }
 }

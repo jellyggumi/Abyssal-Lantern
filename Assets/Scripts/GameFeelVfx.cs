@@ -626,6 +626,24 @@ namespace CastleBusters
             Instance?.ShowLaunchToast(unitName, powerPercent, angle);
         }
 
+        /// <summary>
+        /// The ENEMY fired. Separate from <see cref="NotifyLaunch"/> because the two must not be
+        /// confusable: the player's volley earns a combo credit and a friendly-blue toast, and
+        /// crediting the enemy's shot to the player's combo would inflate a reward statistic with
+        /// incoming fire.
+        ///
+        /// Exists at all because enemy launches were completely silent — NotifyLaunch is only
+        /// reachable from the player's LaunchManager. Sound is the cheapest attribution channel
+        /// available: an auditory signal reaches central processing in 8-10ms where a visual one
+        /// takes 20-40ms. `.survey/siege-impact-vfx-and-attack-motion/attack-motion.md` §1.3
+        /// </summary>
+        public static void NotifyEnemyLaunch(string unitName, float powerPercent, float angle)
+        {
+            GameFeelVfx.PlayLaunchSfx(powerPercent);
+            Instance?.ShowToast($"적 발사: {unitName}  {powerPercent:F0}% / {angle:F0}°",
+                new Color(1f, 0.55f, 0.38f, 1f), 1.35f);
+        }
+
         public static void NotifyDamage(Vector3 position, float amount, bool isCore)
         {
             if (Instance == null) return;
