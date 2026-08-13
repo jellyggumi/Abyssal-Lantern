@@ -33,12 +33,23 @@ owner action. Public beat: WebGL build on the
   See [[wiki/projects/castle-war/siege-art]].
 - **Visibility: post-action readback** (2026-08-13): the answer to *"적이 어떻게
   쏘는지 안 보인다"* flipped from adding UI to keeping the last shot readable — the
-  arc persists past impact, an impact marker ends it, and one line reports what the
+  arc persists past impact (the marker that first ended it was cut a day later — see
+  below) and one line reports what the
   turn cost. A survey of twelve titles refuted the draft's pre-action telegraph
   (0.9s window, zero enemy-turn inputs) and its seven new UI elements (a documented
   "icon mess" failure path); six of those placeholders were deleted. Precedent is
   Rampart (1990) — structurally the same game, no telegraph at all.
   See [[wiki/projects/castle-war/visibility-readback]].
+- **Attack motion + impact VFX** (2026-08-14): two reports — a white box on impact,
+  and no way to tell an attack was happening — had one cause. Everything needed was
+  already present and unwired: PulseAttack never fired on launch, the enemy apron was
+  a bare Transform, the player's launcher hid for the whole enemy turn, and enemy
+  volleys were silent. The impact icon turned out to be a form error (1/13 in the
+  sample, and that one hides its board) and was deleted, so **zero placeholders
+  remain**. Net screen elements: **−1**. Verification caught two defects in the
+  freshly shipped arcs: they measured 1.13:1 against the sky (alpha cannot fix a
+  hue-only difference) and the dashed enemy arc never rendered at all.
+  See [[wiki/projects/castle-war/attack-motion-and-impact-vfx]].
 - Cycle: Stage 1 concept pivot — see
   `_workspace/current/production/task-manifest.md` (live) for tasks.
 - Rule file: repository `CLAUDE.md` (AGENTS.md points to it).
@@ -52,8 +63,10 @@ owner action. Public beat: WebGL build on the
   [[wiki/projects/castle-war/deployment-economy]]
 - Launcher + castle keep art (새총, 성, 3단계 파괴 애니메이션):
   [[wiki/projects/castle-war/siege-art]]
-- Visibility / post-action readback (궤적 잔존, 착탄 마커, 턴 판독 한 줄):
+- Visibility / post-action readback (궤적 잔존, 턴 판독 한 줄):
   [[wiki/projects/castle-war/visibility-readback]]
+- Attack motion + impact VFX (양측 발사기, 반동·와인드업, 아크 카싱):
+  [[wiki/projects/castle-war/attack-motion-and-impact-vfx]]
 - Legacy history: [[castle-busters-phase-1-analysis]],
   [[castle-busters-phase-2-completion]] (under `wiki/reports/`)
 
