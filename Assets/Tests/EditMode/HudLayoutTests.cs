@@ -37,6 +37,33 @@ namespace CastleBusters.Tests
                 "the Last Stand card overlaps the selection row; whichever draws last steals the tap");
         }
 
+        static float StripTop => SiegeForecastStrip.StripY + SiegeForecastStrip.StripHeight / 2f;
+        static float StripBottom => SiegeForecastStrip.StripY - SiegeForecastStrip.StripHeight / 2f;
+
+        [Test]
+        public void ForecastStrip_StaysOnScreenAndClearOfTheLastStandCard()
+        {
+            // The strip took the row the one-shot loop vacated. The audit's warning about that
+            // band was explicit: its bounds are constants, but nothing checked what moved in.
+            // D-009 was exactly that failure — a card animated, reported interactable, and sat
+            // off-screen — so the new occupant gets the same guard the cards have.
+            Assert.Greater(StripBottom, 0f,
+                "the forecast strip hangs off the bottom edge");
+            Assert.Greater(LastStandBottom, StripTop,
+                "the forecast strip overlaps the Last Stand card");
+        }
+
+        [Test]
+        public void ForecastStrip_FitsInsideTheVacatedSelectionRow()
+        {
+            // It should occupy that row, not merely avoid collisions somewhere else on screen:
+            // if it drifts out, it lands on whatever else the bottom band holds.
+            float rowBottom = GameManager.SelectionRowY - GameManager.SelectionRowCardHeight / 2f;
+            Assert.GreaterOrEqual(StripBottom, rowBottom - 0.01f,
+                "the strip sits below the selection row band");
+            Assert.LessOrEqual(StripTop, RowTop + 0.01f,
+                "the strip sits above the selection row band");
+        }
     }
 
     /// <summary>

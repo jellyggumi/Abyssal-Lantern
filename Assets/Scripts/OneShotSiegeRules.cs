@@ -38,6 +38,27 @@ namespace CastleBusters
         public static float OpeningVolleyDamageMultiplier(int completedTurns)
             => completedTurns <= 0 ? OpeningVolleyDamageScale : 1f;
 
+        /// <summary>Player-facing name. The rule owns this so the HUD cannot drift from the
+        /// projectile actually loaded, which is the whole point of telegraphing it.</summary>
+        public static string DisplayName(Projectile projectile)
+        {
+            switch (projectile)
+            {
+                case Projectile.Archer: return "궁수";
+                case Projectile.Barrel: return "화약통";
+                default: return "기사";
+            }
+        }
+
+        /// <summary>
+        /// What the NEXT turn will load. The cycle is fully deterministic, so this is knowable
+        /// and was knowable all along — it simply had no reader. Without it the player learns
+        /// their own weapon only as their turn opens and never learns the enemy's at all, which
+        /// makes a predictable rule read as a random one.
+        /// </summary>
+        public static Projectile ProjectileForNextTurn(int completedTurns)
+            => ProjectileForTurn(Mathf.Max(0, completedTurns) + 1);
+
         /// <summary>
         /// Pure apply boundary: multiplies damage by an already-captured multiplier. Never
         /// reads GameManager or any other mutable state — callers must capture the multiplier

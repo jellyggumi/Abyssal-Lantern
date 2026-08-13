@@ -547,6 +547,10 @@ namespace CastleBusters
             if (Application.isPlaying)
             {
                 StageWeather.Ensure().Apply(currentStage);
+                // Tells the player what is loaded, what answers it, and how far along the match
+                // is — three facts the one-shot loop knows exactly and never showed anyone
+                // (qa/ux-defect-list.md UX-004, UX-005).
+                SiegeForecastStrip.Ensure();
             }
         }
 
