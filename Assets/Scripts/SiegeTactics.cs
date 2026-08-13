@@ -42,6 +42,31 @@ namespace CastleBusters
         public const float MaxY = 8f;
         public const float MaxAbsX = 10.5f; // inside the keeps' band, well clear of both rings
 
+        /// <summary>
+        /// Whether the brick designation window is actually open right now.
+        ///
+        /// This exists because the HUD used to assert the window was open by writing a literal
+        /// string. `SiegeAlarmSystem` told the player "클릭: 벽돌 예약" on every enemy turn while
+        /// <see cref="BrickPlacementController"/> returned early in the one-shot loop and ate the
+        /// click — the screen issued an instruction the game refused to honour. A survey of twelve
+        /// comparable titles found zero that display a non-functional instruction
+        /// (`.survey/siege-visibility-and-telegraph/`), so this is a defect class of its own, not
+        /// a polish item.
+        ///
+        /// Stated as a predicate rather than deleted text so the guidance comes BACK on its own
+        /// when the feature is re-enabled. Deleting the literal would have left the opposite
+        /// staleness: a working window nobody is told about.
+        /// </summary>
+        /// <param name="enforcesOneShotTurns">One shot per turn — placement verbs are suspended.</param>
+        /// <param name="isOpponentTurn">Designation happens on the OPPONENT's turn only.</param>
+        /// <param name="deployModeArmed">Deploy owns the click while armed; both listen for the same button.</param>
+        public static bool DesignationOpen(bool enforcesOneShotTurns, bool isOpponentTurn, bool deployModeArmed)
+        {
+            if (enforcesOneShotTurns) return false;
+            if (!isOpponentTurn) return false;
+            return !deployModeArmed;
+        }
+
         public static bool CanPlace(Vector2 position)
         {
             if (LaunchRingRules.IsInsideRing(position)) return false;

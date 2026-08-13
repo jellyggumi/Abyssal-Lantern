@@ -394,6 +394,11 @@ namespace CastleBusters
             // (D-004) — 205 terrain tiles falling from one blast is not a reward event, and
             // counting them would drown the keep-collapse signal G4/G7 actually measure.
             if (!isGroundAnchor) TelemetrySink.BlockDestroyed(collapseChainDepth);
+            // Same exclusion, same reason, for the player-facing readback: a shot that dropped
+            // three wall blocks and forty terrain tiles reads as "성벽 3블록", because the wall
+            // is what the next shot has to get through. Cores are counted as core damage, not
+            // as a block (CastleCoreGimmick taps NoteCoreDamage directly).
+            if (!isGroundAnchor && !(this is CastleCoreGimmick)) ShotTraceDirector.NoteBlockDestroyed();
             // Resolve and award ownership before CastleController can end the match.
             // EndGame snapshots the current score into the results card, so a fatal block
             // must be credited before that transition.

@@ -546,6 +546,20 @@ namespace CastleBusters
             selectedUnitPortrait.gameObject.SetActive(sprite != null);
         }
 
+        /// <summary>
+        /// <c>GameManager.WaitAndEndTurn</c> disables this component while a volley resolves, and
+        /// a disabled Update cannot retract what it drew. Without this the aim guidance freezes
+        /// on screen for the whole resolution — the same false-instruction defect as UX-003b,
+        /// just arriving through the component lifecycle instead of the turn state.
+        /// </summary>
+        private void OnDisable()
+        {
+            if (controlGuideText != null && controlGuideText.gameObject.activeSelf)
+            {
+                controlGuideText.gameObject.SetActive(false);
+            }
+        }
+
         private void Update()
         {
             // Aim and deploy are mutually exclusive verbs: while placement is armed the same
@@ -604,6 +618,21 @@ namespace CastleBusters
             {
                 launchPointHintLabel.gameObject.SetActive(isPlayerTurn && !isDragging && !deployArmed);
                 launchPointHintLabel.transform.localPosition = new Vector3(0f, 1.45f + Mathf.Sin(Time.time * 7f) * 0.16f, 0f);
+            }
+
+            // UX-003b: this line reads "아무 곳이나 당겨 발사", and it used to stay on screen
+            // through the enemy turn while three separate paths refused the drag. An instruction
+            // the game will not honour is not guidance, it is a trap — and the survey of twelve
+            // comparable titles found none that ships one (`design/visibility-spec-v2.md` §5-A).
+            // Gated on the same `canAim` the input path uses, so the label and the rule cannot
+            // disagree. Deploy mode keeps it: there the line describes placement, which IS live.
+            if (controlGuideText != null)
+            {
+                bool guidanceIsTrue = canAim || deployArmed;
+                if (controlGuideText.gameObject.activeSelf != guidanceIsTrue)
+                {
+                    controlGuideText.gameObject.SetActive(guidanceIsTrue);
+                }
             }
 
             if (weakPullFlashTimer > 0f)
