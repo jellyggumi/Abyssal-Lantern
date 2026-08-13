@@ -39,6 +39,8 @@ namespace CastleBusters
         public const string Stage2SpikeTrapDormant = "gimmick_stage2_spiketrap_dormant";
         public const string Stage2SpikeTrapArmed = "gimmick_stage2_spiketrap_armed";
         public const string Stage3FrostVent = "gimmick_stage3_frost_vent";
+        /// <summary>Wordless drag-back gesture cue (first-play coach, drag-from-anywhere).</summary>
+        public const string DragGesture = "ui_drag_gesture";
 
         private static readonly Dictionary<string, Sprite> cache = new Dictionary<string, Sprite>();
 

@@ -36,6 +36,7 @@ namespace CastleBusters
         private TextMeshProUGUI instructionText;
         private RectTransform bannerRect;
         private CanvasGroup bannerGroup;
+        private Image gestureIcon;
         private TextMeshPro worldArrow;
         private float stepEnteredAt;
         private float timerHeldSeconds;
@@ -167,6 +168,15 @@ namespace CastleBusters
             if (stepText != null) stepText.text = $"첫 출정 안내  {FirstPlayGuide.StepLabel(guide.Current)}";
             if (instructionText != null) instructionText.text = FirstPlayGuide.Instruction(guide.Current);
             if (bannerGroup != null) bannerGroup.alpha = 0f; // fade back in per step
+            if (gestureIcon != null)
+            {
+                // The drag steps carry the wordless gesture pictogram: a hand pulling
+                // back is readable by a player who cannot (or will not) read the line.
+                bool showGesture = gestureIcon.sprite != null
+                    && (guide.Current == FirstPlayGuide.Step.Draw
+                        || guide.Current == FirstPlayGuide.Step.Release);
+                gestureIcon.gameObject.SetActive(showGesture);
+            }
             PositionArrowForStep();
         }
 
@@ -318,6 +328,22 @@ namespace CastleBusters
             instructionText.alignment = TextAlignmentOptions.Left;
             instructionText.fontStyle = FontStyles.Bold;
 
+            // Wordless gesture pictogram (Higgsfield flux_2, ui_drag_gesture): sits to the
+            // right of the instruction on the drag steps. Sprite-less builds simply never
+            // activate it — the coach stays fully functional as text.
+            var gestureGo = new GameObject("GestureIcon");
+            gestureGo.transform.SetParent(banner.transform, false);
+            gestureIcon = gestureGo.AddComponent<Image>();
+            gestureIcon.sprite = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.DragGesture);
+            gestureIcon.preserveAspect = true;
+            gestureIcon.raycastTarget = false;
+            var gestureRt = gestureGo.GetComponent<RectTransform>();
+            gestureRt.anchorMin = gestureRt.anchorMax = new Vector2(1f, 0.5f);
+            gestureRt.pivot = new Vector2(1f, 0.5f);
+            gestureRt.sizeDelta = new Vector2(72f, 72f);
+            gestureRt.anchoredPosition = new Vector2(-140f, 0f);
+            gestureGo.SetActive(false);
+
             // Skip: small, explicit, top-right of the banner. The only raycast target the
             // coach owns — the banner itself must never eat a board press.
             var skipGo = new GameObject("SkipButton");
@@ -338,7 +364,7 @@ namespace CastleBusters
             skipLabel.rectTransform.offsetMin = Vector2.zero;
             skipLabel.rectTransform.offsetMax = Vector2.zero;
             skipLabel.alignment = TextAlignmentOptions.Center;
-            skipLabel.text = "건너뛰기 ▸";
+            skipLabel.text = "건너뛰기 ▶";
         }
 
         private static TextMeshProUGUI CreateLabel(Transform parent, string name, float fontSize, Color color)

@@ -216,7 +216,7 @@ namespace CastleBusters
             {
                 // Animated ellipsis: motion in the strip itself proves the game is alive.
                 int dots = 1 + (int)(Time.time * 2.5f) % 3;
-                text = $"볼리 해결 중{new string('.', dots)}"; // no ⚔: glyph missing from base TMP font
+                text = $"볼리 해결 중{new string('.', dots)}"; // dots only: sword glyph missing from base TMP font
                 color = new Color(1f, 0.82f, 0.35f, 1f);
             }
             else

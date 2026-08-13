@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace CastleBusters
 {
@@ -8,7 +9,6 @@ namespace CastleBusters
     {
         [Header("Launch Settings")]
         public Transform launchPoint;
-        public float launchActivationRadius = 3.5f;
         public float maxDragDistance = 4.2f;
         public float launchForceMultiplier = 6f;
         public float maxLaunchVelocity = 25.2f;
@@ -53,20 +53,23 @@ namespace CastleBusters
         // True when the affordance is textured art (slingshot / gate frames) rather than the
         // procedural cyan ring — art must not be tinted, only alpha-pulsed.
         private bool launchPointIndicatorIsArt;
-        private GameObject invalidStartMarkerInstance;
-        private LineRenderer boundaryLine;
-        private const int BoundaryPointCount = 73;
-        private readonly Vector3[] boundaryPoints = new Vector3[BoundaryPointCount];
-        private Vector2 lastBoundaryCenter = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
-        private float lastBoundaryRadius = -1f;
-        private float boundaryFlashTimer = 0f;
+        // Weak-pull coaching flash: colors the guide line back to normal when it expires.
+        private float weakPullFlashTimer = 0f;
         private int trajectoryCollisionMask;
-        private float invalidStartMarkerTimer;
-        private readonly Color boundaryNormalColor = new Color(0.2f, 0.6f, 1f, 0.35f);
-        private readonly Color boundaryFlashColor = new Color(1f, 0.2f, 0.2f, 0.95f);
         private TextMeshProUGUI launchAlertText;
         private TextMeshPro launchPointHintLabel;
-        private string selectedUnitName = "Knight";
+        // Player-facing name (Korean, DeploymentRules.DisplayName vocabulary)...
+        private string selectedUnitName = "기사";
+        // ...and the stable English identifier telemetry aggregates by. Renaming the
+        // display must never fork the analytics key ("기사" vs "Knight" would split every
+        // per-unit aggregate the balance gates read).
+        private string selectedUnitTelemetryName = "Knight";
+        // Portrait of the projectile the turn will fire (playtest feedback: the guide
+        // showed a raw prefab name like EXPLOSIVEBARREL — an image reads instantly).
+        private Image selectedUnitPortrait;
+        // Keyboard aim preview is opt-in per turn: at idle the board stays clean; the
+        // arc+stats appear once the player actually touches an arrow key.
+        private bool keyboardAimTouchedThisTurn;
 
         /// <summary>True while the player is actively drawing the bowstring (drag in progress).</summary>
         public bool IsAiming => isDragging;
@@ -110,12 +113,12 @@ namespace CastleBusters
         {
             if (selectedUnitUsesDeployment)
             {
-                return $"<b>{selectedUnitName.ToUpperInvariant()}</b> 배치 준비  ·  전장 클릭 → 설치";
+                return $"<b>{selectedUnitName}</b> 배치 준비  ·  전장 클릭 → 설치";
             }
 
             // One compact line: the unit cards already carry roster shortcuts, so this guide
             // only preserves readiness plus the launch gesture the player must perform.
-            string guide = $"<b>{selectedUnitName.ToUpperInvariant()}</b> 준비  ·  푸른 링 드래그 → 발사";
+            string guide = $"<b>{selectedUnitName}</b> 준비  ·  아무 곳이나 당겨 발사";
 
             // The one-shot turn may buy an emplacement INSTEAD of its shot, but a player
             // who is never told that will never find it. Only advertised once the breach
@@ -209,7 +212,7 @@ namespace CastleBusters
                 launchPointHintLabel.fontSize = 2.4f;
                 launchPointHintLabel.sortingOrder = 18;
                 launchPointHintLabel.color = new Color(0.75f, 0.95f, 1f, 0.92f);
-                launchPointHintLabel.text = "▼ 여기서 장전 ▼";
+                launchPointHintLabel.text = "▼ 발사 준비 ▼";
             }
 
             if (impactMarkerPrefab != null)
@@ -225,16 +228,6 @@ namespace CastleBusters
                 sr.sortingOrder = 12;
                 go.SetActive(false);
                 impactMarkerInstance = go;
-            }
-
-            if (invalidStartMarkerInstance == null)
-            {
-                var go = new GameObject("InvalidLaunchStartMarker");
-                var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = CreateCircleSprite(0.32f, new Color(1f, 0.1f, 0.05f, 0.82f));
-                sr.sortingOrder = 13;
-                go.SetActive(false);
-                invalidStartMarkerInstance = go;
             }
 
             if (rubberBandLine == null)
@@ -292,11 +285,34 @@ namespace CastleBusters
                     rectTransform.anchorMin = new Vector2(0.02f, 0.02f);
                     rectTransform.anchorMax = new Vector2(0.82f, 0.02f);
                     rectTransform.pivot = new Vector2(0f, 0f);
-                    rectTransform.anchoredPosition = Vector2.zero;
-                    rectTransform.sizeDelta = new Vector2(0f, 72f);
+                    // Text starts past the 64px portrait slot so the two never overprint.
+                    rectTransform.anchoredPosition = new Vector2(76f, 0f);
+                    rectTransform.sizeDelta = new Vector2(-76f, 72f);
 
                     controlGuideText = textComp;
                 }
+            }
+
+            // Projectile portrait (playtest feedback: "발사체 이미지로" — show WHAT fires,
+            // not just its name). Sits in the slot the guide text's 76px inset reserves.
+            if (selectedUnitPortrait == null)
+            {
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas != null)
+                {
+                    var go = new GameObject("SelectedUnitPortrait");
+                    go.transform.SetParent(canvas.transform, false);
+                    selectedUnitPortrait = go.AddComponent<Image>();
+                    selectedUnitPortrait.preserveAspect = true;
+                    selectedUnitPortrait.raycastTarget = false;
+                    var rt = go.GetComponent<RectTransform>();
+                    rt.anchorMin = rt.anchorMax = new Vector2(0.02f, 0.02f);
+                    rt.pivot = new Vector2(0f, 0f);
+                    rt.anchoredPosition = new Vector2(0f, 4f);
+                    rt.sizeDelta = new Vector2(64f, 64f);
+                    go.SetActive(false); // RefreshSelectedUnitPortrait shows it when art exists
+                }
+                RefreshSelectedUnitPortrait();
             }
 
             if (controlGuideText != null)
@@ -331,48 +347,8 @@ namespace CastleBusters
                 }
             }
 
-            if (boundaryLine == null)
-            {
-                var go = new GameObject("DefaultBoundaryLine");
-                go.transform.SetParent(transform);
-                boundaryLine = go.AddComponent<LineRenderer>();
-                boundaryLine.positionCount = 73;
-                boundaryLine.startWidth = 0.10f;
-                boundaryLine.endWidth = 0.10f;
-                boundaryLine.loop = true;
-                boundaryLine.material = new Material(Shader.Find("Sprites/Default"));
-                boundaryLine.startColor = boundaryNormalColor;
-                boundaryLine.endColor = boundaryNormalColor;
-                boundaryLine.sortingOrder = 7;
-                UpdateBoundaryLineGeometry();
-            }
-        }
-
-        private void UpdateBoundaryLineGeometry()
-        {
-            if (boundaryLine == null) return;
-
-            Vector2 center = GetLaunchAnchorPosition();
-            bool shapeChanged = boundaryLine.positionCount != BoundaryPointCount;
-            if (!shapeChanged
-                && center == lastBoundaryCenter
-                && Mathf.Approximately(launchActivationRadius, lastBoundaryRadius))
-            {
-                return;
-            }
-
-            boundaryLine.positionCount = BoundaryPointCount;
-            for (int i = 0; i < BoundaryPointCount; i++)
-            {
-                float angle = i * 5f * Mathf.Deg2Rad;
-                boundaryPoints[i] = new Vector3(
-                    center.x + Mathf.Cos(angle) * launchActivationRadius,
-                    center.y + Mathf.Sin(angle) * launchActivationRadius,
-                    0f);
-            }
-            boundaryLine.SetPositions(boundaryPoints);
-            lastBoundaryCenter = center;
-            lastBoundaryRadius = launchActivationRadius;
+            // No boundary ring: input is drag-from-anywhere, so a circle around the sling
+            // would re-teach the removed "press here" rule the moment it appeared.
         }
 
         private void UpdateLaunchStats(Vector2 velocity)
@@ -460,10 +436,10 @@ namespace CastleBusters
         private void OnDestroy()
         {
             if (impactMarkerInstance != null) Destroy(impactMarkerInstance);
-            if (invalidStartMarkerInstance != null) Destroy(invalidStartMarkerInstance);
             if (launchPointIndicatorInstance != null) Destroy(launchPointIndicatorInstance);
             if (launchStatsText != null && launchStatsText.gameObject.name == "LaunchStatsText") Destroy(launchStatsText.gameObject);
             if (launchAlertText != null && launchAlertText.gameObject.name == "LaunchAlertText") Destroy(launchAlertText.gameObject);
+            if (selectedUnitPortrait != null) Destroy(selectedUnitPortrait.gameObject);
         }
 
         private void Start()
@@ -489,13 +465,20 @@ namespace CastleBusters
         {
             selectedUnitPrefab = unitPrefab;
             selectedUnitUsesDeployment = selectedCard.HasValue && DeploymentRules.IsDeployOnly(selectedCard.Value);
-            selectedUnitName = unitPrefab != null
-                ? ResolveSelectedUnitName(unitPrefab)
-                : selectedCard.HasValue
-                    ? DeploymentRules.DisplayName(selectedCard.Value)
-                    : ResolveSelectedUnitName(null);
+            selectedUnitTelemetryName = ResolveTelemetryName(unitPrefab, selectedCard);
+            selectedUnitName = ResolveDisplayName(unitPrefab, selectedCard);
             selectedLaunchBodyBounds = UnitController.EstimateLaunchedWorldColliderBounds(unitPrefab);
+            // A new selection is a new turn for aiming purposes: the keyboard preview is
+            // re-armed only by the next arrow press, so the board opens each turn clean.
+            keyboardAimTouchedThisTurn = false;
+            if (!isDragging)
+            {
+                if (trajectoryLine != null) trajectoryLine.positionCount = 0;
+                HideLaunchStats();
+                UpdateImpactMarker(false);
+            }
             if (controlGuideText != null) controlGuideText.text = BuildControlGuideText();
+            RefreshSelectedUnitPortrait();
             if (launchPointHintLabel != null)
             {
                 launchPointHintLabel.text = selectedUnitUsesDeployment
@@ -504,19 +487,63 @@ namespace CastleBusters
             }
         }
 
-        private string ResolveSelectedUnitName(GameObject unitPrefab)
+        /// <summary>Stable English analytics key (Telemetry aggregates by string equality).</summary>
+        private static string ResolveTelemetryName(GameObject unitPrefab, DeployCard? selectedCard)
         {
             if (unitPrefab != null && unitPrefab.TryGetComponent<UnitController>(out var unit))
             {
                 return unit.unitType.ToString();
             }
-
+            // The powder-keg projectile prefab carries no UnitController (it gains one at
+            // spawn — see SpawnAndLaunchOne); its gimmick identifies it.
+            if (unitPrefab != null && unitPrefab.GetComponent<ExplosiveGimmick>() != null)
+            {
+                return UnitType.Barrel.ToString();
+            }
+            if (selectedCard.HasValue) return selectedCard.Value.ToString();
             if (unitPrefab != null && !string.IsNullOrWhiteSpace(unitPrefab.name))
             {
                 return unitPrefab.name.Replace("(Clone)", string.Empty).Trim();
             }
-
             return "Unit";
+        }
+
+        /// <summary>
+        /// Player-facing name, always the DeploymentRules Korean vocabulary. The old path
+        /// leaked engine identifiers ("EXPLOSIVEBARREL 준비") whenever the prefab carried no
+        /// UnitController — a raw asset name is developer text, not game text.
+        /// </summary>
+        private static string ResolveDisplayName(GameObject unitPrefab, DeployCard? selectedCard)
+        {
+            if (selectedCard.HasValue) return DeploymentRules.DisplayName(selectedCard.Value);
+            if (unitPrefab != null && unitPrefab.TryGetComponent<UnitController>(out var unit))
+            {
+                switch (unit.unitType)
+                {
+                    case UnitType.Knight: return DeploymentRules.DisplayName(DeployCard.Knight);
+                    case UnitType.Archer: return DeploymentRules.DisplayName(DeployCard.Archer);
+                    case UnitType.Cannon: return DeploymentRules.DisplayName(DeployCard.Cannon);
+                    case UnitType.Barrel: return DeploymentRules.DisplayName(DeployCard.Barrel);
+                }
+            }
+            if (unitPrefab != null && unitPrefab.GetComponent<ExplosiveGimmick>() != null)
+            {
+                return DeploymentRules.DisplayName(DeployCard.Barrel);
+            }
+            return "부대";
+        }
+
+        /// <summary>
+        /// The projectile as an image beside the guide line (playtest feedback: a portrait
+        /// reads instantly where a name must be parsed). Higgsfield art keyed by the same
+        /// English identifier telemetry uses; no art → the icon simply stays hidden.
+        /// </summary>
+        private void RefreshSelectedUnitPortrait()
+        {
+            if (selectedUnitPortrait == null) return;
+            var sprite = HiggsfieldSpriteLibrary.LoadUi(selectedUnitTelemetryName);
+            selectedUnitPortrait.sprite = sprite;
+            selectedUnitPortrait.gameObject.SetActive(sprite != null);
         }
 
         private void Update()
@@ -579,30 +606,10 @@ namespace CastleBusters
                 launchPointHintLabel.transform.localPosition = new Vector3(0f, 1.45f + Mathf.Sin(Time.time * 7f) * 0.16f, 0f);
             }
 
-            UpdateBoundaryLineGeometry();
-
-            if (invalidStartMarkerTimer > 0f)
+            if (weakPullFlashTimer > 0f)
             {
-                invalidStartMarkerTimer -= Time.deltaTime;
-                float pulse = 1f + Mathf.Sin(Time.time * 18f) * 0.25f;
-                if (invalidStartMarkerInstance != null)
-                {
-                    invalidStartMarkerInstance.transform.localScale = Vector3.one * pulse;
-                    if (invalidStartMarkerTimer <= 0f) invalidStartMarkerInstance.SetActive(false);
-                }
-            }
-
-            if (boundaryFlashTimer > 0f)
-            {
-                boundaryFlashTimer -= Time.deltaTime;
-                float t = Mathf.Clamp01(boundaryFlashTimer);
-                Color c = Color.Lerp(boundaryNormalColor, boundaryFlashColor, t);
-                if (boundaryLine != null)
-                {
-                    boundaryLine.startColor = c;
-                    boundaryLine.endColor = c;
-                }
-                if (boundaryFlashTimer <= 0f && controlGuideText != null)
+                weakPullFlashTimer -= Time.deltaTime;
+                if (weakPullFlashTimer <= 0f && controlGuideText != null)
                 {
                     controlGuideText.text = BuildControlGuideText();
                     controlGuideText.color = new Color(0.8f, 0.95f, 1f, 0.95f);
@@ -643,19 +650,30 @@ namespace CastleBusters
         /// Keyboard fallback: arrows nudge angle/power, Space commits the tuned shot.
         /// A pointer click deliberately does NOT fire — committing a launch requires
         /// either the full pull gesture or an explicit Space press, never a bare tap.
+        /// The preview arc + power/angle readout are OPT-IN per turn: at idle they used to
+        /// render permanently at the bottom center ("발사! 파워 60% · 각도 45°" over a dotted
+        /// arc), which playtest feedback read as meaningless chrome. The first arrow press
+        /// summons them; a clean turn opens with a clean board.
         /// </summary>
         private void HandleKeyboardFineTune()
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow)) AdjustAimAngle(-angleStepDegrees);
-            if (Input.GetKeyDown(KeyCode.RightArrow)) AdjustAimAngle(angleStepDegrees);
-            if (Input.GetKeyDown(KeyCode.DownArrow)) AdjustAimPower(-powerStep);
-            if (Input.GetKeyDown(KeyCode.UpArrow)) AdjustAimPower(powerStep);
+            bool arrowTouched = false;
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) { AdjustAimAngle(-angleStepDegrees); arrowTouched = true; }
+            if (Input.GetKeyDown(KeyCode.RightArrow)) { AdjustAimAngle(angleStepDegrees); arrowTouched = true; }
+            if (Input.GetKeyDown(KeyCode.DownArrow)) { AdjustAimPower(-powerStep); arrowTouched = true; }
+            if (Input.GetKeyDown(KeyCode.UpArrow)) { AdjustAimPower(powerStep); arrowTouched = true; }
+            if (arrowTouched) keyboardAimTouchedThisTurn = true;
 
             if (isDragging) return; // an active pull owns the trajectory preview
 
+            // Space must stay armed with the tuned default even when the preview is hidden:
+            // the commit consumes the aim state, not the preview.
             launchVelocity = GetSeparatedAimVelocity();
-            DrawTrajectory(launchVelocity);
-            UpdateLaunchStats(launchVelocity);
+            if (keyboardAimTouchedThisTurn)
+            {
+                DrawTrajectory(launchVelocity);
+                UpdateLaunchStats(launchVelocity);
+            }
 
             if (Input.GetKeyDown(KeyCode.Space)) LaunchUnit();
         }
@@ -666,38 +684,36 @@ namespace CastleBusters
 
             if (pressed)
             {
-                if (IsWithinLaunchAffordance(pointerWorldPos))
+                if (UnityEngine.EventSystems.EventSystem.current != null
+                    && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
                 {
-                    if (UnityEngine.EventSystems.EventSystem.current != null)
-                    {
-                        if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
-                    }
-
-                    isDragging = true;
-                    dragStartPos = GetLaunchAnchorPosition();
-                    launchVelocity = Vector2.zero;
-                    if (trajectoryLine != null) trajectoryLine.positionCount = trajectoryResolution;
-                    if (launchAlertText != null) launchAlertText.text = "DRAW THE SIEGE LINE";
-                    if (controlGuideText != null)
-                    {
-                        controlGuideText.text = $"{selectedUnitName} 조준 중 — 궤적과 바람을 보고 발사";
-                        controlGuideText.color = new Color(0.94f, 0.98f, 1f, 0.95f);
-                    }
+                    return; // UI owns this press (cards, buttons, skip)
                 }
-                else
+
+                // Drag-from-anywhere (first-contact playtest, 2026-08-12): requiring the
+                // press to start inside the 3.5u ring made the very first gesture a
+                // precision test — most new players pressed the castle they wanted to hit
+                // and got scolded. Any off-UI press now starts the draw; the pull is
+                // measured FROM THE PRESS POINT, so a press is always a zero-power start
+                // and the gesture (not the cursor's absolute position) is what aims.
+                isDragging = true;
+                dragStartPos = pointerWorldPos;
+                launchVelocity = Vector2.zero;
+                if (trajectoryLine != null) trajectoryLine.positionCount = trajectoryResolution;
+                if (launchAlertText != null) launchAlertText.text = "DRAW THE SIEGE LINE";
+                if (controlGuideText != null)
                 {
-                    if (UnityEngine.EventSystems.EventSystem.current == null || !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-                    {
-                        TriggerBoundaryFlash(pointerWorldPos);
-                    }
+                    controlGuideText.text = $"{selectedUnitName} 조준 중 — 궤적과 바람을 보고 발사";
+                    controlGuideText.color = new Color(0.94f, 0.98f, 1f, 0.95f);
                 }
             }
 
             if (isDragging && held)
             {
-                launchVelocity = CalculateLaunchVelocity(pointerWorldPos);
+                Vector2 anchorSpacePointer = ToAnchorSpace(pointerWorldPos);
+                launchVelocity = CalculateLaunchVelocity(anchorSpacePointer);
                 DrawTrajectory(launchVelocity);
-                UpdateRubberBand(pointerWorldPos);
+                UpdateRubberBand(anchorSpacePointer);
                 UpdateLaunchStats(launchVelocity);
             }
 
@@ -717,41 +733,26 @@ namespace CastleBusters
             }
         }
 
-        public void TriggerBoundaryFlash(Vector2? invalidWorldPosition = null)
+        /// <summary>
+        /// Maps a drag gesture that started at <see cref="dragStartPos"/> onto the sling
+        /// anchor: the pull the player performs anywhere on screen is replayed as if it
+        /// had started on the pouch. Starting AT the anchor degenerates to identity, which
+        /// is why every anchor-press test and the keyboard path are unaffected.
+        /// </summary>
+        private Vector2 ToAnchorSpace(Vector2 pointerWorldPosition)
         {
-            boundaryFlashTimer = 1.0f;
-            if (controlGuideText != null)
-            {
-                controlGuideText.text = "⚠️ 푸른 링 안에서 드래그를 시작하세요";
-                controlGuideText.color = Color.red;
-            }
-            if (launchAlertText != null)
-            {
-                launchAlertText.text = "⚠️ 푸른 링으로 돌아가세요";
-            }
-            if (invalidWorldPosition.HasValue && invalidStartMarkerInstance != null)
-            {
-                invalidStartMarkerInstance.transform.position = new Vector3(invalidWorldPosition.Value.x, invalidWorldPosition.Value.y, 0f);
-                invalidStartMarkerInstance.transform.localScale = Vector3.one;
-                invalidStartMarkerInstance.SetActive(true);
-                invalidStartMarkerTimer = 0.65f;
-            }
+            return GetLaunchAnchorPosition() + (pointerWorldPosition - dragStartPos);
         }
 
         private void TriggerWeakLaunchFeedback()
         {
-            boundaryFlashTimer = 0.45f;
+            weakPullFlashTimer = 0.45f;
             if (launchAlertText != null) launchAlertText.text = "더 깊게 당긴 뒤 발사";
             if (controlGuideText != null)
             {
                 controlGuideText.text = BuildControlGuideText();
                 controlGuideText.color = new Color(1f, 0.78f, 0.25f, 0.95f);
             }
-        }
-
-        public bool IsWithinLaunchAffordance(Vector2 worldPosition)
-        {
-            return launchPoint != null && Vector2.Distance(worldPosition, launchPoint.position) <= launchActivationRadius;
         }
 
         /// <summary>
@@ -1014,7 +1015,7 @@ namespace CastleBusters
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);
             TelemetrySink.Volley(
-                selectedUnitName,
+                selectedUnitTelemetryName, // analytics key stays English across UI renames
                 powerPercent,
                 angle,
                 GameManager.Instance != null ? GameManager.Instance.currentWindForce : 0f);

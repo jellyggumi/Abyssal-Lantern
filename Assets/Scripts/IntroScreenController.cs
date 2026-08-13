@@ -168,8 +168,9 @@ namespace CastleBusters
             howTo.rectTransform.anchorMax = new Vector2(0.5f, 0.30f);
             howTo.rectTransform.sizeDelta = new Vector2(1500f, 120f);
             // One line, Korean only: the bilingual two-line version doubled the width and
-            // read as a manual, not an affordance. Wind and unit keys are taught in-match.
-            howTo.text = "유닛 선택 → 푸른 링에서 당겨 발사 → 적 코어 파괴";
+            // read as a manual, not an affordance. Wind and cadence are taught in-match;
+            // projectiles rotate automatically, so there is no unit selection to teach.
+            howTo.text = "아무 곳이나 당겨 발사 → 적 코어 파괴";
             howTo.fontSize = 30f;
             howTo.alignment = TextAlignmentOptions.Center;
             howTo.color = new Color(0.85f, 0.92f, 1f, 0.9f);

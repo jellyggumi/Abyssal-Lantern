@@ -174,18 +174,18 @@ namespace CastleBusters
         // Stage3 "Volcanic Abyss": a vast long-range gorge, not just a wider Stage1.
         // Launch apron pushed from 14.5 to 18.5 (player-to-player distance 29 -> 37,
         // +27.6%) with ground/camera/gate/wind widened to match and the wind cap raised
-        // 6.5 -> 7.2 to keep late-match aiming meaningful over the longer throw. Kegs move
-        // from Stage1's bridge-hugging ±6.5/±11 out to the wings at ±11.5/±15.0, mirroring
-        // Stage1's exact margin ratios scaled to the wider apron (outer keg clears the
-        // muzzle by 3.5u, same as Stage1's ±11; inner keg clears the core by 2.5u, same as
-        // Stage1's ±6.5) — strictly inside every pinned safety threshold (core clearance
-        // >1.0u, muzzle clearance >3.0u — both with real margin, not boundary-exact) instead
-        // of the wider board's raw midpoint. The wide midfield between ±11.5 stays open,
-        // which is the whole point of a "gorge". Field composition rotates a 5th obstacle
-        // kind (SpikeTrap) and mutates every 4th turn (vs Stage1's 3rd) at a higher cap (7
-        // vs 6) — the wide board reads as open, not cluttered, and the pacing is
-        // deliberately slower/tenser than Stage1 or Stage2. Fiery reddish background tint
-        // reinforces the volcanic mood.
+        // 6.5 -> 7.2 to keep late-match aiming meaningful over the longer throw. Kegs sit
+        // in the wings at ±11.5/±14.0 — the outer pair was ±15.0 until the muzzle-footprint
+        // defect fix (2026-08-12): 3.5u of muzzle clearance is INSIDE the launched Knight's
+        // spawn footprint (2.64u body half-width + 0.76u keg half-width + drift), so the
+        // first knight volley detonated it at the muzzle, exactly like Stage1's removed ±11
+        // pair. 14.0 keeps the wing identity with real clearance (4.5u > the 4.2u footprint
+        // band; KegPlacementSafetyTests derives the band from the actual prefabs). The wide
+        // midfield between ±11.5 stays open, which is the whole point of a "gorge". Field
+        // composition rotates a 5th obstacle kind (SpikeTrap) and mutates every 4th turn
+        // (vs Stage1's 3rd) at a higher cap (7 vs 6) — the wide board reads as open, not
+        // cluttered, and the pacing is deliberately slower/tenser than Stage1 or Stage2.
+        // Fiery reddish background tint reinforces the volcanic mood.
         public static readonly StageLayout Stage3 = new StageLayout(
             StageId.Stage3, "VOLCANIC ABYSS / 화산 심연",
             launchApronAbsX: 18.5f,
@@ -197,10 +197,10 @@ namespace CastleBusters
             cameraMaxHalfHeight: 13.5f,
             barrelPositions: new[]
             {
-                new Vector3(-15.0f, 0.5f, 0f),
+                new Vector3(-14.0f, 0.5f, 0f),
                 new Vector3(-11.5f, 0.5f, 0f),
                 new Vector3(11.5f, 0.5f, 0f),
-                new Vector3(15.0f, 0.5f, 0f),
+                new Vector3(14.0f, 0.5f, 0f),
             },
             // Campaign redistribution: fortress height now rises 2 -> 3 -> 4 across the
             // sequential unlock order. Stage3 previously kept Stage1's 2 — the only stage

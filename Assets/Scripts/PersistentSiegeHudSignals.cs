@@ -4,13 +4,16 @@ namespace CastleBusters
     /// Pure presentation contract for the match-critical, text-independent HUD signals.
     /// Keeping this mapping outside of the UI builder makes the state readable and testable
     /// without needing a scene, canvas, or localization table.
+    ///
+    /// (A LaunchReady signal used to live here, rendered as a bottom-center crosshair.
+    /// Playtest feedback read that diamond as meaningless — the slingshot and its bobbing
+    /// hint label already ARE the launch affordance — so the signal left with its renderer.)
     /// </summary>
     public readonly struct PersistentSiegeHudState
     {
         public bool IsVisible { get; }
         public bool PlayerFactionActive { get; }
         public bool EnemyFactionActive { get; }
-        public bool LaunchReady { get; }
         public bool ObjectiveCoreHighlighted { get; }
         public bool MatchComplete { get; }
 
@@ -18,14 +21,12 @@ namespace CastleBusters
             bool isVisible,
             bool playerFactionActive,
             bool enemyFactionActive,
-            bool launchReady,
             bool objectiveCoreHighlighted,
             bool matchComplete)
         {
             IsVisible = isVisible;
             PlayerFactionActive = playerFactionActive;
             EnemyFactionActive = enemyFactionActive;
-            LaunchReady = launchReady;
             ObjectiveCoreHighlighted = objectiveCoreHighlighted;
             MatchComplete = matchComplete;
         }
@@ -40,13 +41,11 @@ namespace CastleBusters
             // impact/settling phase so a player never loses track of whose turn is resolving.
             bool playerActive = visible && !complete && isPlayerTurn;
             bool enemyActive = visible && !complete && !isPlayerTurn;
-            bool launchReady = playerActive && !isResolvingTurn && state == GameState.PlayerTurn;
 
             return new PersistentSiegeHudState(
                 visible,
                 playerActive,
                 enemyActive,
-                launchReady,
                 visible && !complete,
                 complete);
         }

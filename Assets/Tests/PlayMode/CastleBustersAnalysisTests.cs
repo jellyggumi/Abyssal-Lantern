@@ -43,18 +43,18 @@ namespace CastleBusters.Tests
 
             // Verify GameManager exists
             Assert.IsNotNull(GameManager.Instance, "GameManager must exist");
-            Debug.Log("✅ GameManager exists");
+            Debug.Log("[OK] GameManager exists");
 
             // Verify key components
             gameManager = GameManager.Instance;
             launchManager = Object.FindObjectOfType<LaunchManager>();
             Assert.IsNotNull(launchManager, "LaunchManager must exist");
-            Debug.Log("✅ LaunchManager exists");
+            Debug.Log("[OK] LaunchManager exists");
 
             // Check initial state
             Assert.IsNotNull(gameManager.playerCastle, "Player castle must exist");
             Assert.IsNotNull(gameManager.enemyCastle, "Enemy castle must exist");
-            Debug.Log("✅ Both castles exist");
+            Debug.Log("[OK] Both castles exist");
 
             // Record baseline memory and FPS
             long memoryBefore = System.GC.GetTotalMemory(false);
@@ -65,7 +65,7 @@ namespace CastleBusters.Tests
 
             long memoryAfter = System.GC.GetTotalMemory(false);
             Debug.Log($"Memory after 1s: {memoryAfter / (1024 * 1024)} MB");
-            Debug.Log("✅ CYCLE 1 COMPLETE");
+            Debug.Log("[OK] CYCLE 1 COMPLETE");
         }
 
         [UnityTest]
@@ -92,7 +92,7 @@ namespace CastleBusters.Tests
             Debug.Log("Testing Knight unit...");
             gameManager.SelectUnit(0);
             launchManager.SimulateLaunch(new Vector2(10f, 5f));
-            Debug.Log("✅ Knight launched successfully");
+            Debug.Log("[OK] Knight launched successfully");
 
             // Test 2: Verify game state transitions.
             // This used to sleep a flat 3s and then assert the handoff, which was never what
@@ -112,10 +112,10 @@ namespace CastleBusters.Tests
             Debug.Log($"Turn handoff observed after {waited:F2}s");
 
             Assert.AreEqual(GameState.AITurn, gameManager.currentState, "Should transition to AI turn after player launches");
-            Debug.Log("✅ Game state transitioned correctly");
+            Debug.Log("[OK] Game state transitioned correctly");
 
             yield return new WaitForSecondsRealtime(2f);
-            Debug.Log("✅ CYCLE 2 COMPLETE");
+            Debug.Log("[OK] CYCLE 2 COMPLETE");
         }
 
         [UnityTest]
@@ -210,7 +210,7 @@ namespace CastleBusters.Tests
             Debug.Log($"Average game duration: {avgGameDuration:F1}s");
             Debug.Log($"Average units launched per game: {avgUnitsPerGame:F1}");
             Debug.Log($"Total units launched: {totalUnits}");
-            Debug.Log("✅ CYCLE 3 COMPLETE");
+            Debug.Log("[OK] CYCLE 3 COMPLETE");
         }
 
         [UnityTest]
@@ -236,7 +236,7 @@ namespace CastleBusters.Tests
 
                 // Verify unit can be selected
                 Assert.IsNotNull(gameManager, "GameManager must be available");
-                Debug.Log($"✅ {unitNames[i]} can be selected");
+                Debug.Log($"[OK] {unitNames[i]} can be selected");
 
                 yield return new WaitForSecondsRealtime(0.5f);
             }
@@ -252,7 +252,7 @@ namespace CastleBusters.Tests
                 if (i % 3 == 0) Debug.Log($"Frame {i}: {fps:F1} FPS");
             }
 
-            Debug.Log("✅ CYCLE 4 COMPLETE");
+            Debug.Log("[OK] CYCLE 4 COMPLETE");
         }
 
         [UnityTest]
@@ -283,7 +283,7 @@ namespace CastleBusters.Tests
             Debug.Log("4. [LOW] Content Expansion - Consider additional unit types");
             Debug.Log("5. [LOW] Sound Design - Add placeholder audio cues");
 
-            Debug.Log("✅ CYCLE 5 COMPLETE");
+            Debug.Log("[OK] CYCLE 5 COMPLETE");
             yield return null;
         }
     }
