@@ -297,7 +297,7 @@ namespace CastleBusters
             // not just its name). Sits in the slot the guide text's 76px inset reserves.
             if (selectedUnitPortrait == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("SelectedUnitPortrait");

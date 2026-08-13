@@ -58,22 +58,31 @@ namespace CastleBusters.Tests
             var hud = GameObject.Find(HudCanvas.CanvasName);
             Assert.IsNotNull(hud, $"The HUD canvas '{HudCanvas.CanvasName}' must exist once a match is running");
 
+            // Every Graphic, not just text. The first version of this counted TextMeshProUGUI
+            // only, and a merge promptly landed a new Image (SelectedUnitPortrait) that took
+            // the old FindObjectOfType<Canvas>() path — the exact defect this test exists to
+            // catch — while the suite stayed green. A contract that covers one component type
+            // does not cover the rule.
             var strays = new List<string>();
-            foreach (var t in Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsSortMode.None))
+            foreach (var g in Object.FindObjectsByType<Graphic>(FindObjectsSortMode.None))
             {
-                if (!t.isActiveAndEnabled) continue;
-                var canvas = t.canvas;
+                if (!g.isActiveAndEnabled) continue;
+                var canvas = g.canvas;
                 if (canvas == null) continue;   // not drawn at all — a separate defect, filed as UX-001/002
                 // The intro/webtoon/results screens own their own canvases by design; only the
                 // gameplay HUD is under this contract.
                 if (canvas.GetComponentInParent<IntroScreenController>() != null) continue;
                 if (canvas.GetComponentInParent<WebtoonPrologueController>() != null) continue;
-                if (canvas.name != HudCanvas.CanvasName) strays.Add($"{t.name} → {canvas.name}");
+                // Children of a HUD element travel with their parent; only roots are placed.
+                if (g.transform.parent != null
+                    && g.transform.parent.GetComponentInParent<Canvas>() == canvas
+                    && canvas.name == HudCanvas.CanvasName) continue;
+                if (canvas.name != HudCanvas.CanvasName) strays.Add($"{g.name}({g.GetType().Name}) → {canvas.name}");
             }
 
             Assert.IsEmpty(strays,
-                "Gameplay HUD labels must all live on the one HUD canvas; a split means two "
-                + "scalers and two text sizes. Strays: " + string.Join(", ", strays));
+                "Every gameplay HUD graphic must live on the one HUD canvas; a split means two "
+                + "scalers and two sizes. Strays: " + string.Join(", ", strays));
         }
 
         /// <summary>
