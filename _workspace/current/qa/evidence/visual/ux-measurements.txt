@@ -1,0 +1,12 @@
+## ux-1-title
+state=Intro playerTurn=False turn=0
+onscreen text=19 buttons=9
+
+## ux-2-match-start
+state=PlayerTurn playerTurn=True turn=0
+onscreen text=11 buttons=1
+
+## ux-3-player-turn
+state=PlayerTurn playerTurn=True turn=0
+onscreen text=10 buttons=1
+

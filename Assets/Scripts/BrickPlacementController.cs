@@ -277,7 +277,7 @@ namespace CastleBusters
 
         private void CreateBlockUI()
         {
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = HudCanvas.Resolve();
             if (canvas == null) return;
             MobileSafeArea.ConfigureCanvas(canvas);
 

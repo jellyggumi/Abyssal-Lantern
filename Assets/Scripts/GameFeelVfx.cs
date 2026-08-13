@@ -759,37 +759,13 @@ namespace CastleBusters
         private void EnsureHud()
         {
             if (root != null) return;
-            // Never adopt the intro title canvas as the HUD host - it is transient and sits on
-            // a much higher sorting order than gameplay UI.
-            canvas = null;
-            // ponytail: one-shot HUD init, not per-frame — registry swap if canvases ever churn
-            foreach (var c in FindObjectsOfType<Canvas>())
-            {
-                if (c.GetComponent<IntroScreenController>() != null) continue;
-                canvas = c;
-                break;
-            }
-            if (canvas == null)
-            {
-                var canvasGo = new GameObject("GameplayCanvas");
-                canvas = canvasGo.AddComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-                var scaler = canvasGo.AddComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920f, 1080f);
-                scaler.matchWidthOrHeight = 0.5f;
-                canvasGo.AddComponent<GraphicRaycaster>();
-            }
-            else
-            {
-                var scaler = canvas.GetComponent<CanvasScaler>();
-                if (scaler == null) scaler = canvas.gameObject.AddComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920f, 1080f);
-                scaler.matchWidthOrHeight = 0.5f;
-                if (canvas.GetComponent<GraphicRaycaster>() == null) canvas.gameObject.AddComponent<GraphicRaycaster>();
-            }
-            MobileSafeArea.ConfigureCanvas(canvas);
+            // One named canvas, resolved the same way by every HUD system. This used to take
+            // whatever FindObjectsOfType returned first and then rewrite that canvas's scaler,
+            // which had two consequences: the HUD's parent depended on engine iteration order,
+            // and whichever canvas won had its scaling redefined underneath its real owner.
+            // Measured fallout — the badges landed on the cold open's NarrativeCanvas and
+            // rendered 17pt at 6.5px (`qa/evidence/font/hud-font-scale.md`).
+            canvas = HudCanvas.Resolve();
 
             var rootGo = new GameObject("GameplayUxDirectorHUD");
             rootGo.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
@@ -800,13 +776,16 @@ namespace CastleBusters
             root.offsetMax = Vector2.zero;
 
             comboBackplate = CreatePanel("ComboBackplate", new Vector2(0.60f, 0.60f), new Vector2(0.5f, 0.5f), new Vector2(400f, 52f), new Color(0.09f, 0.045f, 0.01f, 0.46f));
-            toastBackplate = CreatePanel("ToastBackplate", new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), new Color(0f, 0.05f, 0.1f, 0.58f));
+            // 0.78 -> 0.76, together with the toast text below. At 0.78 the plate's top edge
+            // ran 4px into the turn timer, which is always on screen while the toast is not:
+            // a transient banner yields to a persistent readout, never the other way round.
+            toastBackplate = CreatePanel("ToastBackplate", new Vector2(0.5f, 0.76f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), new Color(0f, 0.05f, 0.1f, 0.58f));
             toastBackplateRt = toastBackplate.GetComponent<RectTransform>();
             toastBackplateImg = toastBackplate.GetComponent<Image>();
 
             // Keep the transient coaching lane vertically high without shifting it toward the
             // right edge on narrower aspect ratios.
-            turnToastText = CreateText("TurnToastText", new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), 28, TextAlignmentOptions.Center, Color.white);
+            turnToastText = CreateText("TurnToastText", new Vector2(0.5f, 0.76f), new Vector2(0.5f, 0.5f), new Vector2(800f, 64f), 28, TextAlignmentOptions.Center, Color.white);
             turnToastRt = turnToastText.rectTransform;
             comboText = CreateText("ComboText", new Vector2(0.60f, 0.60f), new Vector2(0.5f, 0.5f), new Vector2(400f, 52f), 24, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.22f, 1f));
             comboBackplate.SetActive(false);
@@ -830,8 +809,13 @@ namespace CastleBusters
                 timerRt.sizeDelta = new Vector2(100f, 40f);
             }
 
-            playerCoreBadge = new CoreHealthBadge(root, "KEEP CORE", new Vector2(0.18f, 0.84f), new Color(0.25f, 0.75f, 1f, 1f));
-            enemyCoreBadge = new CoreHealthBadge(root, "BREACH CORE", new Vector2(0.82f, 0.84f), new Color(1f, 0.62f, 0.18f, 1f));
+            // Pulled inward from 0.18/0.82. At the old position the friendly badge sat at
+            // x 46-185 and the supply gauge and deploy toggle occupy x 10-130, so the badge
+            // covered 70% of the toggle. That collision predates this pass — it was 58% at the
+            // original 17pt — but a readout that overlaps a control is a defect at any size.
+            // Inward also reads better: each badge now sits over the keep it reports on.
+            playerCoreBadge = new CoreHealthBadge(root, "KEEP CORE", new Vector2(0.325f, 0.84f), new Color(0.25f, 0.75f, 1f, 1f));
+            enemyCoreBadge = new CoreHealthBadge(root, "BREACH CORE", new Vector2(0.675f, 0.84f), new Color(1f, 0.62f, 0.18f, 1f));
 
             // A wordless rail: faction chevrons, a pulsing crosshair for a legal shot, and a
             // diamond over the target core. Colour, side, shape, and motion all agree so the
@@ -1112,7 +1096,10 @@ namespace CastleBusters
                 var textGo = new GameObject("Label");
                 textGo.transform.SetParent(container, false);
                 label = textGo.AddComponent<TextMeshProUGUI>();
-                label.fontSize = 17;
+                // Core health is the number a player reads before every shot, so it takes the
+                // primary size. At 17 it rendered 9.1px on a 1024x576 window and lost the
+                // crossbars of E — "KEEP CORE" read as "KLLP CORL".
+                label.fontSize = HudCanvas.PrimaryLabelSize;
                 label.fontStyle = FontStyles.Bold;
                 label.alignment = TextAlignmentOptions.Center;
                 label.color = Color.white;

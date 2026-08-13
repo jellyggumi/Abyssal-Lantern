@@ -587,7 +587,7 @@ namespace CastleBusters
         private void EnsureHud()
         {
             if (supplyText != null) return;
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = HudCanvas.Resolve();
             if (canvas == null) return;
 
             var panel = new GameObject("SupplyPanel");
@@ -597,7 +597,11 @@ namespace CastleBusters
             panelRt.anchorMax = new Vector2(0f, 1f);
             panelRt.pivot = new Vector2(0f, 1f);
             panelRt.anchoredPosition = new Vector2(18f, -104f);
-            panelRt.sizeDelta = new Vector2(226f, 26f);
+            // 226 -> 300 wide. "보급 9/24  ·  3턴 해금" is a single line that did not fit 226
+            // units at this size, so TMP wrapped it and the second line landed on the deploy
+            // toggle below (`qa/evidence/hud-fix/hud-overlap.md`). The friendly core badge now
+            // starts at x 308 in canvas units, so 300 stays clear of it.
+            panelRt.sizeDelta = new Vector2(300f, 34f);
 
             var bg = panel.AddComponent<UnityEngine.UI.Image>();
             bg.color = new Color(0.05f, 0.07f, 0.1f, 0.72f);
@@ -617,8 +621,12 @@ namespace CastleBusters
             var textGo = new GameObject("SupplyText");
             textGo.transform.SetParent(panel.transform, false);
             supplyText = textGo.AddComponent<TextMeshProUGUI>();
-            supplyText.fontSize = 15;
+            supplyText.fontSize = HudCanvas.PrimaryLabelSize;
             supplyText.alignment = TextAlignmentOptions.Center;
+            // A supply readout that wraps costs more than one that runs a little long: the
+            // second line lands on whatever is beneath it.
+            supplyText.enableWordWrapping = false;
+            supplyText.overflowMode = TextOverflowModes.Overflow;
             supplyText.color = new Color(0.97f, 0.99f, 1f, 1f);
             supplyText.outlineWidth = 0.18f;
             supplyText.outlineColor = new Color(0.02f, 0.02f, 0.03f, 0.95f);
@@ -634,8 +642,12 @@ namespace CastleBusters
             buttonRt.anchorMin = new Vector2(0f, 1f);
             buttonRt.anchorMax = new Vector2(0f, 1f);
             buttonRt.pivot = new Vector2(0f, 1f);
-            buttonRt.anchoredPosition = new Vector2(18f, -134f);
-            buttonRt.sizeDelta = new Vector2(226f, 26f);
+            // -134 -> -152. The supply panel sits at -104 and both boxes are 26 tall, so the
+            // rows were 30 apart; at 23pt the glyphs stand ~34 tall and the two readouts
+            // overlapped 74%. Spacing is set by the text that is drawn, not by the box that
+            // was authored (`qa/evidence/hud-fix/hud-overlap.md`).
+            buttonRt.anchoredPosition = new Vector2(18f, -152f);
+            buttonRt.sizeDelta = new Vector2(300f, 34f);
             var buttonImage = buttonGo.AddComponent<UnityEngine.UI.Image>();
             buttonImage.color = new Color(0.1f, 0.14f, 0.2f, 0.85f);
             deployToggleButton = buttonGo.AddComponent<UnityEngine.UI.Button>();
@@ -645,8 +657,10 @@ namespace CastleBusters
             var labelGo = new GameObject("DeployToggleLabel");
             labelGo.transform.SetParent(buttonGo.transform, false);
             deployToggleLabel = labelGo.AddComponent<TextMeshProUGUI>();
-            deployToggleLabel.fontSize = 14;
+            deployToggleLabel.fontSize = HudCanvas.SecondaryLabelSize;
             deployToggleLabel.alignment = TextAlignmentOptions.Center;
+            deployToggleLabel.enableWordWrapping = false;
+            deployToggleLabel.overflowMode = TextOverflowModes.Overflow;
             deployToggleLabel.color = new Color(0.85f, 0.95f, 1f, 1f);
             var labelRt = labelGo.GetComponent<RectTransform>();
             labelRt.anchorMin = Vector2.zero;

@@ -681,12 +681,21 @@ namespace CastleBusters.Tests
             Assert.IsNotNull(turnToastRect, "The launch toast must expose its runtime rectangle.");
             Assert.IsNotNull(comboRect, "The combo banner must expose its runtime rectangle.");
 
-            Assert.AreEqual(0.78f, turnToastRect.anchorMin.y, 0.0001f);
-            Assert.AreEqual(0.78f, turnToastRect.anchorMax.y, 0.0001f);
+            // Sizes stay pinned — they are the lane widths the layout was built around — but
+            // the anchors are not asserted as literals any more. This test failed when the
+            // toast moved 0.78 -> 0.76 to stop covering the turn timer, and the thing it is
+            // named for (two banners, two lanes) was never in danger. A coordinate literal
+            // standing in for a relationship blocks the next legitimate move and says nothing
+            // about whether the relationship survived it.
             Assert.AreEqual(new Vector2(800f, 64f), turnToastRect.sizeDelta);
-            Assert.AreEqual(0.60f, comboRect.anchorMin.y, 0.0001f);
-            Assert.AreEqual(0.60f, comboRect.anchorMax.y, 0.0001f);
             Assert.AreEqual(new Vector2(400f, 52f), comboRect.sizeDelta);
+            Assert.AreEqual(turnToastRect.anchorMin.y, turnToastRect.anchorMax.y, 0.0001f,
+                "The toast must sit on one horizontal line, not stretch vertically.");
+            Assert.AreEqual(comboRect.anchorMin.y, comboRect.anchorMax.y, 0.0001f,
+                "The combo banner must sit on one horizontal line, not stretch vertically.");
+            Assert.Greater(turnToastRect.anchorMin.y, comboRect.anchorMin.y,
+                "The transient toast lane must stay above the combo lane; swapping them would "
+                + "put the louder, rarer banner underneath the routine one.");
 
             var referenceViewport = new Vector2(960f, 600f);
             Vector2 toastOrigin = Vector2.Scale(turnToastRect.anchorMin, referenceViewport)

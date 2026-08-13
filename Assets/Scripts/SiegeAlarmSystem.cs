@@ -64,16 +64,10 @@ namespace CastleBusters
         private void EnsureUi()
         {
             if (feedRoot != null) return;
-            canvas = null;
-            foreach (var c in FindObjectsOfType<Canvas>())
-            {
-                if (c.GetComponent<IntroScreenController>() != null) continue;
-                if (c.GetComponent<ResultsScreenController>() != null) continue;
-                canvas = c;
-                break;
-            }
+            // Same named canvas every HUD system uses; see HudCanvas for why the old
+            // iteration-order hunt had to go.
+            canvas = HudCanvas.Resolve();
             if (canvas == null) return;
-            MobileSafeArea.ConfigureCanvas(canvas);
 
             var rootGo = new GameObject("SiegeAlarmFeed");
             rootGo.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
@@ -85,7 +79,7 @@ namespace CastleBusters
             var stripGo = new GameObject("FlowStateStrip");
             stripGo.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
             flowStrip = stripGo.AddComponent<TextMeshProUGUI>();
-            flowStrip.fontSize = 17f;
+            flowStrip.fontSize = HudCanvas.SecondaryLabelSize;
             flowStrip.fontStyle = FontStyles.Bold;
             flowStrip.alignment = TextAlignmentOptions.Center;
             flowStrip.enableWordWrapping = false;
@@ -131,7 +125,7 @@ namespace CastleBusters
             go.transform.SetParent(feedRoot, false);
             var text = go.AddComponent<TextMeshProUGUI>();
             text.text = $"▶ {message}";
-            text.fontSize = 16f;
+            text.fontSize = HudCanvas.SecondaryLabelSize;
             text.fontStyle = FontStyles.Bold;
             text.color = color;
             text.alignment = TextAlignmentOptions.Left;

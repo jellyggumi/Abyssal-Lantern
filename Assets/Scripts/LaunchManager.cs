@@ -253,13 +253,13 @@ namespace CastleBusters
 
             if (launchStatsText == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("LaunchStatsText");
                     go.transform.SetParent(canvas.transform, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
-                    textComp.fontSize = 24;
+                    textComp.fontSize = HudCanvas.PrimaryLabelSize;
                     textComp.color = Color.white;
                     textComp.alignment = TextAlignmentOptions.Center;
 
@@ -275,13 +275,13 @@ namespace CastleBusters
 
             if (controlGuideText == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("ControlGuideText");
                     go.transform.SetParent(canvas.transform, false);
                     var textComp = go.AddComponent<TextMeshProUGUI>();
-                    textComp.fontSize = 22;
+                    textComp.fontSize = HudCanvas.SecondaryLabelSize;
                     textComp.color = new Color(0.8f, 0.95f, 1f, 0.95f);
                     textComp.outlineWidth = 0.18f;
                     textComp.outlineColor = new Color(0.02f, 0.015f, 0.01f, 0.95f);
@@ -311,13 +311,13 @@ namespace CastleBusters
 
             if (launchAlertText == null)
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = HudCanvas.Resolve();
                 if (canvas != null)
                 {
                     var go = new GameObject("LaunchAlertText");
                     go.transform.SetParent(canvas.transform, false);
                     launchAlertText = go.AddComponent<TextMeshProUGUI>();
-                    launchAlertText.fontSize = 26;
+                    launchAlertText.fontSize = HudCanvas.PrimaryLabelSize;
                     launchAlertText.color = new Color(1f, 0.25f, 0.2f, 1f);
                     launchAlertText.alignment = TextAlignmentOptions.Center;
                     launchAlertText.text = "";
