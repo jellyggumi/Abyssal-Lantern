@@ -146,13 +146,24 @@ TMP는 상자를 넘쳐 그린다. 글리프 실측(`textBounds`)으로 바꾸�
 
 ## 검증
 
-| 검사 | 결과 |
-|---|---|
-| `HudCanvasContractTests` (3) | 통과 — 단일 캔버스, 하한, 남의 캔버스 불변 |
-| `HudScaleFloorTests` (4) | 통과 — 클램프, 비례, 퇴화 입력 |
-| `HudOverlapTests` (1) | 통과 — 글리프 실측 기준 겹침 0 |
-| `HudFixEvidenceCapture` (1) | 통과 — 4개 창 크기 캡처 |
-| EditMode 전체 | **401/401** |
+| 검사 | 결과 | 실행 시점 | 증거 |
+|---|---|---|---|
+| `HudCanvasContractTests` (3) | 통과 | 병합 전 | 단일 캔버스 · 하한 · 남의 캔버스 불변 |
+| `HudScaleFloorTests` (4) | 통과 | 병합 전 | 클램프 · 비례 · 퇴화 입력 |
+| `HudOverlapTests` (1) | 통과 | 병합 전 | `qa/evidence/hud-fix/hud-overlap.md` |
+| `HudFixEvidenceCapture` (1) | 통과 | 병합 전 | `qa/evidence/hud-fix/` 4개 창 |
+| EditMode 전체 | **401/401** | 병합 전 | `qa/evidence/editmode-hud-canvas-fix.xml` |
+| PlayMode 전체 | **73/77** | 병합 전 | `qa/evidence/playmode-hud-canvas-fix.xml` |
+| EditMode 전체 | 405/405 | 병합 후 | **증거 없음** |
+| 글리프 감사 (main 게이트) | 406/406 | 병합 후 | **증거 없음** |
+
+> **병합 후 두 값은 미검증으로 취급한다.** 실행 출력에서 읽은 값이지만, 스크래치 정리에서
+> XML·로그를 지우며 보관본을 남기지 않았다. 하네스 규칙은 *"증거 경로 누락 = 주장 값과
+> 무관하게 FAIL"* 이다 — 값이 맞는지와 별개로 게이트를 통과시킬 수 없다.
+> 재실행해 `evidence/`에 보관하는 것이 남은 작업이다.
+>
+> 재발 방지: **정리 전에 보관한다.** 이번엔 `mem.xml`(병합 후)이 아니라
+> `fem.xml`(병합 전)을 보관한 뒤 원본을 지웠다.
 
 회귀 방어의 요점: `HudLabelSizes_ClearTheLegibilityFloorAtTheSmallestWindow`가
 출하 당시 크기(17/15/14pt)를 넣으면 **즉시 빨간불**이 된다. 이 결함이 다시
