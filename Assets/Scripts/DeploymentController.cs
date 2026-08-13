@@ -40,8 +40,6 @@ namespace CastleBusters
         private bool hintShown;
         private const float HudRefreshInterval = 0.1f;
         private float hudRefreshTimer;
-        private bool hudToggleInitialized;
-        private bool lastHudDeployMode;
 
         private void Awake()
         {
@@ -245,14 +243,21 @@ namespace CastleBusters
             // start drawing the sling, or the player pays supply AND burns their volley.
             var lm = FindObjectOfType<LaunchManager>();
             if (lm != null) lm.CancelAim();
-            SiegeAlarmSystem.Post($"배치 모드: {DeploymentRules.DisplayName(SelectedCard)}", new Color(0.7f, 0.95f, 1f, 1f));
+            // Names the consequence, not the mode: an armed click SPENDS the turn, and the
+            // player must be told how to back out before they find out by spending it.
+            SiegeAlarmSystem.Post(
+                $"{DeploymentRules.DisplayName(SelectedCard)} 설치 — 전장을 클릭 (턴 소모) · Esc 취소",
+                new Color(1f, 0.84f, 0.3f, 1f));
+            UpdateHud(); // armed state changes what a click means: never wait on the throttle
         }
 
         public void DisarmDeployMode()
         {
+            bool wasArmed = DeployModeArmed;
             DeployModeArmed = false;
             if (ghost != null) ghost.SetActive(false);
             if (zoneLine != null) zoneLine.enabled = false;
+            if (wasArmed) UpdateHud();
         }
 
         /// <summary>GameManager selection hook: the roster card also selects what deploy places.</summary>
@@ -591,7 +596,7 @@ namespace CastleBusters
             if (canvas == null) return;
 
             var panel = new GameObject("SupplyPanel");
-            panel.transform.SetParent(canvas.transform, false);
+            panel.transform.SetParent(MobileSafeArea.GetContentRoot(canvas), false);
             var panelRt = panel.AddComponent<RectTransform>();
             panelRt.anchorMin = new Vector2(0f, 1f);
             panelRt.anchorMax = new Vector2(0f, 1f);
@@ -628,14 +633,19 @@ namespace CastleBusters
             textRt.offsetMin = Vector2.zero;
             textRt.offsetMax = Vector2.zero;
 
+            // Parented to the SAFE-AREA content root, not the raw canvas (2026-08-13):
+            // MobileSafeArea insets that root, so a button pinned to the canvas sat outside
+            // the inset band — it never appeared in any live capture, which left the D key
+            // as the battery's only entrance and nothing on screen said the key existed.
+            var hudRoot = MobileSafeArea.GetContentRoot(canvas);
             var buttonGo = new GameObject("DeployToggleButton");
-            buttonGo.transform.SetParent(canvas.transform, false);
+            buttonGo.transform.SetParent(hudRoot, false);
             var buttonRt = buttonGo.AddComponent<RectTransform>();
             buttonRt.anchorMin = new Vector2(0f, 1f);
             buttonRt.anchorMax = new Vector2(0f, 1f);
             buttonRt.pivot = new Vector2(0f, 1f);
             buttonRt.anchoredPosition = new Vector2(18f, -134f);
-            buttonRt.sizeDelta = new Vector2(226f, 26f);
+            buttonRt.sizeDelta = new Vector2(300f, 30f);
             var buttonImage = buttonGo.AddComponent<UnityEngine.UI.Image>();
             buttonImage.color = new Color(0.1f, 0.14f, 0.2f, 0.85f);
             deployToggleButton = buttonGo.AddComponent<UnityEngine.UI.Button>();
@@ -680,15 +690,29 @@ namespace CastleBusters
                     : $"{DeploymentRules.DisplayName(SelectedCard)} {cost:0}";
                 supplyText.text = $"보급 {PlayerSupply:0}/{SupplyRules.MaxSupply:0}  ·  {state}";
             }
-            if (deployToggleLabel != null &&
-                (!hudToggleInitialized || lastHudDeployMode != DeployModeArmed))
+            // Always recomputed — supply regenerates and breaches land continuously, so a
+            // change-gated label would keep showing a stale gate. The old version only
+            // refreshed on the armed-mode edge and read `배치 모드 ON/OFF`, which named an
+            // internal mode instead of the action, its cost, or the gate blocking it.
+            if (deployToggleLabel != null)
             {
-                hudToggleInitialized = true;
-                lastHudDeployMode = DeployModeArmed;
-                deployToggleLabel.text = DeployModeArmed ? "배치 모드 ON (D)" : "배치 모드 OFF (D)";
-                deployToggleLabel.color = DeployModeArmed
-                    ? new Color(0.6f, 1f, 0.75f, 1f)
-                    : new Color(0.8f, 0.88f, 0.95f, 1f);
+                var gmRef = GameManager.Instance;
+                bool playerCanAct = gmRef != null
+                    && gmRef.currentState == GameState.PlayerTurn
+                    && gmRef.IsPlayerTurn
+                    && !gmRef.IsResolvingTurn;
+
+                var prompt = TurnActionPrompt.ForCannon(
+                    playerCanAct,
+                    DeployModeArmed,
+                    turn,
+                    PlayerBreaches,
+                    PlayerSupply,
+                    CooldownOf(DeployCard.Cannon, true));
+
+                deployToggleLabel.text = prompt.label;
+                deployToggleLabel.color = TurnActionPrompt.ColorFor(prompt.tone);
+                if (deployToggleButton != null) deployToggleButton.interactable = prompt.interactable;
             }
         }
     }

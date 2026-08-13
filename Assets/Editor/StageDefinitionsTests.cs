@@ -30,12 +30,18 @@ namespace CastleBusters.Tests
             var layout = StageDefinitions.Stage1;
             Assert.AreEqual(StageId.Stage1, layout.id);
             Assert.IsFalse(layout.locked, "Stage1 must always be selectable");
-            Assert.AreEqual(14.5f, layout.launchApronAbsX, 0.001f, "Stage1 launch apron must match the original GameManager.LaunchApronAbsX default");
-            Assert.AreEqual(20f, layout.groundHalfWidth, 0.001f);
-            Assert.AreEqual(10f, layout.groundAnchorAbsX, 0.001f);
-            Assert.AreEqual(15f, layout.gateAbsX, 0.001f);
-            Assert.AreEqual(6.5f, layout.windCapEnd, 0.001f);
-            Assert.AreEqual(39f, layout.cameraDesiredWorldWidth, 0.001f);
+            // Refrozen to the widened board (2026-08-13: 맵 폭 확대). Stage1 is the baseline
+            // every other stage is judged against, so the freeze tracks current intent —
+            // what it still guarantees is that GameManager's mirrored default and this
+            // table cannot drift apart.
+            Assert.AreEqual(17.0f, layout.launchApronAbsX, 0.001f, "Stage1 launch apron (widened board)");
+            Assert.AreEqual(GameManager.LaunchApronAbsX, layout.launchApronAbsX, 0.001f,
+                "Stage1 apron must stay identical to the GameManager default it mirrors");
+            Assert.AreEqual(23f, layout.groundHalfWidth, 0.001f);
+            Assert.AreEqual(11.5f, layout.groundAnchorAbsX, 0.001f);
+            Assert.AreEqual(17.5f, layout.gateAbsX, 0.001f);
+            Assert.AreEqual(7.0f, layout.windCapEnd, 0.001f);
+            Assert.AreEqual(45f, layout.cameraDesiredWorldWidth, 0.001f);
             Assert.AreEqual(11.2f, layout.cameraMaxHalfHeight, 0.001f);
             // Moved from 2 deliberately, not drifted: keeps were raised a course across every
             // stage to pull a decided match toward the five-minute target (MatchLengthModel).

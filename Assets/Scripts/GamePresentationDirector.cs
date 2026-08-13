@@ -12,12 +12,19 @@ namespace CastleBusters
 
         [Header("Camera Framing")]
         public Vector2 boardCenter = new Vector2(0f, 3.0f);
-        public float targetHalfHeight = 8.4f;  // widened board pass (cores ±9, aprons ±14.5)
-        public float minHalfHeight = 7.2f;
+        public float targetHalfHeight = 8.4f;  // widened board pass (cores ±9, aprons ±17.0)
         public float maxHalfHeight = 11.2f;
-        public float desiredWorldWidth = 39f;
+        public float desiredWorldWidth = 45f;  // widened board pass 2026-08-13 (was 39)
         public float followLerp = 3.5f;
         public float focusExtraHeight = 0.9f; // Readjusted from 0.65f to 0.9f (1.4x)
+
+        [Header("Screen Handling")]
+        // Wheel/pinch zoom only — press+drag is the launch gesture (pinned) and must stay
+        // unshared, so drag-to-pan is deliberately not offered.
+        public bool allowPlayerZoom = true;
+        private float playerZoom = CameraFraming.MinZoom;
+        private float aimWeight;
+        private float fittedSize = 1f;
 
         [Header("Presentation")]
         public bool pixelSnapCamera = true;
@@ -64,6 +71,10 @@ namespace CastleBusters
         {
             if (mainCamera == null) return;
 
+            HandleZoomInput();
+            bool aiming = IsPlayerDrawing();
+            aimWeight = CameraFraming.EaseAimWeight(aimWeight, aiming, Time.unscaledDeltaTime);
+
             FitCameraToAspect();
 
             Vector3 targetPosition = baseCameraPosition;
@@ -73,8 +84,19 @@ namespace CastleBusters
                 float clampedY = Mathf.Clamp(focusTarget.position.y + focusExtraHeight, -0.25f, 5.2f);
                 targetPosition = new Vector3(clampedX, clampedY, baseCameraPosition.z);
             }
+            else if (aimWeight > 0.001f)
+            {
+                // Aim framing: slide toward the sling the player is pulling so the pouch and
+                // the keep being aimed at share the screen. The old fixed frame put the
+                // sling at the very edge, so a player pulling could not see their target.
+                targetPosition = new Vector3(
+                    CameraFraming.AimCenterX(boardCenter.x, PlayerSlingX(), aimWeight),
+                    baseCameraPosition.y,
+                    baseCameraPosition.z);
+            }
 
             mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, targetPosition, 1f - Mathf.Exp(-followLerp * Time.deltaTime));
+
 
             if (pixelSnapCamera)
             {
@@ -112,10 +134,52 @@ namespace CastleBusters
 
         private void FitCameraToAspect()
         {
-            mainCamera.orthographicSize = CalculateOrthographicSize(
-                targetHalfHeight, desiredWorldWidth, mainCamera.aspect);
+            // The fitted size is the board-must-fit rule; player zoom and aim framing are
+            // multipliers ON that fit, never replacements for it, so no combination of
+            // scroll and aiming can crop the field below the authored framing.
+            fittedSize = CalculateOrthographicSize(targetHalfHeight, desiredWorldWidth, mainCamera.aspect);
+            float zoom = CameraFraming.ClampZoom(playerZoom) * CameraFraming.AimZoomMultiplier(aimWeight);
+            mainCamera.orthographicSize = fittedSize * zoom;
             baseCameraPosition = new Vector3(boardCenter.x, boardCenter.y, mainCamera.transform.position.z);
         }
+
+        /// <summary>
+        /// Wheel (desktop) and two-finger pinch (touch). Never a drag: a single press and
+        /// drag anywhere on the board is the launch gesture, and sharing that channel would
+        /// turn every attempted pan into a spent, zero-power volley.
+        /// </summary>
+        private void HandleZoomInput()
+        {
+            if (!allowPlayerZoom) return;
+
+            float scroll = Input.mouseScrollDelta.y;
+            if (Input.touchCount == 2)
+            {
+                Touch a = Input.GetTouch(0), b = Input.GetTouch(1);
+                float previous = ((a.position - a.deltaPosition) - (b.position - b.deltaPosition)).magnitude;
+                float current = (a.position - b.position).magnitude;
+                scroll += (current - previous) * 0.01f;
+            }
+
+            if (Mathf.Abs(scroll) > 0.001f)
+            {
+                playerZoom = CameraFraming.ApplyZoomInput(playerZoom, scroll);
+            }
+        }
+
+        /// <summary>True while the player is drawing the sling — drives aim framing.</summary>
+        private bool IsPlayerDrawing()
+        {
+            var gm = GameManager.Instance;
+            if (gm == null || gm.currentState != GameState.PlayerTurn || !gm.IsPlayerTurn) return false;
+            if (launchManager == null) launchManager = FindObjectOfType<LaunchManager>();
+            return launchManager != null && launchManager.IsAiming;
+        }
+
+        private LaunchManager launchManager;
+
+        /// <summary>The player's sling x, read from the live ring rules (stage-aware).</summary>
+        private static float PlayerSlingX() => LaunchRingRules.PlayerRingX;
 
         private void FitBackgroundToCamera()
         {

@@ -124,19 +124,30 @@ namespace CastleBusters.Tests
         }
 
         [Test]
-        public void LaunchedBodyFootprint_MatchesTheLiveDefectTraceScale()
+        public void LaunchedBodyFootprint_EqualsTheAuthoredBodyAndStaysUnderOneBlock()
         {
-            // The footprint band only protects the muzzle if the resolver keeps reporting
-            // the REAL launched collider. The live trace measured the Knight at 2.64u
-            // half-width (5.28u collider vs 0.93u rendered art — the documented mismatch).
-            // If this shrinks, someone has done the collider/art rebalance: delete this
-            // guard together with that work, and re-derive every keg position, because the
-            // footprint band and possibly the removed ±11 wing kegs become renegotiable.
-            Bounds knight = UnitController.EstimateLaunchedWorldColliderBounds(
-                LoadPrefab("Assets/Prefabs/Knight.prefab"));
-            Assert.That(knight.extents.x, Is.EqualTo(2.64f).Within(0.15f),
-                "Knight launched half-width moved — the keg placement bands were derived " +
-                "against 2.64u (live trace 2026-08-12). Re-derive stage keg positions.");
+            // History: this guard was written on 2026-08-12 pinning 2.64u, the half-width a
+            // Knight ACTUALLY had when its collider was derived from whichever sprite was
+            // current — 5.28u of hitbox behind 0.93u of art, which is how a launched knight
+            // detonated a keg 3.3u away on frame 1. The 2026-08-13 pass replaced that rule
+            // with an authored body size, so the guard now pins the property that matters:
+            // the launched footprint IS the authored body, and a soldier is not wider than
+            // the wall blocks it is thrown at.
+            var prefab = LoadPrefab("Assets/Prefabs/Knight.prefab");
+            var unit = prefab.GetComponent<UnitController>();
+            Assert.IsNotNull(unit, "the knight prefab must carry its UnitController");
+
+            Bounds knight = UnitController.EstimateLaunchedWorldColliderBounds(prefab);
+            Vector2 authored = UnitController.BodyWorldColliderSize(
+                unit.bodyWorldHeight, unit.colliderVisualCoverage);
+
+            Assert.That(knight.size.x, Is.EqualTo(authored.x).Within(0.001f),
+                "the launched footprint must equal the authored body — no sprite may resize it");
+            Assert.That(knight.size.y, Is.EqualTo(authored.y).Within(0.001f),
+                "the launched footprint must equal the authored body — no sprite may resize it");
+            Assert.That(knight.size.x, Is.LessThan(1.5f),
+                "a soldier wider than ~1.5u re-opens the muzzle-footprint defect family: it " +
+                "starts overlapping neighbouring board furniture the moment it spawns");
         }
     }
 }

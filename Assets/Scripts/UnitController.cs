@@ -36,7 +36,6 @@ namespace CastleBusters
 
             return new Vector2(windForce / Mathf.Max(MinRuntimeMass, mass), 0f);
         }
-        private const float ReferenceVisualScale = 0.42f;
         // Shared ally/enemy multiply-tint for sprites. UnitSpriteAnimator (Knight/Archer)
         // and ExplosiveGimmick (the powder-keg gimmick, which owns its own sprite and does NOT
         // use UnitSpriteAnimator - see the isGimmickVisual check in Awake below) both read these
@@ -75,7 +74,18 @@ namespace CastleBusters
 
 
         [Header("Presentation Scale")]
-        public float visualScale = 0.48f; // prefabs serialize the same value; enlarged hero pass
+        // Authored body height in WORLD units — not a sprite multiplier (2026-08-13).
+        // The old `visualScale` multiplied whatever sprite happened to be current, and three
+        // different sprites reach one soldier: the prefab placeholder (15.36u), the generated
+        // frame on disk (5.12u), and the atlas-packed frame at runtime (1.62u). One
+        // multiplier over three natives produced three different bodies, which is how a
+        // knight's hitbox ended up 5.28u wide behind 0.93u of art.
+        //
+        // 1.15u: a head taller than the 1u wall blocks it besieges (2026-08-13 request:
+        // 궁수/기사 크기 확대 — the old body drew ~0.78u, two thirds of a block).
+        public float bodyWorldHeight = 1.15f;
+        // Hitbox as a fraction of that body. The collider is now a pure function of these
+        // two numbers, so what you author is what collides.
         public float colliderVisualCoverage = 0.82f;
         public float trailWidthScale = 0.18f;
         [Header("QA Safeguards")]
@@ -228,29 +238,74 @@ namespace CastleBusters
         private void ApplyPlayableScaleAndCollider()
         {
             if (GetComponent<ExplosiveGimmick>() != null) return;
-            visualScale = Mathf.Max(0.01f, visualScale);
+            bodyWorldHeight = Mathf.Max(0.1f, bodyWorldHeight);
+
+            Sprite displayed = ResolveDisplayedSprite(this, GetComponentInChildren<SpriteRenderer>(true));
 
             // Wider stages frame more world, so a fixed-size body renders smaller there.
-            // Folding the stage factor in here keeps a soldier the same size on screen on
-            // every board. The serialized visualScale is deliberately not overwritten —
-            // this must not compound if the method runs twice.
-            float renderScale = Mathf.Max(0.01f, visualScale * GameManager.StageActorVisualScale);
-
+            // Folding the stage factor in keeps a soldier the same size on screen on every
+            // board; the collider below deliberately excludes it, so world hitboxes stay
+            // stage-invariant while the art scales.
+            float renderScale = RenderScaleFor(displayed, bodyWorldHeight) * GameManager.StageActorVisualScale;
+            renderScale = Mathf.Max(0.001f, renderScale);
             transform.localScale = new Vector3(renderScale, renderScale, 1f);
 
-            var sr = GetComponentInChildren<SpriteRenderer>(true);
             var box = GetComponent<BoxCollider2D>();
-            if (sr != null && sr.sprite != null && box != null)
+            if (box != null)
             {
-                Vector2 spriteSize = sr.sprite.bounds.size;
-                // Dividing by the same factor the transform multiplies by leaves world
-                // collider extents identical on every stage: art scales, hitboxes do not.
-                float referenceScaleRatio = ReferenceVisualScale / renderScale;
-                box.size = new Vector2(
-                    Mathf.Max(0.25f / renderScale, spriteSize.x * colliderVisualCoverage * referenceScaleRatio),
-                    Mathf.Max(0.25f / renderScale, spriteSize.y * colliderVisualCoverage * referenceScaleRatio));
-                box.offset = sr.sprite.bounds.center;
+                Vector2 world = BodyWorldColliderSize(bodyWorldHeight, colliderVisualCoverage);
+                // Authored in LOCAL units: dividing by the factor the transform multiplies
+                // by leaves world extents identical on every stage.
+                box.size = new Vector2(world.x / renderScale, world.y / renderScale);
+                box.offset = displayed != null ? (Vector2)displayed.bounds.center : Vector2.zero;
             }
+        }
+
+        /// <summary>
+        /// The sprite the body actually renders with, used ONLY to derive the scale that
+        /// fits it to <see cref="bodyWorldHeight"/> — never to decide how big the body is.
+        ///
+        /// Awake runs before <see cref="UnitSpriteAnimator"/> swaps in the generated frame
+        /// set, so reading the renderer here saw the prefab's placeholder art instead
+        /// (15.36u native vs the generated frame). Worse, the runtime frame arrives through
+        /// <see cref="SpriteAtlasPacker"/>, which resamples 512px source art into an atlas
+        /// cell — live-measured 1.62u against 5.12u on disk. Any sizing rule that reads a
+        /// sprite therefore produced three different bodies (prefab / raw / packed) for one
+        /// soldier. Fitting to an authored world height makes all three identical.
+        /// </summary>
+        public static Sprite ResolveDisplayedSprite(UnitController unit, SpriteRenderer fallbackRenderer)
+        {
+            if (unit != null)
+            {
+                var frames = Resources.LoadAll<Sprite>($"GeneratedUnitFrames/{unit.unitType}/Idle");
+                if (frames != null && frames.Length > 0)
+                {
+                    System.Array.Sort(frames, (a, b) => string.CompareOrdinal(a.name, b.name));
+                    var raw = frames[0];
+                    var packer = SpriteAtlasPacker.Instance;
+                    return packer != null ? (packer.GetPackedSprite(raw) ?? raw) : raw;
+                }
+            }
+            return fallbackRenderer != null ? fallbackRenderer.sprite : null;
+        }
+
+        /// <summary>Scale that draws <paramref name="displayed"/> at the authored height.</summary>
+        public static float RenderScaleFor(Sprite displayed, float bodyWorldHeight)
+        {
+            if (displayed == null) return Mathf.Max(0.01f, bodyWorldHeight);
+            float native = Mathf.Max(0.0001f, displayed.bounds.size.y);
+            return Mathf.Max(0.001f, bodyWorldHeight / native);
+        }
+
+        /// <summary>
+        /// World hitbox for a body authored at <paramref name="bodyWorldHeight"/>. A pure
+        /// function of authored intent — no sprite, no PPU, no atlas state — so the aim
+        /// preview, the runtime body, and EditMode all read one number.
+        /// </summary>
+        public static Vector2 BodyWorldColliderSize(float bodyWorldHeight, float coverage)
+        {
+            float h = Mathf.Max(0.1f, bodyWorldHeight) * Mathf.Clamp(coverage, 0.05f, 1f);
+            return new Vector2(h, h);
         }
 
         /// <summary>
@@ -282,18 +337,19 @@ namespace CastleBusters
             }
 
             var unit = prefab.GetComponent<UnitController>();
-            if (unit != null && sprite != null)
+            if (unit != null)
             {
-                // Must mirror ApplyPlayableScaleAndCollider exactly, stage factor included:
-                // the runtime offset is the sprite centre times the *rendered* scale, so a
-                // prediction using the bare visualScale would drift on the wider stages and
-                // the aim preview would start from the wrong point.
-                float renderScale = Mathf.Max(0.01f, unit.visualScale * GameManager.StageActorVisualScale);
-                Vector2 spriteSize = sprite.bounds.size;
-                Vector2 size = new Vector2(
-                    Mathf.Max(0.25f, spriteSize.x * unit.colliderVisualCoverage * ReferenceVisualScale),
-                    Mathf.Max(0.25f, spriteSize.y * unit.colliderVisualCoverage * ReferenceVisualScale));
-                Vector2 center = sprite.bounds.center * renderScale;
+                // Must mirror ApplyPlayableScaleAndCollider exactly, or the aim preview
+                // casts a different body than the one that flies. Size comes from authored
+                // intent (no sprite), so preview/runtime/EditMode cannot disagree; only the
+                // offset needs the sprite, because the runtime offset is the sprite centre
+                // inside the scaled transform.
+                Sprite displayed = ResolveDisplayedSprite(unit, spriteRenderer);
+                Vector2 size = BodyWorldColliderSize(unit.bodyWorldHeight, unit.colliderVisualCoverage);
+                float renderScale = RenderScaleFor(displayed, unit.bodyWorldHeight) * GameManager.StageActorVisualScale;
+                Vector2 center = displayed != null
+                    ? (Vector2)displayed.bounds.center * Mathf.Max(0.001f, renderScale)
+                    : Vector2.zero;
                 return new Bounds(center, new Vector3(size.x, size.y, 0f));
             }
 

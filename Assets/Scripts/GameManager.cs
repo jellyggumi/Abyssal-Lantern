@@ -550,7 +550,7 @@ namespace CastleBusters
         // for Stage3's wider player-to-player gap. Stage1/Stage2's 14.5 default keeps every
         // existing caller/test byte-identical when either is active (the only stages EditMode
         // tests ever see, since they call Awake()/CreateGround() directly and never Start()).
-        public static float LaunchApronAbsX = 14.5f;  // was 12 — launch offset from core is 5.5
+        public static float LaunchApronAbsX = 17.0f;  // widened board pass 2026-08-13 (was 14.5)
         // Two kegs, not four (defect fix 2026-08-12): the old ±11 pair sat 3.5u from the
         // muzzles — INSIDE the launched Knight's 2.64u-half-width spawn footprint plus keg
         // half-width, so the player's very first knight volley contacted the keg on frame 1,
@@ -573,9 +573,9 @@ namespace CastleBusters
 
         public static readonly Vector3[] InitialGatePositions =
         {
-            new Vector3(-15f, 5.4f, 0f),   // Multiply — deep player wing (aerial, arc-reachable)
+            new Vector3(-17.5f, 5.4f, 0f), // Multiply — deep player wing (aerial, arc-reachable)
             new Vector3(0f, 6.1f, 0f),     // PowerUp — apex over the bridge
-            new Vector3(15f, 4.9f, 0f),    // Reduce — deep enemy wing (aerial, arc-reachable)
+            new Vector3(17.5f, 4.9f, 0f),  // Reduce — deep enemy wing (aerial, arc-reachable)
         };
 
         private void EnsureFieldDirector()
