@@ -47,7 +47,7 @@ namespace CastleBusters.Tests
             // result needs confirming rather than re-collecting two that already agree with the B1
             // match data. Stage1 5445 / 3.82x and Stage2 5225 / 3.11x are in
             // qa/evidence/match-length/castle-material-census.md.
-            foreach (var stage in new[] { StageId.Stage3 })
+            foreach (var stage in new[] { StageId.Stage1, StageId.Stage2, StageId.Stage3 })
             {
                 LogAssert.ignoreFailingMessages = true;
                 GameManager.PendingStage = stage;
@@ -73,29 +73,36 @@ namespace CastleBusters.Tests
                 var castle = gm.enemyCastle;
                 Assert.IsNotNull(castle, $"{stage}: enemy castle missing");
 
-                // Group live blocks by name prefix, which is how the spawners label their output.
-                var buckets = new Dictionary<string, (int count, float hp)>();
-                float liveTotal = 0f;
-                int groundAnchors = 0;
-                float groundHp = 0f;
+                // Classify by ROLE, not by the isGroundAnchor flag. The first census excluded
+                // anchors and called the remainder "non-ground", but CreateGround parents every
+                // ground tile under a castle (GameManager:1579-1580) and leaves the breakable top
+                // rows non-anchored - so terrain landed in the castle's material total. That is
+                // where the reported "material is understated 3.1-3.8x" came from.
+                //
+                // Three roles, because they answer different questions:
+                //   keep      - gates the win condition: wall courses, scene-authored blocks, core.
+                //   terrain   - absorbs shots but gates nothing: breakable ground tiles.
+                //   immovable - anchors; cannot be destroyed at all.
+                var buckets = new Dictionary<string, (int count, float hp, string role)>();
+                float keepTotal = 0f, terrainTotal = 0f, immovableTotal = 0f;
+                int immovableCount = 0;
 
                 foreach (var b in castle.GetComponentsInChildren<DestructibleBlock>(true))
                 {
                     if (b == null) continue;
-                    if (b.isGroundAnchor)
-                    {
-                        groundAnchors++;
-                        groundHp += Mathf.Max(0f, b.currentHP);
-                        continue;
-                    }
+                    float hp = Mathf.Max(0f, b.currentHP);
 
                     string name = b.name;
                     int underscore = name.IndexOf('_');
                     string prefix = underscore > 0 ? name.Substring(0, underscore) : name;
 
-                    if (!buckets.TryGetValue(prefix, out var cur)) cur = (0, 0f);
-                    buckets[prefix] = (cur.count + 1, cur.hp + Mathf.Max(0f, b.currentHP));
-                    liveTotal += Mathf.Max(0f, b.currentHP);
+                    string role;
+                    if (b.isGroundAnchor) { role = "immovable"; immovableTotal += hp; immovableCount++; }
+                    else if (prefix == "GroundBlock") { role = "terrain"; terrainTotal += hp; }
+                    else { role = "keep"; keepTotal += hp; }
+
+                    if (!buckets.TryGetValue(prefix, out var cur)) cur = (0, 0f, role);
+                    buckets[prefix] = (cur.count + 1, cur.hp + hp, role);
                 }
 
                 // What the model counts.
@@ -107,25 +114,24 @@ namespace CastleBusters.Tests
                 float stoneHp = stone != null ? stone.maxHP : 85f;
                 float modelMaterial = modelBlocks * stoneHp + CastleCoreGimmick.CoreMaxHP;
 
-                Debug.Log($"[census] {stage}: live non-ground HP {liveTotal:F0} across "
-                          + $"{buckets.Count} name groups | model says {modelMaterial:F0} "
-                          + $"({modelBlocks} blocks x {stoneHp} + core) | ratio {liveTotal / modelMaterial:F2}x");
-                Debug.Log($"[census] {stage}: ground anchors excluded: {groundAnchors} blocks, {groundHp:F0} HP");
+                Debug.Log($"[census] {stage}: keep {keepTotal:F0} | terrain {terrainTotal:F0} | "
+                          + $"immovable {immovableTotal:F0} ({immovableCount}) | model {modelMaterial:F0} "
+                          + $"| keep/model {keepTotal / modelMaterial:F2}x");
 
                 report.AppendLine($"## {stage}");
                 report.AppendLine();
                 report.AppendLine($"- 모델 입력: **{modelMaterial:F0}** ({modelBlocks}블록 × {stoneHp} + 코어 {CastleCoreGimmick.CoreMaxHP})");
-                report.AppendLine($"- 실제 비지면 재료: **{liveTotal:F0}** → **{liveTotal / modelMaterial:F2}배**");
-                report.AppendLine($"- 제외된 지면 앵커: {groundAnchors}블록 / {groundHp:F0} HP");
+                report.AppendLine($"- **승리를 막는 재료 (keep)**: **{keepTotal:F0}** → **{keepTotal / modelMaterial:F2}배**");
+                report.AppendLine($"- 발사를 흡수하나 승리와 무관 (terrain): {terrainTotal:F0}");
+                report.AppendLine($"- 파괴 불가 (immovable): {immovableCount}블록 / {immovableTotal:F0} HP");
                 report.AppendLine();
-                report.AppendLine("| 이름 그룹 | 개수 | HP 합 | 모델이 세는가 |");
-                report.AppendLine("|---|---:|---:|---|");
+                report.AppendLine("| 이름 그룹 | 개수 | HP 합 | 역할 | 모델이 세는가 |");
+                report.AppendLine("|---|---:|---:|---|---|");
                 foreach (var kv in buckets)
                 {
-                    // The model's census walks KeepProfile courses only, so anything not named as a
-                    // keep block is material the pacing equation never sees.
-                    bool counted = kv.Key.StartsWith("Block") || kv.Key.StartsWith("WallBlock");
-                    report.AppendLine($"| `{kv.Key}` | {kv.Value.count} | {kv.Value.hp:F0} | {(counted ? "예" : "**아니오**")} |");
+                    // The model's M = b·h + c counts runtime wall courses and the core only.
+                    bool counted = kv.Key == "WallBlock";
+                    report.AppendLine($"| `{kv.Key}` | {kv.Value.count} | {kv.Value.hp:F0} | {kv.Value.role} | {(counted ? "예" : "**아니오**")} |");
                 }
                 report.AppendLine();
             }

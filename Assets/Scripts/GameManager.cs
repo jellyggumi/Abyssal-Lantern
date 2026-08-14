@@ -237,10 +237,20 @@ namespace CastleBusters
             {
                 if (cachedRampTurns > 0) return cachedRampTurns;
 
+                // The keep's ACTUAL hit points, course by course and material by material, not
+                // blocks x stone. The all-stone approximation drifted 0.90x / 1.04x / 1.19x per
+                // stage because no stage is all stone: Stage1 is W,S,S,I and Stage3 is W,W,W,I.
+                // KeepWallHitPoints already walks what spawns - the pacing gate uses it, and the
+                // ramp reading a different figure meant two numbers claimed to be "material".
+                // Measured in qa/evidence/match-length/castle-material-census-by-role.md.
+                var wood = Resources.Load<BlockData>("WoodBlockData");
                 var stone = Resources.Load<BlockData>("StoneBlockData");
-                float blockHealth = stone != null ? stone.maxHP : 85f;
-                float material = MatchLengthModel.Material(
-                    BlocksPerKeep(ActiveLayout.wallHeightBlocks), blockHealth, CastleCoreGimmick.CoreMaxHP);
+                var iron = Resources.Load<BlockData>("IronBlockData");
+                float material = KeepWallHitPoints(
+                    ActiveLayout,
+                    wood != null ? wood.maxHP : 30f,
+                    stone != null ? stone.maxHP : 85f,
+                    iron != null ? iron.maxHP : 150f) + CastleCoreGimmick.CoreMaxHP;
 
                 cachedRampTurns = Mathf.Max(1, Mathf.RoundToInt(
                     MatchLengthModel.TurnsToDecide(material, MatchLengthModel.EffectiveDamagePerTurn)));
