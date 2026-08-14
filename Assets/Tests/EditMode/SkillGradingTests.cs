@@ -638,9 +638,18 @@ namespace CastleBusters.Tests
         /// §3.2 does not treat "light" as taste; it quotes it — "a handicap system that is a little
         /// light provides a reasonable environment for the rapidly-improving player" — and notes the
         /// same page calls traditional handicap stones an UNDER-compensation by their own arithmetic.
-        /// §4.5 turns that into a number: one grade pays 20% of the ramp's 1.7 span, not 100%,
-        /// because repaying the gap in full deletes the skill difference the scale exists to
-        /// measure. Qualitative claims rot; this makes the claim checkable.
+        /// §4.5 turns that into arithmetic: a grade pays the ceiling divided by the widest grade
+        /// gap, which against the ramp's 1.7 span is 13.7% — not the 100% that repaying the gap in
+        /// full would cost, because that deletes the skill difference the scale exists to measure.
+        /// The first version paid a flat 0.35 (20.6%) and that is the version which lost a rung, so
+        /// the repair moved the compensation TOWARD the source §3.2 quotes rather than away from it:
+        /// keeping four grades distinct and making each step lighter were the same edit.
+        ///
+        /// No literal percentage is asserted below, deliberately. This docstring said "20%" for a
+        /// while after the constant became `cap / 3`, and so did the failure message — prose citing
+        /// a number that the code derives goes stale silently, which is the same class of drift as
+        /// the ramp reading a keep that did not exist (`StageProgressionShapeTests`). The assertions
+        /// compute the live figure and print it; the design's reasoning is what they name.
         ///
         /// Both the step and the ceiling are held under half the span, since the design's phrasing
         /// is "lighter than half" and the ceiling is the value a real Novice actually receives.
@@ -653,10 +662,11 @@ namespace CastleBusters.Tests
             float half = RampSpan * 0.5f;
 
             Assert.Less(SkillGrading.AimErrorPerGrade, half,
-                $"one grade pays {SkillGrading.AimErrorPerGrade:F2} of a {RampSpan:F2} ramp span "
+                $"one grade pays {SkillGrading.AimErrorPerGrade:F3} of a {RampSpan:F2} ramp span "
                 + $"({SkillGrading.AimErrorPerGrade / RampSpan:P1}), which is at or past half. §3.2 "
-                + "cites a primary source for a LIGHT handicap and §4.5 fixed the first value at "
-                + "20%; paying a grade gap in full flattens the skill difference the scale measures");
+                + "cites a primary source for a LIGHT handicap and §4.5 derives the step as the "
+                + "ceiling over the widest grade gap; paying a grade gap in full flattens the skill "
+                + "difference the scale measures");
 
             Assert.Less(SkillGrading.MaximumHandicapAimError, half,
                 $"the ceiling is {SkillGrading.MaximumHandicapAimError:F2} of a {RampSpan:F2} span "
