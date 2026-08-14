@@ -119,6 +119,40 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   blockers, and human-only judgments.
 - Numbers gate everything (G1–G8, `skill://game-studio-harness`). No adjective
   passes a gate.
+- **`-nographics` for PlayMode probes, except captures.** The MCP plugin's
+  `BufferedFileLogStorage` hangs the domain reload: the same probe times out at
+  300s with graphics and finishes in ~42s without. But `cam.Render()` segfaults
+  without a graphics device, so a probe that writes PNGs must run WITH graphics
+  and accept the hang risk. Cost four aborted runs in cycle 2 before anyone
+  noticed the two requirements conflict.
+
+### Invariants earned the hard way (violating these has already cost us)
+
+- **A test must measure the quantity the code produces.** A blink clamp was
+  applied to a phase *rate* while the code produced the derivative of
+  `t × rate`; the test asserted the rate, passed, and certified a WCAG violation
+  as safe. A test that certifies safety it never measured is worse than no test.
+  When a value is derived, assert the derived thing — count the real output.
+- **A floor-type requirement is only valid where its target does not compete for
+  size with something else** (N-26). `HudCanvas.LegibleFloorPixels` is a
+  screen-space constant; applied to a world-space label it demands a font size at
+  which the annotation grows larger than the soldier it annotates. Carrying a
+  screen-space constant into world space breaks its premise silently.
+- **Presentation that reports a count must be bound to the event, not to the
+  state.** A 0.625s attack clip looped for a 1.5s cooldown showed 2.40 swings per
+  one damage event. Players count swings; a looping clip lies about the number.
+- **One owner per render channel.** `sr.color` was written by buffs, by expiry
+  blinks, and by the animator's per-frame team tint — so buff colour rendered for
+  zero frames. Anything wanting to tint a unit goes through the animator, which
+  composes flash over status over team.
+- **Greyscale art times a neutral tint is invisible on bright ground.** Art here
+  is authored greyscale and code multiplies colour in, so `Color.white` leaves the
+  result colourless — measured as the "white square" report. Tints on effect art
+  need saturation (pinned at ≥0.35).
+- **Ask the scene, not the source, when pixels are the question.** Two wrong
+  diagnoses in cycle 2 came from reading code about a frame nobody had captured.
+  Enumerate the renderers at the position, then switch the suspect off and measure
+  the difference.
 
 ## 6. Web build & deployment
 
