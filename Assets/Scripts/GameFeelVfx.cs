@@ -172,26 +172,19 @@ namespace CastleBusters
         /// <summary>
         /// A short world-space label above a world position.
         ///
-        /// <para><b>Size.</b> The default was 2.7 and melee hits passed 1.9, which put one em at
-        /// 4.32px and 2.29px respectively at 1024x576 — against
-        /// <see cref="HudCanvas.LegibleFloorPixels"/> of 12px that `design/visibility-spec.md`
-        /// already promised for "every label". World <c>TextMeshPro</c> takes TMP's 0.1 scale branch
-        /// (<c>m_isOrthographic</c> is set only by <c>TextMeshProUGUI</c>), so one em is
-        /// <c>fontSize * 0.1</c> world units regardless of the camera being orthographic.</para>
-        ///
-        /// <para><b>Why this is 5.0 and not 9.96.</b> Clearing 12px at the worst framing (zoom 1.6 x
-        /// aim 1.18) needs fontSize 9.96, and satisfying it while fully opaque needs 13.28 once the
-        /// spawn bounce is counted. A soldier's body is 1.15 world units
-        /// (<c>Knight.prefab:137</c>), so those sizes make the annotation 0.87x and 1.15x the actor
-        /// it annotates — the label would be as large as the soldier. 5.0 is the largest size that
-        /// stays at half the body height, and it reaches 6.63px at worst framing: still 1.81x under
-        /// the floor, stated here rather than papered over, while clearing it at default framing. The floor is a screen-space HUD
-        /// constant, and a world label cannot meet it without dwarfing the world.</para>
+        /// <para><b>Size.</b> The floor, the arithmetic behind it, and the shortfall it accepts all
+        /// live on <see cref="MinWorldLabelFontSize"/> — deliberately in ONE place. This docstring
+        /// used to restate the derivation, and when the constant moved 5.0 to 5.5 only one copy was
+        /// updated: two comments in this file then disagreed about the same number, inside the very
+        /// text that records why the shortfall is accepted. That is the fifth comment-versus-code
+        /// mismatch in this cycle and the second inside a rule written to prevent them. Duplicated
+        /// arithmetic structurally guarantees a half-update, so there is now one owner and everything
+        /// else points at it.</para>
         ///
         /// <para><b>Consequence.</b> Because this channel cannot carry sustained state legibly, the
         /// unit's own animation carries it instead — see <c>UnitSpriteAnimator.PulseAttack</c>, where
-        /// one swing now means one damage event. Labels report discrete moments; the sprite reports
-        /// what the soldier is doing.</para>
+        /// one swing means one damage event. Labels report discrete moments; the sprite reports what
+        /// the soldier is doing.</para>
         /// </summary>
         public static void SpawnFeedbackLabel(Vector3 position, string message, Color color, float fontSize = MinWorldLabelFontSize, float lifetime = 0.65f)
         {

@@ -1,0 +1,7 @@
+[b1] Stage1: decided after 42 turns, 22 player shots, 127.4s wall clock
+[b1] Stage1: measured d=96.59 (model 37) s=3.48s (model 7.5) hitRate=73%
+[b1] Stage2: decided after 11 turns, 6 player shots, 41.6s wall clock
+[b1] Stage2: measured d=128.33 (model 37) s=4.22s (model 7.5) hitRate=83%
+[b1] Stage3: decided after 31 turns, 16 player shots, 84.8s wall clock
+[b1] Stage3: measured d=5.31 (model 37) s=3.07s (model 7.5) hitRate=19%
+[b1] wrote _workspace/current/qa/evidence/match-length/b1-measurement.md

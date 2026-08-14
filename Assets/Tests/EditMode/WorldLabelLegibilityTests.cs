@@ -150,6 +150,62 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
+        /// The docstring's stated figures must match the constant they describe.
+        ///
+        /// This exists because the drift actually happened: the constant moved 5.0 to 5.5 and one of
+        /// two duplicated docstrings kept saying 5.0, inside the very passage that records why the
+        /// shortfall is accepted. A reader reaching for the ceiling would have found the wrong one.
+        /// It was the fifth comment-versus-code mismatch of the cycle, and the second inside a rule
+        /// written to stop them.
+        ///
+        /// Automating "does prose agree with code" is only tractable because the arithmetic now has
+        /// a single owner — with the derivation duplicated, this test would have had to guess which
+        /// copy was authoritative. Deduplication is what made the guard possible, and the guard is
+        /// what keeps the deduplication from being undone.
+        /// </summary>
+        [Test]
+        public void TheDocstringFiguresMatchTheConstant()
+        {
+            const string path = "Assets/Scripts/GameFeelVfx.cs";
+            Assert.IsTrue(System.IO.File.Exists(path), $"precondition: {path} must exist");
+
+            var doc = new System.Text.StringBuilder();
+            foreach (var line in System.IO.File.ReadAllLines(path))
+            {
+                var t = line.TrimStart();
+                if (t.StartsWith("///")) doc.Append(t).Append('\n');
+            }
+            var prose = doc.ToString();
+
+            float floor = GameFeelVfx.MinWorldLabelFontSize;
+            float worst = EmPixels(floor, WorstZoom);
+            float best = EmPixels(floor, CameraFraming.MinZoom);
+            float shortfall = HudCanvas.LegibleFloorPixels / worst;
+
+            // Every claim the prose makes about this constant, checked against the constant.
+            (string claim, bool present)[] required =
+            {
+                ($"{floor:0.0} is therefore a deliberate compromise", prose.Contains($"{floor:0.0} is therefore a deliberate compromise")),
+                ($"worst-framing px {worst:0.00}", prose.Contains($"{worst:0.00}px at the worst framing")),
+                ($"shortfall {shortfall:0.00}x", prose.Contains($"{shortfall:0.00}x")),
+                ($"default-framing px {best:0.00}", prose.Contains($"{best:0.00}px")),
+            };
+
+            foreach (var r in required)
+            {
+                Assert.IsTrue(r.present,
+                    $"the docstring on MinWorldLabelFontSize no longer states \"{r.claim}\", which the "
+                    + $"constant {floor} now implies. Update the prose, or the next reader will trust a "
+                    + "stale number in the passage that justifies the shortfall");
+            }
+
+            // And the superseded value may appear only as history, never as a live claim.
+            Assert.IsFalse(prose.Contains("5.0 is the largest size"),
+                "a docstring still asserts 5.0 as the ceiling; the ceiling is "
+                + $"{floor} and 5.0 may only appear as a record of what it used to be");
+        }
+
+        /// <summary>
         /// Diagnostics must not reach players.
         ///
         /// Six recovery messages were shipping on the same channel as the labels that describe the

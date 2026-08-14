@@ -126,5 +126,72 @@ namespace CastleBusters.Tests
                 SiegePacingSimulation.MaximumAverageSeconds));
             Assert.That(earlyEnds, Is.LessThanOrEqualTo(SiegePacingSimulation.MaximumEarlyEndMatches));
         }
+
+        /// <summary>
+        /// The model attributes all of a keep's loss to the attacker, and a live match does not.
+        ///
+        /// `M = b·h + c` with `N = M/d` has exactly one damage term, so it says: one side removes the
+        /// other's material at rate d. B1 measured three full matches
+        /// (`qa/b1-measurement-findings.md`) and found 39%, 42% and 67% of the enemy's material loss
+        /// was inflicted by the enemy itself — the launch apron sits at ±17 while its own keep
+        /// courses stand at ±4..7, so a shallow shot fires into its own wall. Stage3 is the extreme:
+        /// the player dealt 85 while the enemy did 175 to itself, and the match still resolved.
+        ///
+        /// This test does not assert a corrected model. It asserts the current one cannot be repaired
+        /// by recalibrating d, because the arithmetic shows what recalibration would silently do:
+        /// fold the enemy's self-damage into the player's damage term, after which no material or
+        /// pacing change can be read. That is why B2 and B3 stay blocked on a model change rather
+        /// than on a better constant.
+        /// </summary>
+        [Test]
+        public void RecalibratingDamagePerTurn_WouldAbsorbTheEnemysSelfDamage()
+        {
+            // Measured in the B1 run, Stage1.
+            const float playerDealt = 2125f;
+            const float enemySelfInflicted = 1332f;
+            const int playerShots = 22;
+
+            float naiveD = (playerDealt + enemySelfInflicted) / playerShots;   // what a probe sees
+            float honestD = playerDealt / playerShots;                         // the player's own rate
+
+            Assert.Greater(naiveD, honestD * 1.5f,
+                $"a naive recalibration reads d={naiveD:F1} where the player's own contribution is "
+                + $"{honestD:F1} - a {naiveD / honestD:F2}x overstatement, entirely from damage the "
+                + "enemy did to itself");
+
+            Assert.Less(MatchLengthModel.EffectiveDamagePerTurn, honestD,
+                $"d={MatchLengthModel.EffectiveDamagePerTurn} is below even the player-only rate "
+                + $"({honestD:F1}) in Stage1, while being 7x ABOVE the Stage3 rate (5.31). One "
+                + "constant cannot straddle a 24x spread between stages");
+        }
+
+        /// <summary>
+        /// d is a distribution, not a constant, and a single number erases the part that matters.
+        ///
+        /// Stage3's median damage per shot is ZERO — 13 of 16 shots did nothing — while its mean is
+        /// 5.31. A model consuming only the mean cannot express "most shots accomplish nothing",
+        /// which is precisely the complaint that opened this investigation.
+        /// </summary>
+        [Test]
+        public void TheMeasuredDamagePerTurn_HasATailAConstantCannotCarry()
+        {
+            // Stage3 per-shot damage, from qa/evidence/match-length/b1-measurement.md.
+            float[] stage3 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 50, 0 };
+
+            var sorted = (float[])stage3.Clone();
+            System.Array.Sort(sorted);
+            float median = sorted[sorted.Length / 2];
+
+            float mean = 0f;
+            foreach (var v in stage3) mean += v;
+            mean /= stage3.Length;
+
+            Assert.AreEqual(0f, median, 0.001f,
+                "more than half of Stage3's shots deal nothing at all");
+            Assert.Greater(mean, median,
+                $"the mean ({mean:F2}) sits above the median ({median:F2}) because two shots carry "
+                + "94% of the total - reporting that mean as 'damage per turn' describes a turn that "
+                + "almost never happens");
+        }
     }
 }
