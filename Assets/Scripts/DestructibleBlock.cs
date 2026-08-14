@@ -226,8 +226,16 @@ namespace CastleBusters
             GameFeelVfx.SpawnDamageNumber(transform.position, damage, new Color(1f, 0.85f, 0.25f, 1f));
             GameFeelVfx.SpawnImpactBurst(transform.position, feedbackColor, Mathf.Clamp(damage / 35f, 0.45f, 1.8f), spriteRenderer != null ? spriteRenderer.sprite : null, false);
             // Dedicated star-flash impact frames on top of the procedural burst; size tracks damage.
+            //
+            // Tinted warm, not white. A/B measurement (qa/impact-white-square.md): with this flash
+            // on screen the impact carries pale NEUTRAL pixels (209,209,207); disabling it takes
+            // them to zero. The art is authored greyscale and the tint multiplies into it, so
+            // Color.white left it colourless - and colourless over bright grass and sky is the
+            // "white square" that was reported, since nothing else at the impact is neutral. Warm
+            // amber matches the burst (0.80,0.50,0.20), the damage number, and the Higgsfield
+            // starburst that draws beside it.
             FrameAnimEffect.Spawn(EffectSpriteLibrary.Spark, transform.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.15f),
-                Mathf.Clamp(0.6f + damage / 60f, 0.6f, 1.6f), Color.white, 20f);
+                Mathf.Clamp(0.6f + damage / 60f, 0.6f, 1.6f), new Color(1f, 0.78f, 0.36f, 1f), 20f);
             GameplayUxDirector.NotifyDamage(transform.position, damage, this is CastleCoreGimmick);
 
             if (damage >= maxHP * 0.15f && DebrisPool.Instance != null)

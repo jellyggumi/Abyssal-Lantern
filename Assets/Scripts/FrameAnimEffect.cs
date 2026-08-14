@@ -85,6 +85,13 @@ namespace CastleBusters
         private SpriteRenderer sr;
         private Color baseColor;
 
+        /// <summary>
+        /// The world size every frame is scaled to span, jitter included. Held rather than
+        /// recomputed because the jitter is per-instance: re-rolling it on each frame change would
+        /// make the effect flicker in size instead of holding one.
+        /// </summary>
+        private float targetWorldSize;
+
 
         public static FrameAnimEffect Spawn(string effectKey, Vector3 position, float worldSize, Color tint,
             float fps = 18f, int sortingOrder = 36)
@@ -115,18 +122,32 @@ namespace CastleBusters
             // which reads as a stamped decal rather than a live effect once you see it a
             // few times in a row. A small per-instance size jitter (+/-12%) keeps repeated
             // spawns visually distinct without changing readability.
-            float sizeJitter = worldSize * Random.Range(0.88f, 1.12f);
+            targetWorldSize = worldSize * Random.Range(0.88f, 1.12f);
 
-            // Uniform scale so the largest frame dimension spans worldSize units.
-            Vector2 native = frames[0].bounds.size;
-            float maxNative = Mathf.Max(native.x, native.y);
-            if (maxNative > 0.0001f)
-            {
-                float scale = sizeJitter / maxNative;
-                transform.localScale = new Vector3(scale, scale, 1f);
-            }
+            ApplyScaleFor(frames[0]);
+
             // Slight random roll keeps repeated sparks from looking stamped.
             transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(-14f, 14f));
+        }
+
+        /// <summary>
+        /// Sizes the transform so THIS frame spans <see cref="targetWorldSize"/> units.
+        ///
+        /// Called on every frame change, not once at spawn. Scale used to be computed from
+        /// frames[0] alone while <see cref="Update"/> swapped the sprite underneath it, so a strip
+        /// whose frames differ in pixel size changed its drawn size mid-playback - the effect
+        /// visibly jumped. Six of this project's nine strips differ that way, fx_sparkle worst at
+        /// 77x77 followed by three 256x256 (a 3.3x step), so the jump was the normal case rather
+        /// than the exception. Compensating here means mismatched art still plays at one size.
+        /// </summary>
+        private void ApplyScaleFor(Sprite frame)
+        {
+            if (frame == null) return;
+            Vector2 native = frame.bounds.size;
+            float maxNative = Mathf.Max(native.x, native.y);
+            if (maxNative <= 0.0001f) return;
+            float scale = targetWorldSize / maxNative;
+            transform.localScale = new Vector3(scale, scale, 1f);
         }
 
 
@@ -147,7 +168,12 @@ namespace CastleBusters
                 Destroy(gameObject);
                 return;
             }
-            if (sr.sprite != frames[index]) sr.sprite = frames[index];
+            if (sr.sprite != frames[index])
+            {
+                sr.sprite = frames[index];
+                // Re-fit: frames within a strip are not all the same pixel size in this project.
+                ApplyScaleFor(frames[index]);
+            }
 
             // Playtest note: the old strip just cut to Destroy() on the final frame, which
             // read as an abrupt "pop" when frames.Length was small (e.g. 4-frame fx_spawn).
