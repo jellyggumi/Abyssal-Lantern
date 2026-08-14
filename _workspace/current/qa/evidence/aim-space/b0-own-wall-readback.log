@@ -1,0 +1,2 @@
+[sweep] 45deg draw=60%  proj=Knight mass=0.35 colW=0.94  peakY=5.99  end=-0.15  -> SHORT  | hit: wall block 'MovingObstacle' at x=-0.07
+         beastHP=150->81  walls=59->56  ourReadback="아군 기사 → 아군 성벽 2블록 손실"  lastLine="적 기사 → 성벽 1블록 파괴 · 아군 성벽 2블록 손실" (byPlayer=False)

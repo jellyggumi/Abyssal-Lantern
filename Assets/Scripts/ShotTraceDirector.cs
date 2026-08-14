@@ -100,6 +100,7 @@ namespace CastleBusters
         private static string shotProjectile;
         private static int blocksThisShot;
         private static int fieldPiecesThisShot;
+        private static int ownBlocksThisShot;
         private static float coreDamageThisShot;
 
         /// <summary>The composed readback for the most recently sealed shot, or empty.</summary>
@@ -147,6 +148,7 @@ namespace CastleBusters
             samples.Clear();
             blocksThisShot = 0;
             fieldPiecesThisShot = 0;
+            ownBlocksThisShot = 0;
             coreDamageThisShot = 0f;
             shotProjectile = string.Empty;
         }
@@ -167,6 +169,7 @@ namespace CastleBusters
             shotProjectile = projectileDisplayName;
             blocksThisShot = 0;
             fieldPiecesThisShot = 0;
+            ownBlocksThisShot = 0;
             coreDamageThisShot = 0f;
         }
 
@@ -187,11 +190,23 @@ namespace CastleBusters
         /// The claim the line makes — "this turn's shot left N blocks down" — is therefore
         /// literally what was measured.
         /// </summary>
-        public static void NoteBlockDestroyed(TargetKind kind = TargetKind.Wall)
+        /// <param name="wallOwnerIsPlayer">
+        /// Which side owned the wall, or null for field furniture with no owner. Compared against
+        /// the side that fired: a shot that drops its own wall is not a breach, and reporting it as
+        /// one reads as progress. A live sweep caught exactly that — a shallow draw from the -17
+        /// apron struck the player's own keep at x=-8 and the line said "성벽 3블록 파괴".
+        /// </param>
+        public static void NoteBlockDestroyed(TargetKind kind = TargetKind.Wall,
+                                              bool? wallOwnerIsPlayer = null)
         {
             if (!shotOpen) return;
-            if (kind == TargetKind.Wall) blocksThisShot++;
-            else fieldPiecesThisShot++;
+            if (kind != TargetKind.Wall) { fieldPiecesThisShot++; return; }
+
+            // Unknown owner counts as the opponent's, preserving what every existing caller meant
+            // before ownership was threaded through.
+            bool ownWall = wallOwnerIsPlayer.HasValue && wallOwnerIsPlayer.Value == shotByPlayer;
+            if (ownWall) ownBlocksThisShot++;
+            else blocksThisShot++;
         }
 
         /// <summary>
@@ -239,6 +254,7 @@ namespace CastleBusters
                 Projectile = shotProjectile,
                 BlocksDestroyed = blocksThisShot,
                 FieldPiecesDestroyed = fieldPiecesThisShot,
+                OwnBlocksDestroyed = ownBlocksThisShot,
                 CoreDamage = coreDamageThisShot,
             });
             LatestLineByPlayer = shotByPlayer;
@@ -251,6 +267,7 @@ namespace CastleBusters
             samples.Clear();
             blocksThisShot = 0;
             fieldPiecesThisShot = 0;
+            ownBlocksThisShot = 0;
             coreDamageThisShot = 0f;
         }
 

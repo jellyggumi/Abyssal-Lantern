@@ -419,12 +419,19 @@ namespace CastleBusters
             // remove. The category is resolved from parentage, which the ownership code below
             // already establishes: under a CastleController it is the keep, otherwise it is field
             // furniture.
+            //
+            // Ownership goes with it. The live sweep's next shot hit the PLAYER'S OWN wall at
+            // x=-8 — the launch apron sits at -17 and the player's own keep stands at -7..-4, so a
+            // shallow draw fires into it — and the readback still said "성벽 3블록 파괴", which
+            // reads as progress. Whose wall it was is the difference between a breach and a
+            // self-inflicted hole.
             if (!isGroundAnchor && !(this is CastleCoreGimmick))
             {
+                var owner = GetComponentInParent<CastleController>();
                 ShotTraceDirector.NoteBlockDestroyed(
-                    GetComponentInParent<CastleController>() != null
-                        ? ShotTraceDirector.TargetKind.Wall
-                        : ShotTraceDirector.TargetKind.FieldObstacle);
+                    owner != null ? ShotTraceDirector.TargetKind.Wall
+                                  : ShotTraceDirector.TargetKind.FieldObstacle,
+                    owner != null ? owner.isPlayerCastle : (bool?)null);
             }
             // Resolve and award ownership before CastleController can end the match.
             // EndGame snapshots the current score into the results card, so a fatal block

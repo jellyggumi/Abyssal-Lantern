@@ -135,6 +135,67 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
+        /// The shooter's own wall coming down is reported as a loss, not as a breach.
+        ///
+        /// The launch apron sits at x=-17 and the player's own keep stands at x=-7..-4, so a
+        /// shallow draw fires into it. A live sweep did exactly that at 60% draw — struck the
+        /// player's own wall at x=-8 — and the line still said "성벽 3블록 파괴", which reads as
+        /// progress. The model puts roughly half the expressible draw range below the player's own
+        /// roof at 45 degrees, so this is the common case rather than an edge one.
+        /// </summary>
+        [Test]
+        public void Compose_ReportsOwnWallDamageAsALoss()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                OwnBlocksDestroyed = 3,
+            });
+
+            StringAssert.Contains("아군 성벽 3블록 손실", line);
+            StringAssert.DoesNotContain("파괴", line);
+        }
+
+        /// <summary>
+        /// A shot can breach the enemy and cost you a wall in the same turn; both must show, and
+        /// the loss goes last so the gain is not buried under it.
+        /// </summary>
+        [Test]
+        public void Compose_OrdersTheLossAfterTheGain()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                BlocksDestroyed = 2,
+                OwnBlocksDestroyed = 1,
+            });
+
+            StringAssert.Contains("성벽 2블록 파괴", line);
+            StringAssert.Contains("아군 성벽 1블록 손실", line);
+            Assert.Less(line.IndexOf("2블록 파괴"), line.IndexOf("손실"),
+                "the gain reads first; the loss is the caveat, not the headline");
+        }
+
+        /// <summary>
+        /// Self-damage alone is not a miss. A shot that demolished your own wall did something,
+        /// and calling it "빗나감" would hide the consequence the player has to plan around.
+        /// </summary>
+        [Test]
+        public void OwnWallOnly_IsNotReportedAsAMiss()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                OwnBlocksDestroyed = 1,
+            });
+
+            StringAssert.DoesNotContain("빗나감", line);
+        }
+
+        /// <summary>
         /// Siege damage is a product of multipliers, so the raw figure is routinely fractional.
         /// "-39.6" reads as precision the player cannot act on, and the gauge it describes moves
         /// in whole points anyway.

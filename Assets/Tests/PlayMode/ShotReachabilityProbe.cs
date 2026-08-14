@@ -303,7 +303,20 @@ namespace CastleBusters.Tests
                 float arcAtResolve = SealedArcX();
                 float unitRestAtResolve = shot != null ? shot.transform.position.x : float.NaN;
 
-                yield return new WaitForSecondsRealtime(8f);
+                // Capture the readback DURING the settle, sampling until it stops being ours.
+                //
+                // The 8s wait lets the AI take its turn, and its shot seals over LatestLine. I read
+                // the line after the wait and drew a conclusion from it about MY shot - it began
+                // "적 기사", which is the enemy describing its own shot, so the comparison was
+                // between my hit target and someone else's readback. Recording the owner flag is
+                // what makes that mistake impossible to repeat silently.
+                string ourLine = ShotTraceDirector.LatestLineByPlayer ? ShotTraceDirector.LatestLine : "";
+                for (float t = 0f; t < 8f; t += Time.unscaledDeltaTime)
+                {
+                    if (ShotTraceDirector.LatestLineByPlayer && !string.IsNullOrEmpty(ShotTraceDirector.LatestLine))
+                        ourLine = ShotTraceDirector.LatestLine;
+                    yield return null;
+                }
                 float arcAfterWait = SealedArcX();
                 float unitRestX = shot != null ? shot.transform.position.x : float.NaN;
                 float impactX = !float.IsNaN(arcAtResolve) ? arcAtResolve : arcAfterWait;
@@ -353,7 +366,8 @@ namespace CastleBusters.Tests
                           + $"mass={mass:F2} colW={colliderW:F2}  peakY={peakY:F2}  "
                           + $"end={arcAfterWait:F2}  -> {verdict}  | hit: {hit}"
                           + $"\n         beastHP={beastHpBefore:F0}->{BeastHp():F0}  walls={wallsBefore}->{EnemyWallBlocks()}"
-                          + $"  readback=\"{ShotTraceDirector.LatestLine}\"");
+                          + $"  ourReadback=\"{ourLine}\""
+                          + $"  lastLine=\"{ShotTraceDirector.LatestLine}\" (byPlayer={ShotTraceDirector.LatestLineByPlayer})");
             }
 
             Assert.Pass("sweep recorded; see the [sweep] lines");

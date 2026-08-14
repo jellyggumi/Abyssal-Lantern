@@ -43,10 +43,20 @@ namespace CastleBusters
             /// announced as wall breaches.
             /// </summary>
             public int FieldPiecesDestroyed;
+            /// <summary>
+            /// Blocks of the SHOOTER'S OWN castle this shot brought down.
+            ///
+            /// The launch apron is outside the shooter's own keep, so a shallow shot fires into it —
+            /// measured live at x=-8 from the -17 apron, and the line reported "성벽 3블록 파괴" as
+            /// if it were a breach. Self-damage has to read as a warning; the player's next decision
+            /// depends on knowing which wall now has the hole.
+            /// </summary>
+            public int OwnBlocksDestroyed;
             /// <summary>Damage dealt to the opposing core. Zero when the core was untouched.</summary>
             public float CoreDamage;
             /// <summary>False when nothing at all was recorded — the shot missed everything.</summary>
-            public bool HitSomething => BlocksDestroyed > 0 || FieldPiecesDestroyed > 0 || CoreDamage > 0f;
+            public bool HitSomething =>
+                BlocksDestroyed > 0 || FieldPiecesDestroyed > 0 || OwnBlocksDestroyed > 0 || CoreDamage > 0f;
         }
 
         /// <summary>
@@ -67,7 +77,7 @@ namespace CastleBusters
 
             if (!s.HitSomething) return $"{who} {what} → 빗나감";
 
-            var parts = new List<string>(3);
+            var parts = new List<string>(4);
             if (s.BlocksDestroyed > 0) parts.Add($"성벽 {s.BlocksDestroyed}블록 파괴");
             // Named separately so a cleared corridor does not read as a breached wall. Ordered
             // after the wall because the wall is what the next shot has to get through.
@@ -75,6 +85,9 @@ namespace CastleBusters
             // Rounded to a whole point: fractional siege damage is an artefact of multipliers,
             // and "-39.6" reads as precision the player cannot act on.
             if (s.CoreDamage > 0f) parts.Add($"코어 -{Mathf.RoundToInt(s.CoreDamage)}");
+            // Last, and worded as a loss rather than a count, because it is the one clause that
+            // means the shot went wrong. "아군 성벽 3블록 파괴" would still read like a tally.
+            if (s.OwnBlocksDestroyed > 0) parts.Add($"아군 성벽 {s.OwnBlocksDestroyed}블록 손실");
 
             return $"{who} {what} → {string.Join(" · ", parts)}";
         }
