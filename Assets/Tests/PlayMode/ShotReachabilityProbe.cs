@@ -79,14 +79,14 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
-        /// Fires one shot at a given angle and power and records the outcome.
-        ///
-        /// The angle/power pair comes from the offline model's best candidates, so if the shot still
-        /// falls short the model and the engine disagree — which is itself the finding.
+        /// Fires into the window the curve now provides and reports whether the enemy actually
+        /// loses health. This is the measurement the earlier run could not make: it fired at a draw
+        /// the old linear curve put short of the keep, so "core HP unchanged" proved only that a
+        /// miss does no damage.
         /// </summary>
         [UnityTest]
         [Timeout(180000)]
-        public IEnumerator Probe_OneShotAtTheModelsBestAngle()
+        public IEnumerator Probe_OneShotIntoTheKeepWindow()
         {
             yield return BootMatch();
 
@@ -98,11 +98,13 @@ namespace CastleBusters.Tests
             float hpBefore = core.currentHP;
             int wallsBefore = EnemyWallBlocks();
 
-            // Model said 70% power at ~25 degrees lands inside the keep band.
-            float speed = lm.maxLaunchVelocity * 0.70f;
-            float rad = 25f * Mathf.Deg2Rad;
+            // Mid-window at 45 degrees under the new curve. The draw is what the player controls,
+            // so the probe speaks in draw and lets the curve produce the speed.
+            const float draw = 0.85f;
+            float speed = LaunchPowerCurve.SpeedForDraw(draw, lm.maxLaunchVelocity);
+            float rad = 45f * Mathf.Deg2Rad;
             var v = new Vector2(speed * Mathf.Cos(rad), speed * Mathf.Sin(rad));
-            Debug.Log($"[reach] firing angle=25deg power=70% velocity={v} (|v|={v.magnitude:F2})");
+            Debug.Log($"[reach] cap={lm.maxLaunchVelocity:F2} draw={draw * 100:F0}% -> speed={speed:F2} velocity={v}");
 
             lm.SimulateLaunch(v);
             yield return null;
@@ -166,7 +168,9 @@ namespace CastleBusters.Tests
                 var lm = Object.FindFirstObjectByType<LaunchManager>();
                 Assert.IsNotNull(lm);
 
-                float speed = lm.maxLaunchVelocity * power;
+                // Sweep in DRAW, not speed: draw is what the player controls, and the curve is
+                // what turns it into speed. Sweeping speed would hide the very thing being fixed.
+                float speed = LaunchPowerCurve.SpeedForDraw(power, lm.maxLaunchVelocity);
                 float rad = 45f * Mathf.Deg2Rad;
                 lm.SimulateLaunch(new Vector2(speed * Mathf.Cos(rad), speed * Mathf.Sin(rad)));
                 yield return null;

@@ -554,7 +554,7 @@ MonoBehaviour:
   launchActivationRadius: 3.5
   maxDragDistance: 4.2
   launchForceMultiplier: 6
-  maxLaunchVelocity: 25.2
+  maxLaunchVelocity: 17.5
   minLaunchVelocity: 3
   trajectoryLine: {fileID: 83740686}
   trajectoryResolution: 150
@@ -2885,7 +2885,7 @@ MonoBehaviour:
   unitPrefabs:
   - {fileID: 6573281129364223326, guid: e829e969bfe8a4c9785891be397bb254, type: 3}
   - {fileID: 1974663412398712130, guid: f4516a7d5c21346b9ba2a7652fa3853a, type: 3}
-  maxLaunchVelocity: 25.2
+  maxLaunchVelocity: 17.5
   errorOffsetRange: 1
 --- !u!4 &900142438
 Transform:

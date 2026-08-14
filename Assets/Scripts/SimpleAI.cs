@@ -10,7 +10,12 @@ namespace CastleBusters
         [Header("AI Settings")]
         public Transform launchPoint;
         public GameObject[] unitPrefabs;
-        public float maxLaunchVelocity = 25.2f;
+        /// <summary>
+        /// Speed cap, mirroring <see cref="LaunchPowerCurve.MaxSpeed"/>. Both sides must fire the
+        /// same weapon: leaving the AI at 25.2 while the player dropped to 17.5 would hand the
+        /// enemy 2.5x the reach and make every balance figure meaningless.
+        /// </summary>
+        public float maxLaunchVelocity = LaunchPowerCurve.MaxSpeed;
         public float errorOffsetRange = 1.0f;
 
         public void TakeTurn() => StartCoroutine(PerformLaunch());
@@ -100,7 +105,7 @@ namespace CastleBusters
             // auditory signal reaches central processing in 8-10ms against 20-40ms for a visual
             // one, which makes this the cheapest attribution channel on the board.
             launcherView?.NotifyFired(velocity);
-            float powerPercent = velocity.magnitude / Mathf.Max(0.01f, maxLaunchVelocity) * 100f;
+            float powerPercent = LaunchPowerCurve.DrawForSpeed(velocity.magnitude, maxLaunchVelocity) * 100f;
             float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyEnemyLaunch(
