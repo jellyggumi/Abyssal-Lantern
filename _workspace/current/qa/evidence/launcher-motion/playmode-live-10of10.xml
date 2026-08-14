@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="10" result="Passed" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:50Z" duration="37.7453632">
+  <test-suite type="TestSuite" id="1116" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="87" result="Passed" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:50Z" duration="37.745363" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1110" name="CastleBusters.PlayModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="87" result="Passed" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:50Z" duration="37.739671" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="90142" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1111" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="87" result="Passed" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:50Z" duration="37.738349" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1112" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="87" result="Passed" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:50Z" duration="37.737203" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1057" name="LauncherMotionEvidenceCapture" fullname="CastleBusters.Tests.LauncherMotionEvidenceCapture" classname="CastleBusters.Tests.LauncherMotionEvidenceCapture" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:20Z" duration="7.858908" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1058" name="Capture_BothLaunchersAcrossATurnHandoff" fullname="CastleBusters.Tests.LauncherMotionEvidenceCapture.Capture_BothLaunchersAcrossATurnHandoff" methodname="Capture_BothLaunchersAcrossATurnHandoff" classname="CastleBusters.Tests.LauncherMotionEvidenceCapture" runstate="Runnable" seed="330379212" result="Passed" start-time="2026-08-13 16:54:12Z" end-time="2026-08-13 16:54:17Z" duration="4.693058" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="240000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+<color=#ffaa00>warn:</color> [01:54:14:3322] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> ConnectionManager[c96dbcba-4b6d-4c1c-8ffe-8aa47c4c10b9] ExecuteHubMethodAsync Connection became inactive while invoking 'PerformVersionHandshake' on endpoint: /hub/mcp-server. Error: The 'InvokeCoreAsync' method cannot be called if the connection is not active
+<color=#ff6b6b>fail:</color> [01:54:14:3325] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> McpManagerClientHub Version handshake failed: No response from server.
+<color=#ffaa00>warn:</color> [01:54:14:3330] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> McpManagerClientHub Version handshake failed (1/3). Reason: Version handshake failed with null response.
+[evidence] _workspace/current/qa/evidence/launcher-motion/player-turn-both-launchers.png (1307190 bytes)
+[evidence] _workspace/current/qa/evidence/launcher-motion/enemy-turn-windup.png (1304013 bytes)
+[evidence] _workspace/current/qa/evidence/launcher-motion/enemy-fire-recoil.png (1304126 bytes)
+]]></output>
+            </test-case>
+            <test-case id="1059" name="Capture_SpentArcsWithoutTheWhiteBox" fullname="CastleBusters.Tests.LauncherMotionEvidenceCapture.Capture_SpentArcsWithoutTheWhiteBox" methodname="Capture_SpentArcsWithoutTheWhiteBox" classname="CastleBusters.Tests.LauncherMotionEvidenceCapture" runstate="Runnable" seed="259027293" result="Passed" start-time="2026-08-13 16:54:17Z" end-time="2026-08-13 16:54:20Z" duration="3.158235" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="180000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+[evidence] _workspace/current/qa/evidence/launcher-motion/spent-arcs-solid-vs-dashed.png (1317357 bytes)
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1060" name="LauncherMotionLiveSceneTests" fullname="CastleBusters.Tests.LauncherMotionLiveSceneTests" classname="CastleBusters.Tests.LauncherMotionLiveSceneTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-13 16:54:20Z" end-time="2026-08-13 16:54:37Z" duration="16.478449" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1061" name="EnemyLauncher_ExistsAndIsVisibleOnTheBoard" fullname="CastleBusters.Tests.LauncherMotionLiveSceneTests.EnemyLauncher_ExistsAndIsVisibleOnTheBoard" methodname="EnemyLauncher_ExistsAndIsVisibleOnTheBoard" classname="CastleBusters.Tests.LauncherMotionLiveSceneTests" runstate="Runnable" seed="41284922" result="Passed" start-time="2026-08-13 16:54:20Z" end-time="2026-08-13 16:54:23Z" duration="3.067108" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1064" name="EnemyWindup_LoadsTheLauncherBeforeTheShot" fullname="CastleBusters.Tests.LauncherMotionLiveSceneTests.EnemyWindup_LoadsTheLauncherBeforeTheShot" methodname="EnemyWindup_LoadsTheLauncherBeforeTheShot" classname="CastleBusters.Tests.LauncherMotionLiveSceneTests" runstate="Runnable" seed="144529596" result="Passed" start-time="2026-08-13 16:54:23Z" end-time="2026-08-13 16:54:27Z" duration="3.656136" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1063" name="FiringMovesTheLauncher_ThenItReturnsToRest" fullname="CastleBusters.Tests.LauncherMotionLiveSceneTests.FiringMovesTheLauncher_ThenItReturnsToRest" methodname="FiringMovesTheLauncher_ThenItReturnsToRest" classname="CastleBusters.Tests.LauncherMotionLiveSceneTests" runstate="Runnable" seed="1852116554" result="Passed" start-time="2026-08-13 16:54:27Z" end-time="2026-08-13 16:54:30Z" duration="3.588367" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1065" name="PlayerAndEnemyArcs_DifferInShapeNotOnlyColour" fullname="CastleBusters.Tests.LauncherMotionLiveSceneTests.PlayerAndEnemyArcs_DifferInShapeNotOnlyColour" methodname="PlayerAndEnemyArcs_DifferInShapeNotOnlyColour" classname="CastleBusters.Tests.LauncherMotionLiveSceneTests" runstate="Runnable" seed="694016182" result="Passed" start-time="2026-08-13 16:54:30Z" end-time="2026-08-13 16:54:34Z" duration="3.080406" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1062" name="PlayerLauncher_StaysVisibleThroughTheEnemyTurn" fullname="CastleBusters.Tests.LauncherMotionLiveSceneTests.PlayerLauncher_StaysVisibleThroughTheEnemyTurn" methodname="PlayerLauncher_StaysVisibleThroughTheEnemyTurn" classname="CastleBusters.Tests.LauncherMotionLiveSceneTests" runstate="Runnable" seed="309537422" result="Passed" start-time="2026-08-13 16:54:34Z" end-time="2026-08-13 16:54:37Z" duration="3.082009" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1100" name="ShotReadbackLiveSceneTests" fullname="CastleBusters.Tests.ShotReadbackLiveSceneTests" classname="CastleBusters.Tests.ShotReadbackLiveSceneTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-13 16:54:37Z" end-time="2026-08-13 16:54:50Z" duration="13.397259" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1103" name="EnemyTurnStrip_DoesNotOfferBrickReservationWhileTheClickIsRefused" fullname="CastleBusters.Tests.ShotReadbackLiveSceneTests.EnemyTurnStrip_DoesNotOfferBrickReservationWhileTheClickIsRefused" methodname="EnemyTurnStrip_DoesNotOfferBrickReservationWhileTheClickIsRefused" classname="CastleBusters.Tests.ShotReadbackLiveSceneTests" runstate="Runnable" seed="441881802" result="Passed" start-time="2026-08-13 16:54:37Z" end-time="2026-08-13 16:54:40Z" duration="3.077309" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1101" name="PlayerShot_LeavesAnArcThatEndsAtTheImpactAndAReadbackLine" fullname="CastleBusters.Tests.ShotReadbackLiveSceneTests.PlayerShot_LeavesAnArcThatEndsAtTheImpactAndAReadbackLine" methodname="PlayerShot_LeavesAnArcThatEndsAtTheImpactAndAReadbackLine" classname="CastleBusters.Tests.ShotReadbackLiveSceneTests" runstate="Runnable" seed="1080003759" result="Passed" start-time="2026-08-13 16:54:40Z" end-time="2026-08-13 16:54:47Z" duration="7.228670" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="180000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+]]></output>
+            </test-case>
+            <test-case id="1102" name="ReadbackLine_IsDisplayedOnTheStripDuringThePlayerTurn" fullname="CastleBusters.Tests.ShotReadbackLiveSceneTests.ReadbackLine_IsDisplayedOnTheStripDuringThePlayerTurn" methodname="ReadbackLine_IsDisplayedOnTheStripDuringThePlayerTurn" classname="CastleBusters.Tests.ShotReadbackLiveSceneTests" runstate="Runnable" seed="1046292800" result="Passed" start-time="2026-08-13 16:54:47Z" end-time="2026-08-13 16:54:50Z" duration="3.088886" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+<color=#ff6b6b>fail:</color> [01:54:50:5108] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

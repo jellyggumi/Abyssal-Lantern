@@ -18,20 +18,21 @@ namespace CastleBusters.Tests
     public class VisibilitySpecAssetTests
     {
         /// <summary>
-        /// Placeholders the spec commits to. Real art replaces the file, never the name.
+        /// Placeholders the spec commits to — now none.
         ///
-        /// This list shrank from seven to one, and the deletion is the point. The v1 draft
-        /// proposed seven new UI elements; a survey of twelve comparable titles found that
-        /// adding a display element per missed affordance is a documented failure path — the
-        /// Into the Breach team spent eighteen months building what they call "an icon mess"
-        /// that way, and their fix was deleting mechanics, not adding display. v2 keeps the one
-        /// element that answers the actual gap (where did the shot land) and drops the other six
-        /// as unaudited output that would otherwise ship in the build against CLAUDE.md §3.
+        /// The list went seven, then one, then zero, and each step was an argument won rather
+        /// than a cleanup. The v1 draft proposed seven new UI elements; the visibility survey
+        /// found that adding a display element per missed affordance is a documented failure
+        /// path, which cancelled six. The VFX survey then examined the survivor — an icon at the
+        /// impact point — across thirteen titles and found it in exactly one, Battleship, whose
+        /// board is hidden. Ten of thirteen change the world instead, which castle-war already
+        /// does. So the last placeholder was not art we still owed; it was a form error.
+        ///
+        /// Kept as an empty array rather than deleted: the next element someone wants to add
+        /// belongs here, and an empty list is a visible statement that the count is zero on
+        /// purpose. `.survey/siege-impact-vfx-and-attack-motion/impact-vfx.md` §2.4
         /// </summary>
-        private static readonly string[] Placeholders =
-        {
-            "Gimmicks/ui_ph_impact_marker",
-        };
+        private static readonly string[] Placeholders = { };
 
         /// <summary>Existing art the spec reuses. Listed so a cleanup pass cannot quietly drop it.</summary>
         private static readonly string[] Existing =
@@ -43,12 +44,11 @@ namespace CastleBusters.Tests
         };
 
         /// <summary>
-        /// The six elements v2 cancelled must stay gone.
+        /// The seven elements the two surveys cancelled must stay gone.
         ///
         /// Without this the deletion is reversible by accident: a later session reading the v1
         /// draft would regenerate them, and unused art in <c>Resources/</c> is invisible until
-        /// someone audits the folder. The reasons are per-file, not blanket — see
-        /// `design/visibility-spec-v2.md` §5-B.
+        /// someone audits the folder. The reasons are per-file, not blanket.
         /// </summary>
         private static readonly string[] Cancelled =
         {
@@ -58,6 +58,7 @@ namespace CastleBusters.Tests
             "Gimmicks/ui_ph_angle_dial",        // the v1 draft itself called this redundant with the trajectory
             "Gimmicks/ui_ph_projectile_next",   // this round's portrait already ships (task #48)
             "Gimmicks/ui_ph_step_coach",        // controlGuideText already occupies that role and position
+            "Gimmicks/ui_ph_impact_marker",     // icon-at-impact is 1/13 in the sample, and that one hides its board
         };
 
         [Test]

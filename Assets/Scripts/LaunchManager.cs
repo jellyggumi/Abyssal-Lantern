@@ -53,6 +53,9 @@ namespace CastleBusters
         // True when the affordance is textured art (slingshot / gate frames) rather than the
         // procedural cyan ring — art must not be tinted, only alpha-pulsed.
         private bool launchPointIndicatorIsArt;
+        // Owns the launcher's dim / windup / recoil. Lazily bound in Update because the
+        // affordance may be an authored prefab or built procedurally, and both paths land here.
+        private LauncherView playerLauncherView;
         // Weak-pull coaching flash: colors the guide line back to normal when it expires.
         private float weakPullFlashTimer = 0f;
         private int trajectoryCollisionMask;
@@ -586,31 +589,35 @@ namespace CastleBusters
 
             if (launchPointIndicatorInstance != null)
             {
-                float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.18f;
-                // Multiply the breathing pulse INTO the fitted scale. Assigning the raw pulse
-                // (as this did) discarded the world-size fit computed at setup, so any framed
-                // launch art silently rendered at its native sprite scale instead of the
-                // intended world size.
-                launchPointIndicatorInstance.transform.localScale = launchPointIndicatorBaseScale * pulse;
-                launchPointIndicatorInstance.SetActive(isPlayerTurn && !deployArmed);
-
-                var sr = launchPointIndicatorInstance.GetComponent<SpriteRenderer>();
-                if (sr != null)
+                // Motion, dim, and fire kick now belong to LauncherView, which owns both sides.
+                // The old code hid this launcher for the whole enemy turn — and since the enemy
+                // apron has no visual of its own, that left BOTH muzzles empty for the 0.9s in
+                // which the enemy actually shoots. Dimming the waiting side instead keeps the
+                // board populated and is the sample's most common way to say who is acting
+                // (8/12), at no screen-element cost. `.survey/siege-impact-vfx-and-attack-motion/`
+                if (playerLauncherView == null)
                 {
-                    if (launchPointIndicatorIsArt)
-                    {
-                        // Textured launcher (새총): pulse only the alpha so the wood/leather
-                        // keeps its own colour instead of being washed cyan every frame.
-                        float alpha = 0.88f + Mathf.Sin(Time.time * 8f) * 0.12f;
-                        sr.color = new Color(1f, 1f, 1f, alpha);
-                    }
-                    else
-                    {
-                        // Procedural ring fallback: raised alpha floor so it never dims below
-                        // a clearly-visible glow as the "start here" hint at rest.
-                        float alpha = 0.58f + Mathf.Sin(Time.time * 8f) * 0.26f;
-                        sr.color = new Color(0.35f, 0.9f, 1f, alpha);
-                    }
+                    playerLauncherView = launchPointIndicatorInstance.GetComponent<LauncherView>()
+                        ?? launchPointIndicatorInstance.AddComponent<LauncherView>();
+                    playerLauncherView.isPlayerSide = true;
+                    playerLauncherView.CaptureRestPose();
+                }
+
+                // Deploy mode still hides it: while placement is armed the launcher is not the
+                // verb in play, and leaving it lit would advertise a gesture the click is not
+                // going to perform (the same false-affordance class as UX-003).
+                bool visible = !deployArmed;
+                if (launchPointIndicatorInstance.activeSelf != visible)
+                {
+                    launchPointIndicatorInstance.SetActive(visible);
+                }
+
+                if (!launchPointIndicatorIsArt)
+                {
+                    // Procedural ring fallback keeps its cyan identity; LauncherView drives the
+                    // alpha, so only the hue is set here.
+                    var sr = launchPointIndicatorInstance.GetComponent<SpriteRenderer>();
+                    if (sr != null) sr.color = new Color(0.35f, 0.9f, 1f, sr.color.a);
                 }
             }
 
@@ -1043,6 +1050,9 @@ namespace CastleBusters
             float angle = Mathf.Atan2(reportedVelocity.y, reportedVelocity.x) * Mathf.Rad2Deg;
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);
+            // The launcher itself reacts. Until now the slingshot looped at a fixed 8fps forever,
+            // so the frame the shot left was indistinguishable from the frame before it.
+            playerLauncherView?.NotifyFired(reportedVelocity);
             TelemetrySink.Volley(
                 selectedUnitTelemetryName, // analytics key stays English across UI renames
                 powerPercent,

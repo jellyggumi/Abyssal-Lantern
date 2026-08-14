@@ -1,0 +1,5 @@
+[probe] slingshot frames=6 gate frames=6
+[probe] PLAYER-TURN side=player DefaultLaunchPointIndicator active=True pos=(-17.00, 0.94, 0.00) scale=(0.66, 0.66, 1.05) renderers=1 [DefaultLaunchPointIndicator sprite=slingshot_anim_000 flipX=False alpha=1.00 worldSize=1.68x1.68] animator=yes fps=8
+[probe] ENEMY-BUILT EnemyLauncherView active=True pos=(17.00, 0.94, 0.00) scale=(0.66, 0.66, 1.05) renderers=1 [EnemyLauncherView sprite=slingshot_anim_000 flipX=True alpha=0.42 worldSize=1.68x1.68] animator=yes fps=8
+[probe] ENEMY-TURN side=player DefaultLaunchPointIndicator active=True pos=(-17.00, 0.94, 0.00) scale=(0.66, 0.66, 1.05) renderers=1 [DefaultLaunchPointIndicator sprite=slingshot_anim_000 flipX=False alpha=0.42 worldSize=1.68x1.68] animator=yes fps=8
+[probe] ENEMY-TURN side=enemy EnemyLauncherView active=True pos=(17.00, 0.94, 0.00) scale=(0.66, 0.66, 1.05) renderers=1 [EnemyLauncherView sprite=slingshot_anim_000 flipX=True alpha=1.00 worldSize=1.68x1.68] animator=yes fps=8

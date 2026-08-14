@@ -65,7 +65,7 @@ namespace CastleBusters.Tests
 
         [UnityTest]
         [Timeout(180000)]
-        public IEnumerator PlayerShot_LeavesAnArcAnImpactMarkerAndAReadbackLine()
+        public IEnumerator PlayerShot_LeavesAnArcThatEndsAtTheImpactAndAReadbackLine()
         {
             yield return BootMatch();
 
@@ -132,12 +132,26 @@ namespace CastleBusters.Tests
                 "a one-point line is a dot at the muzzle, which reads as a rendering fault");
 
             // The marker belongs at the end of the arc: that is the whole claim of R-2 — the
-            // trajectory already existed and never said where it concluded.
-            var marker = trace.GetComponentInChildren<SpriteRenderer>(true);
-            Assert.IsNotNull(marker, "the impact marker must exist as a child of the trace");
+            // trajectory already existed and never said where it concluded — and the endpoint is
+            // now how it says that. The icon that used to sit here was cut: a survey of thirteen
+            // comparable titles found icon-at-impact in exactly one, Battleship, whose board is
+            // hidden, while ten change the world at the impact point, which this game already
+            // does. So the arc must END where the shot landed, and carry no child renderer.
+            Assert.IsEmpty(trace.GetComponentsInChildren<SpriteRenderer>(true),
+                "the impact icon was removed as a form error; the arc must carry no child renderer");
+
             var lastPoint = line.GetPosition(line.positionCount - 1);
-            Assert.Less(Vector2.Distance(marker.transform.position, lastPoint), 0.01f,
-                "the impact marker must sit on the final trajectory point");
+            var body = Object.FindObjectsByType<UnitController>(FindObjectsSortMode.None);
+            float nearest = float.MaxValue;
+            foreach (var u in body)
+            {
+                if (u == null || u.isPlayerUnit == false) continue;
+                nearest = Mathf.Min(nearest, Vector2.Distance(u.transform.position, lastPoint));
+            }
+            Assert.Less(nearest, 6f,
+                $"the arc's final vertex must land near where the projectile actually came to rest, "
+                + $"since that endpoint is now the only thing marking the impact (nearest player "
+                + $"body {nearest:F2}u away)");
 
             // The trace must be inert. A collider here would let the memory of a shot deflect the
             // next one — presentation writing back into simulation (CLAUDE.md §2).
