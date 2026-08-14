@@ -119,6 +119,16 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   blockers, and human-only judgments.
 - Numbers gate everything (G1–G8, `skill://game-studio-harness`). No adjective
   passes a gate.
+- **Read every file the triage names before starting.** A survey lane computed a
+  win-rate cliff from a simulator assumption and recommended intervention, while
+  the measured value sat in a file the triage had named by path
+  (`qa/b1-measurement-findings.md`). The assumption was off by 8–18×, and correcting
+  it reversed the recommendation. The lane self-reported the miss; the rule exists so
+  the next one does not repeat it.
+- **Verify an id before quoting what it returned.** A lane pulled Steam reviews for
+  eight app ids and found three misattributed — 219150 is Hotline Miami, not Worms
+  Clan Wars. Caught before writing, so the corpus is clean. Unverified, Hotline
+  Miami reviews would have been quoted as artillery players' voices.
 - **A floor-type requirement is only valid where its target does not compete for
   size with something else.** A minimum-pixel rule works for HUD canvas text: the
   HUD does not contend with world geometry. It breaks for a world-space label
@@ -168,6 +178,32 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   the product multiplicatively so equal relative gains are equal. Wanting one lever
   is a design position — state it as one, and let the test assert only what the
   numbers force.
+- **A test can pass ONLY in a bug's presence.** A ceiling test asserted that the
+  widest handicap reaches its cap. It did reach it — and its reaching it WAS the
+  defect, because two grades clamped to the same value and a four-grade scale
+  behaved as three. Eleven tests were green while shipping that. "The ceiling
+  works" and "the scale is a scale" are different contracts, and only the first
+  existed. When a clamp, cap, or floor is asserted, also assert that the values it
+  bounds stay distinguishable.
+- **A simulator constant that no gameplay code reads is a measurement parameter,
+  not a knob.** `beginnerAimError` was recommended as a one-constant fix on the
+  belief that "the knob already exists". It is read only by the two sims, the
+  editor, and tests; the player's launch path contains zero random draws (the AI's
+  contains four), so that constant models a HUMAN's hand. Raising it moves what the
+  gate reports and nothing a player experiences. Before writing "the knob already
+  exists", grep for reads from gameplay code.
+- **Fixing something invalidates decisions that cited it — go back and check.** The
+  opening-volley damping landed at 22:51 and erased a 38%p first-turn gap. The
+  arbitration that blocked all seven gimmicks on that gap was last touched at 13:11,
+  nine hours EARLIER, so nobody cited a stale number: the fix simply arrived
+  afterwards and no one revisited what it invalidated. Three documents kept citing
+  87% for over a day. A fix is not finished until the decisions that depended on the
+  old state have been re-read.
+- **When a device changes damage or accuracy, say so on screen.** Every shipped
+  comparable announces such rules — Hedgewars gives Karma / Vampirism / Extra
+  Damage their own permanent HUD icons, Worms marks a handicapped roster with `+`/`-`,
+  ShellShock added a wind icon to the server LIST. This project had two invisible
+  ones. A player who is not told why a shot hurt less reads it as a miss.
 - **The presentation/simulation boundary (§2) is load-bearing, and it has now paid
   twice.** Sim-side balance figures stayed measurable across a large presentation
   change because not one simulation symbol moved — so a baseline nobody thought to

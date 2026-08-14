@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="11" result="Failed(Child)" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.0667016">
+  <test-suite type="TestSuite" id="1000" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="538" result="Failed" site="Child" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.066702" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1606" name="CastleBusters.EditModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.EditModeTests.dll" runstate="Runnable" testcasecount="309" result="Failed" site="Child" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.058506" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="67583" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1607" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="309" result="Failed" site="Child" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.055501" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1608" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="309" result="Failed" site="Child" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.052603" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1502" name="SkillGradingTests" fullname="CastleBusters.Tests.SkillGradingTests" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" testcasecount="11" result="Failed" site="Child" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.045577" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1511" name="ABoundaryHitRateTakesTheHigherGrade" fullname="CastleBusters.Tests.SkillGradingTests.ABoundaryHitRateTakesTheHigherGrade" methodname="ABoundaryHitRateTakesTheHigherGrade" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="421479023" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.011292" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1509" name="AnUnmeasuredPlayerIsNeitherPunishedNorPaid" fullname="CastleBusters.Tests.SkillGradingTests.AnUnmeasuredPlayerIsNeitherPunishedNorPaid" methodname="AnUnmeasuredPlayerIsNeitherPunishedNorPaid" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="580525441" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.002725" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1508" name="EliteIsOwedExactlyNothing" fullname="CastleBusters.Tests.SkillGradingTests.EliteIsOwedExactlyNothing" methodname="EliteIsOwedExactlyNothing" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="1374205410" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.016902" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1512" name="EveryGradeReceivesADistinctHandicap" fullname="CastleBusters.Tests.SkillGradingTests.EveryGradeReceivesADistinctHandicap" methodname="EveryGradeReceivesADistinctHandicap" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="833653905" result="Failed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.002362" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Novice and Apprentice both receive a handicap of 0.700, so the scale has 4 grades but fewer than 4 outcomes. This is the first version's defect verbatim (handicap-sensitivity.log lines 17-18): the grades a struggling player actually holds are the ones that merge, so the measurement is finer than the compensation it drives
+  Expected: not equal to 0.699999988f
+  But was:  0.699999988f
+]]></message>
+                <stack-trace><![CDATA[at CastleBusters.Tests.SkillGradingTests.EveryGradeReceivesADistinctHandicap () [0x00036] in /Users/seokcmin/Desktop/castle-war/Assets/Tests/EditMode/SkillGradingTests.cs:554
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1505" name="EveryGradesErrorCurveIsTheSameRampTranslated" fullname="CastleBusters.Tests.SkillGradingTests.EveryGradesErrorCurveIsTheSameRampTranslated" methodname="EveryGradesErrorCurveIsTheSameRampTranslated" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="1091339394" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.000664" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1510" name="ImprovingYourAimNeverBuysMoreCompensation" fullname="CastleBusters.Tests.SkillGradingTests.ImprovingYourAimNeverBuysMoreCompensation" methodname="ImprovingYourAimNeverBuysMoreCompensation" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="1338840046" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.001223" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1513" name="OneGradeOfCompensationStaysLighterThanHalfTheRamp" fullname="CastleBusters.Tests.SkillGradingTests.OneGradeOfCompensationStaysLighterThanHalfTheRamp" methodname="OneGradeOfCompensationStaysLighterThanHalfTheRamp" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="309519232" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.000312" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1503" name="TheGradeBoundariesAreAScaleOverTheMeasuredHitRates" fullname="CastleBusters.Tests.SkillGradingTests.TheGradeBoundariesAreAScaleOverTheMeasuredHitRates" methodname="TheGradeBoundariesAreAScaleOverTheMeasuredHitRates" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="759824019" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.000300" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1506" name="TheHandicapIsTheSameOffsetAtEveryTurn" fullname="CastleBusters.Tests.SkillGradingTests.TheHandicapIsTheSameOffsetAtEveryTurn" methodname="TheHandicapIsTheSameOffsetAtEveryTurn" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="483675632" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.000372" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1504" name="TheMeasuredHitRatesLandInThreeDistinctGrades" fullname="CastleBusters.Tests.SkillGradingTests.TheMeasuredHitRatesLandInThreeDistinctGrades" methodname="TheMeasuredHitRatesLandInThreeDistinctGrades" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="1079438978" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.000360" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1507" name="TheWidestHandicapStillLeavesTheRampItsTravel" fullname="CastleBusters.Tests.SkillGradingTests.TheWidestHandicapStillLeavesTheRampItsTravel" methodname="TheWidestHandicapStillLeavesTheRampItsTravel" classname="CastleBusters.Tests.SkillGradingTests" runstate="Runnable" seed="671431298" result="Passed" start-time="2026-08-14 12:00:18Z" end-time="2026-08-14 12:00:18Z" duration="0.000212" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<color=#ff6b6b>fail:</color> [21:00:18:3997] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
