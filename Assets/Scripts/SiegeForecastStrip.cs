@@ -56,7 +56,7 @@ namespace CastleBusters
         /// uses, so a notch cannot clip it (the defect list flagged two labels that skipped it).</summary>
         public static SiegeForecastStrip Ensure()
         {
-            var existing = FindObjectOfType<SiegeForecastStrip>();
+            var existing = FindAnyObjectByType<SiegeForecastStrip>();
             if (existing != null) return existing;
 
             // HudCanvas.Resolve, never FindObjectOfType<Canvas>: picking a canvas by iteration
@@ -64,11 +64,15 @@ namespace CastleBusters
             var parent = HudCanvas.Root();
             if (parent == null) return null;
 
-            var host = new GameObject("SiegeForecastStrip");
-            var strip = host.AddComponent<SiegeForecastStrip>();
+            // RectTransform in the constructor, matching MobileSafeArea.GetContentRoot and every
+            // other UI object built in this project. The first version created a bare GameObject
+            // — which comes with a plain Transform — and tried to add the RectTransform after
+            // parenting. That produced no strip at all in a running scene, silently, which is
+            // precisely the failure this widget was written to stop happening to other labels.
+            var host = new GameObject("SiegeForecastStrip", typeof(RectTransform));
             host.transform.SetParent(parent, false);
 
-            var rt = host.AddComponent<RectTransform>();
+            var rt = host.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0f);
             rt.anchorMax = new Vector2(0.5f, 0f);
             rt.pivot = new Vector2(0.5f, 0.5f);
@@ -84,6 +88,9 @@ namespace CastleBusters
             text.outlineWidth = 0.16f;
             text.outlineColor = new Color(0.02f, 0.02f, 0.03f, 0.95f);
             text.raycastTarget = false;
+
+            // The behaviour goes on last, so its Awake cannot run against a half-built object.
+            var strip = host.AddComponent<SiegeForecastStrip>();
             strip.label = text;
 
             return strip;

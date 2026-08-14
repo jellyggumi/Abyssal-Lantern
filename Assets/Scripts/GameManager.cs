@@ -547,10 +547,6 @@ namespace CastleBusters
             if (Application.isPlaying)
             {
                 StageWeather.Ensure().Apply(currentStage);
-                // Tells the player what is loaded, what answers it, and how far along the match
-                // is — three facts the one-shot loop knows exactly and never showed anyone
-                // (qa/ux-defect-list.md UX-004, UX-005).
-                SiegeForecastStrip.Ensure();
             }
         }
 
@@ -1791,6 +1787,11 @@ namespace CastleBusters
             if (StageInterludeController.Active != null) StageInterludeController.Active.Dismiss();
             if (introScreen != null) { introScreen.Dismiss(); introScreen = null; }
             Time.timeScale = 1f;
+            // AFTER the intro teardown, not in Start(). Built during Start() the strip is
+            // created while the intro is still up and is torn down with it — measured: it was
+            // built, then OnDestroy fired, and Start() never runs twice to rebuild it. A match
+            // HUD element belongs to the match, so it is ensured where the match begins.
+            SiegeForecastStrip.Ensure();
             turnCount = 0;
             playerLastStand = LastStand.Phase.Locked;
             aiLastStand = LastStand.Phase.Locked;
