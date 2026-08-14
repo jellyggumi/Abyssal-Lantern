@@ -1,0 +1,14 @@
+[reach] firing angle=25deg power=70% velocity=(15.99, 7.45) (|v|=17.64)
+[reach] projectile found=True
+[reach] ---- result ----
+[reach] frames in Launched state : 325
+[reach] peak height y            : 3.98
+[reach] x where flight ended     : -7.97   (enemy keep spans 6..11.5)
+[reach] reached the keep?        : NO — fell short
+[reach] enemy core HP            : 150.0 -> 150.0  (delta 0.0)
+[reach] enemy wall blocks        : 143 -> 141  (delta -2)
+[reach] readback line            : "적 기사 → 성벽 1블록 파괴"
+[sweep] 45deg power=40%  launchedFrames=818  peakY=3.92  endX=-8.96  -> SHORT
+[sweep] 45deg power=60%  launchedFrames=1423  peakY=7.12  endX=0.23  -> SHORT
+[sweep] 45deg power=80%  launchedFrames=2404  peakY=11.62  endX=18.25  -> PAST the keep
+[sweep] 45deg power=100%  launchedFrames=1677  peakY=17.41  endX=25.04  -> PAST the keep
