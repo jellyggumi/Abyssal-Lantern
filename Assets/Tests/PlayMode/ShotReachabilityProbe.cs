@@ -118,34 +118,51 @@ namespace CastleBusters.Tests
             }
             Debug.Log($"[reach] projectile found={(shot != null)}");
 
-            float peakY = float.MinValue, lastX = float.NaN;
+            // Watch the flight, but do NOT treat the loop's last sample as the impact. The first
+            // revision did, and its "1578 frames in Launched state" was the 12s cap being spent:
+            // a knight that lands and rolls slowly stays in the Launched state until the stuck
+            // monitor grounds it, so the recorded x was "where it was at the cutoff", which is a
+            // statement about the stopwatch and not about the shot.
+            float peakY = float.MinValue;
             int launchedFrames = 0;
             float watch = 0f;
-            while (shot != null && watch < 12f)
+            bool resolved = false;
+            while (shot != null && watch < 20f)
             {
                 if (shot.CurrentState == UnitState.Launched) launchedFrames++;
                 peakY = Mathf.Max(peakY, shot.transform.position.y);
-                lastX = shot.transform.position.x;
-                if (shot.CurrentState != UnitState.Launched && launchedFrames > 0) break;
+                if (shot.CurrentState != UnitState.Launched && launchedFrames > 0) { resolved = true; break; }
                 watch += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            // Let the turn resolve so damage and the readback land.
-            yield return new WaitForSecondsRealtime(6f);
+            // Let the turn resolve so the trace seals and damage lands.
+            yield return new WaitForSecondsRealtime(8f);
+
+            // The sealed arc's final vertex IS the impact point — the trace director records it
+            // during flight and freezes it at the settle boundary, which is exactly the moment the
+            // shot stopped being a shot.
+            float impactX = float.NaN;
+            var traceGo = GameObject.Find("ShotTrace_Player");
+            if (traceGo != null)
+            {
+                var line = traceGo.GetComponent<LineRenderer>();
+                if (line != null && line.positionCount > 0)
+                    impactX = line.GetPosition(line.positionCount - 1).x;
+            }
 
             float hpAfter = core != null ? core.currentHP : -1f;
             int wallsAfter = EnemyWallBlocks();
 
             var sb = new StringBuilder();
             sb.AppendLine("[reach] ---- result ----");
-            sb.AppendLine($"[reach] frames in Launched state : {launchedFrames}");
-            sb.AppendLine($"[reach] peak height y            : {peakY:F2}");
-            sb.AppendLine($"[reach] x where flight ended     : {lastX:F2}   (enemy keep spans {KeepLo}..{KeepHi})");
-            sb.AppendLine($"[reach] reached the keep?        : {(lastX >= KeepLo ? "YES" : "NO — fell short")}");
-            sb.AppendLine($"[reach] enemy core HP            : {hpBefore:F1} -> {hpAfter:F1}  (delta {hpAfter - hpBefore:F1})");
-            sb.AppendLine($"[reach] enemy wall blocks        : {wallsBefore} -> {wallsAfter}  (delta {wallsAfter - wallsBefore})");
-            sb.AppendLine($"[reach] readback line            : \"{ShotTraceDirector.LatestLine}\"");
+            sb.AppendLine($"[reach] flight resolved on its own : {resolved} (watched {watch:F1}s, {launchedFrames} frames)");
+            sb.AppendLine($"[reach] peak height y             : {peakY:F2}");
+            sb.AppendLine($"[reach] IMPACT x (sealed arc)      : {impactX:F2}   (enemy keep spans {KeepLo}..{KeepHi})");
+            sb.AppendLine($"[reach] reached the keep?         : {(impactX >= KeepLo ? "YES" : "NO — fell short")}");
+            sb.AppendLine($"[reach] enemy core HP             : {hpBefore:F1} -> {hpAfter:F1}  (delta {hpAfter - hpBefore:F1})");
+            sb.AppendLine($"[reach] enemy wall blocks (noisy)  : {wallsBefore} -> {wallsAfter}");
+            sb.AppendLine($"[reach] readback line             : \"{ShotTraceDirector.LatestLine}\"");
             Debug.Log(sb.ToString());
 
             Assert.Greater(launchedFrames, 0,
@@ -182,25 +199,37 @@ namespace CastleBusters.Tests
                     if (u != null && u.isPlayerUnit && u.CurrentState == UnitState.Launched) { shot = u; break; }
                 }
 
-                float peakY = float.MinValue, lastX = float.NaN;
+                float peakY = float.MinValue;
                 int launchedFrames = 0;
                 float watch = 0f;
-                while (shot != null && watch < 10f)
+                while (shot != null && watch < 20f)
                 {
                     if (shot.CurrentState == UnitState.Launched) launchedFrames++;
                     peakY = Mathf.Max(peakY, shot.transform.position.y);
-                    lastX = shot.transform.position.x;
                     if (shot.CurrentState != UnitState.Launched && launchedFrames > 0) break;
                     watch += Time.unscaledDeltaTime;
                     yield return null;
                 }
 
-                string verdict = float.IsNaN(lastX) ? "no projectile"
-                    : lastX < KeepLo ? "SHORT"
-                    : lastX <= KeepHi ? "ON THE KEEP"
+                // Same correction as the single-shot probe: read the sealed arc, not the loop's
+                // last sample. A landed knight keeps rolling inside the Launched state, so the
+                // sample was measuring the cutoff rather than the impact.
+                yield return new WaitForSecondsRealtime(8f);
+                float impactX = float.NaN;
+                var traceGo = GameObject.Find("ShotTrace_Player");
+                if (traceGo != null)
+                {
+                    var line = traceGo.GetComponent<LineRenderer>();
+                    if (line != null && line.positionCount > 0)
+                        impactX = line.GetPosition(line.positionCount - 1).x;
+                }
+
+                string verdict = float.IsNaN(impactX) ? "no sealed arc"
+                    : impactX < KeepLo ? "SHORT"
+                    : impactX <= KeepHi ? "ON THE KEEP"
                     : "PAST the keep";
-                Debug.Log($"[sweep] 45deg power={power * 100:F0}%  launchedFrames={launchedFrames}  "
-                          + $"peakY={peakY:F2}  endX={lastX:F2}  -> {verdict}");
+                Debug.Log($"[sweep] 45deg draw={power * 100:F0}%  peakY={peakY:F2}  "
+                          + $"impactX={impactX:F2}  -> {verdict}");
             }
 
             Assert.Pass("sweep recorded; see the [sweep] lines");
