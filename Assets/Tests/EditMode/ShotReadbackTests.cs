@@ -70,6 +70,71 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
+        /// A field obstacle is not a wall, and the line must not say it is.
+        ///
+        /// This is the defect a live sweep caught: three shots hit a midfield field-tower, an enemy
+        /// archer and bare ground, and every one was announced as "성벽 N블록 파괴"
+        /// (`qa/aim-space-reachability.md` §0-C). The readback exists so the player can tell what
+        /// their shot did; announcing a breach that never happened is worse than saying nothing,
+        /// because the player aims the next shot at a hole that is not there.
+        /// </summary>
+        [Test]
+        public void Compose_DoesNotCallAFieldObstacleAWall()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                FieldPiecesDestroyed = 2,
+            });
+
+            StringAssert.DoesNotContain("성벽", line);
+            StringAssert.Contains("야전 구조물 2", line);
+        }
+
+        /// <summary>
+        /// Both categories in one shot are reported separately, wall first.
+        ///
+        /// A shot can clear a field tower on the way in and still take a wall block; the player
+        /// needs to know both, and which is which, because only one of them is a hole to aim at.
+        /// </summary>
+        [Test]
+        public void Compose_SeparatesWallsFromFieldPieces()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                BlocksDestroyed = 3,
+                FieldPiecesDestroyed = 1,
+            });
+
+            StringAssert.Contains("성벽 3블록", line);
+            StringAssert.Contains("야전 구조물 1", line);
+            Assert.Less(line.IndexOf("성벽"), line.IndexOf("야전"),
+                "the wall comes first - it is what the next shot has to get through");
+        }
+
+        /// <summary>
+        /// Destroying only field furniture still counts as hitting something.
+        ///
+        /// Otherwise a shot that killed the flying beast would be reported as a miss, which is the
+        /// opposite error from the one being fixed.
+        /// </summary>
+        [Test]
+        public void FieldOnlyHit_IsNotReportedAsAMiss()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                FieldPiecesDestroyed = 1,
+            });
+
+            StringAssert.DoesNotContain("빗나감", line);
+        }
+
+        /// <summary>
         /// Siege damage is a product of multipliers, so the raw figure is routinely fractional.
         /// "-39.6" reads as precision the player cannot act on, and the gauge it describes moves
         /// in whole points anyway.

@@ -410,7 +410,22 @@ namespace CastleBusters
             // three wall blocks and forty terrain tiles reads as "성벽 3블록", because the wall
             // is what the next shot has to get through. Cores are counted as core damage, not
             // as a block (CastleCoreGimmick taps NoteCoreDamage directly).
-            if (!isGroundAnchor && !(this is CastleCoreGimmick)) ShotTraceDirector.NoteBlockDestroyed();
+            //
+            // But NOT everything left over is a wall. A live sweep fired three shots that hit a
+            // midfield field-tower, an enemy archer, and bare ground, and the readback called all
+            // three "성벽 N블록 파괴" (qa/aim-space-reachability.md §0-C). Field obstacles and the
+            // flying beast are DestructibleBlocks too, so the readback was telling the player they
+            // had breached a wall they never touched — the exact confusion the readback exists to
+            // remove. The category is resolved from parentage, which the ownership code below
+            // already establishes: under a CastleController it is the keep, otherwise it is field
+            // furniture.
+            if (!isGroundAnchor && !(this is CastleCoreGimmick))
+            {
+                ShotTraceDirector.NoteBlockDestroyed(
+                    GetComponentInParent<CastleController>() != null
+                        ? ShotTraceDirector.TargetKind.Wall
+                        : ShotTraceDirector.TargetKind.FieldObstacle);
+            }
             // Resolve and award ownership before CastleController can end the match.
             // EndGame snapshots the current score into the results card, so a fatal block
             // must be credited before that transition.

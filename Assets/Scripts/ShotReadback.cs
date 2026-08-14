@@ -29,12 +29,24 @@ namespace CastleBusters
             public bool ByPlayer;
             /// <summary>Display name of the projectile, already in the roster's Korean vocabulary.</summary>
             public string Projectile;
-            /// <summary>Wall/structure blocks destroyed by this shot.</summary>
+            /// <summary>Castle wall/structure blocks destroyed by this shot.</summary>
             public int BlocksDestroyed;
+            /// <summary>
+            /// Midfield furniture destroyed by this shot: field towers, the flying beast, lane
+            /// barrels.
+            ///
+            /// Separate from <see cref="BlocksDestroyed"/> because they mean different things to
+            /// the next shot. A downed wall block is a hole to aim through; a downed field tower is
+            /// a cleared corridor. Reporting both as "성벽" told players they had breached a wall
+            /// their shot never reached — measured in qa/aim-space-reachability.md §0-C, where
+            /// three shots hit a field tower, an enemy archer and bare ground and all three were
+            /// announced as wall breaches.
+            /// </summary>
+            public int FieldPiecesDestroyed;
             /// <summary>Damage dealt to the opposing core. Zero when the core was untouched.</summary>
             public float CoreDamage;
             /// <summary>False when nothing at all was recorded — the shot missed everything.</summary>
-            public bool HitSomething => BlocksDestroyed > 0 || CoreDamage > 0f;
+            public bool HitSomething => BlocksDestroyed > 0 || FieldPiecesDestroyed > 0 || CoreDamage > 0f;
         }
 
         /// <summary>
@@ -55,8 +67,11 @@ namespace CastleBusters
 
             if (!s.HitSomething) return $"{who} {what} → 빗나감";
 
-            var parts = new List<string>(2);
+            var parts = new List<string>(3);
             if (s.BlocksDestroyed > 0) parts.Add($"성벽 {s.BlocksDestroyed}블록 파괴");
+            // Named separately so a cleared corridor does not read as a breached wall. Ordered
+            // after the wall because the wall is what the next shot has to get through.
+            if (s.FieldPiecesDestroyed > 0) parts.Add($"야전 구조물 {s.FieldPiecesDestroyed} 파괴");
             // Rounded to a whole point: fractional siege damage is an artefact of multipliers,
             // and "-39.6" reads as precision the player cannot act on.
             if (s.CoreDamage > 0f) parts.Add($"코어 -{Mathf.RoundToInt(s.CoreDamage)}");
