@@ -110,5 +110,57 @@ namespace CastleBusters.Tests
                 "GenerateGroundTexture must return null on a refused request instead of letting the "
                 + "exception unwind through CreateGround and Start");
         }
+
+        /// <summary>
+        /// Builds the ground at Stage3's width and asserts the call returns instead of throwing.
+        ///
+        /// This is the measurement the PlayMode census could not deliver: four consecutive attempts
+        /// hit the MCP plugin's domain-reload hang, and one of them never even reached the scene, so
+        /// its zero-exception count proved nothing. Invoking `CreateGround` directly with the private
+        /// width field forced to Stage3's value tests the same code path with no scene at all.
+        ///
+        /// Before the fix this threw `UnityException: Failed to create texture` from inside
+        /// `GenerateGroundTexture`, which is exactly how the keep and core stopped being created.
+        /// </summary>
+        [Test]
+        public void BuildingTheGroundAtStageThreesWidth_DoesNotThrow()
+        {
+            var go = new GameObject("GameManager_AtlasBudget");
+            try
+            {
+                var gm = go.AddComponent<GameManager>();
+
+                // ApplyStageLayout runs from Start(), which EditMode never calls, so the width is
+                // set directly — the same value Stage3's layout would install.
+                var widthField = typeof(GameManager).GetField("groundHalfWidth",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(widthField, "precondition: groundHalfWidth must still be the field name");
+                widthField.SetValue(gm, Mathf.RoundToInt(StageDefinitions.Stage3.groundHalfWidth));
+
+                var create = typeof(GameManager).GetMethod("CreateGround",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Assert.IsNotNull(create, "precondition: CreateGround must still exist");
+
+                Assert.DoesNotThrow(() => create.Invoke(gm, null),
+                    "building the ground at Stage3's width must not throw - when it did, the exception "
+                    + "unwound out of Start and the stage shipped with no keep and no core");
+
+                // And the tiles must actually exist, or "does not throw" was achieved by doing nothing.
+                int columns = Mathf.RoundToInt(StageDefinitions.Stage3.groundHalfWidth) * 2 + 1;
+                int found = 0;
+                foreach (var b in Object.FindObjectsByType<DestructibleBlock>(FindObjectsSortMode.None))
+                    if (b != null && b.name.StartsWith("GroundBlock_")) found++;
+
+                Assert.AreEqual(columns * GroundRowCount, found,
+                    $"Stage3's ground must be {columns}x{GroundRowCount} tiles; a short grid means the "
+                    + "builder bailed partway rather than completing without art");
+            }
+            finally
+            {
+                foreach (var b in Object.FindObjectsByType<DestructibleBlock>(FindObjectsSortMode.None))
+                    if (b != null) Object.DestroyImmediate(b.gameObject);
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }
