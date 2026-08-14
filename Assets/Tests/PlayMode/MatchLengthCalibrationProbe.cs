@@ -84,7 +84,15 @@ namespace CastleBusters.Tests
         [Timeout(600000)]
         public IEnumerator Probe_MeasureDamagePerTurnAndMatchLength()
         {
-            var stages = new[] { StageId.Stage1, StageId.Stage2, StageId.Stage3 };
+            // Stage3 only, on re-measurement.
+            //
+            // The first B1 run measured all three, but Stage3's figures turned out to describe a
+            // stage with no castle: a ground-atlas request was throwing out of Start and the keep,
+            // the core and every later gimmick were never built (task #63). Its d=5.31 and 81%
+            // zero-damage rate were reading an empty board. Stage1's 96.59 and Stage2's 128.33 stand
+            // — those boards were intact — so only the invalidated stage is re-run, which also keeps
+            // the session inside the reload-hang window.
+            var stages = new[] { StageId.Stage3 };
             var report = new StringBuilder();
             report.AppendLine("# B1 실측 — d(턴당 유효 피해) · s(턴 소요) · 경기 길이");
             report.AppendLine();
@@ -210,7 +218,7 @@ namespace CastleBusters.Tests
                 report.AppendLine();
             }
 
-            var path = Path.Combine(EvidenceDir, "b1-measurement.md");
+            var path = Path.Combine(EvidenceDir, "b1-stage3-remeasured.md");
             File.WriteAllText(path, report.ToString());
             Debug.Log($"[b1] wrote {path}");
 

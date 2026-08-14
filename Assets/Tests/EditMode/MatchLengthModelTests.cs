@@ -160,38 +160,46 @@ namespace CastleBusters.Tests
                 + "enemy did to itself");
 
             Assert.Less(MatchLengthModel.EffectiveDamagePerTurn, honestD,
-                $"d={MatchLengthModel.EffectiveDamagePerTurn} is below even the player-only rate "
-                + $"({honestD:F1}) in Stage1, while being 7x ABOVE the Stage3 rate (5.31). One "
-                + "constant cannot straddle a 24x spread between stages");
+                $"d={MatchLengthModel.EffectiveDamagePerTurn} is below the player-only rate "
+                + $"({honestD:F1}) in Stage1, and below it in every stage measured — a consistent "
+                + "2.6x to 3.5x understatement rather than the 24x spread first reported, which was "
+                + "Stage3 measured while its castle failed to build");
         }
 
         /// <summary>
         /// d is a distribution, not a constant, and a single number erases the part that matters.
         ///
-        /// Stage3's median damage per shot is ZERO — 13 of 16 shots did nothing — while its mean is
-        /// 5.31. A model consuming only the mean cannot express "most shots accomplish nothing",
-        /// which is precisely the complaint that opened this investigation.
+        /// This one survived the Stage3 correction. Even with the castle standing, 6 of 14 shots deal
+        /// nothing, the median is 62.5 against a mean of 128.00, and one barrel did 560. A model
+        /// consuming only the mean describes a turn that rarely happens — which is the complaint that
+        /// opened this investigation, stated as arithmetic.
         /// </summary>
         [Test]
         public void TheMeasuredDamagePerTurn_HasATailAConstantCannotCarry()
         {
-            // Stage3 per-shot damage, from qa/evidence/match-length/b1-measurement.md.
-            float[] stage3 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 50, 0 };
+            // Stage3 per-shot damage, re-measured with its castle present.
+            // qa/evidence/match-length/b1-stage3-remeasured.md
+            float[] stage3 = { 0, 130, 175, 465, 150, 560, 85, 0, 40, 0, 0, 187, 0, 0 };
 
             var sorted = (float[])stage3.Clone();
             System.Array.Sort(sorted);
-            float median = sorted[sorted.Length / 2];
+            float median = 0.5f * (sorted[sorted.Length / 2 - 1] + sorted[sorted.Length / 2]);
 
             float mean = 0f;
             foreach (var v in stage3) mean += v;
             mean /= stage3.Length;
 
-            Assert.AreEqual(0f, median, 0.001f,
-                "more than half of Stage3's shots deal nothing at all");
-            Assert.Greater(mean, median,
-                $"the mean ({mean:F2}) sits above the median ({median:F2}) because two shots carry "
-                + "94% of the total - reporting that mean as 'damage per turn' describes a turn that "
-                + "almost never happens");
+            int zeros = 0;
+            foreach (var v in stage3) if (v == 0f) zeros++;
+
+            Assert.AreEqual(128.00f, mean, 0.01f,
+                "guard: this array must reproduce the measured mean or it is not the measured data");
+            Assert.Greater(mean, median * 1.5f,
+                $"the mean ({mean:F2}) must sit well above the median ({median:F2}) - a heavy tail is "
+                + "the property a single constant cannot carry");
+            Assert.GreaterOrEqual(zeros, stage3.Length / 4,
+                $"{zeros} of {stage3.Length} shots dealt nothing; if that fraction ever drops below a "
+                + "quarter the aiming problem improved and this figure needs re-recording");
         }
 
         /// <summary>
@@ -204,7 +212,9 @@ namespace CastleBusters.Tests
             {
                 ("Stage1", 16f / 22f, 2125f / 16f,  96.59f),
                 ("Stage2",  5f /  6f,  770f /  5f, 128.33f),
-                ("Stage3",  3f / 16f,   85f /  3f,   5.31f),
+                // Re-measured with the castle present. The first pass read 0.19 / 28.3 / 5.31 on a
+                // stage booting without walls or a core (task #63).
+                ("Stage3",  8f / 14f, 1792f /  8f, 128.00f),
             };
 
             foreach (var m in measured)
@@ -215,31 +225,39 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
-        /// And here is the expensive half: the two factors disagree about what is broken.
+        /// The two factors are separable but NOT ranked, and that distinction is the useful part.
         ///
-        /// This is the test that should stop B3 from tuning the wrong thing. Durability and material
-        /// changes move q. Stage3's q is 28.3 against Stage1's 132.8, but its p is 0.19 against 0.73
-        /// — and lifting p alone to Stage1's level moves its damage per turn 3.9x, without touching
-        /// a single material value. A pass that raises damage while leaving 81% of shots landing on
-        /// nothing has improved the number the player never gets to use.
+        /// I first wrote this test asserting accuracy beats damage. It failed: closing Stage1's hit
+        /// rate to Stage2's level yields 110.7 while a 15% damage buff yields 111.1. Of course it
+        /// does — p and q enter d multiplicatively, so a 15% gain in either is a 15% gain in d. There
+        /// is no arithmetic ranking to discover, and a test claiming one was asserting a preference
+        /// dressed as a measurement.
+        ///
+        /// What the factorisation is actually for: p and q are measured separately, so a tuning pass
+        /// can say WHICH it moved and verify it moved. Choosing between them is a design question
+        /// about cost and side effects — accuracy changes what the player can do, damage changes what
+        /// their shots are worth — and this test deliberately refuses to prejudge it.
         /// </summary>
         [Test]
-        public void HitRate_IsTheFactorStageThreeIsShortOf()
+        public void HitRateAndPerShotDamage_AreSeparableButNotRanked()
         {
-            const float stage3HitRate = 3f / 16f;
-            const float stage3PerLanded = 85f / 3f;
             const float stage1HitRate = 16f / 22f;
+            const float stage1PerLanded = 2125f / 16f;
 
-            float asShipped = MatchLengthModel.DamagePerTurn(stage3HitRate, stage3PerLanded);
-            float withStage1Accuracy = MatchLengthModel.DamagePerTurn(stage1HitRate, stage3PerLanded);
+            float asIs = MatchLengthModel.DamagePerTurn(stage1HitRate, stage1PerLanded);
 
-            Assert.Greater(withStage1Accuracy / asShipped, 3.5f,
-                $"raising only the hit rate takes Stage3 from {asShipped:F2} to "
-                + $"{withStage1Accuracy:F2} damage per turn. If this ratio falls below 3.5x the "
-                + "measurement changed and the 'fix accuracy, not damage' conclusion needs redoing");
+            // The same relative gain applied to each factor in turn.
+            const float gain = 1.15f;
+            float viaAccuracy = MatchLengthModel.DamagePerTurn(stage1HitRate * gain, stage1PerLanded);
+            float viaDamage = MatchLengthModel.DamagePerTurn(stage1HitRate, stage1PerLanded * gain);
 
-            Assert.Less(stage3HitRate, 0.25f,
-                "Stage3's hit rate is the outlier that makes its d unusable, not its damage");
+            Assert.Greater(viaAccuracy, asIs, "raising accuracy alone must raise damage per turn");
+            Assert.Greater(viaDamage, asIs, "raising per-shot damage alone must also raise it");
+
+            Assert.AreEqual(viaAccuracy, viaDamage, 0.01f,
+                $"equal relative gains must produce equal results ({viaAccuracy:F2} vs "
+                + $"{viaDamage:F2}); if they diverge, d has stopped being the plain product of p and "
+                + "q and every figure derived from the factorisation needs rechecking");
         }
 
         /// <summary>
@@ -259,17 +277,18 @@ namespace CastleBusters.Tests
 
             foreach (var s in MatchLengthModel.SelfInflictedShareIsNotModelled)
             {
-                Assert.Greater(s.selfShare, 0.3f,
-                    $"{s.stage}: a share this large cannot be treated as noise");
+                Assert.Greater(s.selfShare, 0.2f,
+                    $"{s.stage}: a quarter of a keep's own destruction cannot be treated as noise");
                 Assert.Less(s.selfShare, 1f, $"{s.stage}: share must be a fraction");
             }
 
-            // Stage3 is the case that changes what a win means.
+            // Stage3 was the extreme reading, and correcting it is part of the record.
             var stage3 = System.Array.Find(MatchLengthModel.SelfInflictedShareIsNotModelled,
                                            s => s.stage == "Stage3");
-            Assert.Greater(stage3.selfShare, 0.5f,
-                "in Stage3 the defender destroyed more of its own keep than the attacker did, so a "
-                + "Stage3 victory is not evidence the attacker's shots worked");
+            Assert.Less(stage3.selfShare, 0.5f,
+                "with its castle present Stage3's defender no longer out-damages the attacker (0.26). "
+                + "The 0.67 first recorded came from a stage that booted without walls or a core, "
+                + "where almost nothing the attacker did could land");
         }
     }
 }

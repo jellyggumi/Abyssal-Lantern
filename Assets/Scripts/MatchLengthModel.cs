@@ -76,17 +76,25 @@ namespace CastleBusters
 
         // ---- Measured decomposition (B1, 2026-08-14) -------------------------------------
         //
-        // Everything above treats d as one constant. Three measured matches say it is not one
-        // number: 96.59 / 128.33 / 5.31 for Stage1/2/3 against the shipped 37 — too low by 2.6x
-        // and 3.5x, too high by 7x, a 24x spread. Full data: qa/b1-measurement-findings.md.
+        // Everything above treats d as one constant. Three measured matches put the attacker's own
+        // rate at 96.59 / 128.33 / 128.00 for Stage1/2/3 against the shipped 37 — a consistent 2.6x
+        // to 3.5x understatement, spread only 1.33x between stages.
         //
-        // The constants above are LEFT IN PLACE deliberately. They are what the shipped balance
-        // was derived from, and replacing them with a measured average would silently credit the
-        // player for damage the enemy did to itself — 39%, 42% and 67% of each keep's loss was
-        // self-inflicted, because a launch apron at ±17 fires over its own keep courses at ±4..7
-        // and 48% of the draw range lands short of its own roof. A single averaged d absorbs that
-        // and makes every later material change unreadable. The decomposition below exists so the
-        // next tuning pass has somewhere honest to stand instead.
+        // An earlier version of this comment claimed a 24x spread. That was Stage3 measured while a
+        // ground-atlas exception aborted its boot, so it had no wall courses and no core: its d read
+        // 5.31 because there was nothing to hit. Re-measured with the castle present it is 128.00.
+        // A single constant is therefore defensible after all — it is simply mis-set. Data:
+        // qa/b1-measurement-findings.md, qa/evidence/match-length/b1-stage3-remeasured.md.
+        //
+        // The constants above are LEFT IN PLACE anyway, for two reasons that outlived the correction.
+        // First, 26-42% of each keep's material loss is inflicted by its own owner — a launch apron
+        // at ±17 firing over its own courses at ±4..7 — so a d fitted to observed material loss
+        // credits the attacker for the defender's mistakes. Second, the model's OTHER input is wrong
+        // by nearly the same factor: the live castle carries 3.1-3.8x the material the equation
+        // counts, because the census walks KeepProfile courses while the board also parents ground
+        // tiles and the core under the same transform. The two understatements cancel to 0.89-1.46x,
+        // which is why the pacing gate reads plausible. Correcting d alone drops every stage from
+        // ~300s to 91-123s, moving the gate from wrong-and-green to wrong-and-red.
 
         /// <summary>
         /// d factorised into the two things that can actually be measured separately.
@@ -100,13 +108,17 @@ namespace CastleBusters
         ///            p (hit rate)   q (per landed)      d
         ///   Stage1        0.73            132.8      96.59
         ///   Stage2        0.83            154.0     128.33
-        ///   Stage3        0.19             28.3       5.31
+        ///   Stage3        0.57            224.0     128.00
         /// </code>
         ///
-        /// p spans 4.4x and q spans 5.4x; they compound into d's 24x. Stage3 is not short of
-        /// damage, it is short of arrivals — at Stage1's hit rate the same shots would deal 20.7
-        /// per turn instead of 5.31, a 3.9x change from p alone. A material or durability pass
-        /// moves q, which is the factor Stage3 does not need.
+        /// Stage3's row is the re-measured one. Before its castle existed it read p=0.19, q=28.3,
+        /// d=5.31, and that row is what made the spread look like 24x — a factorisation inherits
+        /// whatever defect its measurement had.
+        ///
+        /// Within a stage the distribution is still heavy-tailed: Stage3's median damage per shot is
+        /// 62.5 against a mean of 128.00, 43% of shots deal nothing, and one shot did 560. A model
+        /// consuming only the mean cannot express "many shots accomplish nothing", which is the
+        /// complaint that opened this investigation.
         /// </summary>
         public static float DamagePerTurn(float hitRate, float damagePerLandedShot)
             => Mathf.Clamp01(hitRate) * Mathf.Max(0f, damagePerLandedShot);
@@ -137,7 +149,10 @@ namespace CastleBusters
         {
             ("Stage1", 0.39f),
             ("Stage2", 0.42f),
-            ("Stage3", 0.67f),
+            // 0.26 re-measured with Stage3's castle present. It read 0.67 while the stage booted
+            // without walls or a core, which made the defender look like the primary demolisher; with
+            // the keep standing the attacker is comfortably ahead. Still far too large to ignore.
+            ("Stage3", 0.26f),
         };
     }
 
