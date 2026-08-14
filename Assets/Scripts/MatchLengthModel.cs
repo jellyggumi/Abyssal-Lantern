@@ -44,19 +44,43 @@ namespace CastleBusters
         /// pass): enemy turns now spend their time on the shot, not the wait.</summary>
         public const float AverageTurnSeconds = 7.5f;
 
-        /// <summary>d — effective on-target damage a side lands per turn. Retuned 42 → 37
-        /// alongside the tempo pass (baseShotDamage 120 → 106) so faster turns lengthen the
-        /// match in TURNS, keeping the decided-match estimate at the five-minute target
-        /// instead of silently shortening it.</summary>
-        public const float EffectiveDamagePerTurn = 37f;
+        /// <summary>
+        /// d — effective material one side removes from the OTHER side's keep per shot it takes.
+        ///
+        /// Recalibrated 37 → 85.7 in the same edit that fixed <see cref="TurnsToDecide"/>, because
+        /// the two were wrong together and either alone breaks the estimate. The old 37 was never a
+        /// measured rate: it compensated for the equation counting one side's shots as if they were
+        /// all of the match's turns. 85.7 / 37 = 2.32, and the factor the equation was missing is 2.
+        ///
+        /// Calibrated against observed turn counts rather than raw measurement, deliberately. B1
+        /// measured 96.59 material removed per player shot (Stage1, 22 shots), but real matches ran
+        /// 35-39 turns where that rate predicts 32.8 — because a shot's material does not all reach
+        /// the enemy keep. Self-inflicted destruction is 26-42% of the total and terrain absorbs
+        /// shots that never arrive, and the model has a term for neither. Setting d to the raw rate
+        /// would make the equation confidently wrong in a new direction; setting it to what
+        /// reproduces 37 turns keeps it honest about being a fit.
+        /// qa/evidence/g2/aim-error-conversion.md, qa/b1-measurement-findings.md
+        /// </summary>
+        public const float EffectiveDamagePerTurn = 85.7f;
 
         /// <summary>M = b·h + c</summary>
         public static float Material(int blocksPerKeep, float blockHealth, float coreHealth)
             => blocksPerKeep * blockHealth + coreHealth;
 
-        /// <summary>N = M / d</summary>
+        /// <summary>
+        /// N = 2·M / d — turns, not shots.
+        ///
+        /// THE FACTOR OF 2 IS THE FIX. `d` is what ONE side removes per shot IT takes, and a turn
+        /// belongs to one side, so a match in which the attacker needs M/d shots spans twice that
+        /// many turns: the defender takes one between each. The equation read `M / d` and called the
+        /// result turns, losing the alternation the whole game is built on.
+        ///
+        /// Measured both ways against real matches (Stage1, M=1585, d as measured 96.59): the old
+        /// form predicts 16.4 turns against 35-39 observed, off by 2.1-2.4x. With the factor it
+        /// predicts 32.8, and calibrating d closes the rest.
+        /// </summary>
         public static float TurnsToDecide(float material, float damagePerTurn)
-            => material / Mathf.Max(0.01f, damagePerTurn);
+            => 2f * material / Mathf.Max(0.01f, damagePerTurn);
 
         /// <summary>T = N · s</summary>
         public static float SecondsToDecide(float material, float damagePerTurn, float turnSeconds)
@@ -70,9 +94,11 @@ namespace CastleBusters
                 AverageTurnSeconds);
 
         /// <summary>Inverse of the model: the material a target length implies. Use this when
-        /// changing the target, so walls are derived from the goal rather than guessed toward it.</summary>
+        /// changing the target, so walls are derived from the goal rather than guessed toward it.
+        /// Carries the same factor of 2 as <see cref="TurnsToDecide"/> — an inverse that dropped it
+        /// would hand back half the material the forward direction needs.</summary>
         public static float MaterialForTargetSeconds(float targetSeconds)
-            => targetSeconds / AverageTurnSeconds * EffectiveDamagePerTurn;
+            => targetSeconds / AverageTurnSeconds * EffectiveDamagePerTurn / 2f;
 
         // ---- Measured decomposition (B1, 2026-08-14) -------------------------------------
         //
