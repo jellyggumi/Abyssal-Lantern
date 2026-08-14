@@ -1499,7 +1499,22 @@ namespace CastleBusters
             // groundRowCount so the strip fills the camera's visible ground band instead of floating
             // above bare background.
             const int groundRowCount = 5;
-            int blockRes = 160;
+            // Tile resolution is DERIVED from an atlas budget, not fixed at 160.
+            //
+            // A flat 160px makes the atlas width scale with the board: Stage1 and Stage2 asked for
+            // 7520 and 7200 pixels and got them, Stage3's wider ground band asked for 8800 and
+            // Texture2D threw "invalid parameters". That exception unwound out of CreateGround and
+            // out of Start, taking the rest of the boot with it — which is why Stage3 shipped with
+            // an enemy castle of five blocks, no wall courses and no core, and why a Stage3 match
+            // "decided" after removing 260 total HP
+            // (qa/evidence/match-length/castle-material-census.md).
+            //
+            // The exact trigger is NOT established: 8800 sits well inside the 16384 dimension cap,
+            // so something else in the request is at fault and I did not measure which. Rather than
+            // guess a ceiling, the resolution falls to whatever keeps the atlas inside a
+            // conservative budget — a wider board loses tile crispness instead of losing its castle.
+            const int maxAtlasWidth = 4096;
+            int blockRes = Mathf.Clamp(maxAtlasWidth / Mathf.Max(1, groundColumnCount), 16, 160);
             int texWidth = groundColumnCount * blockRes;
             int texHeight = groundRowCount * blockRes;
             Texture2D groundTex = GenerateGroundTexture(texWidth, texHeight);
@@ -1539,6 +1554,10 @@ namespace CastleBusters
                         // mismatch between visuals and physics that made the ground feel disconnected.
                         int pixelX = gridX * blockRes;
                         int pixelY = gridY * blockRes;
+                        // No atlas is a cosmetic outcome, not a structural one: the tile keeps the
+                        // material's own sprite and colour and the board finishes building. Before
+                        // this, a refused atlas threw out of Start and Stage3 had no keep at all.
+                        if (groundTex == null) continue;
                         Sprite normalSlice = Sprite.Create(groundTex, new Rect(pixelX, pixelY, blockRes, blockRes), new Vector2(0.5f, 0.5f), blockRes);
                         normalSlice.name = $"GroundSlice_{x}_{yIndex}_Normal";
                         // Reset tint to white: the sliced ground texture already carries its own
@@ -1567,12 +1586,35 @@ namespace CastleBusters
         }
 
 
+        /// <summary>
+        /// Builds the ground tilemap atlas, or returns null if the graphics layer refuses it.
+        ///
+        /// Returning null instead of throwing is the point. This threw for Stage3's wider board and
+        /// the exception unwound through <see cref="CreateGround"/> and out of <c>Start</c>, so the
+        /// keep, the core, and every gimmick sequenced after it were never created. A texture is
+        /// presentation; it silently deleted the simulation.
+        ///
+        /// CLAUDE.md §2 draws that boundary one way — presentation may read simulation state, never
+        /// write it. This is the same rule's third face: presentation failing must not be able to
+        /// REMOVE simulation either. Callers handle null; ground tiles without art are a cosmetic
+        /// defect, while a castle without walls is not a game.
+        /// </summary>
         private Texture2D GenerateGroundTexture(int width, int height)
         {
             // Mipmapped + trilinear so the tilemap (and any sliced crack art baked from it) minifies
             // cleanly instead of shimmering/aliasing when the camera zooms out or a tile is scaled down
             // for explosion debris/particles - the actual "aliasing when it breaks" complaint.
-            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            Texture2D tex;
+            try
+            {
+                tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[GameManager] ground atlas {width}x{height} refused ({e.GetType().Name}: "
+                                 + $"{e.Message}). Tiles will use flat colour; the board still builds.");
+                return null;
+            }
             tex.filterMode = FilterMode.Trilinear;
             tex.wrapMode = TextureWrapMode.Clamp;
             tex.anisoLevel = 4;

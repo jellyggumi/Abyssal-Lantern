@@ -73,6 +73,72 @@ namespace CastleBusters
         /// changing the target, so walls are derived from the goal rather than guessed toward it.</summary>
         public static float MaterialForTargetSeconds(float targetSeconds)
             => targetSeconds / AverageTurnSeconds * EffectiveDamagePerTurn;
+
+        // ---- Measured decomposition (B1, 2026-08-14) -------------------------------------
+        //
+        // Everything above treats d as one constant. Three measured matches say it is not one
+        // number: 96.59 / 128.33 / 5.31 for Stage1/2/3 against the shipped 37 — too low by 2.6x
+        // and 3.5x, too high by 7x, a 24x spread. Full data: qa/b1-measurement-findings.md.
+        //
+        // The constants above are LEFT IN PLACE deliberately. They are what the shipped balance
+        // was derived from, and replacing them with a measured average would silently credit the
+        // player for damage the enemy did to itself — 39%, 42% and 67% of each keep's loss was
+        // self-inflicted, because a launch apron at ±17 fires over its own keep courses at ±4..7
+        // and 48% of the draw range lands short of its own roof. A single averaged d absorbs that
+        // and makes every later material change unreadable. The decomposition below exists so the
+        // next tuning pass has somewhere honest to stand instead.
+
+        /// <summary>
+        /// d factorised into the two things that can actually be measured separately.
+        ///
+        /// <c>d = p · q</c> where <c>p</c> is the fraction of shots that damage anything and
+        /// <c>q</c> is the damage a landed shot does. The identity is trivial — p·q reduces to
+        /// dealt/shots — and that is not the point. The point is that p and q say different things
+        /// and have different fixes:
+        ///
+        /// <code>
+        ///            p (hit rate)   q (per landed)      d
+        ///   Stage1        0.73            132.8      96.59
+        ///   Stage2        0.83            154.0     128.33
+        ///   Stage3        0.19             28.3       5.31
+        /// </code>
+        ///
+        /// p spans 4.4x and q spans 5.4x; they compound into d's 24x. Stage3 is not short of
+        /// damage, it is short of arrivals — at Stage1's hit rate the same shots would deal 20.7
+        /// per turn instead of 5.31, a 3.9x change from p alone. A material or durability pass
+        /// moves q, which is the factor Stage3 does not need.
+        /// </summary>
+        public static float DamagePerTurn(float hitRate, float damagePerLandedShot)
+            => Mathf.Clamp01(hitRate) * Mathf.Max(0f, damagePerLandedShot);
+
+        /// <summary>
+        /// Turns for the ATTACKER alone to remove a keep, given the measured factors.
+        ///
+        /// Named "attacker" because <see cref="TurnsToDecide"/> silently means the same thing while
+        /// reading as if it covered the whole match. It does not: a keep also loses material to its
+        /// own owner's shots, and in Stage3 that channel was larger than the attacker's. A caller
+        /// that wants match length needs both, and the second is not modelled here — see
+        /// <see cref="SelfInflictedShareIsNotModelled"/>.
+        /// </summary>
+        public static float AttackerTurnsToRemove(float material, float hitRate, float damagePerLandedShot)
+            => material / Mathf.Max(0.01f, DamagePerTurn(hitRate, damagePerLandedShot));
+
+        /// <summary>
+        /// The measured share of a keep's material loss that its OWN side inflicted, per stage.
+        ///
+        /// Documented as data rather than folded into an equation, because the honest thing to
+        /// report is that the model has no term for it. Adding one that reproduces these numbers
+        /// would be an identity — total divided by the sum of two rates derived from that same
+        /// total returns the observed turn count by construction, predicting nothing. Closing this
+        /// properly needs the three causes separated first (own shots, the flying beast's wall
+        /// rams, collapse chains crossing a turn boundary), which B1 did not do.
+        /// </summary>
+        public static readonly (string stage, float selfShare)[] SelfInflictedShareIsNotModelled =
+        {
+            ("Stage1", 0.39f),
+            ("Stage2", 0.42f),
+            ("Stage3", 0.67f),
+        };
     }
 
     /// <summary>

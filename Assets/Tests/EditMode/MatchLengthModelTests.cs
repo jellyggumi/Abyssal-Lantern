@@ -193,5 +193,83 @@ namespace CastleBusters.Tests
                 + "94% of the total - reporting that mean as 'damage per turn' describes a turn that "
                 + "almost never happens");
         }
+
+        /// <summary>
+        /// The factorisation reproduces every measured stage, which is the cheap half of the claim.
+        /// </summary>
+        [Test]
+        public void DamagePerTurn_FactorisesIntoHitRateAndDamagePerLandedShot()
+        {
+            (string stage, float p, float q, float d)[] measured =
+            {
+                ("Stage1", 16f / 22f, 2125f / 16f,  96.59f),
+                ("Stage2",  5f /  6f,  770f /  5f, 128.33f),
+                ("Stage3",  3f / 16f,   85f /  3f,   5.31f),
+            };
+
+            foreach (var m in measured)
+            {
+                Assert.AreEqual(m.d, MatchLengthModel.DamagePerTurn(m.p, m.q), 0.02f,
+                    $"{m.stage}: p={m.p:F3} x q={m.q:F1} must reproduce the measured d");
+            }
+        }
+
+        /// <summary>
+        /// And here is the expensive half: the two factors disagree about what is broken.
+        ///
+        /// This is the test that should stop B3 from tuning the wrong thing. Durability and material
+        /// changes move q. Stage3's q is 28.3 against Stage1's 132.8, but its p is 0.19 against 0.73
+        /// — and lifting p alone to Stage1's level moves its damage per turn 3.9x, without touching
+        /// a single material value. A pass that raises damage while leaving 81% of shots landing on
+        /// nothing has improved the number the player never gets to use.
+        /// </summary>
+        [Test]
+        public void HitRate_IsTheFactorStageThreeIsShortOf()
+        {
+            const float stage3HitRate = 3f / 16f;
+            const float stage3PerLanded = 85f / 3f;
+            const float stage1HitRate = 16f / 22f;
+
+            float asShipped = MatchLengthModel.DamagePerTurn(stage3HitRate, stage3PerLanded);
+            float withStage1Accuracy = MatchLengthModel.DamagePerTurn(stage1HitRate, stage3PerLanded);
+
+            Assert.Greater(withStage1Accuracy / asShipped, 3.5f,
+                $"raising only the hit rate takes Stage3 from {asShipped:F2} to "
+                + $"{withStage1Accuracy:F2} damage per turn. If this ratio falls below 3.5x the "
+                + "measurement changed and the 'fix accuracy, not damage' conclusion needs redoing");
+
+            Assert.Less(stage3HitRate, 0.25f,
+                "Stage3's hit rate is the outlier that makes its d unusable, not its damage");
+        }
+
+        /// <summary>
+        /// The unmodelled term stays visible, and stays out of the equation.
+        ///
+        /// A future reader will be tempted to add a self-damage term that reproduces these shares.
+        /// It would fit perfectly and predict nothing — dividing the total by the sum of two rates
+        /// derived from that same total returns the observed turn count by construction. The shares
+        /// are recorded so the gap is known; the equation stays honest by not pretending to cover
+        /// it until the three causes are separated.
+        /// </summary>
+        [Test]
+        public void TheSelfInflictedShareIsRecordedButNotFoldedIntoTheModel()
+        {
+            Assert.AreEqual(3, MatchLengthModel.SelfInflictedShareIsNotModelled.Length,
+                "three stages were measured");
+
+            foreach (var s in MatchLengthModel.SelfInflictedShareIsNotModelled)
+            {
+                Assert.Greater(s.selfShare, 0.3f,
+                    $"{s.stage}: a share this large cannot be treated as noise");
+                Assert.Less(s.selfShare, 1f, $"{s.stage}: share must be a fraction");
+            }
+
+            // Stage3 is the case that changes what a win means.
+            var stage3 = System.Array.Find(MatchLengthModel.SelfInflictedShareIsNotModelled,
+                                           s => s.stage == "Stage3");
+            Assert.Greater(stage3.selfShare, 0.5f,
+                "in Stage3 the defender destroyed more of its own keep than the attacker did, so a "
+                + "Stage3 victory is not evidence the attacker's shots worked");
+        }
     }
 }
