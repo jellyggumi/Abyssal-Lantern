@@ -1,0 +1,8 @@
+[census] Stage1: live non-ground HP 5445 across 4 name groups | model says 1425 (15 blocks x 85 + core) | ratio 3.82x
+[census] Stage1: ground anchors excluded: 84 blocks, 7200 HP
+[census] Stage2: live non-ground HP 5225 across 4 name groups | model says 1680 (18 blocks x 85 + core) | ratio 3.11x
+[census] Stage2: ground anchors excluded: 82 blocks, 7030 HP
+UnityException: Failed to create texture because of invalid parameters.
+[census] Stage3: live non-ground HP 260 across 1 name groups | model says 1935 (21 blocks x 85 + core) | ratio 0.13x
+[census] Stage3: ground anchors excluded: 3 blocks, 450 HP
+[census] wrote _workspace/current/qa/evidence/match-length/castle-material-census.md

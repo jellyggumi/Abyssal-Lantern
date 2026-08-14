@@ -119,7 +119,74 @@ namespace CastleBusters
         }
 
 
-        public static void SpawnFeedbackLabel(Vector3 position, string message, Color color, float fontSize = 2.7f, float lifetime = 0.65f)
+        /// <summary>
+        /// Smallest font size any world-space label may render at.
+        ///
+        /// Derivation, because the number looks arbitrary and is not. World <c>TextMeshPro</c> takes
+        /// TMP's 0.1 scale branch — <c>m_isOrthographic</c> is set only inside
+        /// <c>TextMeshProUGUI</c>, so an orthographic camera does not change it — which makes one em
+        /// exactly <c>fontSize * 0.1</c> world units. At the smallest supported window (1024x576)
+        /// the camera fits to a 12.667-unit half-height, so:
+        ///
+        /// <code>
+        ///   em pixels = fontSize * 0.1 * (576 / (2 * 12.667 * zoom))
+        /// </code>
+        ///
+        /// <see cref="HudCanvas.LegibleFloorPixels"/> is 12px and `design/visibility-spec.md`
+        /// promised it for "every label". Reaching it at the worst framing (zoom 1.6 x aim 1.18 =
+        /// 1.888) needs fontSize 9.96; reaching it while still fully opaque needs 13.28. A soldier
+        /// stands 1.15 world units (<c>Knight.prefab:137</c>), so those two sizes make the label
+        /// 0.87x and 1.15x the actor it describes.
+        ///
+        /// <b>5.5 is therefore a deliberate compromise, not a pass.</b> It is the largest size that
+        /// stays within half the body height, and it renders 6.63px at the worst framing — 1.81x
+        /// under the floor, though it DOES clear the floor (12.52px) at default framing. The shortfall is recorded rather than hidden: the floor is a screen-space HUD
+        /// constant, and a world label cannot satisfy it without out-sizing the world. What carries
+        /// sustained action state instead is the unit's own animation
+        /// (<c>UnitSpriteAnimator.PulseAttack</c>), which scales with the actor and so never hits
+        /// this wall.
+        /// </summary>
+        public const float MinWorldLabelFontSize = 5.5f;
+
+        /// <summary>
+        /// A label for developers, suppressed in player builds.
+        ///
+        /// `STUCK FIX`, `STUCK RECOVERY`, `LOOP FIX`, `OUT`, `PATH FIX` and `STUCK RESOLVED` all
+        /// name recovery machinery, not player actions, and all six were shipping to players on top
+        /// of the labels that do describe the game. A player watching a soldier cannot tell which of
+        /// the floating words are about their siege and which are about a physics rescue, so the
+        /// diagnostics were actively competing with the signal.
+        ///
+        /// Routed through a separate entry point rather than deleted, because they earn their keep
+        /// during development: each one marks a real recovery path firing, and a silent recovery is
+        /// how a stuck-unit bug hides. <c>Debug.isDebugBuild</c> is true in the editor and in
+        /// development builds, false in a release WebGL build — which is the build the player gets.
+        /// </summary>
+        public static void SpawnDiagnosticLabel(Vector3 position, string message, Color color,
+                                                float fontSize = MinWorldLabelFontSize, float lifetime = 0.4f)
+        {
+            if (!Debug.isDebugBuild && !Application.isEditor) return;
+            SpawnFeedbackLabel(position, message, color, fontSize, lifetime);
+        }
+
+        /// <summary>
+        /// A short world-space label above a world position.
+        ///
+        /// <para><b>Size.</b> The floor, the arithmetic behind it, and the shortfall it accepts all
+        /// live on <see cref="MinWorldLabelFontSize"/> — deliberately in ONE place. This docstring
+        /// used to restate the derivation, and when the constant moved 5.0 to 5.5 only one copy was
+        /// updated: two comments in this file then disagreed about the same number, inside the very
+        /// text that records why the shortfall is accepted. That is the fifth comment-versus-code
+        /// mismatch in this cycle and the second inside a rule written to prevent them. Duplicated
+        /// arithmetic structurally guarantees a half-update, so there is now one owner and everything
+        /// else points at it.</para>
+        ///
+        /// <para><b>Consequence.</b> Because this channel cannot carry sustained state legibly, the
+        /// unit's own animation carries it instead — see <c>UnitSpriteAnimator.PulseAttack</c>, where
+        /// one swing means one damage event. Labels report discrete moments; the sprite reports what
+        /// the soldier is doing.</para>
+        /// </summary>
+        public static void SpawnFeedbackLabel(Vector3 position, string message, Color color, float fontSize = MinWorldLabelFontSize, float lifetime = 0.65f)
         {
             if (!Application.isPlaying || string.IsNullOrWhiteSpace(message)) return;
 
@@ -127,11 +194,26 @@ namespace CastleBusters
             go.transform.position = position + new Vector3(0f, 0.72f, 0f);
             var text = go.AddComponent<TextMeshPro>();
             text.text = message;
-            text.fontSize = fontSize;
+            // The floor is enforced HERE, not at the ~25 call sites.
+            //
+            // Every existing caller passes 1.15 to 2.5, all of them below this. Editing each one
+            // would spread the contract across twenty-five places and guarantee the next new label
+            // is authored small again; one clamp means a caller can ask for MORE emphasis but never
+            // for less than legible. See MinWorldLabelFontSize for the arithmetic.
+            text.fontSize = Mathf.Max(MinWorldLabelFontSize, fontSize);
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
             text.color = color;
             text.sortingOrder = 45;
+
+            // Dark casing, for the same reason the shot trace needed one: the label core measured
+            // 1.61:1 against sky and 1.21:1 against cloud, and WCAG 1.4.3 wants 4.5:1 for text this
+            // size. Colour alone cannot separate a warm glyph from a bright sky, so the outline
+            // supplies the luminance difference. At fontSize 5.5 the cap is 6.63 x 0.686 = 4.55px,
+            // so a 0.25 outline ratio renders ~1.14px — above the one-pixel floor that made the
+            // previous 0.22-at-1.9pt casing (0.65px) invisible.
+            text.outlineWidth = 0.25f;
+            text.outlineColor = new Color32(12, 10, 18, 255);
 
             var animator = go.AddComponent<FloatingDamageText>();
             animator.lifetime = lifetime;
@@ -181,9 +263,22 @@ namespace CastleBusters
         {
             if (!Application.isPlaying) return;
 
-            // Dedicated ember-shard art (generated) replaces the plain radial-gradient dot;
-            // callers can still hand in their own sprite (petals, smoke) for themed bursts.
-            if (sprite == null) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleEmber);
+            // Dedicated ember-shard art replaces the plain radial-gradient dot. Callers may hand
+            // in their own sprite for themed bursts (petals, smoke) — but NOT any sprite they
+            // happen to be rendering, which is what DestructibleBlock was doing.
+            //
+            // Measured: striking a wall produced a cluster of pale grey (210,209,207) squares and
+            // zero near-white-but-that-was-the-point pixels, because the block handed over its own
+            // `face_s0` — a 512x512 brick-mortar OVERLAY that is almost entirely white with thin
+            // dark lines. Shrunk to a 2-12px particle, an overlay of white with hairlines is a
+            // white smudge. It reads as a broken image, which is exactly how it was reported.
+            //
+            // The sprite is vetted rather than trusted, so a caller cannot reintroduce this by
+            // passing whatever it is drawing.
+            if (!IsUsableParticleSprite(sprite))
+            {
+                sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleEmber);
+            }
 
             var go = new GameObject("ImpactBurst");
             go.transform.position = position;
@@ -304,7 +399,10 @@ namespace CastleBusters
 
         public static void SpawnCollapseDust(Vector3 position, float intensity = 1f, Sprite sprite = null)
         {
-            if (sprite == null) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleSmoke);
+            // Same vetting as the burst: three collapse call sites in DestructibleBlock pass the
+            // block's own overlay sprite, which shrinks to a white smudge (see
+            // IsUsableParticleSprite). Smoke is the intended art for a collapse.
+            if (!IsUsableParticleSprite(sprite)) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleSmoke);
             SpawnImpactBurst(position, new Color(0.72f, 0.62f, 0.48f, 0.85f), intensity, sprite);
             SpawnHiggsfieldAccent(
                 position,
@@ -376,6 +474,51 @@ namespace CastleBusters
             texture.Apply(false, true);
             cachedParticleTexture = texture;
             return cachedParticleTexture;
+        }
+
+        /// <summary>
+        /// Sprites this project actually keeps as particle art. Membership, not a heuristic:
+        /// a size or brightness test would let the next unsuitable sprite through the moment it
+        /// happened to fall inside the bounds.
+        /// </summary>
+        private static readonly string[] ParticleArtNames =
+        {
+            EffectSpriteLibrary.ParticleEmber,
+            EffectSpriteLibrary.ParticleSmoke,
+            EffectSpriteLibrary.ParticlePetal,
+            EffectSpriteLibrary.ParticleRain,
+            EffectSpriteLibrary.ParticleSnow,
+            EffectSpriteLibrary.ParticleAsh,
+        };
+
+        /// <summary>
+        /// Whether <paramref name="sprite"/> is art meant to be a particle.
+        ///
+        /// The failure this closes: <see cref="DestructibleBlock"/> passed whatever it was
+        /// rendering — `face_s0`, a 512x512 brick-mortar overlay that is almost entirely white.
+        /// As a particle that is a white smudge, and it was reported as a broken image. Four call
+        /// sites did it (one on damage, three on collapse), so the check belongs here rather than
+        /// at each of them: a caller that means "make the debris look like my material" is asking
+        /// for something the overlay sprite cannot express, and the honest answer is to fall back
+        /// to real particle art.
+        ///
+        /// Anything under Resources/Effects/particles is allowed by name. Everything else is
+        /// refused, including a null.
+        /// </summary>
+        public static bool IsUsableParticleSprite(Sprite sprite)
+        {
+            if (sprite == null) return false;
+            for (int i = 0; i < ParticleArtNames.Length; i++)
+            {
+                // Unity appends nothing for a single-sprite import, so an exact match is the rule;
+                // StartsWith covers a future sliced sheet named `particle_ember_0`.
+                if (sprite.name == ParticleArtNames[i] ||
+                    sprite.name.StartsWith(ParticleArtNames[i], System.StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static Material GetParticleMaterial(Texture2D customTexture = null)
@@ -577,6 +720,29 @@ namespace CastleBusters
         public static void NotifyLastStandActive()
         {
             Instance?.ShowToast("일발역전! 다음 발사 ×2.2", new Color(1f, 0.42f, 0.12f, 1f), 2.4f);
+        }
+
+        /// <summary>
+        /// Announces the handicap once, at match start, when there is one.
+        ///
+        /// The survey found no shipped game that applies an invisible damage or accuracy rule with
+        /// no indication at all: Hedgewars gives Karma / Vampirism / Extra Damage their own
+        /// permanent HUD icons, Worms marks a handicapped team with +/- on the roster, ShellShock
+        /// puts every rule in the lobby and added a wind icon to the server LIST. This project had
+        /// two such rules with zero display — the opening-volley damping and this handicap.
+        ///
+        /// A toast rather than a permanent badge, deliberately. The same repo's visibility survey
+        /// found that adding an icon every time a playtester missed something is a documented
+        /// failure path — one team spent eighteen months building what they called "an icon mess".
+        /// Worms' precedent is also pre-match rather than persistent. So: said once, when it is
+        /// true, and never again.
+        /// </summary>
+        public static void NotifyHandicapApplied(SkillGrading.Grade grade, float aimError)
+        {
+            if (aimError <= 0f) return;   // nothing to announce; silence is the correct display
+            Instance?.ShowToast(
+                $"수련 보정 적용 — 적 조준이 흔들립니다",
+                new Color(0.55f, 0.85f, 1f, 1f), 2.8f);
         }
 
         private void UpdateDangerVignette()

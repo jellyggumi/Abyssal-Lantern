@@ -73,6 +73,87 @@ namespace CastleBusters
         /// changing the target, so walls are derived from the goal rather than guessed toward it.</summary>
         public static float MaterialForTargetSeconds(float targetSeconds)
             => targetSeconds / AverageTurnSeconds * EffectiveDamagePerTurn;
+
+        // ---- Measured decomposition (B1, 2026-08-14) -------------------------------------
+        //
+        // Everything above treats d as one constant. Three measured matches put the attacker's own
+        // rate at 96.59 / 128.33 / 128.00 for Stage1/2/3 against the shipped 37 — a consistent 2.6x
+        // to 3.5x understatement, spread only 1.33x between stages.
+        //
+        // An earlier version of this comment claimed a 24x spread. That was Stage3 measured while a
+        // ground-atlas exception aborted its boot, so it had no wall courses and no core: its d read
+        // 5.31 because there was nothing to hit. Re-measured with the castle present it is 128.00.
+        // A single constant is therefore defensible after all — it is simply mis-set. Data:
+        // qa/b1-measurement-findings.md, qa/evidence/match-length/b1-stage3-remeasured.md.
+        //
+        // The constants above are LEFT IN PLACE anyway, for two reasons that outlived the correction.
+        // First, 26-42% of each keep's material loss is inflicted by its own owner — a launch apron
+        // at ±17 firing over its own courses at ±4..7 — so a d fitted to observed material loss
+        // credits the attacker for the defender's mistakes. Second, the model's OTHER input is wrong
+        // by nearly the same factor: the live castle carries 3.1-3.8x the material the equation
+        // counts, because the census walks KeepProfile courses while the board also parents ground
+        // tiles and the core under the same transform. The two understatements cancel to 0.89-1.46x,
+        // which is why the pacing gate reads plausible. Correcting d alone drops every stage from
+        // ~300s to 91-123s, moving the gate from wrong-and-green to wrong-and-red.
+
+        /// <summary>
+        /// d factorised into the two things that can actually be measured separately.
+        ///
+        /// <c>d = p · q</c> where <c>p</c> is the fraction of shots that damage anything and
+        /// <c>q</c> is the damage a landed shot does. The identity is trivial — p·q reduces to
+        /// dealt/shots — and that is not the point. The point is that p and q say different things
+        /// and have different fixes:
+        ///
+        /// <code>
+        ///            p (hit rate)   q (per landed)      d
+        ///   Stage1        0.73            132.8      96.59
+        ///   Stage2        0.83            154.0     128.33
+        ///   Stage3        0.57            224.0     128.00
+        /// </code>
+        ///
+        /// Stage3's row is the re-measured one. Before its castle existed it read p=0.19, q=28.3,
+        /// d=5.31, and that row is what made the spread look like 24x — a factorisation inherits
+        /// whatever defect its measurement had.
+        ///
+        /// Within a stage the distribution is still heavy-tailed: Stage3's median damage per shot is
+        /// 62.5 against a mean of 128.00, 43% of shots deal nothing, and one shot did 560. A model
+        /// consuming only the mean cannot express "many shots accomplish nothing", which is the
+        /// complaint that opened this investigation.
+        /// </summary>
+        public static float DamagePerTurn(float hitRate, float damagePerLandedShot)
+            => Mathf.Clamp01(hitRate) * Mathf.Max(0f, damagePerLandedShot);
+
+        /// <summary>
+        /// Turns for the ATTACKER alone to remove a keep, given the measured factors.
+        ///
+        /// Named "attacker" because <see cref="TurnsToDecide"/> silently means the same thing while
+        /// reading as if it covered the whole match. It does not: a keep also loses material to its
+        /// own owner's shots, and in Stage3 that channel was larger than the attacker's. A caller
+        /// that wants match length needs both, and the second is not modelled here — see
+        /// <see cref="SelfInflictedShareIsNotModelled"/>.
+        /// </summary>
+        public static float AttackerTurnsToRemove(float material, float hitRate, float damagePerLandedShot)
+            => material / Mathf.Max(0.01f, DamagePerTurn(hitRate, damagePerLandedShot));
+
+        /// <summary>
+        /// The measured share of a keep's material loss that its OWN side inflicted, per stage.
+        ///
+        /// Documented as data rather than folded into an equation, because the honest thing to
+        /// report is that the model has no term for it. Adding one that reproduces these numbers
+        /// would be an identity — total divided by the sum of two rates derived from that same
+        /// total returns the observed turn count by construction, predicting nothing. Closing this
+        /// properly needs the three causes separated first (own shots, the flying beast's wall
+        /// rams, collapse chains crossing a turn boundary), which B1 did not do.
+        /// </summary>
+        public static readonly (string stage, float selfShare)[] SelfInflictedShareIsNotModelled =
+        {
+            ("Stage1", 0.39f),
+            ("Stage2", 0.42f),
+            // 0.26 re-measured with Stage3's castle present. It read 0.67 while the stage booted
+            // without walls or a core, which made the defender look like the primary demolisher; with
+            // the keep standing the attacker is comfortably ahead. Still far too large to ignore.
+            ("Stage3", 0.26f),
+        };
     }
 
     /// <summary>

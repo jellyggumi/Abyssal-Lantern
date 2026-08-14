@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:33Z" duration="30.9933192">
+  <test-suite type="TestSuite" id="1130" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="100" result="Passed" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:33Z" duration="30.993319" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1124" name="CastleBusters.PlayModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="100" result="Passed" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:33Z" duration="30.987558" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="33335" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1125" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="100" result="Passed" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:33Z" duration="30.986149" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1126" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="100" result="Passed" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:33Z" duration="30.985008" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1111" name="ShotReachabilityProbe" fullname="CastleBusters.Tests.ShotReachabilityProbe" classname="CastleBusters.Tests.ShotReachabilityProbe" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:33Z" duration="30.983178" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1112" name="Probe_OneShotAtTheModelsBestAngle" fullname="CastleBusters.Tests.ShotReachabilityProbe.Probe_OneShotAtTheModelsBestAngle" methodname="Probe_OneShotAtTheModelsBestAngle" classname="CastleBusters.Tests.ShotReachabilityProbe" runstate="Runnable" seed="1678760146" result="Passed" start-time="2026-08-14 00:51:02Z" end-time="2026-08-14 00:51:12Z" duration="9.989116" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="180000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+<color=#ffaa00>warn:</color> [09:51:04:5776] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> ConnectionManager[f28af5ad-5897-470f-b59e-971f1c7c20ac] ExecuteHubMethodAsync Connection became inactive while invoking 'PerformVersionHandshake' on endpoint: /hub/mcp-server. Error: The 'InvokeCoreAsync' method cannot be called if the connection is not active
+<color=#ff6b6b>fail:</color> [09:51:04:5780] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> McpManagerClientHub Version handshake failed: No response from server.
+<color=#ffaa00>warn:</color> [09:51:04:5783] <color=#B4FF32>[AI]</color> <color=#48C9B0><b>McpManagerClientHub</b></color> McpManagerClientHub Version handshake failed (1/3). Reason: Version handshake failed with null response.
+[reach] firing angle=25deg power=70% velocity=(15.99, 7.45) (|v|=17.64)
+[reach] projectile found=True
+Failed to import package with error: Cannot import package in play mode.
+Failed to import package with error: Cannot import package in play mode.
+[reach] ---- result ----
+[reach] frames in Launched state : 325
+[reach] peak height y            : 3.98
+[reach] x where flight ended     : -7.97   (enemy keep spans 6..11.5)
+[reach] reached the keep?        : NO — fell short
+[reach] enemy core HP            : 150.0 -> 150.0  (delta 0.0)
+[reach] enemy wall blocks        : 143 -> 141  (delta -2)
+[reach] readback line            : "적 기사 → 성벽 1블록 파괴"
+
+]]></output>
+            </test-case>
+            <test-case id="1113" name="Probe_PowerSweepAtFortyFiveDegrees" fullname="CastleBusters.Tests.ShotReachabilityProbe.Probe_PowerSweepAtFortyFiveDegrees" methodname="Probe_PowerSweepAtFortyFiveDegrees" classname="CastleBusters.Tests.ShotReachabilityProbe" runstate="Runnable" seed="120523317" result="Passed" start-time="2026-08-14 00:51:12Z" end-time="2026-08-14 00:51:33Z" duration="20.986505" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="300000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <reason>
+                <message><![CDATA[sweep recorded; see the [sweep] lines]]></message>
+              </reason>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:true
+[sweep] 45deg power=40%  launchedFrames=818  peakY=3.92  endX=-8.96  -> SHORT
+[sweep] 45deg power=60%  launchedFrames=1423  peakY=7.12  endX=0.23  -> SHORT
+[sweep] 45deg power=80%  launchedFrames=2404  peakY=11.62  endX=18.25  -> PAST the keep
+[sweep] 45deg power=100%  launchedFrames=1677  peakY=17.41  endX=25.04  -> PAST the keep
+<color=#ff6b6b>fail:</color> [09:51:33:5848] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

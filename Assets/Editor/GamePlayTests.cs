@@ -1132,17 +1132,21 @@ namespace CastleBusters.Tests
                 launchManager.launchPoint = launchPointGo.transform;
                 launchManager.maxDragDistance = 4.2f;
                 launchManager.launchForceMultiplier = 6f;
-                launchManager.maxLaunchVelocity = 25.2f;
+                launchManager.maxLaunchVelocity = LaunchPowerCurve.MaxSpeed;
                 launchManager.minLaunchVelocity = 3f;
 
                 Vector2 pointer = (Vector2)launchPointGo.transform.position + Vector2.left * 4.2f;
                 Vector2 velocity = launchManager.CalculateLaunchVelocity(pointer);
 
-                Assert.AreEqual(25.2f, velocity.x, 0.001f,
+                // The tuned cap moved 25.2 -> LaunchPowerCurve.MaxSpeed. Asserted against the
+                // curve rather than a literal so the two cannot drift apart: the cap is not a feel
+                // number, it is sized so a full 45-degree draw lands just past the keep instead of
+                // 36 units beyond it. `qa/aim-space-reachability.md`
+                Assert.AreEqual(LaunchPowerCurve.MaxSpeed, velocity.x, 0.001f,
                     "A full leftward draw must throw RIGHT (slingshot pull) at the tuned launch cap.");
                 Assert.AreEqual(0f, velocity.y, 0.001f);
-                Assert.AreEqual(25.2f, velocity.magnitude, 0.001f,
-                    "A 4.2-unit full draw must launch at 25.2 m/s.");
+                Assert.AreEqual(LaunchPowerCurve.MaxSpeed, velocity.magnitude, 0.001f,
+                    "A full 4.2-unit draw must launch at the tuned cap.");
                 Assert.AreEqual(1f, launchManager.GetPullTensionRatio(pointer), 0.001f,
                     "A full draw must report complete bowstring tension.");
             }
@@ -1165,7 +1169,7 @@ namespace CastleBusters.Tests
                 launchManager.launchPoint = launchPointGo.transform;
                 launchManager.maxDragDistance = 4.2f;
                 launchManager.launchForceMultiplier = 6f;
-                launchManager.maxLaunchVelocity = 25.2f;
+                launchManager.maxLaunchVelocity = LaunchPowerCurve.MaxSpeed;
                 launchManager.minLaunchVelocity = 3f;
 
                 Vector2 belowThreshold = launchManager.CalculateLaunchVelocity(
@@ -1173,11 +1177,17 @@ namespace CastleBusters.Tests
                 Vector2 atThreshold = launchManager.CalculateLaunchVelocity(
                     (Vector2)launchPointGo.transform.position + Vector2.up * 0.50f);
 
-                Assert.AreEqual(2.94f, belowThreshold.magnitude, 0.001f);
-                Assert.Less(belowThreshold.magnitude, launchManager.minLaunchVelocity,
-                    "A 0.49-unit pull must remain below the 3 m/s launch threshold.");
-                Assert.AreEqual(3f, atThreshold.magnitude, 0.001f,
-                    "The exact 0.50-unit boundary must reach 3 m/s without an off-by-one dead zone.");
+                // The refused GESTURE is the contract, not the speed behind it. MinDrawFraction
+                // 0.119 x maxDragDistance 4.2 = 0.4998u, so the boundary sits between these two
+                // pulls exactly where it did under the old linear curve — the player's hand learns
+                // the same depth. What moved is the speed at that depth (3.0 -> ~6.0), which is why
+                // the assertion reads EffectiveMinLaunchSpeed instead of a literal: honouring the
+                // serialized 3 would have dropped the refusal to a 2.9% flick and deleted the
+                // coaching in silence.
+                Assert.Less(belowThreshold.magnitude, launchManager.EffectiveMinLaunchSpeed,
+                    "A 0.49-unit pull must stay below the launch threshold and be coached, not fired.");
+                Assert.GreaterOrEqual(atThreshold.magnitude, launchManager.EffectiveMinLaunchSpeed,
+                    "The 0.50-unit boundary must clear the threshold without an off-by-one dead zone.");
                 Assert.Less(atThreshold.y, 0f,
                     "An upward pull must throw downward — threshold handling must preserve the slingshot direction.");
             }

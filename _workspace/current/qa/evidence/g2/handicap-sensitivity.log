@@ -1,0 +1,26 @@
+=== HANDICAP SENSITIVITY (V4) ===
+settings: keep=1440 shot=106 aim=0.7 err=0.09
+matches per point: 100, alternating turn order
+G2 band: 45 %-55 %
+
+--- IF the handicap costs the AI this much aim quality ---
+  penalty | player win rate | inside band
+     0.00 |          53.0 % | yes
+     0.01 |          68.0 % | NO
+     0.02 |          83.0 % | NO
+     0.03 |          95.0 % | NO
+     0.05 |          99.0 % | NO
+     0.08 |         100.0 % | NO
+     0.12 |         100.0 % | NO
+
+--- the grade ladder, in aim-error metres (NOT convertible to the above) ---
+  Novice      handicap 0.70 -> AI error 2.35 (at the ramp midpoint 1.65)
+  Apprentice  handicap 0.70 -> AI error 2.35 (at the ramp midpoint 1.65)
+  Skilled     handicap 0.35 -> AI error 2.00 (at the ramp midpoint 1.65)
+  Elite       handicap 0.00 -> AI error 1.65 (at the ramp midpoint 1.65)
+
+--- what the runtime must measure to close the gap ---
+  TelemetrySink.AiHits / AiShots against AiMeanAimError:
+  that pair converts metres of aim error into points of hit rate, which is
+  the same unit as the quality penalty above. Until then the handicap has a
+  rationale (20% of the ramp span per grade) and no predicted effect size.

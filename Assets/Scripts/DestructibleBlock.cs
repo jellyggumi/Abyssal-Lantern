@@ -221,13 +221,27 @@ namespace CastleBusters
 
             if (isFalling && currentHP <= 0) return;
             float prevRatio = maxHP > 0f ? currentHP / maxHP : 0f;
+            // Material actually removed, not damage dealt: overkill on a nearly-dead block is not
+            // material. The survey needs the COEFFICIENT OF VARIATION of per-shot damage, because
+            // sd(shots to destroy) = sqrt(durability/mean) * CV - and hit rate cannot supply it,
+            // being a binarisation that discards magnitude. Accumulated here and closed at the turn
+            // boundary, since one shot per turn is the rule.
+            TelemetrySink.NoteMaterialRemoved(damageFromPlayer, Mathf.Min(damage, Mathf.Max(0f, currentHP)));
             currentHP -= damage;
             Color feedbackColor = blockData != null ? blockData.blockColor : new Color(0.65f, 0.55f, 0.42f, 1f);
             GameFeelVfx.SpawnDamageNumber(transform.position, damage, new Color(1f, 0.85f, 0.25f, 1f));
             GameFeelVfx.SpawnImpactBurst(transform.position, feedbackColor, Mathf.Clamp(damage / 35f, 0.45f, 1.8f), spriteRenderer != null ? spriteRenderer.sprite : null, false);
             // Dedicated star-flash impact frames on top of the procedural burst; size tracks damage.
+            //
+            // Tinted warm, not white. A/B measurement (qa/impact-white-square.md): with this flash
+            // on screen the impact carries pale NEUTRAL pixels (209,209,207); disabling it takes
+            // them to zero. The art is authored greyscale and the tint multiplies into it, so
+            // Color.white left it colourless - and colourless over bright grass and sky is the
+            // "white square" that was reported, since nothing else at the impact is neutral. Warm
+            // amber matches the burst (0.80,0.50,0.20), the damage number, and the Higgsfield
+            // starburst that draws beside it.
             FrameAnimEffect.Spawn(EffectSpriteLibrary.Spark, transform.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.15f),
-                Mathf.Clamp(0.6f + damage / 60f, 0.6f, 1.6f), Color.white, 20f);
+                Mathf.Clamp(0.6f + damage / 60f, 0.6f, 1.6f), new Color(1f, 0.78f, 0.36f, 1f), 20f);
             GameplayUxDirector.NotifyDamage(transform.position, damage, this is CastleCoreGimmick);
 
             if (damage >= maxHP * 0.15f && DebrisPool.Instance != null)
@@ -402,7 +416,29 @@ namespace CastleBusters
             // three wall blocks and forty terrain tiles reads as "성벽 3블록", because the wall
             // is what the next shot has to get through. Cores are counted as core damage, not
             // as a block (CastleCoreGimmick taps NoteCoreDamage directly).
-            if (!isGroundAnchor && !(this is CastleCoreGimmick)) ShotTraceDirector.NoteBlockDestroyed();
+            //
+            // But NOT everything left over is a wall. A live sweep fired three shots that hit a
+            // midfield field-tower, an enemy archer, and bare ground, and the readback called all
+            // three "성벽 N블록 파괴" (qa/aim-space-reachability.md §0-C). Field obstacles and the
+            // flying beast are DestructibleBlocks too, so the readback was telling the player they
+            // had breached a wall they never touched — the exact confusion the readback exists to
+            // remove. The category is resolved from parentage, which the ownership code below
+            // already establishes: under a CastleController it is the keep, otherwise it is field
+            // furniture.
+            //
+            // Ownership goes with it. The live sweep's next shot hit the PLAYER'S OWN wall at
+            // x=-8 — the launch apron sits at -17 and the player's own keep stands at -7..-4, so a
+            // shallow draw fires into it — and the readback still said "성벽 3블록 파괴", which
+            // reads as progress. Whose wall it was is the difference between a breach and a
+            // self-inflicted hole.
+            if (!isGroundAnchor && !(this is CastleCoreGimmick))
+            {
+                var owner = GetComponentInParent<CastleController>();
+                ShotTraceDirector.NoteBlockDestroyed(
+                    owner != null ? ShotTraceDirector.TargetKind.Wall
+                                  : ShotTraceDirector.TargetKind.FieldObstacle,
+                    owner != null ? owner.isPlayerCastle : (bool?)null);
+            }
             // Resolve and award ownership before CastleController can end the match.
             // EndGame snapshots the current score into the results card, so a fatal block
             // must be credited before that transition.
@@ -417,10 +453,16 @@ namespace CastleBusters
                 if (gameManager != null && resolvedDamageFromPlayer.HasValue)
                 {
                     bool attackerIsPlayer = resolvedDamageFromPlayer.Value;
-                    if (castle.isPlayerCastle != attackerIsPlayer)
+                    bool onOpponentKeep = castle.isPlayerCastle != attackerIsPlayer;
+                    if (onOpponentKeep)
                     {
                         gameManager.AddScore(attackerIsPlayer, scoreValue);
                     }
+                    // The skill measure rides the SAME predicate the score does, deliberately.
+                    // A shot that broke the player's own wall scores nothing and must count as a
+                    // miss for grading too - B1 measured that happening on 71% of the player's own
+                    // turns, so a grade built on "blocks broken" would read self-harm as skill.
+                    TelemetrySink.NoteShotOutcome(attackerIsPlayer, onOpponentKeep);
                 }
                 castle.OnBlockDestroyed(this);
                 CastleRuinFx.NotifyBlockDestroyed(this, castle);

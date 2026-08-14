@@ -164,6 +164,14 @@ namespace CastleBusters
         private bool playerDangerNotified;
         private bool aiDangerNotified;
 
+        /// <summary>
+        /// The aim error the AI last fired under — the difficulty ramp plus whatever handicap the
+        /// player's grade earned. Captured at fire time rather than recomputed at the turn boundary
+        /// because <see cref="CurrentAiErrorOffset"/> moves with the turn count, so reading it after
+        /// the increment would report the NEXT turn's value against this turn's outcome.
+        /// </summary>
+        private float lastAiAimError;
+
         public bool PlayerCoreInDanger => playerCore != null && LastStand.IsDanger(playerCore.currentHP, playerCore.maxHP);
         public bool EnemyCoreInDanger => enemyCore != null && LastStand.IsDanger(enemyCore.currentHP, enemyCore.maxHP);
 
@@ -237,10 +245,20 @@ namespace CastleBusters
             {
                 if (cachedRampTurns > 0) return cachedRampTurns;
 
+                // The keep's ACTUAL hit points, course by course and material by material, not
+                // blocks x stone. The all-stone approximation drifted 0.90x / 1.04x / 1.19x per
+                // stage because no stage is all stone: Stage1 is W,S,S,I and Stage3 is W,W,W,I.
+                // KeepWallHitPoints already walks what spawns - the pacing gate uses it, and the
+                // ramp reading a different figure meant two numbers claimed to be "material".
+                // Measured in qa/evidence/match-length/castle-material-census-by-role.md.
+                var wood = Resources.Load<BlockData>("WoodBlockData");
                 var stone = Resources.Load<BlockData>("StoneBlockData");
-                float blockHealth = stone != null ? stone.maxHP : 85f;
-                float material = MatchLengthModel.Material(
-                    BlocksPerKeep(ActiveLayout.wallHeightBlocks), blockHealth, CastleCoreGimmick.CoreMaxHP);
+                var iron = Resources.Load<BlockData>("IronBlockData");
+                float material = KeepWallHitPoints(
+                    ActiveLayout,
+                    wood != null ? wood.maxHP : 30f,
+                    stone != null ? stone.maxHP : 85f,
+                    iron != null ? iron.maxHP : 150f) + CastleCoreGimmick.CoreMaxHP;
 
                 cachedRampTurns = Mathf.Max(1, Mathf.RoundToInt(
                     MatchLengthModel.TurnsToDecide(material, MatchLengthModel.EffectiveDamagePerTurn)));
@@ -1499,7 +1517,22 @@ namespace CastleBusters
             // groundRowCount so the strip fills the camera's visible ground band instead of floating
             // above bare background.
             const int groundRowCount = 5;
-            int blockRes = 160;
+            // Tile resolution is DERIVED from an atlas budget, not fixed at 160.
+            //
+            // A flat 160px makes the atlas width scale with the board: Stage1 and Stage2 asked for
+            // 7520 and 7200 pixels and got them, Stage3's wider ground band asked for 8800 and
+            // Texture2D threw "invalid parameters". That exception unwound out of CreateGround and
+            // out of Start, taking the rest of the boot with it — which is why Stage3 shipped with
+            // an enemy castle of five blocks, no wall courses and no core, and why a Stage3 match
+            // "decided" after removing 260 total HP
+            // (qa/evidence/match-length/castle-material-census.md).
+            //
+            // The exact trigger is NOT established: 8800 sits well inside the 16384 dimension cap,
+            // so something else in the request is at fault and I did not measure which. Rather than
+            // guess a ceiling, the resolution falls to whatever keeps the atlas inside a
+            // conservative budget — a wider board loses tile crispness instead of losing its castle.
+            const int maxAtlasWidth = 4096;
+            int blockRes = Mathf.Clamp(maxAtlasWidth / Mathf.Max(1, groundColumnCount), 16, 160);
             int texWidth = groundColumnCount * blockRes;
             int texHeight = groundRowCount * blockRes;
             Texture2D groundTex = GenerateGroundTexture(texWidth, texHeight);
@@ -1539,6 +1572,10 @@ namespace CastleBusters
                         // mismatch between visuals and physics that made the ground feel disconnected.
                         int pixelX = gridX * blockRes;
                         int pixelY = gridY * blockRes;
+                        // No atlas is a cosmetic outcome, not a structural one: the tile keeps the
+                        // material's own sprite and colour and the board finishes building. Before
+                        // this, a refused atlas threw out of Start and Stage3 had no keep at all.
+                        if (groundTex == null) continue;
                         Sprite normalSlice = Sprite.Create(groundTex, new Rect(pixelX, pixelY, blockRes, blockRes), new Vector2(0.5f, 0.5f), blockRes);
                         normalSlice.name = $"GroundSlice_{x}_{yIndex}_Normal";
                         // Reset tint to white: the sliced ground texture already carries its own
@@ -1567,12 +1604,35 @@ namespace CastleBusters
         }
 
 
+        /// <summary>
+        /// Builds the ground tilemap atlas, or returns null if the graphics layer refuses it.
+        ///
+        /// Returning null instead of throwing is the point. This threw for Stage3's wider board and
+        /// the exception unwound through <see cref="CreateGround"/> and out of <c>Start</c>, so the
+        /// keep, the core, and every gimmick sequenced after it were never created. A texture is
+        /// presentation; it silently deleted the simulation.
+        ///
+        /// CLAUDE.md §2 draws that boundary one way — presentation may read simulation state, never
+        /// write it. This is the same rule's third face: presentation failing must not be able to
+        /// REMOVE simulation either. Callers handle null; ground tiles without art are a cosmetic
+        /// defect, while a castle without walls is not a game.
+        /// </summary>
         private Texture2D GenerateGroundTexture(int width, int height)
         {
             // Mipmapped + trilinear so the tilemap (and any sliced crack art baked from it) minifies
             // cleanly instead of shimmering/aliasing when the camera zooms out or a tile is scaled down
             // for explosion debris/particles - the actual "aliasing when it breaks" complaint.
-            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            Texture2D tex;
+            try
+            {
+                tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[GameManager] ground atlas {width}x{height} refused ({e.GetType().Name}: "
+                                 + $"{e.Message}). Tiles will use flat colour; the board still builds.");
+                return null;
+            }
             tex.filterMode = FilterMode.Trilinear;
             tex.wrapMode = TextureWrapMode.Clamp;
             tex.anisoLevel = 4;
@@ -1814,6 +1874,20 @@ namespace CastleBusters
             // player already earned. ResetSeries() is the only thing that clears it.
             GameplayUxDirector.SetDangerState(false);
             DeploymentController.Instance?.ResetEconomy();
+            // The handicap is decided ONCE, here, from the sample the session has accumulated so
+            // far. Reading it per turn (the first version) meant a player crossing the sample gate
+            // or a grade boundary mid-match saw the AI's accuracy change with no perceivable cause.
+            // Worms Armageddon's precedent is the same shape: AI level is a byte authored before
+            // the match, and the cumulative stats stored beside it never feed back into it.
+            MatchHandicap.FreezeForMatch(TelemetrySink.PlayerShots, TelemetrySink.PlayerHits);
+            // And say so. Every shipped game the survey checked announces a rule that silently
+            // changes damage or accuracy; this project had two that said nothing. Once, at the
+            // start, and only when there is something to announce.
+            GameplayUxDirector.NotifyHandicapApplied(
+                SkillGrading.GradeForHitRate(TelemetrySink.PlayerShots > 0
+                    ? (float)TelemetrySink.PlayerHits / TelemetrySink.PlayerShots
+                    : 1f),
+                MatchHandicap.Current);
             currentState = GameState.PlayerTurn;
             isPlayerTurn = true;
             turnTimer = turnDuration;
@@ -2277,6 +2351,16 @@ namespace CastleBusters
             // Turn boundary: the volley has fully resolved, so the collapse chain it caused is
             // now complete and can be recorded as one reward event (see TelemetrySink.TurnResolved).
             TelemetrySink.TurnResolved();
+            // The skill measure closes here too, but only for the player's turns and only when a
+            // shot was actually committed. A turn that timed out without firing is not a miss -
+            // grading it would rate the clock rather than the aim. `ShotCommitted` is the same
+            // gate that enforces one shot per turn, so the two cannot drift apart.
+            if (isPlayerTurn) TelemetrySink.PlayerTurnEnded(oneShotTurnGate.ShotCommitted);
+            // The AI's mirror, recorded with the aim error it actually fired under. Hit rate alone
+            // could not separate a handicap from the difficulty ramp, since both move the same
+            // field - so the offset travels with the outcome. This is what supplies the
+            // metres-to-hit-rate conversion the balance model cannot derive.
+            else TelemetrySink.AiTurnEnded(oneShotTurnGate.ShotCommitted, lastAiAimError);
             turnCount++;
             isPlayerTurn = !isPlayerTurn;
             currentState = isPlayerTurn ? GameState.PlayerTurn : GameState.AITurn;
@@ -2306,8 +2390,24 @@ namespace CastleBusters
             var ai = FindObjectOfType<SimpleAI>();
             if (ai != null)
             {
-                // AI aim tightens along the same difficulty curve the wind rides on.
-                ai.errorOffsetRange = CurrentAiErrorOffset;
+                // AI aim tightens along the same difficulty curve the wind rides on, PLUS the
+                // handicap the player's measured grade is owed. Added, never multiplied: a
+                // multiplier would deform the Hill curve DifficultyCurve was rewritten to produce
+                // (task #17) differently per grade, making the difficulty SHAPE a function of the
+                // player's skill instead of the turn.
+                //
+                // Campaign only. The Go sources this follows are explicit that competitive play
+                // gets no handicap ("in tournaments, particularly when prize money is at stake, no
+                // handicap will be given to the weaker player"). There is no versus mode today; if
+                // one is added it must NOT inherit this line by default.
+                // design/skill-grading-and-handicap.md, .survey/siege-first-turn-fairness/
+                // MatchHandicap.Current, not the live counters: the value was frozen at match start
+                // so it cannot shift under the player mid-match.
+                ai.errorOffsetRange = CurrentAiErrorOffset + MatchHandicap.Current;
+                // Captured for the telemetry pair: an outcome is only interpretable next to the
+                // error the shot was fired under, since the ramp and the handicap move the same
+                // field and hit rate alone cannot separate them.
+                lastAiAimError = ai.errorOffsetRange;
                 ai.TakeTurn();
             }
             else EndTurn();

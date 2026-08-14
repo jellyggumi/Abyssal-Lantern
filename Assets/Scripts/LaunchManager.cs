@@ -11,8 +11,26 @@ namespace CastleBusters
         public Transform launchPoint;
         public float maxDragDistance = 4.2f;
         public float launchForceMultiplier = 6f;
-        public float maxLaunchVelocity = 25.2f;
+        /// <summary>
+        /// Speed cap. Mirrors <see cref="LaunchPowerCurve.MaxSpeed"/> — the curve is the authority
+        /// and this field exists so the keyboard aim path and the power readout share one number.
+        /// Was 25.2, which covered 64.7u at 45° against 26u of need: most of the pull existed only
+        /// to overshoot, and that is what made the usable window six percentage points wide.
+        /// </summary>
+        public float maxLaunchVelocity = LaunchPowerCurve.MaxSpeed;
         public float minLaunchVelocity = 3f;
+
+        /// <summary>
+        /// Speed below which a draw is refused with the "더 깊게 당긴 뒤 발사" coaching.
+        ///
+        /// Derived from <see cref="LaunchPowerCurve.MinDrawFraction"/> rather than read from
+        /// <see cref="minLaunchVelocity"/>, because the contract is a GESTURE: the shallow flick
+        /// that used to be refused must keep being refused. A fixed 3 m/s was 11.9% of the draw
+        /// under the old linear curve and only 2.9% under this one, so honouring the serialized
+        /// number would have quietly deleted the coaching. `minLaunchVelocity` is kept for the
+        /// keyboard aim path's own floor and for scene compatibility.
+        /// </summary>
+        public float EffectiveMinLaunchSpeed => LaunchPowerCurve.MinLaunchSpeed(maxLaunchVelocity);
 
         [Header("Trajectory Line")]
         public LineRenderer trajectoryLine;
@@ -357,13 +375,13 @@ namespace CastleBusters
         private void UpdateLaunchStats(Vector2 velocity)
         {
             if (launchStatsText == null) return;
-            bool canLaunch = velocity.magnitude >= minLaunchVelocity;
+            bool canLaunch = velocity.magnitude >= EffectiveMinLaunchSpeed;
             var gameManager = GameManager.Instance;
             if (gameManager != null)
             {
                 velocity = gameManager.PreviewLastStandLaunchVelocity(gameManager.IsPlayerTurn, velocity);
             }
-            float forcePercent = maxLaunchVelocity > 0f ? (velocity.magnitude / maxLaunchVelocity) * 100f : 0f;
+            float forcePercent = LaunchPowerCurve.DrawForSpeed(velocity.magnitude, maxLaunchVelocity) * 100f;
 
             float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
             if (angle < 0) angle += 360f;
@@ -758,7 +776,7 @@ namespace CastleBusters
                 isDragging = false;
                 if (trajectoryLine != null) trajectoryLine.positionCount = 0;
                 CleanUpVisuals();
-                if (launchVelocity.magnitude >= minLaunchVelocity)
+                if (launchVelocity.magnitude >= EffectiveMinLaunchSpeed)
                 {
                     LaunchUnit();
                 }
@@ -800,9 +818,17 @@ namespace CastleBusters
         {
             Vector2 pullVector = GetLaunchAnchorPosition() - pointerWorldPosition;
             Vector2 clampedPull = Vector2.ClampMagnitude(pullVector, maxDragDistance);
-            Vector2 velocity = clampedPull * launchForceMultiplier;
-            float cappedMagnitude = Mathf.Min(maxLaunchVelocity, velocity.magnitude);
-            return velocity.sqrMagnitude > 0.0001f ? velocity.normalized * cappedMagnitude : Vector2.zero;
+            if (clampedPull.sqrMagnitude <= 0.0001f) return Vector2.zero;
+
+            // Draw depth as a fraction of the full pull, then through the power curve. This used
+            // to be `clampedPull * launchForceMultiplier` capped at maxLaunchVelocity — speed
+            // linear in draw, which made DISTANCE quadratic in draw because range goes as v².
+            // Measured consequence at 45°: impact jumped from x=0.23 at 60% draw to x=18.25 at
+            // 80%, across a keep 5.5u wide. See LaunchPowerCurve for the arithmetic and the
+            // before/after windows.
+            float normalizedDraw = clampedPull.magnitude / Mathf.Max(0.0001f, maxDragDistance);
+            float speed = LaunchPowerCurve.SpeedForDraw(normalizedDraw, maxLaunchVelocity);
+            return clampedPull.normalized * speed;
         }
 
         public Vector2 GetLaunchAnchorPosition()
@@ -1046,7 +1072,10 @@ namespace CastleBusters
             }
 
 
-            float powerPercent = reportedVelocity.magnitude / Mathf.Max(0.01f, maxLaunchVelocity) * 100f;
+            // Report the DRAW the player made, not the speed ratio. Under the √ curve a half pull
+            // produces 70.7% of max speed, so a speed-based readout would tell the player they
+            // pulled harder than they did — and the number they are learning to repeat is the pull.
+            float powerPercent = LaunchPowerCurve.DrawForSpeed(reportedVelocity.magnitude, maxLaunchVelocity) * 100f;
             float angle = Mathf.Atan2(reportedVelocity.y, reportedVelocity.x) * Mathf.Rad2Deg;
             if (angle < 0f) angle += 360f;
             GameplayUxDirector.NotifyLaunch(selectedUnitName, powerPercent, angle);

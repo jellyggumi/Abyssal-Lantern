@@ -119,6 +119,115 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   blockers, and human-only judgments.
 - Numbers gate everything (G1–G8, `skill://game-studio-harness`). No adjective
   passes a gate.
+- **Read every file the triage names before starting.** A survey lane computed a
+  win-rate cliff from a simulator assumption and recommended intervention, while
+  the measured value sat in a file the triage had named by path
+  (`qa/b1-measurement-findings.md`). The assumption was off by 8–18×, and correcting
+  it reversed the recommendation. The lane self-reported the miss; the rule exists so
+  the next one does not repeat it.
+- **Verify an id before quoting what it returned.** A lane pulled Steam reviews for
+  eight app ids and found three misattributed — 219150 is Hotline Miami, not Worms
+  Clan Wars. Caught before writing, so the corpus is clean. Unverified, Hotline
+  Miami reviews would have been quoted as artillery players' voices.
+- **A floor-type requirement is only valid where its target does not compete for
+  size with something else.** A minimum-pixel rule works for HUD canvas text: the
+  HUD does not contend with world geometry. It breaks for a world-space label
+  attached to an object — raising a label on a 1.15u body to 12px at worst zoom
+  makes the label 0.87–1.15× the body, so the annotation becomes the subject
+  (measured 1.73× contradiction, cycle 2: floor needed fontSize 9.96, the
+  subordinate-annotation ceiling allowed 5.75). When a floor cannot be met, the
+  answer is neither "waive it" nor "reclassify as not applicable" — the first
+  hides a measured defect, the second erases a user-reported one. Narrow the
+  floor to the case where that channel alone carries the information, and move
+  the rest to a channel that is not size-bound. Check the competition condition
+  before writing any new floor.
+- **Cite an accessibility rate with its unit.** A flash rate measured as an
+  instantaneous derivative and one measured as WCAG's worst one-second window
+  are different numbers for the same curve (11.50/s vs 9.00/s, cycle 2). Quoting
+  one without the unit propagated a wrong figure into shipped code comments.
+  Report both, and judge on the window; at a clamp or `min()` kink use one-sided
+  limits, never a central difference, and take the worse side — smoothing a kink
+  biases structurally toward the safe-looking answer.
+- **PlayMode probes: `-nographics`, and run them TWICE.** The domain-reload hang is
+  the MCP plugin's `OnBeforeAssemblyReload` → `DisposeLogCollector` →
+  `BufferedFileLogStorage.cs:52`. It fires when the run has to reload assemblies, so
+  the reliable pattern is: run once (it may hang), change no scripts, run again — the
+  second pass has nothing to recompile and completes. Cycle 2 lost five consecutive
+  attempts to this before the pattern was found; the sixth finished in 128s.
+  Symptom of the bad case: the log stops with no scene markers, which means the run
+  never reached the scene and any "zero errors" reading from it proves nothing.
+  `-nographics` also avoids it in most cases, but `cam.Render()` segfaults without a
+  graphics device, so a probe that writes PNGs must run WITH graphics and take the
+  hang risk.
+
+### Invariants earned the hard way (violating these has already cost us)
+
+- **A test must measure the quantity the code produces.** A blink clamp was
+  applied to a phase *rate* while the code produced the derivative of
+  `t × rate`; the test asserted the rate, passed, and certified a WCAG violation
+  as safe. A test that certifies safety it never measured is worse than no test.
+  When a value is derived, assert the derived thing — count the real output.
+- **A derived figure inherits every defect of the run it came from.** B1 measured
+  Stage3's damage per turn at 5.31 and concluded d "cannot be one number, it spans
+  24x". The stage had no walls and no core — a ground-atlas exception was aborting
+  its boot — so the figure described an empty board, and re-measuring gave 128.00
+  against a true spread of 1.33x. Before a measurement becomes a conclusion, check
+  that the thing being measured was actually there.
+- **Never rank levers the arithmetic cannot rank.** A test asserted that fixing
+  accuracy beats fixing damage; it failed at 110.7 versus 111.1, because both enter
+  the product multiplicatively so equal relative gains are equal. Wanting one lever
+  is a design position — state it as one, and let the test assert only what the
+  numbers force.
+- **A test can pass ONLY in a bug's presence.** A ceiling test asserted that the
+  widest handicap reaches its cap. It did reach it — and its reaching it WAS the
+  defect, because two grades clamped to the same value and a four-grade scale
+  behaved as three. Eleven tests were green while shipping that. "The ceiling
+  works" and "the scale is a scale" are different contracts, and only the first
+  existed. When a clamp, cap, or floor is asserted, also assert that the values it
+  bounds stay distinguishable.
+- **A simulator constant that no gameplay code reads is a measurement parameter,
+  not a knob.** `beginnerAimError` was recommended as a one-constant fix on the
+  belief that "the knob already exists". It is read only by the two sims, the
+  editor, and tests; the player's launch path contains zero random draws (the AI's
+  contains four), so that constant models a HUMAN's hand. Raising it moves what the
+  gate reports and nothing a player experiences. Before writing "the knob already
+  exists", grep for reads from gameplay code.
+- **Fixing something invalidates decisions that cited it — go back and check.** The
+  opening-volley damping landed at 22:51 and erased a 38%p first-turn gap. The
+  arbitration that blocked all seven gimmicks on that gap was last touched at 13:11,
+  nine hours EARLIER, so nobody cited a stale number: the fix simply arrived
+  afterwards and no one revisited what it invalidated. Three documents kept citing
+  87% for over a day. A fix is not finished until the decisions that depended on the
+  old state have been re-read.
+- **When a device changes damage or accuracy, say so on screen.** Every shipped
+  comparable announces such rules — Hedgewars gives Karma / Vampirism / Extra
+  Damage their own permanent HUD icons, Worms marks a handicapped roster with `+`/`-`,
+  ShellShock added a wind icon to the server LIST. This project had two invisible
+  ones. A player who is not told why a shot hurt less reads it as a miss.
+- **The presentation/simulation boundary (§2) is load-bearing, and it has now paid
+  twice.** Sim-side balance figures stayed measurable across a large presentation
+  change because not one simulation symbol moved — so a baseline nobody thought to
+  capture was still recoverable at HEAD. And a buff that wrote `sr.color` directly
+  rendered for *zero frames*, because the animator owns that channel and reasserts
+  it every frame. Those are the same rule seen from both sides: the boundary is why
+  the measurement survived, and the boundary is why the shortcut failed. Treat a
+  presentation change that needs to write simulation state as a design error, not a
+  plumbing problem.
+- **Presentation that reports a count must be bound to the event, not to the
+  state.** A 0.625s attack clip looped for a 1.5s cooldown showed 2.40 swings per
+  one damage event. Players count swings; a looping clip lies about the number.
+- **One owner per render channel.** `sr.color` was written by buffs, by expiry
+  blinks, and by the animator's per-frame team tint — so buff colour rendered for
+  zero frames. Anything wanting to tint a unit goes through the animator, which
+  composes flash over status over team.
+- **Greyscale art times a neutral tint is invisible on bright ground.** Art here
+  is authored greyscale and code multiplies colour in, so `Color.white` leaves the
+  result colourless — measured as the "white square" report. Tints on effect art
+  need saturation (pinned at ≥0.35).
+- **Ask the scene, not the source, when pixels are the question.** Two wrong
+  diagnoses in cycle 2 came from reading code about a frame nobody had captured.
+  Enumerate the renderers at the position, then switch the suspect off and measure
+  the difference.
 
 ## 6. Web build & deployment
 

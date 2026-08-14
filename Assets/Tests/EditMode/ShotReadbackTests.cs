@@ -70,6 +70,132 @@ namespace CastleBusters.Tests
         }
 
         /// <summary>
+        /// A field obstacle is not a wall, and the line must not say it is.
+        ///
+        /// This is the defect a live sweep caught: three shots hit a midfield field-tower, an enemy
+        /// archer and bare ground, and every one was announced as "성벽 N블록 파괴"
+        /// (`qa/aim-space-reachability.md` §0-C). The readback exists so the player can tell what
+        /// their shot did; announcing a breach that never happened is worse than saying nothing,
+        /// because the player aims the next shot at a hole that is not there.
+        /// </summary>
+        [Test]
+        public void Compose_DoesNotCallAFieldObstacleAWall()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                FieldPiecesDestroyed = 2,
+            });
+
+            StringAssert.DoesNotContain("성벽", line);
+            StringAssert.Contains("야전 구조물 2", line);
+        }
+
+        /// <summary>
+        /// Both categories in one shot are reported separately, wall first.
+        ///
+        /// A shot can clear a field tower on the way in and still take a wall block; the player
+        /// needs to know both, and which is which, because only one of them is a hole to aim at.
+        /// </summary>
+        [Test]
+        public void Compose_SeparatesWallsFromFieldPieces()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                BlocksDestroyed = 3,
+                FieldPiecesDestroyed = 1,
+            });
+
+            StringAssert.Contains("성벽 3블록", line);
+            StringAssert.Contains("야전 구조물 1", line);
+            Assert.Less(line.IndexOf("성벽"), line.IndexOf("야전"),
+                "the wall comes first - it is what the next shot has to get through");
+        }
+
+        /// <summary>
+        /// Destroying only field furniture still counts as hitting something.
+        ///
+        /// Otherwise a shot that killed the flying beast would be reported as a miss, which is the
+        /// opposite error from the one being fixed.
+        /// </summary>
+        [Test]
+        public void FieldOnlyHit_IsNotReportedAsAMiss()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                FieldPiecesDestroyed = 1,
+            });
+
+            StringAssert.DoesNotContain("빗나감", line);
+        }
+
+        /// <summary>
+        /// The shooter's own wall coming down is reported as a loss, not as a breach.
+        ///
+        /// The launch apron sits at x=-17 and the player's own keep stands at x=-7..-4, so a
+        /// shallow draw fires into it. A live sweep did exactly that at 60% draw — struck the
+        /// player's own wall at x=-8 — and the line still said "성벽 3블록 파괴", which reads as
+        /// progress. The model puts roughly half the expressible draw range below the player's own
+        /// roof at 45 degrees, so this is the common case rather than an edge one.
+        /// </summary>
+        [Test]
+        public void Compose_ReportsOwnWallDamageAsALoss()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                OwnBlocksDestroyed = 3,
+            });
+
+            StringAssert.Contains("아군 성벽 3블록 손실", line);
+            StringAssert.DoesNotContain("파괴", line);
+        }
+
+        /// <summary>
+        /// A shot can breach the enemy and cost you a wall in the same turn; both must show, and
+        /// the loss goes last so the gain is not buried under it.
+        /// </summary>
+        [Test]
+        public void Compose_OrdersTheLossAfterTheGain()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                BlocksDestroyed = 2,
+                OwnBlocksDestroyed = 1,
+            });
+
+            StringAssert.Contains("성벽 2블록 파괴", line);
+            StringAssert.Contains("아군 성벽 1블록 손실", line);
+            Assert.Less(line.IndexOf("2블록 파괴"), line.IndexOf("손실"),
+                "the gain reads first; the loss is the caveat, not the headline");
+        }
+
+        /// <summary>
+        /// Self-damage alone is not a miss. A shot that demolished your own wall did something,
+        /// and calling it "빗나감" would hide the consequence the player has to plan around.
+        /// </summary>
+        [Test]
+        public void OwnWallOnly_IsNotReportedAsAMiss()
+        {
+            var line = ShotReadback.Compose(new ShotReadback.Summary
+            {
+                ByPlayer = true,
+                Projectile = "기사",
+                OwnBlocksDestroyed = 1,
+            });
+
+            StringAssert.DoesNotContain("빗나감", line);
+        }
+
+        /// <summary>
         /// Siege damage is a product of multipliers, so the raw figure is routinely fractional.
         /// "-39.6" reads as precision the player cannot act on, and the gauge it describes moves
         /// in whole points anyway.

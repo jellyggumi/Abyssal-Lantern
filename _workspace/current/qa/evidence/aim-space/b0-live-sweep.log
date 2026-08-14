@@ -1,0 +1,8 @@
+[sweep] 45deg draw=60%  proj=Knight mass=0.35 colW=0.94  peakY=5.99  end=-0.21  -> SHORT  | hit: wall block 'FieldTowerBlock_1' at x=0.00
+         beastHP=150->NaN  walls=59->56  readback="적 기사 → 성벽 4블록 파괴"
+--
+[sweep] 45deg draw=86%  proj=Knight mass=0.35 colW=0.94  peakY=8.00  end=7.88  -> ON THE KEEP  | hit: enemy unit Archer at x=7.98
+         beastHP=150->130  walls=59->58  readback="적 기사 → 성벽 3블록 파괴"
+--
+[sweep] 45deg draw=100%  proj=Knight mass=0.35 colW=0.94  peakY=9.08  end=18.76  -> PAST the keep  | hit: GROUND tile 'GroundBlock_19_0' at x=19.00
+         beastHP=150->150  walls=59->58  readback="적 기사 → 성벽 2블록 파괴"
