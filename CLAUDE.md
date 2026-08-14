@@ -119,6 +119,25 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   blockers, and human-only judgments.
 - Numbers gate everything (G1–G8, `skill://game-studio-harness`). No adjective
   passes a gate.
+- **A floor-type requirement is only valid where its target does not compete for
+  size with something else.** A minimum-pixel rule works for HUD canvas text: the
+  HUD does not contend with world geometry. It breaks for a world-space label
+  attached to an object — raising a label on a 1.15u body to 12px at worst zoom
+  makes the label 0.87–1.15× the body, so the annotation becomes the subject
+  (measured 1.73× contradiction, cycle 2: floor needed fontSize 9.96, the
+  subordinate-annotation ceiling allowed 5.75). When a floor cannot be met, the
+  answer is neither "waive it" nor "reclassify as not applicable" — the first
+  hides a measured defect, the second erases a user-reported one. Narrow the
+  floor to the case where that channel alone carries the information, and move
+  the rest to a channel that is not size-bound. Check the competition condition
+  before writing any new floor.
+- **Cite an accessibility rate with its unit.** A flash rate measured as an
+  instantaneous derivative and one measured as WCAG's worst one-second window
+  are different numbers for the same curve (11.50/s vs 9.00/s, cycle 2). Quoting
+  one without the unit propagated a wrong figure into shipped code comments.
+  Report both, and judge on the window; at a clamp or `min()` kink use one-sided
+  limits, never a central difference, and take the worse side — smoothing a kink
+  biases structurally toward the safe-looking answer.
 - **`-nographics` for PlayMode probes, except captures.** The MCP plugin's
   `BufferedFileLogStorage` hangs the domain reload: the same probe times out at
   300s with graphics and finishes in ~42s without. But `cam.Render()` segfaults
@@ -133,11 +152,15 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   `t × rate`; the test asserted the rate, passed, and certified a WCAG violation
   as safe. A test that certifies safety it never measured is worse than no test.
   When a value is derived, assert the derived thing — count the real output.
-- **A floor-type requirement is only valid where its target does not compete for
-  size with something else** (N-26). `HudCanvas.LegibleFloorPixels` is a
-  screen-space constant; applied to a world-space label it demands a font size at
-  which the annotation grows larger than the soldier it annotates. Carrying a
-  screen-space constant into world space breaks its premise silently.
+- **The presentation/simulation boundary (§2) is load-bearing, and it has now paid
+  twice.** Sim-side balance figures stayed measurable across a large presentation
+  change because not one simulation symbol moved — so a baseline nobody thought to
+  capture was still recoverable at HEAD. And a buff that wrote `sr.color` directly
+  rendered for *zero frames*, because the animator owns that channel and reasserts
+  it every frame. Those are the same rule seen from both sides: the boundary is why
+  the measurement survived, and the boundary is why the shortcut failed. Treat a
+  presentation change that needs to write simulation state as a design error, not a
+  plumbing problem.
 - **Presentation that reports a count must be bound to the event, not to the
   state.** A 0.625s attack clip looped for a 1.5s cooldown showed 2.40 swings per
   one damage event. Players count swings; a looping clip lies about the number.
