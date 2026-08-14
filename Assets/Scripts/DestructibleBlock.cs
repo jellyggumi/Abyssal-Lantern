@@ -221,6 +221,12 @@ namespace CastleBusters
 
             if (isFalling && currentHP <= 0) return;
             float prevRatio = maxHP > 0f ? currentHP / maxHP : 0f;
+            // Material actually removed, not damage dealt: overkill on a nearly-dead block is not
+            // material. The survey needs the COEFFICIENT OF VARIATION of per-shot damage, because
+            // sd(shots to destroy) = sqrt(durability/mean) * CV - and hit rate cannot supply it,
+            // being a binarisation that discards magnitude. Accumulated here and closed at the turn
+            // boundary, since one shot per turn is the rule.
+            TelemetrySink.NoteMaterialRemoved(damageFromPlayer, Mathf.Min(damage, Mathf.Max(0f, currentHP)));
             currentHP -= damage;
             Color feedbackColor = blockData != null ? blockData.blockColor : new Color(0.65f, 0.55f, 0.42f, 1f);
             GameFeelVfx.SpawnDamageNumber(transform.position, damage, new Color(1f, 0.85f, 0.25f, 1f));
@@ -447,10 +453,16 @@ namespace CastleBusters
                 if (gameManager != null && resolvedDamageFromPlayer.HasValue)
                 {
                     bool attackerIsPlayer = resolvedDamageFromPlayer.Value;
-                    if (castle.isPlayerCastle != attackerIsPlayer)
+                    bool onOpponentKeep = castle.isPlayerCastle != attackerIsPlayer;
+                    if (onOpponentKeep)
                     {
                         gameManager.AddScore(attackerIsPlayer, scoreValue);
                     }
+                    // The skill measure rides the SAME predicate the score does, deliberately.
+                    // A shot that broke the player's own wall scores nothing and must count as a
+                    // miss for grading too - B1 measured that happening on 71% of the player's own
+                    // turns, so a grade built on "blocks broken" would read self-harm as skill.
+                    TelemetrySink.NoteShotOutcome(attackerIsPlayer, onOpponentKeep);
                 }
                 castle.OnBlockDestroyed(this);
                 CastleRuinFx.NotifyBlockDestroyed(this, castle);

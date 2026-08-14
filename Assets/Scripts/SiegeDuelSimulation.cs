@@ -217,6 +217,32 @@ namespace CastleBusters
         }
 
         /// <summary>
+        /// Win rate when the enemy's aim quality is penalised — the handicap's effect, expressed in
+        /// the only unit this model has.
+        ///
+        /// THIS IS A SENSITIVITY TABLE, NOT A PREDICTION OF THE HANDICAP. `SkillGrading` raises the
+        /// AI's aim error by 0.35 world metres per grade; this model has no metres, only a 0..1
+        /// damage multiplier. Converting between them needs wall hitboxes, blast radii, and block
+        /// placement — physics this model does not contain — so inventing a factor would make every
+        /// number below a fabrication. What this answers instead is the conditional: IF the handicap
+        /// costs the AI <paramref name="enemyQualityPenalty"/> of aim quality, the win rate lands
+        /// here. The measured conversion arrives from `TelemetrySink.AiHits / AiShots` against
+        /// `AiMeanAimError`, and only then does a prediction become possible.
+        ///
+        /// Alternating turn order, so what is measured is the handicap and not the opening volley.
+        /// </summary>
+        public static float WinRateWithEnemyPenalty(
+            SiegeBalanceSettings settings, int seed, float enemyQualityPenalty, int matches = RequiredMatches)
+        {
+            var results = RunSeries(
+                settings, seed, matches,
+                alternateFirstMove: true,
+                playerSkill: settings.fixedAimQuality,
+                enemySkill: Mathf.Clamp01(settings.fixedAimQuality - enemyQualityPenalty));
+            return Summarize(results, settings.secondsPerTurn).PlayerWinRate;
+        }
+
+        /// <summary>
         /// PCG-style stream. The pacing sim's plain LCG has weak low-bit behaviour on nearby
         /// seeds, and this sim feeds it seed*2+1 and seed*2+2 — adjacent by construction. Two
         /// streams that start correlated would reintroduce the exact defect this type exists to

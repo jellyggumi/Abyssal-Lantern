@@ -722,6 +722,29 @@ namespace CastleBusters
             Instance?.ShowToast("일발역전! 다음 발사 ×2.2", new Color(1f, 0.42f, 0.12f, 1f), 2.4f);
         }
 
+        /// <summary>
+        /// Announces the handicap once, at match start, when there is one.
+        ///
+        /// The survey found no shipped game that applies an invisible damage or accuracy rule with
+        /// no indication at all: Hedgewars gives Karma / Vampirism / Extra Damage their own
+        /// permanent HUD icons, Worms marks a handicapped team with +/- on the roster, ShellShock
+        /// puts every rule in the lobby and added a wind icon to the server LIST. This project had
+        /// two such rules with zero display — the opening-volley damping and this handicap.
+        ///
+        /// A toast rather than a permanent badge, deliberately. The same repo's visibility survey
+        /// found that adding an icon every time a playtester missed something is a documented
+        /// failure path — one team spent eighteen months building what they called "an icon mess".
+        /// Worms' precedent is also pre-match rather than persistent. So: said once, when it is
+        /// true, and never again.
+        /// </summary>
+        public static void NotifyHandicapApplied(SkillGrading.Grade grade, float aimError)
+        {
+            if (aimError <= 0f) return;   // nothing to announce; silence is the correct display
+            Instance?.ShowToast(
+                $"수련 보정 적용 — 적 조준이 흔들립니다",
+                new Color(0.55f, 0.85f, 1f, 1f), 2.8f);
+        }
+
         private void UpdateDangerVignette()
         {
             if (root == null) return;

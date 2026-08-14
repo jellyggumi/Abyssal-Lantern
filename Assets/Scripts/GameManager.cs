@@ -164,6 +164,14 @@ namespace CastleBusters
         private bool playerDangerNotified;
         private bool aiDangerNotified;
 
+        /// <summary>
+        /// The aim error the AI last fired under — the difficulty ramp plus whatever handicap the
+        /// player's grade earned. Captured at fire time rather than recomputed at the turn boundary
+        /// because <see cref="CurrentAiErrorOffset"/> moves with the turn count, so reading it after
+        /// the increment would report the NEXT turn's value against this turn's outcome.
+        /// </summary>
+        private float lastAiAimError;
+
         public bool PlayerCoreInDanger => playerCore != null && LastStand.IsDanger(playerCore.currentHP, playerCore.maxHP);
         public bool EnemyCoreInDanger => enemyCore != null && LastStand.IsDanger(enemyCore.currentHP, enemyCore.maxHP);
 
@@ -1861,6 +1869,20 @@ namespace CastleBusters
             // player already earned. ResetSeries() is the only thing that clears it.
             GameplayUxDirector.SetDangerState(false);
             DeploymentController.Instance?.ResetEconomy();
+            // The handicap is decided ONCE, here, from the sample the session has accumulated so
+            // far. Reading it per turn (the first version) meant a player crossing the sample gate
+            // or a grade boundary mid-match saw the AI's accuracy change with no perceivable cause.
+            // Worms Armageddon's precedent is the same shape: AI level is a byte authored before
+            // the match, and the cumulative stats stored beside it never feed back into it.
+            MatchHandicap.FreezeForMatch(TelemetrySink.PlayerShots, TelemetrySink.PlayerHits);
+            // And say so. Every shipped game the survey checked announces a rule that silently
+            // changes damage or accuracy; this project had two that said nothing. Once, at the
+            // start, and only when there is something to announce.
+            GameplayUxDirector.NotifyHandicapApplied(
+                SkillGrading.GradeForHitRate(TelemetrySink.PlayerShots > 0
+                    ? (float)TelemetrySink.PlayerHits / TelemetrySink.PlayerShots
+                    : 1f),
+                MatchHandicap.Current);
             currentState = GameState.PlayerTurn;
             isPlayerTurn = true;
             turnTimer = turnDuration;
@@ -2324,6 +2346,16 @@ namespace CastleBusters
             // Turn boundary: the volley has fully resolved, so the collapse chain it caused is
             // now complete and can be recorded as one reward event (see TelemetrySink.TurnResolved).
             TelemetrySink.TurnResolved();
+            // The skill measure closes here too, but only for the player's turns and only when a
+            // shot was actually committed. A turn that timed out without firing is not a miss -
+            // grading it would rate the clock rather than the aim. `ShotCommitted` is the same
+            // gate that enforces one shot per turn, so the two cannot drift apart.
+            if (isPlayerTurn) TelemetrySink.PlayerTurnEnded(oneShotTurnGate.ShotCommitted);
+            // The AI's mirror, recorded with the aim error it actually fired under. Hit rate alone
+            // could not separate a handicap from the difficulty ramp, since both move the same
+            // field - so the offset travels with the outcome. This is what supplies the
+            // metres-to-hit-rate conversion the balance model cannot derive.
+            else TelemetrySink.AiTurnEnded(oneShotTurnGate.ShotCommitted, lastAiAimError);
             turnCount++;
             isPlayerTurn = !isPlayerTurn;
             currentState = isPlayerTurn ? GameState.PlayerTurn : GameState.AITurn;
@@ -2353,8 +2385,24 @@ namespace CastleBusters
             var ai = FindObjectOfType<SimpleAI>();
             if (ai != null)
             {
-                // AI aim tightens along the same difficulty curve the wind rides on.
-                ai.errorOffsetRange = CurrentAiErrorOffset;
+                // AI aim tightens along the same difficulty curve the wind rides on, PLUS the
+                // handicap the player's measured grade is owed. Added, never multiplied: a
+                // multiplier would deform the Hill curve DifficultyCurve was rewritten to produce
+                // (task #17) differently per grade, making the difficulty SHAPE a function of the
+                // player's skill instead of the turn.
+                //
+                // Campaign only. The Go sources this follows are explicit that competitive play
+                // gets no handicap ("in tournaments, particularly when prize money is at stake, no
+                // handicap will be given to the weaker player"). There is no versus mode today; if
+                // one is added it must NOT inherit this line by default.
+                // design/skill-grading-and-handicap.md, .survey/siege-first-turn-fairness/
+                // MatchHandicap.Current, not the live counters: the value was frozen at match start
+                // so it cannot shift under the player mid-match.
+                ai.errorOffsetRange = CurrentAiErrorOffset + MatchHandicap.Current;
+                // Captured for the telemetry pair: an outcome is only interpretable next to the
+                // error the shot was fired under, since the ramp and the handicap move the same
+                // field and hit rate alone cannot separate them.
+                lastAiAimError = ai.errorOffsetRange;
                 ai.TakeTurn();
             }
             else EndTurn();
