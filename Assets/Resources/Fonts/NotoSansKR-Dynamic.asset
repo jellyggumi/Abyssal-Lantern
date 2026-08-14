@@ -1,73 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!21 &-5758222871505957370
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Noto Sans KR - Regular Material
-  m_Shader: {fileID: 4800000, guid: fe393ace9b354375a9cb14cdbbc28be4, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: -699777574466027779}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _ColorMask: 15
-    - _CullMode: 0
-    - _FaceDilate: 0
-    - _GradientScale: 5
-    - _MaskSoftnessX: 0
-    - _MaskSoftnessY: 0
-    - _OutlineSoftness: 0
-    - _OutlineWidth: 0
-    - _PerspectiveFilter: 0.875
-    - _ScaleRatioA: 1
-    - _ScaleRatioB: 1
-    - _ScaleRatioC: 1
-    - _ScaleX: 1
-    - _ScaleY: 1
-    - _ShaderFlags: 0
-    - _Sharpness: 0
-    - _Stencil: 0
-    - _StencilComp: 8
-    - _StencilOp: 0
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _TextureHeight: 1024
-    - _TextureWidth: 1024
-    - _UnderlayDilate: 0
-    - _UnderlayOffsetX: 0
-    - _UnderlayOffsetY: 0
-    - _UnderlaySoftness: 0
-    - _VertexOffsetX: 0
-    - _VertexOffsetY: 0
-    - _WeightBold: 0.75
-    - _WeightNormal: 0
-    m_Colors:
-    - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
-    - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
-    - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
---- !u!28 &-699777574466027779
+--- !u!28 &-6433689664435744293
 Texture2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,7 +81,7 @@ MonoBehaviour:
     m_StrikethroughOffset: 6.8
     m_StrikethroughThickness: 1.6
     m_TabWidth: 7
-  m_Material: {fileID: -5758222871505957370}
+  m_Material: {fileID: 2619917455748591679}
   m_SourceFontFileGUID: c396e6bcfc43d41ccabd813dbec6cd2b
   m_CreationSettings:
     sourceFontFileName: 
@@ -3654,6 +3587,21 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
+  - m_Index: 110
+    m_Metrics:
+      m_Width: 8.96875
+      m_Height: 9.125
+      m_HorizontalBearingX: 1.4375
+      m_HorizontalBearingY: 24.484375
+      m_HorizontalAdvance: 11.84375
+    m_GlyphRect:
+      m_X: 83
+      m_Y: 100
+      m_Width: 10
+      m_Height: 10
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
   - m_Index: 10624
     m_Metrics:
       m_Width: 23.640625
@@ -3741,21 +3689,6 @@ MonoBehaviour:
       m_Y: 419
       m_Width: 28
       m_Height: 30
-    m_Scale: 1
-    m_AtlasIndex: 0
-    m_ClassDefinitionType: 0
-  - m_Index: 110
-    m_Metrics:
-      m_Width: 8.96875
-      m_Height: 9.125
-      m_HorizontalBearingX: 1.4375
-      m_HorizontalBearingY: 24.484375
-      m_HorizontalAdvance: 11.84375
-    m_GlyphRect:
-      m_X: 83
-      m_Y: 100
-      m_Width: 10
-      m_Height: 10
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
@@ -7719,6 +7652,10 @@ MonoBehaviour:
     m_GlyphIndex: 17040
     m_Scale: 1
   - m_ElementType: 1
+    m_Unicode: 176
+    m_GlyphIndex: 110
+    m_Scale: 1
+  - m_ElementType: 1
     m_Unicode: 44340
     m_GlyphIndex: 10624
     m_Scale: 1
@@ -7741,10 +7678,6 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 52452
     m_GlyphIndex: 18736
-    m_Scale: 1
-  - m_ElementType: 1
-    m_Unicode: 176
-    m_GlyphIndex: 110
     m_Scale: 1
   - m_ElementType: 1
     m_Unicode: 54532
@@ -8555,7 +8488,7 @@ MonoBehaviour:
     m_GlyphIndex: 20824
     m_Scale: 1
   m_AtlasTextures:
-  - {fileID: -699777574466027779}
+  - {fileID: -6433689664435744293}
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 1
   m_GetFontFeatures: 1
@@ -9493,6 +9426,10 @@ MonoBehaviour:
     m_Y: 379
     m_Width: 37
     m_Height: 38
+  - m_X: 78
+    m_Y: 95
+    m_Width: 19
+    m_Height: 19
   - m_X: 33
     m_Y: 414
     m_Width: 34
@@ -9517,10 +9454,6 @@ MonoBehaviour:
     m_Y: 414
     m_Width: 37
     m_Height: 39
-  - m_X: 78
-    m_Y: 95
-    m_Width: 19
-    m_Height: 19
   - m_X: 101
     m_Y: 429
     m_Width: 36
@@ -10774,6 +10707,18 @@ MonoBehaviour:
     m_Y: 376
     m_Width: 30
     m_Height: 3
+  - m_X: 97
+    m_Y: 95
+    m_Width: 1
+    m_Height: 22
+  - m_X: 71
+    m_Y: 114
+    m_Width: 27
+    m_Height: 3
+  - m_X: 71
+    m_Y: 106
+    m_Width: 7
+    m_Height: 11
   - m_X: 33
     m_Y: 377
     m_Width: 1
@@ -10790,18 +10735,6 @@ MonoBehaviour:
     m_Y: 390
     m_Width: 27
     m_Height: 24
-  - m_X: 97
-    m_Y: 95
-    m_Width: 1
-    m_Height: 22
-  - m_X: 71
-    m_Y: 114
-    m_Width: 27
-    m_Height: 3
-  - m_X: 71
-    m_Y: 106
-    m_Width: 7
-    m_Height: 11
   - m_X: 101
     m_Y: 417
     m_Width: 7
@@ -11629,3 +11562,70 @@ MonoBehaviour:
     kerningPairs: []
   fallbackFontAssets: []
   atlas: {fileID: 0}
+--- !u!21 &2619917455748591679
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Noto Sans KR - Regular Material
+  m_Shader: {fileID: 4800000, guid: fe393ace9b354375a9cb14cdbbc28be4, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: -6433689664435744293}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _CullMode: 0
+    - _FaceDilate: 0
+    - _GradientScale: 5
+    - _MaskSoftnessX: 0
+    - _MaskSoftnessY: 0
+    - _OutlineSoftness: 0
+    - _OutlineWidth: 0
+    - _PerspectiveFilter: 0.875
+    - _ScaleRatioA: 1
+    - _ScaleRatioB: 1
+    - _ScaleRatioC: 1
+    - _ScaleX: 1
+    - _ScaleY: 1
+    - _ShaderFlags: 0
+    - _Sharpness: 0
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _TextureHeight: 1024
+    - _TextureWidth: 1024
+    - _UnderlayDilate: 0
+    - _UnderlayOffsetX: 0
+    - _UnderlayOffsetY: 0
+    - _UnderlaySoftness: 0
+    - _VertexOffsetX: 0
+    - _VertexOffsetY: 0
+    - _WeightBold: 0.75
+    - _WeightNormal: 0
+    m_Colors:
+    - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
+    - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
