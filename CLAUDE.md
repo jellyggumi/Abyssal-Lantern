@@ -138,12 +138,17 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   Report both, and judge on the window; at a clamp or `min()` kink use one-sided
   limits, never a central difference, and take the worse side — smoothing a kink
   biases structurally toward the safe-looking answer.
-- **`-nographics` for PlayMode probes, except captures.** The MCP plugin's
-  `BufferedFileLogStorage` hangs the domain reload: the same probe times out at
-  300s with graphics and finishes in ~42s without. But `cam.Render()` segfaults
-  without a graphics device, so a probe that writes PNGs must run WITH graphics
-  and accept the hang risk. Cost four aborted runs in cycle 2 before anyone
-  noticed the two requirements conflict.
+- **PlayMode probes: `-nographics`, and run them TWICE.** The domain-reload hang is
+  the MCP plugin's `OnBeforeAssemblyReload` → `DisposeLogCollector` →
+  `BufferedFileLogStorage.cs:52`. It fires when the run has to reload assemblies, so
+  the reliable pattern is: run once (it may hang), change no scripts, run again — the
+  second pass has nothing to recompile and completes. Cycle 2 lost five consecutive
+  attempts to this before the pattern was found; the sixth finished in 128s.
+  Symptom of the bad case: the log stops with no scene markers, which means the run
+  never reached the scene and any "zero errors" reading from it proves nothing.
+  `-nographics` also avoids it in most cases, but `cam.Render()` segfaults without a
+  graphics device, so a probe that writes PNGs must run WITH graphics and take the
+  hang risk.
 
 ### Invariants earned the hard way (violating these has already cost us)
 
@@ -152,6 +157,17 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   `t × rate`; the test asserted the rate, passed, and certified a WCAG violation
   as safe. A test that certifies safety it never measured is worse than no test.
   When a value is derived, assert the derived thing — count the real output.
+- **A derived figure inherits every defect of the run it came from.** B1 measured
+  Stage3's damage per turn at 5.31 and concluded d "cannot be one number, it spans
+  24x". The stage had no walls and no core — a ground-atlas exception was aborting
+  its boot — so the figure described an empty board, and re-measuring gave 128.00
+  against a true spread of 1.33x. Before a measurement becomes a conclusion, check
+  that the thing being measured was actually there.
+- **Never rank levers the arithmetic cannot rank.** A test asserted that fixing
+  accuracy beats fixing damage; it failed at 110.7 versus 111.1, because both enter
+  the product multiplicatively so equal relative gains are equal. Wanting one lever
+  is a design position — state it as one, and let the test assert only what the
+  numbers force.
 - **The presentation/simulation boundary (§2) is load-bearing, and it has now paid
   twice.** Sim-side balance figures stayed measurable across a large presentation
   change because not one simulation symbol moved — so a baseline nobody thought to
