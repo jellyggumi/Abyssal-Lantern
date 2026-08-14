@@ -181,9 +181,22 @@ namespace CastleBusters
         {
             if (!Application.isPlaying) return;
 
-            // Dedicated ember-shard art (generated) replaces the plain radial-gradient dot;
-            // callers can still hand in their own sprite (petals, smoke) for themed bursts.
-            if (sprite == null) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleEmber);
+            // Dedicated ember-shard art replaces the plain radial-gradient dot. Callers may hand
+            // in their own sprite for themed bursts (petals, smoke) — but NOT any sprite they
+            // happen to be rendering, which is what DestructibleBlock was doing.
+            //
+            // Measured: striking a wall produced a cluster of pale grey (210,209,207) squares and
+            // zero near-white-but-that-was-the-point pixels, because the block handed over its own
+            // `face_s0` — a 512x512 brick-mortar OVERLAY that is almost entirely white with thin
+            // dark lines. Shrunk to a 2-12px particle, an overlay of white with hairlines is a
+            // white smudge. It reads as a broken image, which is exactly how it was reported.
+            //
+            // The sprite is vetted rather than trusted, so a caller cannot reintroduce this by
+            // passing whatever it is drawing.
+            if (!IsUsableParticleSprite(sprite))
+            {
+                sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleEmber);
+            }
 
             var go = new GameObject("ImpactBurst");
             go.transform.position = position;
@@ -304,7 +317,10 @@ namespace CastleBusters
 
         public static void SpawnCollapseDust(Vector3 position, float intensity = 1f, Sprite sprite = null)
         {
-            if (sprite == null) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleSmoke);
+            // Same vetting as the burst: three collapse call sites in DestructibleBlock pass the
+            // block's own overlay sprite, which shrinks to a white smudge (see
+            // IsUsableParticleSprite). Smoke is the intended art for a collapse.
+            if (!IsUsableParticleSprite(sprite)) sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleSmoke);
             SpawnImpactBurst(position, new Color(0.72f, 0.62f, 0.48f, 0.85f), intensity, sprite);
             SpawnHiggsfieldAccent(
                 position,
@@ -376,6 +392,51 @@ namespace CastleBusters
             texture.Apply(false, true);
             cachedParticleTexture = texture;
             return cachedParticleTexture;
+        }
+
+        /// <summary>
+        /// Sprites this project actually keeps as particle art. Membership, not a heuristic:
+        /// a size or brightness test would let the next unsuitable sprite through the moment it
+        /// happened to fall inside the bounds.
+        /// </summary>
+        private static readonly string[] ParticleArtNames =
+        {
+            EffectSpriteLibrary.ParticleEmber,
+            EffectSpriteLibrary.ParticleSmoke,
+            EffectSpriteLibrary.ParticlePetal,
+            EffectSpriteLibrary.ParticleRain,
+            EffectSpriteLibrary.ParticleSnow,
+            EffectSpriteLibrary.ParticleAsh,
+        };
+
+        /// <summary>
+        /// Whether <paramref name="sprite"/> is art meant to be a particle.
+        ///
+        /// The failure this closes: <see cref="DestructibleBlock"/> passed whatever it was
+        /// rendering — `face_s0`, a 512x512 brick-mortar overlay that is almost entirely white.
+        /// As a particle that is a white smudge, and it was reported as a broken image. Four call
+        /// sites did it (one on damage, three on collapse), so the check belongs here rather than
+        /// at each of them: a caller that means "make the debris look like my material" is asking
+        /// for something the overlay sprite cannot express, and the honest answer is to fall back
+        /// to real particle art.
+        ///
+        /// Anything under Resources/Effects/particles is allowed by name. Everything else is
+        /// refused, including a null.
+        /// </summary>
+        public static bool IsUsableParticleSprite(Sprite sprite)
+        {
+            if (sprite == null) return false;
+            for (int i = 0; i < ParticleArtNames.Length; i++)
+            {
+                // Unity appends nothing for a single-sprite import, so an exact match is the rule;
+                // StartsWith covers a future sliced sheet named `particle_ember_0`.
+                if (sprite.name == ParticleArtNames[i] ||
+                    sprite.name.StartsWith(ParticleArtNames[i], System.StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static Material GetParticleMaterial(Texture2D customTexture = null)
