@@ -150,15 +150,22 @@ namespace CastleBusters
             => Mathf.Clamp01(hitRate) * Mathf.Max(0f, damagePerLandedShot);
 
         /// <summary>
-        /// Turns for the ATTACKER alone to remove a keep, given the measured factors.
+        /// SHOTS the attacker needs to remove a keep, given the measured factors.
         ///
-        /// Named "attacker" because <see cref="TurnsToDecide"/> silently means the same thing while
-        /// reading as if it covered the whole match. It does not: a keep also loses material to its
-        /// own owner's shots, and in Stage3 that channel was larger than the attacker's. A caller
-        /// that wants match length needs both, and the second is not modelled here — see
-        /// <see cref="SelfInflictedShareIsNotModelled"/>.
+        /// Deliberately shots, not turns. <see cref="TurnsToDecide"/> multiplies by 2 because the
+        /// sides alternate; this one stops before that, so the two are not interchangeable and the
+        /// names now say which is which. The earlier version of this docstring warned that
+        /// `TurnsToDecide` "silently means the same thing while reading as if it covered the whole
+        /// match" — that warning was correct and is now obsolete, because the factor was the defect
+        /// and it is fixed.
+        ///
+        /// What remains unmodelled: a keep also loses material to its OWN owner's shots, and in
+        /// Stage3 that channel was once larger than the attacker's. A caller that wants match length
+        /// from first principles needs both — see <see cref="SelfInflictedShareIsNotModelled"/>. The
+        /// shipped <see cref="EffectiveDamagePerTurn"/> absorbs that gap by being calibrated against
+        /// observed turn counts rather than derived from this function.
         /// </summary>
-        public static float AttackerTurnsToRemove(float material, float hitRate, float damagePerLandedShot)
+        public static float AttackerShotsToRemove(float material, float hitRate, float damagePerLandedShot)
             => material / Mathf.Max(0.01f, DamagePerTurn(hitRate, damagePerLandedShot));
 
         /// <summary>
