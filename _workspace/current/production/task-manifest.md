@@ -1,8 +1,20 @@
 # Task manifest — castle-war
 
 - run-id: 20260809-castle-war-stage1
-- stage: **Stage 1 (concept pivot)** — entered 2026-08-09
+- stage: **Stage 3 (ops stability + play impact)** — entered 2026-08-13
 - next_public_beat: WebGL build linked from https://jellyggumi.github.io/ menu
+
+### 스테이지 전환 기록 (계약 §8이 요구하는 것)
+
+| 전환 | 날짜 | 무엇이 그것을 정당화했나 |
+|---|---|---|
+| Stage 1 (concept pivot) 진입 | 2026-08-09 | 기존 빌드를 들고 팩션 전쟁으로 개념 전환 (`intake/production-brief.md`) |
+| Stage 2 (balance / core-loop / novelty) 진입 | 2026-08-10 | 난이도 곡선·스테이지 재배치(#17)부터 밸런스 레인이 열렸다 |
+| Stage 3 (ops stability + play impact) 진입 | 2026-08-13 | 작업 #48 이후가 전부 연출·가시성·이펙트다(HUD 가독성, 궤적 리드백, 충돌 VFX, 리드백 귀속). **헤더는 Stage 1로 남아 있었고 이는 드리프트였다** — 2026-08-14에 정정 |
+
+> **드리프트를 기록으로 남기는 이유**: 헤더가 Stage 1이면 다음 세션이 Stage 1을 다시 열려고
+> 한다(계약 §8이 명시적으로 금지하는 것). 무엇이 언제 왜 바뀌었는지 표로 남기면 재개 지점이
+> 한 줄로 확정된다.
 
 | # | Task | Lane | Status | Beat it serves |
 |---|---|---|---|---|

@@ -92,7 +92,7 @@ namespace CastleBusters
                         stuckTimer = 0f;
                         if (Application.isPlaying)
                         {
-                            GameFeelVfx.SpawnFeedbackLabel(transform.position, "STUCK RESOLVED", new Color(1f, 0.5f, 0.2f, 1f), 1.4f, 0.35f);
+                            GameFeelVfx.SpawnDiagnosticLabel(transform.position, "STUCK RESOLVED", new Color(1f, 0.5f, 0.2f, 1f), 1.4f, 0.35f);
                         }
                     }
                 }
@@ -133,7 +133,7 @@ namespace CastleBusters
                     moveSpeed = Mathf.Max(0.25f, moveSpeed * 0.75f);
                     reversalCount = 0;
                     reversalWindowTimer = 0f;
-                    GameFeelVfx.SpawnFeedbackLabel(transform.position, "PATH FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.4f, 0.35f);
+                    GameFeelVfx.SpawnDiagnosticLabel(transform.position, "PATH FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.4f, 0.35f);
                 }
             }
 

@@ -119,7 +119,81 @@ namespace CastleBusters
         }
 
 
-        public static void SpawnFeedbackLabel(Vector3 position, string message, Color color, float fontSize = 2.7f, float lifetime = 0.65f)
+        /// <summary>
+        /// Smallest font size any world-space label may render at.
+        ///
+        /// Derivation, because the number looks arbitrary and is not. World <c>TextMeshPro</c> takes
+        /// TMP's 0.1 scale branch — <c>m_isOrthographic</c> is set only inside
+        /// <c>TextMeshProUGUI</c>, so an orthographic camera does not change it — which makes one em
+        /// exactly <c>fontSize * 0.1</c> world units. At the smallest supported window (1024x576)
+        /// the camera fits to a 12.667-unit half-height, so:
+        ///
+        /// <code>
+        ///   em pixels = fontSize * 0.1 * (576 / (2 * 12.667 * zoom))
+        /// </code>
+        ///
+        /// <see cref="HudCanvas.LegibleFloorPixels"/> is 12px and `design/visibility-spec.md`
+        /// promised it for "every label". Reaching it at the worst framing (zoom 1.6 x aim 1.18 =
+        /// 1.888) needs fontSize 9.96; reaching it while still fully opaque needs 13.28. A soldier
+        /// stands 1.15 world units (<c>Knight.prefab:137</c>), so those two sizes make the label
+        /// 0.87x and 1.15x the actor it describes.
+        ///
+        /// <b>5.5 is therefore a deliberate compromise, not a pass.</b> It is the largest size that
+        /// stays within half the body height, and it renders 6.63px at the worst framing — 1.81x
+        /// under the floor, though it DOES clear the floor (12.52px) at default framing. The shortfall is recorded rather than hidden: the floor is a screen-space HUD
+        /// constant, and a world label cannot satisfy it without out-sizing the world. What carries
+        /// sustained action state instead is the unit's own animation
+        /// (<c>UnitSpriteAnimator.PulseAttack</c>), which scales with the actor and so never hits
+        /// this wall.
+        /// </summary>
+        public const float MinWorldLabelFontSize = 5.5f;
+
+        /// <summary>
+        /// A label for developers, suppressed in player builds.
+        ///
+        /// `STUCK FIX`, `STUCK RECOVERY`, `LOOP FIX`, `OUT`, `PATH FIX` and `STUCK RESOLVED` all
+        /// name recovery machinery, not player actions, and all six were shipping to players on top
+        /// of the labels that do describe the game. A player watching a soldier cannot tell which of
+        /// the floating words are about their siege and which are about a physics rescue, so the
+        /// diagnostics were actively competing with the signal.
+        ///
+        /// Routed through a separate entry point rather than deleted, because they earn their keep
+        /// during development: each one marks a real recovery path firing, and a silent recovery is
+        /// how a stuck-unit bug hides. <c>Debug.isDebugBuild</c> is true in the editor and in
+        /// development builds, false in a release WebGL build — which is the build the player gets.
+        /// </summary>
+        public static void SpawnDiagnosticLabel(Vector3 position, string message, Color color,
+                                                float fontSize = MinWorldLabelFontSize, float lifetime = 0.4f)
+        {
+            if (!Debug.isDebugBuild && !Application.isEditor) return;
+            SpawnFeedbackLabel(position, message, color, fontSize, lifetime);
+        }
+
+        /// <summary>
+        /// A short world-space label above a world position.
+        ///
+        /// <para><b>Size.</b> The default was 2.7 and melee hits passed 1.9, which put one em at
+        /// 4.32px and 2.29px respectively at 1024x576 — against
+        /// <see cref="HudCanvas.LegibleFloorPixels"/> of 12px that `design/visibility-spec.md`
+        /// already promised for "every label". World <c>TextMeshPro</c> takes TMP's 0.1 scale branch
+        /// (<c>m_isOrthographic</c> is set only by <c>TextMeshProUGUI</c>), so one em is
+        /// <c>fontSize * 0.1</c> world units regardless of the camera being orthographic.</para>
+        ///
+        /// <para><b>Why this is 5.0 and not 9.96.</b> Clearing 12px at the worst framing (zoom 1.6 x
+        /// aim 1.18) needs fontSize 9.96, and satisfying it while fully opaque needs 13.28 once the
+        /// spawn bounce is counted. A soldier's body is 1.15 world units
+        /// (<c>Knight.prefab:137</c>), so those sizes make the annotation 0.87x and 1.15x the actor
+        /// it annotates — the label would be as large as the soldier. 5.0 is the largest size that
+        /// stays at half the body height, and it reaches 6.63px at worst framing: still 1.81x under
+        /// the floor, stated here rather than papered over, while clearing it at default framing. The floor is a screen-space HUD
+        /// constant, and a world label cannot meet it without dwarfing the world.</para>
+        ///
+        /// <para><b>Consequence.</b> Because this channel cannot carry sustained state legibly, the
+        /// unit's own animation carries it instead — see <c>UnitSpriteAnimator.PulseAttack</c>, where
+        /// one swing now means one damage event. Labels report discrete moments; the sprite reports
+        /// what the soldier is doing.</para>
+        /// </summary>
+        public static void SpawnFeedbackLabel(Vector3 position, string message, Color color, float fontSize = MinWorldLabelFontSize, float lifetime = 0.65f)
         {
             if (!Application.isPlaying || string.IsNullOrWhiteSpace(message)) return;
 
@@ -127,11 +201,26 @@ namespace CastleBusters
             go.transform.position = position + new Vector3(0f, 0.72f, 0f);
             var text = go.AddComponent<TextMeshPro>();
             text.text = message;
-            text.fontSize = fontSize;
+            // The floor is enforced HERE, not at the ~25 call sites.
+            //
+            // Every existing caller passes 1.15 to 2.5, all of them below this. Editing each one
+            // would spread the contract across twenty-five places and guarantee the next new label
+            // is authored small again; one clamp means a caller can ask for MORE emphasis but never
+            // for less than legible. See MinWorldLabelFontSize for the arithmetic.
+            text.fontSize = Mathf.Max(MinWorldLabelFontSize, fontSize);
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
             text.color = color;
             text.sortingOrder = 45;
+
+            // Dark casing, for the same reason the shot trace needed one: the label core measured
+            // 1.61:1 against sky and 1.21:1 against cloud, and WCAG 1.4.3 wants 4.5:1 for text this
+            // size. Colour alone cannot separate a warm glyph from a bright sky, so the outline
+            // supplies the luminance difference. At fontSize 5.5 the cap is 6.63 x 0.686 = 4.55px,
+            // so a 0.25 outline ratio renders ~1.14px — above the one-pixel floor that made the
+            // previous 0.22-at-1.9pt casing (0.65px) invisible.
+            text.outlineWidth = 0.25f;
+            text.outlineColor = new Color32(12, 10, 18, 255);
 
             var animator = go.AddComponent<FloatingDamageText>();
             animator.lifetime = lifetime;

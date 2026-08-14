@@ -654,7 +654,7 @@ namespace CastleBusters
             Vector2 position = transform.position;
             if (IsOutOfPlayableBounds(position))
             {
-                GameFeelVfx.SpawnFeedbackLabel(transform.position, "OUT", new Color(1f, 0.45f, 0.25f, 1f), 1.6f, 0.4f);
+                GameFeelVfx.SpawnDiagnosticLabel(transform.position, "OUT", new Color(1f, 0.45f, 0.25f, 1f), 1.6f, 0.4f);
                 Die();
                 return;
             }
@@ -665,7 +665,7 @@ namespace CastleBusters
                 stuckTimer += Time.fixedDeltaTime;
                 if (stuckTimer >= stuckDuration)
                 {
-                    GameFeelVfx.SpawnFeedbackLabel(transform.position, "STUCK FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
+                    GameFeelVfx.SpawnDiagnosticLabel(transform.position, "STUCK FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
                     currentState = UnitState.Grounded;
                     rb.linearVelocity = Vector2.zero;
                     rb.angularVelocity = 0f;
@@ -693,7 +693,7 @@ namespace CastleBusters
                 groundedStuckTimer += Time.fixedDeltaTime;
                 if (groundedStuckTimer >= stuckDuration)
                 {
-                    GameFeelVfx.SpawnFeedbackLabel(transform.position, "STUCK RECOVERY", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
+                    GameFeelVfx.SpawnDiagnosticLabel(transform.position, "STUCK RECOVERY", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
                     transform.position += new Vector3(0f, 0.5f, 0f);
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, 6.5f);
                     groundedStuckTimer = 0f;
@@ -802,7 +802,7 @@ namespace CastleBusters
                 IsOutOfPlayableBounds(transform.position))
 
             {
-                GameFeelVfx.SpawnFeedbackLabel(transform.position, "OUT", new Color(1f, 0.45f, 0.25f, 1f), 1.6f, 0.4f);
+                GameFeelVfx.SpawnDiagnosticLabel(transform.position, "OUT", new Color(1f, 0.45f, 0.25f, 1f), 1.6f, 0.4f);
                 Die();
                 return;
             }
@@ -985,7 +985,7 @@ namespace CastleBusters
                 rapidDirectionFlipCount++;
                 if (rapidDirectionFlipCount >= maxDirectionFlipsBeforeRecovery)
                 {
-                    GameFeelVfx.SpawnFeedbackLabel(transform.position, "LOOP FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
+                    GameFeelVfx.SpawnDiagnosticLabel(transform.position, "LOOP FIX", new Color(1f, 0.85f, 0.25f, 1f), 1.6f, 0.4f);
                     target = null;
                     rapidDirectionFlipCount = 0;
                     directionFlipWindowTimer = 0f;
@@ -1059,7 +1059,13 @@ namespace CastleBusters
             Color hitColor = unitType == UnitType.Knight ? new Color(1f, 0.9f, 0.45f, 0.9f) : new Color(1f, 0.55f, 0.25f, 0.9f);
             GameFeelVfx.SpawnImpactBurst(target.position, hitColor, 0.35f);
             GameFeelVfx.SpawnShockwaveRing(target.position, hitColor, 0.55f, 0.22f);
-            GameFeelVfx.SpawnFeedbackLabel(target.position, unitType == UnitType.Knight ? "SMASH" : "HIT", new Color(1f, 0.92f, 0.45f, 1f), 1.9f, 0.45f);
+            // One label per hit, not two.
+            //
+            // This used to call SpawnFeedbackLabel directly AND NotifyImpact, which spawns its own
+            // label (GameFeelVfx.cs:736). Both put the same text on the same coordinate at 1.9pt and
+            // 2.0pt — a 5% difference, so they never read as two labels, they read as one blurred
+            // one. NotifyImpact survives because it also registers the combo counter; the direct
+            // spawn was the redundant half. Measured in qa/unit-action-legibility-measurement.md §2.1.
             GameplayUxDirector.NotifyImpact(target.position, unitType == UnitType.Knight ? "SMASH" : "HIT", new Color(1f, 0.92f, 0.45f, 1f));
 
             // Immediate action: capture once, right here, then apply exactly once below.
@@ -1263,8 +1269,17 @@ namespace CastleBusters
             {
                 if (currentState == UnitState.Dead) yield break;
                 t += Time.deltaTime;
-                // Accelerating blink telegraph: white → hot red, faster near detonation.
-                float blink = Mathf.PingPong(t * (3f + t * 5f), 1f);
+                // Accelerating blink telegraph: white -> hot red, faster near detonation.
+                //
+                // The acceleration is CLAMPED. This read `PingPong(t * (3f + t * 5f), 1f)`, whose
+                // phase derivative is 3 + 10t, which measured 9.00 flashes/s in its worst one-second
+                // window — 3.00x the WCAG 2.2 SC 2.3.1 ceiling, with 85% of the two-second fuse over
+                // the line. (The derivative peaks higher, at 11.50/s, but the standard counts
+                // flashes per second and that is the figure that decides compliance.) `design/graphics-needed.md` §D lists that ceiling as prohibited,
+                // with the 1997 Porygon broadcast (600+ hospitalised) as the reason it is on the
+                // list at all. The telegraph still accelerates — that is the whole point of a fuse —
+                // it just tops out below the ceiling instead of sailing past it.
+                float blink = Mathf.PingPong(AccessibleBlink.FusePhase(t), 1f);
                 var tint = Color.Lerp(Color.white, new Color(1f, 0.32f, 0.18f, 1f), blink);
                 foreach (var r in renderers) if (r != null) r.color = tint;
                 yield return null;
@@ -1304,7 +1319,7 @@ namespace CastleBusters
             if (explosionEffectPrefab != null) Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
             GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.45f, 0.08f, 0.95f), Mathf.Clamp(explosionRadius * 0.55f, 0.75f, 2.4f));
             GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.5f, 0.08f, 0.65f), explosionRadius * 1.35f, 0.42f);
-            GameFeelVfx.SpawnFeedbackLabel(transform.position, "BOOM!", new Color(1f, 0.72f, 0.18f, 1f), 2.4f, 0.65f);
+            // Same duplicate as the melee label above: NotifyImpact already spawns one.
             GameplayUxDirector.NotifyImpact(transform.position, "BOOM!", new Color(1f, 0.72f, 0.18f, 1f));
             if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.05f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.65f);
@@ -1350,6 +1365,15 @@ namespace CastleBusters
             if (Application.isPlaying) Destroy(gameObject); else DestroyImmediate(gameObject);
         }
 
+        /// <summary>
+        /// Status tints go through <see cref="UnitSpriteAnimator.SetStatusTint"/>, never onto
+        /// <c>sr.color</c> directly.
+        ///
+        /// Writing the colour here used to render for exactly ZERO frames: the animator's
+        /// LateUpdate reassigns the team tint every frame, so the green was overwritten before it
+        /// was ever presented. Measured in qa/unit-action-legibility-measurement.md (defect U-11).
+        /// The animator blends rather than replaces, so a buffed unit still reads as blue or red.
+        /// </summary>
         public void ApplyBuff(float multiplier, float duration)
         {
             damageMultiplier = multiplier;
@@ -1357,16 +1381,7 @@ namespace CastleBusters
             buffTimer = duration;
             debuffTimer = 0f;
 
-            var sr = GetComponentInChildren<SpriteRenderer>(true);
-            if (sr != null)
-            {
-                if (!hasStoredOriginalColor)
-                {
-                    originalColor = sr.color;
-                    hasStoredOriginalColor = true;
-                }
-                sr.color = new Color(0.2f, 1f, 0.3f, 1f); // Green glow
-            }
+            GetComponent<UnitSpriteAnimator>()?.SetStatusTint(new Color(0.2f, 1f, 0.3f, 1f), 0.55f);
         }
 
         public void ApplyDebuff(float multiplier, float duration)
@@ -1376,16 +1391,7 @@ namespace CastleBusters
             debuffTimer = duration;
             buffTimer = 0f;
 
-            var sr = GetComponentInChildren<SpriteRenderer>(true);
-            if (sr != null)
-            {
-                if (!hasStoredOriginalColor)
-                {
-                    originalColor = sr.color;
-                    hasStoredOriginalColor = true;
-                }
-                sr.color = new Color(0.7f, 0.2f, 1f, 1f); // Purple glow
-            }
+            GetComponent<UnitSpriteAnimator>()?.SetStatusTint(new Color(0.7f, 0.2f, 1f, 1f), 0.55f);
         }
 
         public void ResetEffects()
@@ -1395,25 +1401,28 @@ namespace CastleBusters
             buffTimer = 0f;
             debuffTimer = 0f;
 
-            var sr = GetComponentInChildren<SpriteRenderer>(true);
-            if (sr != null && hasStoredOriginalColor)
-            {
-                sr.color = originalColor;
-            }
+            // Clear through the same owner that set it. The old code restored a cached sr.color,
+            // which was itself a team tint captured at an arbitrary frame — a second source of truth
+            // for a channel the animator owns.
+            GetComponent<UnitSpriteAnimator>()?.SetStatusTint(Color.white, 0f);
         }
 
         /// <summary>
-        /// Fast flicker toward the base color over the closing ~0.8s of a buff/debuff so a
-        /// timer running out reads as a clear warning instead of an instant, unexplained
-        /// revert. tintColor is the buff/debuff's own glow color (kept in sync with
-        /// ApplyBuff/ApplyDebuff above).
+        /// Fast flicker toward the base colour over the closing ~0.8s of a buff/debuff, so a timer
+        /// running out reads as a warning instead of an instant, unexplained revert.
         /// </summary>
         private void ApplyExpiryBlink(Color tintColor, float remaining)
         {
-            var sr = GetComponentInChildren<SpriteRenderer>(true);
-            if (sr == null || !hasStoredOriginalColor) return;
-            float blink = 0.5f + 0.5f * Mathf.Sin(Time.time * 22f);
-            sr.color = Color.Lerp(originalColor, tintColor, blink);
+            // Blink the WEIGHT, not the colour. Writing sr.color here had the same fate as
+            // ApplyBuff's write — overwritten by the animator's per-frame team tint, so the warning
+            // that a buff was about to lapse never appeared either.
+            //
+            // The literal 22f this used was 3.501 Hz, over the WCAG 2.3.1 ceiling, while the comment
+            // beside it claimed 8 Hz — a 2.28x disagreement nobody had checked, and the third
+            // comment-versus-code mismatch found this cycle. The rate now has one owner a test can
+            // interrogate.
+            float blink = 0.5f + 0.5f * Mathf.Sin(Time.time * AccessibleBlink.SafeSineFrequency);
+            GetComponent<UnitSpriteAnimator>()?.SetStatusTint(tintColor, 0.55f * blink);
         }
 
         /// <summary>Playtest cue: a short "BUFF ENDED"/"DEBUFF ENDED" label so the timing of

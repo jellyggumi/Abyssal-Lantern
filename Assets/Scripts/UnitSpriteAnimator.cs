@@ -51,6 +51,10 @@ namespace CastleBusters
         private float randomPhase;
         private float pulseTimer;
         private float flashTimer;
+
+        /// <summary>Active buff/debuff colour and its blend weight; weight 0 means none.</summary>
+        private Color statusTint = Color.white;
+        private float statusTintWeight;
         private float frameTimer;
         private int frameIndex;
         private Vector3 previousPosition;
@@ -98,7 +102,9 @@ namespace CastleBusters
             randomPhase = UnityEngine.Random.value * Mathf.PI * 2f;
             previousPosition = transform.position;
             LoadGeneratedFrameSets();
-            ApplyTeamTint();
+            // Team identity applied at spawn through the same composed path LateUpdate uses, so a
+            // unit is never briefly the wrong colour on its first frame.
+            SetRendererColor(CurrentBaseTint());
         }
 
         private void Start()
@@ -221,16 +227,53 @@ namespace CastleBusters
                 sr.transform.localPosition = rendererBaseLocalPositions[i];
             }
 
+            // One owner for the colour channel, three writers composed in priority order.
+            //
+            // The buff tint used to be written straight onto sr.color from
+            // UnitController.ApplyBuff, and this method overwrote it with the team tint on the very
+            // next frame — so an active buff rendered for ZERO frames. The hit flash survived only
+            // because it lives inside this pipeline rather than outside it. Anything that wants to
+            // colour a unit has to come through here for the same reason.
+            //
+            // Priority: hit flash beats buff (a unit being struck reads as struck first), buff beats
+            // team tint, and the team identity is never fully discarded — the buff is BLENDED, so
+            // blue and red stay tellable apart while buffed. That matters more than buff visibility:
+            // a player who cannot tell whose soldier it is has lost more information than one who
+            // cannot tell it is buffed.
             if (flashTimer > 0f)
             {
                 flashTimer -= Time.deltaTime;
                 float t = Mathf.Clamp01(flashTimer / 0.12f);
-                SetRendererColor(Color.Lerp(unit.isPlayerUnit ? playerTint : enemyTint, flashTint, t));
+                SetRendererColor(Color.Lerp(CurrentBaseTint(), flashTint, t));
             }
             else
             {
-                ApplyTeamTint();
+                SetRendererColor(CurrentBaseTint());
             }
+        }
+
+        /// <summary>
+        /// The unit's colour before any hit flash: team identity, blended toward an active
+        /// buff/debuff tint when one is set.
+        /// </summary>
+        private Color CurrentBaseTint()
+        {
+            Color team = unit != null && unit.isPlayerUnit ? playerTint : enemyTint;
+            if (statusTintWeight <= 0f) return team;
+            return Color.Lerp(team, statusTint, Mathf.Clamp01(statusTintWeight));
+        }
+
+        /// <summary>
+        /// Sets a status tint (buff, debuff) that survives the per-frame team-tint write.
+        ///
+        /// <paramref name="weight"/> 0 clears it. It is a blend rather than a replacement so the
+        /// team colour is never lost; 0.55 reads clearly as "something is on this unit" while blue
+        /// and red stay separable.
+        /// </summary>
+        public void SetStatusTint(Color tint, float weight)
+        {
+            statusTint = tint;
+            statusTintWeight = weight;
         }
 
         private void UpdateFrameAnimation(Vector3 velocity)
@@ -252,6 +295,24 @@ namespace CastleBusters
             while (frameTimer >= frameDuration)
             {
                 frameTimer -= frameDuration;
+                // The attack clip plays ONCE and then holds its first frame; everything else loops.
+                //
+                // Holding frame 0 rather than the last frame is a measured choice, not a preference.
+                // Design lane scored silhouette distance (1 - IoU against idle) for every attack
+                // frame: the recovered stance at frame 4 scores 0.235 for the knight and 0.077 for
+                // the archer, and the archer's own walk-cycle noise floor is 0.225 — so parking on
+                // frame 4 would make a fighting archer indistinguishable from an idle one, erasing
+                // exactly the distinction this change exists to create. Frame 0 is the blade drawn
+                // back: 0.297 / 0.400, clearing the floor by 1.53x and 1.78x, and it reads as
+                // "wound up for the next blow", which is what a soldier between swings is doing.
+                bool holdingSwing = unit != null && unit.CurrentState == UnitState.Attacking
+                                    && activeFrames == attackFrames;
+                if (holdingSwing && frameIndex + 1 >= activeFrames.Length)
+                {
+                    frameIndex = 0;
+                    frameTimer = 0f;
+                    break;
+                }
                 frameIndex = (frameIndex + 1) % activeFrames.Length;
             }
 
@@ -268,6 +329,24 @@ namespace CastleBusters
                 case UnitState.Launched:
                     return launchFrames ?? idleFrames;
                 case UnitState.Attacking:
+                    // The swing is an EVENT, not a state texture.
+                    //
+                    // This used to hand back attackFrames for the whole time the unit sat in
+                    // Attacking, and UpdateFrameAnimation modulo-loops whatever it is given. A
+                    // 5-frame clip at 8fps is 0.625s against a 1.5s knight cooldown, so the knight
+                    // performed 2.40 swings per single damage event (archer: 1.52). The animation
+                    // was not missing — it was reporting a hit count that never happened, which is
+                    // worse, because the player counts swings to read what a soldier is doing.
+                    //
+                    // Sample evidence (design/unit-action-legibility.md): of five verifiable
+                    // comparable titles, all five play one swing per damage event and none loops
+                    // through cooldown. Age of Empires II computes the damage instant at half the
+                    // animation length rather than looping; Battle Cats stands in a separate wait
+                    // state for the 449 frames its 151-frame attack does not cover.
+                    // Attack frames stay selected through the cooldown; UpdateFrameAnimation plays
+                    // the clip once and then parks on frame 0 (the windup). Returning idleFrames here
+                    // instead would have made an engaged soldier look like a waiting one, which the
+                    // silhouette measurements rule out.
                     return attackFrames ?? walkFrames ?? idleFrames;
                 case UnitState.Grounded:
                     return Mathf.Abs(velocity.x) > 0.08f ? (walkFrames ?? idleFrames) : idleFrames;
@@ -283,16 +362,22 @@ namespace CastleBusters
             flashTimer = 0.12f;
         }
 
+        /// <summary>
+        /// Called by <c>UnitController.TryAttack</c> at the instant a swing is committed.
+        ///
+        /// Restarts the attack clip from frame 0, which is what makes one swing mean one hit: the
+        /// clip plays through once (<c>UpdateFrameAnimation</c> parks it on frame 0 at the end
+        /// instead of wrapping), and the only thing that starts it again is another committed
+        /// attack. The swing count therefore equals the damage-event count by construction — there
+        /// is no rate to keep in sync, which is what went wrong when the clip free-looped.
+        /// </summary>
         public void PulseAttack()
         {
             pulseTimer = 0.18f;
+            frameIndex = 0;
+            frameTimer = 0f;
         }
 
-        private void ApplyTeamTint()
-        {
-            if (unit == null) return;
-            SetRendererColor(unit.isPlayerUnit ? playerTint : enemyTint);
-        }
 
         private void SetRendererColor(Color color)
         {
