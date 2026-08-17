@@ -17,16 +17,48 @@ namespace CastleBusters.Tests
             Assert.AreEqual(14 * 85f + 300f, MatchLengthModel.Material(14, 85f, 300f), 0.001f);
         }
 
+        /// <summary>
+        /// Turns, not shots — the factor of 2 that was missing.
+        ///
+        /// This asserted `N == M / d` and passed for the life of the defect, because it checked the
+        /// arithmetic against itself rather than against a match. `d` is what ONE side removes per
+        /// shot IT takes, and a turn belongs to one side, so a match needing M/d shots from the
+        /// attacker spans twice that many turns. Measured: the old form predicted 16.4 turns for
+        /// Stage1 against 35-39 observed.
+        /// </summary>
         [Test]
-        public void Turns_AreMaterialOverDamage()
+        public void Turns_AreTwiceMaterialOverDamage_BecauseSidesAlternate()
         {
-            Assert.AreEqual(10f, MatchLengthModel.TurnsToDecide(420f, 42f), 0.001f);
+            // 420 material at 42 per shot is 10 shots for the attacker - and 20 turns, because the
+            // defender takes one between each.
+            Assert.AreEqual(20f, MatchLengthModel.TurnsToDecide(420f, 42f), 0.001f);
         }
 
         [Test]
         public void Seconds_AreTurnsTimesTurnLength()
         {
-            Assert.AreEqual(85f, MatchLengthModel.SecondsToDecide(420f, 42f, 8.5f), 0.001f);
+            Assert.AreEqual(170f, MatchLengthModel.SecondsToDecide(420f, 42f, 8.5f), 0.001f);
+        }
+
+        /// <summary>
+        /// The inverse must carry the same factor, or a target length would imply half the material
+        /// it needs. Asserted as a round trip rather than a formula, so the two directions cannot
+        /// drift apart the way the forward direction drifted from reality.
+        /// </summary>
+        [Test]
+        public void MaterialForTargetSeconds_RoundTripsThroughTheForwardModel()
+        {
+            float material = MatchLengthModel.MaterialForTargetSeconds(
+                MatchLengthModel.TargetMatchSeconds);
+            float seconds = MatchLengthModel.SecondsToDecide(
+                material,
+                MatchLengthModel.EffectiveDamagePerTurn,
+                MatchLengthModel.AverageTurnSeconds);
+
+            Assert.AreEqual(MatchLengthModel.TargetMatchSeconds, seconds, 0.01f,
+                $"the inverse implied {material:F0} material, which the forward model turns back "
+                + $"into {seconds:F0}s against a {MatchLengthModel.TargetMatchSeconds:F0}s target. "
+                + "One direction is missing the alternation factor the other has");
         }
 
         [Test]

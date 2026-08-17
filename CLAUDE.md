@@ -185,6 +185,21 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   works" and "the scale is a scale" are different contracts, and only the first
   existed. When a clamp, cap, or floor is asserted, also assert that the values it
   bounds stay distinguishable.
+- **A test that restates the formula checks nothing.** `Turns_AreMaterialOverDamage`
+  asserted `TurnsToDecide(420, 42) == 10` — which is `M/d` written twice, once in the
+  code and once in the test. It passed for the life of a defect that made the model
+  predict 16.4 turns where 35–39 were observed, because `d` is what ONE side removes
+  per shot IT takes and the equation called that a turn count, losing the alternation
+  the game is built on. A model is checked against the thing it models: put measured
+  inputs in and compare the output to an observed match. If a test would still pass
+  when the formula is wrong in the same way as the code, it is documentation.
+- **A constant that was never measured will absorb an error in the equation.**
+  `EffectiveDamagePerTurn = 37` was tuned by feel until match length "felt right",
+  and what it was actually doing was cancelling the missing factor of 2 —
+  85.7/37 = 2.32. So the balance READ correct while both halves were wrong, and the
+  audit that refused to retune on unverified inputs was right for a reason it had not
+  identified. When a fitted constant is 2–3× off a measurement, suspect the equation
+  before re-fitting the constant.
 - **A simulator constant that no gameplay code reads is a measurement parameter,
   not a knob.** `beginnerAimError` was recommended as a one-constant fix on the
   belief that "the knob already exists". It is read only by the two sims, the
