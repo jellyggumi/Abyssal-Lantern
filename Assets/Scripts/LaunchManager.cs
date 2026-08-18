@@ -59,12 +59,64 @@ namespace CastleBusters
         private bool selectedUnitUsesDeployment;
         [Header("Separated Aim")]
         [Range(10f, 80f)] public float aimAngleDegrees = 45f;
-        [Range(0f, 1f)] public float aimPower = 0.55f;
+
+        /// <summary>
+        /// Default draw for the keyboard/Space path, raised 0.55 -> 0.82 because 0.55 fired into the
+        /// player's OWN keep.
+        ///
+        /// This path does not use the draw curve. `OneShotSiegeRules.Velocity` takes a linear
+        /// `Lerp(minSpeed, maxSpeed, power)`, so at 0.55 the shot left at 10.975 m/s and landed at
+        /// x=-4.7 with the player's own wall standing at x=-7..-4.
+        ///
+        /// 0.82 is the CENTRE of the reaching band, not the lowest reaching value. Measured at 45deg
+        /// against the runtime integrator (validated to 0.1% of the closed form), the band that lands
+        /// anywhere on the enemy keep is 0.775..0.860 - only 2.12 `powerStep` presses wide. 0.82
+        /// leaves 1.12 presses below and 1.00 above; it is the ONLY value in that band with a full
+        /// press of room on both sides.
+        ///
+        /// The designer lane asked for 0.80 so the default would strike the forward outpost at x=4
+        /// (`GameManager` :810, "the first thing to fall"). That is not available with margin: the
+        /// outpost band bottoms out at 0.775, so 0.80 sits 0.63 presses from falling short and one
+        /// press down stops reaching at all. `AimDefaultReachTests` failed on exactly that and the
+        /// number moved to the centre. The cost is honest - 0.82 lands at x=5.53, the OUTER course,
+        /// so the default no longer nominates the outpost. Widening the band needs a different
+        /// `powerStep` or keep geometry, which is a design change, not a default.
+        ///
+        /// It went stale rather than being wrong when written: task #60 lowered
+        /// `LaunchPowerCurve.MaxSpeed` from 25.2 to 17.5, and 0.55 reached at the old speed. A
+        /// default that depends on another constant needs a test tying them together, which is what
+        /// `AimDefaultReachTests` now does.
+        /// design/aim-space-and-preview-verdict.md, qa/evidence/aim-space/trajectory-blockers.md
+        /// </summary>
+        [Range(0f, 1f)] public float aimPower = 0.82f;
         public float angleStepDegrees = 2f;
         public float powerStep = 0.04f;
 
         private GameObject impactMarkerInstance;
         private GameObject launchPointIndicatorInstance;
+
+        /// <summary>
+        /// The established friendly tint for "this shot hits your own keep" — the same
+        /// (0.45, 0.85, 1) already used for a player unit's trail, its launch flash, and its damage
+        /// numbers (<see cref="UnitController"/> :495, :520, :1136). A self-hit is the player's own
+        /// side stopping the shot, so it wears the player's own colour.
+        ///
+        /// An earlier revision of this invented amber (1, 0.62, 0.15) to sit beside the damage
+        /// numbers. Two things were wrong with that: it was a fourth signal colour where a
+        /// perfectly good third existed, and it lands within 0.03 of the Barrel tint
+        /// (1, 0.65, 0.12) at :496 — a self-hit would have read as a barrel shot.
+        /// </summary>
+        private static readonly Color SelfHitTrajectoryColor = new Color(0.45f, 0.85f, 1f, 0.95f);
+
+        // The line's authored colours, captured once at setup so the self-hit tint can be undone
+        // without hardcoding a guess at what the designer set.
+        private Color authoredTrajectoryStart;
+        private Color authoredTrajectoryEnd;
+        private bool authoredTrajectoryColorsCaptured;
+
+        // Same reversible-overlay treatment for the impact marker's own colour.
+        private Color authoredMarkerColor;
+        private bool authoredMarkerColorCaptured;
         // Fitted world scale of the launch affordance, captured at setup. Update() multiplies
         // its breathing pulse into this instead of overwriting it.
         private Vector3 launchPointIndicatorBaseScale = Vector3.one;
@@ -265,6 +317,16 @@ namespace CastleBusters
                 rubberBandLine.sortingOrder = 11;
             }
 
+            // Capture whatever the trajectory line was authored with, so the self-hit tint is a
+            // reversible overlay rather than a hardcoded pair. Guarded on the line existing because
+            // a scene without one is a valid configuration (DrawTrajectory early-outs).
+            if (trajectoryLine != null && !authoredTrajectoryColorsCaptured)
+            {
+                authoredTrajectoryStart = trajectoryLine.startColor;
+                authoredTrajectoryEnd = trajectoryLine.endColor;
+                authoredTrajectoryColorsCaptured = true;
+            }
+
             if (launchStatsText == null)
             {
                 var root = HudCanvas.Root();
@@ -426,13 +488,26 @@ namespace CastleBusters
             }
         }
 
-        private void UpdateImpactMarker(bool active, Vector2 position = default)
+        private void UpdateImpactMarker(bool active, Vector2 position = default, bool ownKeep = false)
         {
             if (impactMarkerInstance == null) return;
             if (active)
             {
                 impactMarkerInstance.transform.position = new Vector3(position.x, position.y, 0);
                 impactMarkerInstance.SetActive(true);
+                // Same amber as the arc, on the marker the player is looking at. A shot that lands
+                // on your own keep still gets a marker - hiding it would remove the readout at the
+                // exact moment it matters most.
+                var markerRenderer = impactMarkerInstance.GetComponent<SpriteRenderer>();
+                if (markerRenderer != null)
+                {
+                    if (!authoredMarkerColorCaptured)
+                    {
+                        authoredMarkerColor = markerRenderer.color;
+                        authoredMarkerColorCaptured = true;
+                    }
+                    markerRenderer.color = ownKeep ? SelfHitTrajectoryColor : authoredMarkerColor;
+                }
             }
             else
             {
@@ -945,6 +1020,11 @@ namespace CastleBusters
             Vector2 colliderCenterOffset = selectedLaunchBodyBounds.center;
             Vector2 prevPoint = startPos;
             bool hitDetected = false;
+            // Set when the arc terminates on the shooter's OWN keep. Carried out of the loop so the
+            // line and the marker can say it, rather than adding a new HUD element - this repo's own
+            // visibility survey found that adding an icon per missed signal is a documented failure
+            // path (one team spent eighteen months building what they called "an icon mess").
+            bool hitOwnKeep = false;
             Vector2 hitPoint = Vector2.zero;
             Vector2 currentVelocity = velocity;
 
@@ -1030,6 +1110,17 @@ namespace CastleBusters
                     {
                         hitDetected = true;
                         hitPoint = nearestHit.point;
+                        // WHOSE keep, not just where. The preview already stops on the player's own
+                        // wall and that is correct - the real shot does too, on 41.1% of the aim
+                        // space (angle 10-80 x draw 10-100%, measured offline against this same
+                        // integrator). What it never said is that the wall is YOURS, so the arc read
+                        // as a rendering fault rather than as a shot about to hit your own keep.
+                        //
+                        // Read from the collider that stopped it rather than from geometry: a keep
+                        // moves with its stage layout, and comparing x against a hardcoded apron
+                        // would silently invert on a stage whose sides differ.
+                        var hitCastle = nearestHit.collider.GetComponentInParent<CastleController>();
+                        hitOwnKeep = hitCastle != null && hitCastle.isPlayerCastle == previewIsPlayer;
                         Vector2 rootAtImpact = nearestHit.centroid - colliderCenterOffset;
                         trajectoryPoints.Add(new Vector3(rootAtImpact.x, rootAtImpact.y, 0f));
                         break;
@@ -1046,7 +1137,22 @@ namespace CastleBusters
                 trajectoryLine.SetPosition(i, trajectoryPoints[i]);
             }
 
-            UpdateImpactMarker(hitDetected, hitPoint);
+            // The arc says where the shot goes; its colour now says whose wall stops it. Amber for a
+            // shot that will hit your own keep, the authored colour otherwise. No new element, and
+            // the signal rides the line the player is already reading while they aim.
+            if (hitOwnKeep)
+            {
+                trajectoryLine.startColor = SelfHitTrajectoryColor;
+                trajectoryLine.endColor = new Color(
+                    SelfHitTrajectoryColor.r, SelfHitTrajectoryColor.g, SelfHitTrajectoryColor.b, 0.45f);
+            }
+            else if (authoredTrajectoryColorsCaptured)
+            {
+                trajectoryLine.startColor = authoredTrajectoryStart;
+                trajectoryLine.endColor = authoredTrajectoryEnd;
+            }
+
+            UpdateImpactMarker(hitDetected, hitPoint, hitOwnKeep);
         }
 
         private void LaunchUnit()

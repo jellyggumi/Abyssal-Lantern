@@ -948,14 +948,20 @@ namespace CastleBusters
             return root;
         }
 
-        /// <summary>Director entry (§6): balance-event gates reuse the tuned gate recipe.</summary>
+        /// <summary>
+        /// Director entry (§6): balance-event gates reuse the tuned gate recipe.
+        ///
+        /// The sprite comes through <see cref="GimmickSpriteLibrary"/>, not
+        /// `AssetDatabase.LoadAssetAtPath`. The old path was inside `#if UNITY_EDITOR`, so a build
+        /// got a null sprite while `EventGateGimmick` still applied its effect: an INVISIBLE gate
+        /// multiplying the volley by 2.25x. The Editor looked correct, which is why it survived.
+        /// `Assets/Sprites/block_normal.png` is not under `Resources`, so there was no runtime route
+        /// to it at all - the fix is a key that is, and `gimmick_wall_brick` is the wall material
+        /// this gate is cut from.
+        /// </summary>
         public GameObject SpawnBalanceGate(string gateName, Vector3 position, EventGateEffectType effectType)
         {
-            Sprite origSprite = null;
-#if UNITY_EDITOR
-            origSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/block_normal.png");
-#endif
-            return CreateEventGate(gateName, position, effectType, origSprite);
+            return CreateEventGate(gateName, position, effectType, GimmickSpriteLibrary.Load(GimmickSpriteLibrary.WallBrick));
         }
 
         private GameObject CreateEventGate(string gateName, Vector3 position, EventGateEffectType effectType, Sprite sprite)
