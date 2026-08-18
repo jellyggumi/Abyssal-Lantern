@@ -322,6 +322,47 @@ namespace CastleBusters.Tests
             Assert.IsTrue(Shoot("ux-3-player-turn"), "A player-turn frame needs a live camera");
             RecordUx("ux-3-player-turn");
 
+            // The enemy turn, which is 34.1% of a match and had never been photographed. The
+            // docstring above has claimed this frame since the test was written; the body took
+            // three and stopped, so every argument about that state cited a screenshot that did
+            // not exist. UX-015, and it blocks UX-014 in both directions - there is no way to
+            // verify a fix to the enemy turn, and no way to justify re-grading it, without a
+            // picture of it.
+            //
+            // Reached by firing rather than by waiting out the clock: the player's shot ends the
+            // turn, so this is the same boundary the game uses. Aim is the tuned default the
+            // player would fire with, read off the component instead of invented here.
+            var lm = Object.FindObjectOfType<LaunchManager>();
+            Assert.IsNotNull(lm, "The arena must have a LaunchManager to fire with");
+            lm.SimulateLaunch(lm.GetSeparatedAimVelocity());
+
+            // Wait for the turn to actually flip. A fixed sleep would photograph whatever frame it
+            // landed on and call it the enemy turn - which is how a capture harness ends up with a
+            // label that does not match its pixels.
+            float waited = 0f;
+            while (gm.IsPlayerTurn && waited < 12f)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            Assert.IsFalse(gm.IsPlayerTurn,
+                $"The enemy turn never began within {waited:F1}s of the player's shot, so there is "
+                + "no enemy-turn frame to take. Either the shot did not commit or the turn did not "
+                + "hand over.");
+
+            // Past the volley resolution, into the dead air the defect is actually about. UX-014
+            // measured 109.7s of zero inputs; this frame is what the player looks at during it.
+            waited = 0f;
+            while (gm.IsResolvingTurn && waited < 12f)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            yield return new WaitForSecondsRealtime(0.6f);
+
+            Assert.IsTrue(Shoot("ux-4-enemy-turn"), "An enemy-turn frame needs a live camera");
+            RecordUx("ux-4-enemy-turn");
+
             Flush("ux-measurements.txt");
         }
 
