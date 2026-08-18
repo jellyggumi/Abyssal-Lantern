@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="1.7565483">
+  <test-suite type="TestSuite" id="1144" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="109" result="Passed" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="1.756548" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1138" name="CastleBusters.PlayModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="109" result="Passed" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="1.751624" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="54975" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1139" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="109" result="Passed" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="1.750594" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1140" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="109" result="Passed" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="1.749707" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1047" name="HudCanvasContractTests" fullname="CastleBusters.Tests.HudCanvasContractTests" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="1.747422" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1051" name="EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll" fullname="CastleBusters.Tests.HudCanvasContractTests.EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll" methodname="EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" seed="1518665022" result="Passed" start-time="2026-08-18 08:10:48Z" end-time="2026-08-18 08:10:49Z" duration="0.974793" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:false
+]]></output>
+            </test-case>
+            <test-case id="1052" name="SceneAuthoredHudLabels_AreAdoptedOntoTheHudCanvas" fullname="CastleBusters.Tests.HudCanvasContractTests.SceneAuthoredHudLabels_AreAdoptedOntoTheHudCanvas" methodname="SceneAuthoredHudLabels_AreAdoptedOntoTheHudCanvas" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" seed="1024155550" result="Passed" start-time="2026-08-18 08:10:49Z" end-time="2026-08-18 08:10:49Z" duration="0.765371" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+No graphic device is available to initialize the view.
+No graphic device is available to show the window.
+No graphic device is available to initialize the view.
+
+IgnoreFailingMessages:false
+[hud-pin] GameManager TMP_Text fields the scene leaves empty (not asserted, but Adopt(null) is silent so they are named here): gimmickStatusText
+<color=#ff6b6b>fail:</color> [17:10:49:9961] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -407,6 +407,17 @@ namespace CastleBusters.Tests
                 if (!g.isActiveAndEnabled) continue;
                 if (g.canvas != null) continue;
 
+                // World-space text is not a HUD element and needs no canvas: `TMPro.TextMeshPro`
+                // draws through a MeshRenderer in world units, while `TextMeshProUGUI` draws through
+                // a CanvasRenderer. `CaptureZoneController` :57 builds the former at a world offset
+                // above each zone ring, and the first version of this test called both of them
+                // undrawn - a false positive that would have failed on a clean repository, which is
+                // the same defect a peer lane caught in this file's sibling test an hour earlier.
+                //
+                // Asked of the renderer rather than the type, so a future world-space graphic of any
+                // class is covered without editing this line.
+                if (g.GetComponent<CanvasRenderer>() == null && g.GetComponent<Renderer>() != null) continue;
+
                 // Name the whole chain: "WindText (root)" reads as an authoring mistake, while
                 // "Label < Panel < Widget" says a subtree got detached.
                 var chain = new List<string>();

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.9131226">
+  <test-suite type="TestSuite" id="1144" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.913123" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1138" name="CastleBusters.PlayModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.908319" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="56389" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1139" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.907462" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1140" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.906716" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1047" name="HudCanvasContractTests" fullname="CastleBusters.Tests.HudCanvasContractTests" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" testcasecount="7" result="Failed" site="Child" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.904898" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1051" name="EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll" fullname="CastleBusters.Tests.HudCanvasContractTests.EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll" methodname="EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll" classname="CastleBusters.Tests.HudCanvasContractTests" runstate="Runnable" seed="89027308" result="Failed" start-time="2026-08-18 08:12:42Z" end-time="2026-08-18 08:12:43Z" duration="0.898067" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="120000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  These graphics are active and enabled but have no Canvas ancestor, so Unity draws nothing for them. Whatever writes to them keeps working - the value is computed, formatted, and assigned - and the player sees an empty corner of the screen. This is how the wind strength and the score were invisible for the life of UX-001/002 while every other HUD test passed. Undrawn: WindText(TextMeshProUGUI) under [WindText]
+  Expected: <empty>
+  But was:  < "WindText(TextMeshProUGUI) under [WindText]" >
+]]></message>
+                <stack-trace><![CDATA[at CastleBusters.Tests.HudCanvasContractTests+<EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll>d__12.MoveNext () [0x0011b] in /Users/seokcmin/Desktop/castle-war/Assets/Tests/PlayMode/HudCanvasContractTests.cs:428
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@1405238725ab/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:false
+<color=#ff6b6b>fail:</color> [17:12:43:5510] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
