@@ -207,6 +207,38 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   contains four), so that constant models a HUMAN's hand. Raising it moves what the
   gate reports and nothing a player experiences. Before writing "the knob already
   exists", grep for reads from gameplay code.
+- **A test that repairs its subject cannot fail.** `GimmickSpriteLibrary.Load` had an
+  `#if UNITY_EDITOR` self-heal that, on a load miss, set `textureType = Sprite` and
+  called `SaveAndReimport()` — rewriting the tracked `.meta` on disk. So an EditMode
+  run silently fixed four assets, went green, and if the working-tree change was never
+  committed the build still rendered nothing. That false pass through the filesystem is
+  why `fx_muzzle`, `fx_arcane`, and the white explosion each survived a green suite for
+  three cycles. Editor convenience may READ around a broken asset; it must never WRITE.
+  When a suite goes green and `git status` shows assets you did not touch, the suite
+  edited them.
+- **A test that walks a declared list cannot see what is missing from the list.**
+  `SiegeArtResourceTests` iterated the library's declared keys, so an asset on disk with
+  no key was outside every check — permanently. Three defects lived there. The fix is to
+  walk the DISK and assert against a folder-type table the test owns, where an unlisted
+  folder fails rather than defaults to pass. `> 0` is not enough either: `Gimmicks/` held
+  30 correct sprites beside 4 broken ones and passed a non-empty check for cycles.
+- **A default that depends on another constant needs a test tying them together.**
+  `aimPower = 0.55` was correct when written and became a defect when task #60 lowered
+  `MaxSpeed` 25.2 → 17.5, because nothing connected them. The shipped default then fired
+  into the player's OWN keep. Staleness is not a coding error and review does not catch
+  it; only an executable tie does.
+- **A value inside a valid band can still be one step from breaking.** The designer
+  asked for the aim default that strikes the outpost, and it reached — 0.63 key presses
+  from not reaching. The band was 2.12 `powerStep` presses wide, which nobody had
+  measured, and the only value with a press of room on both sides landed elsewhere. When
+  a tuned value sits in a range, assert the MARGIN in the units the player actually
+  moves it by, not just membership.
+- **`new Material(shader)` is not "the shader's intent".** Every particle this game drew
+  was opaque: URP's `ParticlesUnlit` defaults to `_SrcBlend = One`, `_DstBlend = Zero`,
+  `_ZWrite = 1`, `RenderType = Opaque` (:28-32, honoured at :82-83), and nothing set them.
+  Every carefully tuned alpha in every `startColor` was discarded, which is why a white
+  explosion read as a white BLOCK. A material constructed in code has the shader's
+  DEFAULTS, and for transparency those are the wrong ones.
 - **Fixing something invalidates decisions that cited it — go back and check.** The
   opening-volley damping landed at 22:51 and erased a 38%p first-turn gap. The
   arbitration that blocked all seven gimmicks on that gap was last touched at 13:11,
