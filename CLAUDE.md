@@ -148,12 +148,19 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   Report both, and judge on the window; at a clamp or `min()` kink use one-sided
   limits, never a central difference, and take the worse side — smoothing a kink
   biases structurally toward the safe-looking answer.
-- **PlayMode probes: `-nographics`, and run them TWICE.** The domain-reload hang is
-  the MCP plugin's `OnBeforeAssemblyReload` → `DisposeLogCollector` →
-  `BufferedFileLogStorage.cs:52`. It fires when the run has to reload assemblies, so
-  the reliable pattern is: run once (it may hang), change no scripts, run again — the
-  second pass has nothing to recompile and completes. Cycle 2 lost five consecutive
-  attempts to this before the pattern was found; the sixth finished in 128s.
+- **PlayMode probes: `-nographics`, run them TWICE, and filter to ONE test.** The
+  domain-reload hang is the MCP plugin's `OnBeforeAssemblyReload` →
+  `DisposeLogCollector` → `BufferedFileLogStorage.cs:52`. It fires when the run has to
+  reload assemblies, so the first pattern found was: run once (it may hang), change no
+  scripts, run again — the second pass has nothing to recompile and completes. Cycle 2
+  lost five consecutive attempts before finding that; the sixth finished in 128s.
+  **The run-twice rule is probabilistic and has now failed three times.** Cycle 3 lost
+  both passes on `-testFilter "HudCanvasContractTests"` (a whole class, 689 and 637 log
+  lines, zero scene markers), then ran the same two tests one at a time and each
+  finished in **36 seconds**. So narrowing the filter to a single test method is the
+  stronger lever: fewer fixtures to set up means fewer reload boundaries to hang on.
+  Filter per test, not per class, and treat run-twice as the fallback rather than the
+  first move.
   Symptom of the bad case: the log stops with no scene markers, which means the run
   never reached the scene and any "zero errors" reading from it proves nothing.
   `-nographics` also avoids it in most cases, but `cam.Render()` segfaults without a
