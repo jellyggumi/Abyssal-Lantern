@@ -1,5 +1,8 @@
 # Defect register — castle-war
 
+- register-role: canonical
+  D-계열(실행 실패: 테스트·빌드·배포가 실제로 깨진 것)의 정본. 정본 근거는 테스트 XML이다.
+
 | ID | Sev | Defect | Evidence | Status | Response |
 |---|---|---|---|---|---|
 | D-001 | S1 | WebGL 빌드에서 모든 한글 HUD 문자열이 tofu(□)로 렌더 — `Font.GetPathsToOSFonts()`가 브라우저에서 빈 배열이라 KoreanFontSupport 폴백 생성 불가 | `qa/evidence/20260809-webgl-korean-tofu-before.png` (https://jellyggumi.github.io/games/castle-war/ 2026-08-09) | resolved 2026-08-09 | Noto Sans KR 서브셋 번들 + 정적 TMP 아틀라스 베이크로 전환. 최종 WebGL 실행에서 타이틀/전투 한글을 확인: `qa/evidence/final-webgl-title.png`, `qa/evidence/final-webgl-gameplay.png` |

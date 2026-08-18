@@ -216,12 +216,60 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   three cycles. Editor convenience may READ around a broken asset; it must never WRITE.
   When a suite goes green and `git status` shows assets you did not touch, the suite
   edited them.
-- **A test that walks a declared list cannot see what is missing from the list.**
+- **A test that walks a declared list cannot see what is missing from the list — and a
+  filter that skips the failure state is the same defect wearing a green badge.**
   `SiegeArtResourceTests` iterated the library's declared keys, so an asset on disk with
   no key was outside every check — permanently. Three defects lived there. The fix is to
   walk the DISK and assert against a folder-type table the test owns, where an unlisted
   folder fails rather than defaults to pass. `> 0` is not enough either: `Gimmicks/` held
   30 correct sprites beside 4 broken ones and passed a non-empty check for cycles.
+  Five layers of the same shape are now on record, and the last two were written BY
+  sessions that had just documented the first three:
+  (1) declared asset keys, above;
+  (2) a runtime sample filter — `if (canvas == null) continue;` in five HUD tests, whose
+  own comment named the defect it was skipping, so deleting `HudCanvas.Adopt(windText)`
+  left the suite green while the wind strength drew on nothing;
+  (3) a governance predicate — `ux-defect-list.md` assigned sixteen severities with no
+  status column, so "any open S1 blocks every gate" was unevaluable, and an unevaluable
+  blocker reads as no blocker;
+  (4) a list the investigator invents mid-investigation — a lane enumerated "lines with an
+  explicit `yield break`" and missed a fourth escape path that had none;
+  (5) a prose blacklist inside the very gate written to fix (3) — `\bPASS\b` plus excused
+  phrases, which would mis-read `PASS 조건` and `## G4 PASS` the moment a real review
+  existed. Replaced by reading a `verdict:` key: structure has no blacklist.
+  Detection that depends on formatting belongs here too — a rollup row escaped that gate
+  because its cell read `S1 (치명)` rather than `S1`, so tidying the cell would have turned
+  the gate red on a table that was always shaped that way.
+- **A line's presence in a file is not evidence it runs in the state you are describing.**
+  The intake cited `SiegeAlarmSystem.cs:234` as the enemy-turn readback. It is the third
+  branch of an `if/else-if` chain whose second branch is `else if (!gm.IsPlayerTurn)`, so
+  it is structurally unreachable on the enemy turn — and the comment one line below says
+  so in words. Seventeen lines up was the whole answer. In a branch chain the citable unit
+  is the CHAIN, not the line; quoting a line number is a claim about control flow and has
+  to be checked as one.
+- **Absence is not read in the project's favour.** The contract already chose this once —
+  "Missing evidence path = FAIL regardless of claimed value" — and then failed to apply it
+  to the predicate beside it, so sixteen severities with no status column read as no
+  blocker rather than as sixteen unknowns. Wherever a gate depends on a field, decide what
+  a MISSING field means before the first row is written, and make the missing case the
+  unfavourable one.
+- **`0 hits` is a claim, not a measurement — and a bash `grep -c` count is worse than a
+  claim.** Bash `grep` returns silently empty in this repository on patterns the `grep`
+  tool resolves to five files, with no difference in exit code. Three lanes built findings
+  on a bash `0건` in one cycle, including the document that corrected another lane for
+  exactly that. The counting form is more dangerous: `grep -c` returned **16 for both** the
+  HEAD blob (true count 0) and the index blob (true count 3) of the same file — two
+  provably different inputs, one number. An empty result invites suspicion; a plausible
+  number becomes a conclusion, and a peer nearly dismissed a correct refutation with it.
+  The only signal was the RELATION, not the value: different inputs cannot yield the same
+  count. Re-check every absence with the `grep` tool, state it as "0 via <tool>" and never
+  as a bare zero, and count with a script — bash `grep -c` is not a measuring instrument
+  here.
+- **A mutation on a shared worktree is an exclusive operation.** A 617-second mutation run
+  had a peer read the tree mid-window and report a restore failure; the file really was
+  mutated at that instant, and both observations were true at different times. Atomic
+  restore inside one shell call is not enough when other lanes read the same disk —
+  announce start and end, or expect a defect report about your own probe.
 - **A default that depends on another constant needs a test tying them together.**
   `aimPower = 0.55` was correct when written and became a defect when task #60 lowered
   `MaxSpeed` 25.2 → 17.5, because nothing connected them. The shipped default then fired

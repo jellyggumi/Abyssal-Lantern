@@ -39,6 +39,44 @@ namespace CastleBusters.Tests
             yield return new WaitForSecondsRealtime(1.5f);
         }
 
+        /// <summary>
+        /// Boots the scene without burning wall-clock time.
+        ///
+        /// <see cref="BootMatch"/> waits 3 realtime seconds and then calls `BeginSiege`, which is a
+        /// player action. Adoption is not: it finishes inside `GameManager.Start` (`:361`), so two
+        /// player-loop turns after the load is all it takes — the idiom
+        /// <see cref="BootRuntimeHudBuilder"/> already uses at :175-176, whose comment states the
+        /// reason as "without relying on a wall-clock delay". Six seconds across the two adoption
+        /// tests becomes a fraction of one.
+        ///
+        /// Boot-time engine noise is ignored for the duration of the load, and only for it. Under
+        /// `-nographics` the cold-open video logs "No graphic device is available to initialize the
+        /// view", and the MCP editor plugin logs an authorization failure on its own schedule; both
+        /// become unhandled-error failures in this runner and neither says anything about the HUD.
+        /// Suppression ends before any assertion runs, so an error raised BY the thing under test
+        /// still fails. Same seam as `AimErrorConversionProbe` :53/:82/:87 and
+        /// `CastleMaterialCensusProbe` :32.
+        /// </summary>
+        private static IEnumerator BootScene()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                GameManager.PendingStage = StageId.Stage1;
+                var load = SceneManager.LoadSceneAsync("SampleScene", LoadSceneMode.Single);
+                Assert.IsNotNull(load, "SampleScene must begin loading");
+                yield return load;
+
+                // sceneLoaded runs after Awake/OnEnable and before Start; these turns run Start.
+                yield return null;
+                yield return null;
+            }
+            finally
+            {
+                LogAssert.ignoreFailingMessages = false;
+            }
+        }
+
         private enum RuntimeHudBuilder
         {
             BrickPlacement,
@@ -319,7 +357,12 @@ namespace CastleBusters.Tests
             {
                 if (!g.isActiveAndEnabled) continue;
                 var canvas = g.canvas;
-                if (canvas == null) continue;   // not drawn at all — a separate defect, UX-001/002
+                // Not drawn at all — a separate defect (UX-001/002) and not this test's question,
+                // which is which canvas a drawn graphic landed on. Counted by
+                // EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll below; until that test
+                // existed this line was the whole defect's hiding place, and a reader could not
+                // tell the difference from here.
+                if (canvas == null) continue;
                 if (canvas.name == HudCanvas.CanvasName) continue;
                 if (IsOwnedByAnotherSystem(canvas)) continue;
                 strays.Add($"{g.name}({g.GetType().Name}) → {canvas.name}");
@@ -328,6 +371,148 @@ namespace CastleBusters.Tests
             Assert.IsEmpty(strays,
                 "Every gameplay HUD graphic must live on the one HUD canvas; a split means two "
                 + "scalers and two sizes. Strays: " + string.Join(", ", strays));
+        }
+
+        /// <summary>
+        /// Every active HUD graphic is actually DRAWN — it has a Canvas ancestor.
+        ///
+        /// The test above deliberately skips `canvas == null` and names the reason in its own
+        /// comment: that is UX-001/002, a different defect. This is that defect's contract, and
+        /// until now it did not exist. `WindText` and `ScoreText` were authored at the scene ROOT
+        /// with `m_Father: {fileID: 0}`, and a `TextMeshProUGUI` with no Canvas above it renders
+        /// nothing at all. `UpdateUI` formatted the wind strength and the running score into them
+        /// every single turn, for an audience of nobody, for the life of the defect.
+        ///
+        /// `GameManager.SetupUIButtons` now calls `HudCanvas.Adopt` on the scene-authored labels,
+        /// which reparents them onto the HUD canvas. Nothing prevented that call from being
+        /// deleted, and deleting it would restore the silence with the suite green — the split
+        /// test above cannot see a label that draws on no canvas, because it has no canvas to
+        /// compare.
+        ///
+        /// Asserted on the OUTCOME, not on the call. A future change may adopt differently, build
+        /// the labels in code, or fix the scene's parenting instead; every one of those satisfies
+        /// this test, and all that matters is that a player can see the number. The set is
+        /// discovered rather than listed for the same reason the test above gave up its type list:
+        /// a count of four goes stale the moment a fifth label ships.
+        /// </summary>
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator EveryActiveHudGraphic_HasACanvasAncestorSoItIsDrawnAtAll()
+        {
+            yield return BootScene();
+
+            var undrawn = new List<string>();
+            foreach (var g in Object.FindObjectsByType<Graphic>(FindObjectsSortMode.None))
+            {
+                if (!g.isActiveAndEnabled) continue;
+                if (g.canvas != null) continue;
+
+                // Name the whole chain: "WindText (root)" reads as an authoring mistake, while
+                // "Label < Panel < Widget" says a subtree got detached.
+                var chain = new List<string>();
+                for (var t = g.transform; t != null; t = t.parent) chain.Add(t.name);
+                undrawn.Add($"{g.name}({g.GetType().Name}) under [{string.Join(" < ", chain)}]");
+            }
+
+            Assert.IsEmpty(undrawn,
+                "These graphics are active and enabled but have no Canvas ancestor, so Unity draws "
+                + "nothing for them. Whatever writes to them keeps working - the value is computed, "
+                + "formatted, and assigned - and the player sees an empty corner of the screen. This "
+                + "is how the wind strength and the score were invisible for the life of UX-001/002 "
+                + "while every other HUD test passed. Undrawn: " + string.Join("; ", undrawn));
+        }
+
+        /// <summary>
+        /// The labels the SCENE authors are on the HUD canvas specifically, not merely on some
+        /// canvas.
+        ///
+        /// Separate from the assertion above because the failure modes differ and the fixes do
+        /// too. A label with no canvas is invisible; a label on the WRONG canvas is visible at the
+        /// wrong size, which is the 6.5px "KLLP CORL" defect this file was opened for. The scene's
+        /// own canvas is ConstantPixelSize, so a label left on it holds a fixed pixel height while
+        /// every code-built label scales - two rules on one HUD.
+        ///
+        /// Reads the labels off `GameManager`'s serialized fields rather than by name, so the test
+        /// covers whatever the scene actually wires.
+        ///
+        /// Scoped to labels that are ACTIVE, which the first version of this test got wrong twice.
+        /// `resultText` is wired (`SampleScene.unity:1499`) but lives under `GameOverPanel`, which
+        /// ships inactive (`:2716 m_IsActive: 0`) — it is a results-screen label and belongs to no
+        /// HUD canvas until the panel opens. `gimmickStatusText` is empty in the scene
+        /// (`:1508 fileID: 0`) and has zero reads or writes anywhere in `Assets/Scripts/` — a dead
+        /// field the scene is right to leave unwired. Both were reported as defects by the first
+        /// version, so it failed on a clean repository and could not have proven anything.
+        ///
+        /// Empty fields are still surfaced, because `HudCanvas.Adopt(null)` returns silently and an
+        /// unwired label is indistinguishable from an adopted one downstream. They go out as a
+        /// diagnostic line rather than a failure: whether a field SHOULD be wired is a scene
+        /// authoring question, and the assertion this test owns is about the ones that are.
+        /// </summary>
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator SceneAuthoredHudLabels_AreAdoptedOntoTheHudCanvas()
+        {
+            yield return BootScene();
+
+            var gm = GameManager.Instance;
+            Assert.IsNotNull(gm, "the arena must have a GameManager");
+
+            var hud = GameObject.Find(HudCanvas.CanvasName);
+            Assert.IsNotNull(hud, $"the HUD canvas '{HudCanvas.CanvasName}' must exist once the scene has started");
+
+            var problems = new List<string>();
+            var unwired = new List<string>();
+            int checkedCount = 0;
+
+            foreach (var field in typeof(GameManager).GetFields(
+                System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.Public
+                | System.Reflection.BindingFlags.NonPublic))
+            {
+                if (!typeof(TMP_Text).IsAssignableFrom(field.FieldType)) continue;
+
+                var label = field.GetValue(gm) as TMP_Text;
+                if (label == null)
+                {
+                    unwired.Add(field.Name);
+                    continue;
+                }
+
+                // Inactive labels belong to screens that are not open. Adoption happens to the HUD;
+                // a results-screen label under a closed panel is not a HUD label yet.
+                if (!label.isActiveAndEnabled) continue;
+
+                checkedCount++;
+                var canvas = label.canvas;
+                if (canvas == null)
+                {
+                    problems.Add($"{field.Name} ('{label.name}'): no Canvas ancestor - invisible");
+                }
+                else if (canvas.name != HudCanvas.CanvasName)
+                {
+                    problems.Add(
+                        $"{field.Name} ('{label.name}'): on canvas '{canvas.name}' "
+                        + $"({canvas.GetComponent<CanvasScaler>()?.uiScaleMode.ToString() ?? "no scaler"}) "
+                        + $"instead of '{HudCanvas.CanvasName}'");
+                }
+            }
+
+            if (unwired.Count > 0)
+            {
+                Debug.Log("[hud-pin] GameManager TMP_Text fields the scene leaves empty (not asserted, "
+                    + "but Adopt(null) is silent so they are named here): " + string.Join(", ", unwired));
+            }
+
+            Assert.Greater(checkedCount, 0,
+                "No active TMP_Text field on GameManager resolved to a live label, so this test "
+                + "asserted nothing. Either the scene stopped wiring the HUD or the fields were "
+                + "renamed. Empty fields seen: " + (unwired.Count > 0 ? string.Join(", ", unwired) : "none"));
+
+            Assert.IsEmpty(problems,
+                "Scene-authored HUD labels must end up on the HUD canvas. A label on the scene's "
+                + "own ConstantPixelSize canvas holds a fixed pixel height while the rest of the HUD "
+                + "scales, and a label on no canvas is not drawn at all. Problems: "
+                + string.Join("; ", problems));
         }
 
         /// <summary>

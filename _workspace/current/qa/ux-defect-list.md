@@ -1,5 +1,9 @@
 # 인게임 UI/UX 결함 목록 — 코드 실측
 
+- register-role: canonical
+  UX-계열(감사 소견: 코드 경로와 좌표로 확인한 가시성·UX 결함)의 정본. 정본 근거는 코드 경로 인용이다.
+  D-계열과 서로소인 것은 결함이 아니라 역할 분리다 — 같은 결함이 두 대장에 있으면 그것이 결함이다.
+
 - run-id: 20260813-ux-defects-stage1
 - owner: game-qa 레인 (UX 감사)
 - 대상: 작업 트리 현재 상태. **코드 0줄 수정.** 읽기와 좌표 계산만.
@@ -65,13 +69,13 @@
 
 ### 1.2 결함표
 
-| ID | 심각도 | 증상 | 근거 | 제안 |
-|---|---|---|---|---|
-| UX-001 | **S1** | **바람이 화면에 절대 표시되지 않는다.** `WindText`가 Canvas의 자식이 아니라 **씬 루트**다. `TextMeshProUGUI`는 상위에 Canvas가 없으면 그리지 않는다. 값은 매 턴 계산·포맷되지만 어디에도 나오지 않는다 | 부모 없음: `Assets/Scenes/SampleScene.unity:3868` `m_Father: {fileID: 0}` / 씬 루트 목록에 직접 등재: `:4306`. 대조군 `TurnText`는 `:962` `m_Father: {fileID: 339938660}` (= Canvas, `:1285`). 값 계산은 살아 있음: `GameManager.cs:2175-2180`. 화면 부재 확인: `qa/evidence/visual/ux-3-player-turn.png` (좌우 상단 어디에도 `BANNER WIND` 없음) | `WindText`를 Canvas 하위로 재부모화. 바람 상한이 2.0→6.5로 커지는 난이도 곡선(`GameManager.cs:65-66`)이 조준의 최대 변수인데 그 값이 안 보인다. 파티클(`WindVfxManager.cs:82-88`)만으로는 방향은 알아도 **세기 수치를 못 읽는다** |
-| UX-002 | **S1** | **점수가 화면에 절대 표시되지 않는다.** `ScoreText`도 동일하게 씬 루트 | `SampleScene.unity:2692` `m_Father: {fileID: 0}`, 씬 루트 등재 `:4307`. 값 갱신 경로 살아 있음: `GameManager.cs:2182`, 호출 `:1329`. 화면 부재: `ux-3-player-turn.png` 우상단 공백 | 동일 재부모화. 결과 화면은 점수를 쓰는데(`GameManager.cs:2270-2272`) 경기 중엔 누적을 못 본다 |
-| UX-003 | **S1** | 적 턴에 화면이 내리는 지시 2개가 전부 거짓 (§0) | `SiegeAlarmSystem.cs:231` + `BrickPlacementController.cs:76-82`; `LaunchManager.cs:118`+`:498`+`:304` + `LaunchManager.cs:530-532` | 둘 중 하나를 골라라. (a) D3 벽돌 예약을 실제로 켜서 문구를 참으로 만들거나, (b) 적 턴에 두 문자열을 상태 표현으로 교체. **문구만 지우는 것은 최악** — 적 턴 화면에서 텍스트가 하나 더 사라져 §0 표가 전부 수동태가 된다 |
-| UX-004 | S2 | **다음 발사체를 아무도 예고하지 않는다.** `OneShotSiegeRules.ProjectileForTurn(turnCount)`은 완전 결정론적이고 public인데(`OneShotSiegeRules.cs:25-29`, `GameManager.cs:1971-1985`) 소비처는 프리팹 선택뿐. 플레이어는 자기 턴이 시작돼야 무기를 알고, **적 무기는 끝까지 모른다** | 결정 로직 `OneShotSiegeRules.cs:13-18`; 유일한 표시 경로 `LaunchManager.cs:118` (이번 턴 자기 것만); 그 외 소비처 없음 (`ProjectileForTurn` 전체 grep 결과 = `GameManager.cs:1951`, `:1975` 두 곳뿐) | 비교작 9개 장치 중 **D6(완전 텔레그래프)** 부분 보유를 완전 보유로 올릴 수 있는 최저비용 항목. 이미 순수 함수가 있으므로 UI만 붙이면 된다. 자리는 §4 밴드 A |
-| UX-005 | S2 | **경기 진행도를 알 수 없다.** 턴 수는 `GameManager.TurnCount`(`:175`)로 노출돼 있으나 이를 그리는 UI가 하나도 없다. 목표 경기 길이 300초·약 43턴(`qa/idle-time-measurement.md:220-222`)인데 플레이어는 5턴째인지 35턴째인지 화면에서 알 수 없다 | `TurnCount` 소비처 grep: `GameFeelVfx.cs`·`SiegeAlarmSystem.cs`에 0건. 스테이지 진행은 결과 화면에만 존재(`SiegeEcosystem.cs:291-309`) | 코어 HP 배지(`GameFeelVfx.cs:833-834`)가 사실상 유일한 진행 신호다. HP는 비선형이라 "얼마 남았나"의 대용이 못 된다 |
+| ID | 심각도 | 상태 | 증상 | 근거 | 제안 |
+|---|---|---|---|---|---|
+| UX-001 | **S1** | closed 2026-08-14 | **바람이 화면에 절대 표시되지 않는다.** `WindText`가 Canvas의 자식이 아니라 **씬 루트**다. `TextMeshProUGUI`는 상위에 Canvas가 없으면 그리지 않는다. 값은 매 턴 계산·포맷되지만 어디에도 나오지 않는다 | 부모 없음: `Assets/Scenes/SampleScene.unity:3868` `m_Father: {fileID: 0}` / 씬 루트 목록에 직접 등재: `:4306`. 대조군 `TurnText`는 `:962` `m_Father: {fileID: 339938660}` (= Canvas, `:1285`). 값 계산은 살아 있음: `GameManager.cs:2175-2180`. 화면 부재 확인: `qa/evidence/visual/ux-3-player-turn.png` (좌우 상단 어디에도 `BANNER WIND` 없음) | `WindText`를 Canvas 하위로 재부모화. 바람 상한이 2.0→6.5로 커지는 난이도 곡선(`GameManager.cs:65-66`)이 조준의 최대 변수인데 그 값이 안 보인다. 파티클(`WindVfxManager.cs:82-88`)만으로는 방향은 알아도 **세기 수치를 못 읽는다** |
+| UX-002 | **S1** | closed 2026-08-14 | **점수가 화면에 절대 표시되지 않는다.** `ScoreText`도 동일하게 씬 루트 | `SampleScene.unity:2692` `m_Father: {fileID: 0}`, 씬 루트 등재 `:4307`. 값 갱신 경로 살아 있음: `GameManager.cs:2182`, 호출 `:1329`. 화면 부재: `ux-3-player-turn.png` 우상단 공백 | 동일 재부모화. 결과 화면은 점수를 쓰는데(`GameManager.cs:2270-2272`) 경기 중엔 누적을 못 본다 |
+| UX-003 | **S1** | closed 2026-08-14 | 적 턴에 화면이 내리는 지시 2개가 전부 거짓 (§0) | `SiegeAlarmSystem.cs:231` + `BrickPlacementController.cs:76-82`; `LaunchManager.cs:118`+`:498`+`:304` + `LaunchManager.cs:530-532` | 둘 중 하나를 골라라. (a) D3 벽돌 예약을 실제로 켜서 문구를 참으로 만들거나, (b) 적 턴에 두 문자열을 상태 표현으로 교체. **문구만 지우는 것은 최악** — 적 턴 화면에서 텍스트가 하나 더 사라져 §0 표가 전부 수동태가 된다 |
+| UX-004 | S2 | open | **다음 발사체를 아무도 예고하지 않는다.** `OneShotSiegeRules.ProjectileForTurn(turnCount)`은 완전 결정론적이고 public인데(`OneShotSiegeRules.cs:25-29`, `GameManager.cs:1971-1985`) 소비처는 프리팹 선택뿐. 플레이어는 자기 턴이 시작돼야 무기를 알고, **적 무기는 끝까지 모른다** | 결정 로직 `OneShotSiegeRules.cs:13-18`; 유일한 표시 경로 `LaunchManager.cs:118` (이번 턴 자기 것만); 그 외 소비처 없음 (`ProjectileForTurn` 전체 grep 결과 = `GameManager.cs:1951`, `:1975` 두 곳뿐) | 비교작 9개 장치 중 **D6(완전 텔레그래프)** 부분 보유를 완전 보유로 올릴 수 있는 최저비용 항목. 이미 순수 함수가 있으므로 UI만 붙이면 된다. 자리는 §4 밴드 A |
+| UX-005 | S2 | open | **경기 진행도를 알 수 없다.** 턴 수는 `GameManager.TurnCount`(`:175`)로 노출돼 있으나 이를 그리는 UI가 하나도 없다. 목표 경기 길이 300초·약 43턴(`qa/idle-time-measurement.md:220-222`)인데 플레이어는 5턴째인지 35턴째인지 화면에서 알 수 없다 | `TurnCount` 소비처 grep: `GameFeelVfx.cs`·`SiegeAlarmSystem.cs`에 0건. 스테이지 진행은 결과 화면에만 존재(`SiegeEcosystem.cs:291-309`) | 코어 HP 배지(`GameFeelVfx.cs:833-834`)가 사실상 유일한 진행 신호다. HP는 비선형이라 "얼마 남았나"의 대용이 못 된다 |
 
 ---
 
@@ -103,26 +107,26 @@
 
 모든 좌표는 캔버스 1920×1080 기준으로 앵커·피벗·크기에서 직접 계산했다 [OBSERVED — 상수 전부 인용].
 
-| ID | 심각도 | 증상 | 근거 | 제안 |
-|---|---|---|---|---|
-| UX-007 | S2 | **발사 준비 크로스헤어가 파워/각도 수치를 관통한다.** 다이아몬드 마커가 `파워 60%`의 글자를 덮는다 | `LaunchStatsText` anchor (0.5, **0.15**) → 하단에서 162px (`LaunchManager.cs:267-270`). `LaunchReadyMarker` anchor (0.5, **0.17**) → 하단에서 183.6px (`GameFeelVfx.cs:841`). 간격 21.6px. 크로스헤어는 42×42 다이아몬드 + 58px 세로 바(`GameFeelVfx.cs:856-860`) → 중심에서 상하 ±29px. **하단 끝 154.6px < 텍스트 중심 162px** → 관통. 육안 확인: `ux-3-player-turn.png` 중앙 하단, 노란 다이아몬드가 `발사!`와 `파워 60%` 사이를 가로지름 | 크로스헤어를 실제 발사 링 위치로 옮기거나(현재는 화면 중앙 하단 고정인데 플레이어 링은 좌측 x=−14.5), 스탯 텍스트를 밴드 A로 내려라 |
-| UX-008 | S2 | **벽돌 타입 선택 패널이 화면 밖에 있다.** 50px 높이 중 14px만 보인다. WOOD/STONE/IRON 버튼 3개가 사실상 클릭 불가 | `BrickPlacementController.cs:288-292`: anchorMin/Max (0.5, **0**), pivot (0.5, **0**), sizeDelta (390, **50**), anchoredPosition (0, **−36**). 하단 앵커·피벗 0에서 y=−36이면 패널 하단이 화면 아래 36px. 코드 주석은 `// centered and clean above unit selection`이라고 적혀 있어 **의도와 값이 어긋난다.** `HudLayoutTests.cs`는 이 패널을 전혀 보지 않는다(§4.1) | y −36 → **+94** (§4 밴드 A에 정확히 안착). 단, 좌표를 `:292` 인라인 리터럴로 두면 D-009 재발이다 — **상수로 올리고 `패널상단 < LastStandBottom` 단언을 `HudLayoutTests`에 추가**해야 한다. **D3(벽돌 예약) 재활성의 선행조건** — 게이트만 풀면 "패널은 떴는데 못 누른다"가 된다 |
-| UX-009 | S3 | 진영 셰브런 2개가 턴 진행 바를 덮는다 | `PlayerTurnMarker` anchor (0.42, 0.93) → 상단에서 75.6px, 34×34을 45° 회전 → 세로 반지름 24px → 51.6~99.6px 점유 (`GameFeelVfx.cs:839-840`). `TurnProgressBackground`는 상단 −78px, 높이 10 → 73~83px (`GameFeelVfx.cs:815-816`). **바 전체가 셰브런 세로 범위 안에 들어간다.** 가로도 겹침: 셰브런 x 782~830, 바 x 640~1260 | 셰브런을 y 0.93 → 0.955로 올리거나 바를 −78 → −92로 내려라. 둘 다 상시 표시 신호라 어느 하나가 잠깐 사라지는 문제가 아니다 |
-| UX-010 | S3 | KEEP CORE 배지 좌하단 모서리가 배치 토글 버튼 우상단과 겹친다 (28.4 × 9.2px) | 배지 anchor (0.18, 0.84), size 260×44 (`GameFeelVfx.cs:833`, `:1062`) → x 215.6~475.6, 상단에서 150.8~194.8px. 토글 anchor (0,1) pivot (0,1) pos (18, −134) size 226×26 (`DeploymentController.cs:634-638`) → x 18~244, 상단 134~160px. 교집합 x 215.6~244, y 150.8~160. 육안: `ux-3-player-turn.png` 좌상단 `배치 모드` 회색 바와 `KEEP CORE 150/150` 배지 | 배지를 x 0.18 → 0.20으로 밀거나 토글 폭을 226 → 195로 줄여라 |
-| UX-011 | S3 | 플로우 스트립과 타이머가 **간격 0px**로 맞닿아 있다. 폰트·줄높이가 조금만 커지면 즉시 겹친다 | 스트립 anchor (0.5, 0.9) pivot (0.5,1) size 700×26 (`SiegeAlarmSystem.cs:95-97`) → 상단 108~**134**px. `timerText` pos (0, −134) pivot (0.5,1) size 100×40 (`GameFeelVfx.cs:827-830`) → 상단 **134**~174px. 경계 정확히 일치 | 스트립을 0.9 → 0.905로 (약 5px 여유). 한국어 문자열이 들어가는 자리라 안전 마진이 필요하다 |
-| UX-012 | S3 | 씬에 직렬화된 HUD 텍스트 4종만 **외곽선이 없다.** 밝은 하늘 배경 위 흰 글자라 대비가 낮다 | `SampleScene.unity` 전체에서 `m_outlineWidth` 매치 **0건** → 4종 전부 기본값 0. 런타임 생성 텍스트는 전부 외곽선 보유: `GameFeelVfx.cs:876` (0.18), `SiegeAlarmSystem.cs:93` (0.16), `:141` (0.15), `LaunchManager.cs:286` (0.18), `GameManager.cs:1308` (0.16). `TurnText`는 24pt (`SampleScene.unity:1016`). 육안: `ux-3-player-turn.png` 상단 `YOUR SIEGE TURN`이 구름에 묻힘 | 4종에 `outlineWidth 0.16` 적용. 나머지 HUD가 전부 쓰는 값이라 새 규칙이 아니라 누락 보충이다 |
-| UX-013 | S4 | `LaunchStatsText`·`ControlGuideText`가 `MobileSafeArea` 콘텐츠 루트를 거치지 않고 Canvas에 직접 붙는다 — 노치 영역 침범 가능 | `LaunchManager.cs:260`, `:282` `SetParent(canvas.transform, false)`. 대조군은 전부 `MobileSafeArea.GetContentRoot(canvas)` 사용: `GameFeelVfx.cs:795`, `SiegeAlarmSystem.cs:79`·`:86`, `BrickPlacementController.cs:286`, `DeploymentController` 계열 | 두 줄을 콘텐츠 루트로 교체. `ControlGuideText`는 anchorMin y 0.02로 화면 최하단이라 홈 인디케이터와 충돌 위험이 실제로 있다 |
+| ID | 심각도 | 상태 | 증상 | 근거 | 제안 |
+|---|---|---|---|---|---|
+| UX-007 | S2 | open | **발사 준비 크로스헤어가 파워/각도 수치를 관통한다.** 다이아몬드 마커가 `파워 60%`의 글자를 덮는다 | `LaunchStatsText` anchor (0.5, **0.15**) → 하단에서 162px (`LaunchManager.cs:267-270`). `LaunchReadyMarker` anchor (0.5, **0.17**) → 하단에서 183.6px (`GameFeelVfx.cs:841`). 간격 21.6px. 크로스헤어는 42×42 다이아몬드 + 58px 세로 바(`GameFeelVfx.cs:856-860`) → 중심에서 상하 ±29px. **하단 끝 154.6px < 텍스트 중심 162px** → 관통. 육안 확인: `ux-3-player-turn.png` 중앙 하단, 노란 다이아몬드가 `발사!`와 `파워 60%` 사이를 가로지름 | 크로스헤어를 실제 발사 링 위치로 옮기거나(현재는 화면 중앙 하단 고정인데 플레이어 링은 좌측 x=−14.5), 스탯 텍스트를 밴드 A로 내려라 |
+| UX-008 | S2 | open | **벽돌 타입 선택 패널이 화면 밖에 있다.** 50px 높이 중 14px만 보인다. WOOD/STONE/IRON 버튼 3개가 사실상 클릭 불가 | `BrickPlacementController.cs:288-292`: anchorMin/Max (0.5, **0**), pivot (0.5, **0**), sizeDelta (390, **50**), anchoredPosition (0, **−36**). 하단 앵커·피벗 0에서 y=−36이면 패널 하단이 화면 아래 36px. 코드 주석은 `// centered and clean above unit selection`이라고 적혀 있어 **의도와 값이 어긋난다.** `HudLayoutTests.cs`는 이 패널을 전혀 보지 않는다(§4.1) | y −36 → **+94** (§4 밴드 A에 정확히 안착). 단, 좌표를 `:292` 인라인 리터럴로 두면 D-009 재발이다 — **상수로 올리고 `패널상단 < LastStandBottom` 단언을 `HudLayoutTests`에 추가**해야 한다. **D3(벽돌 예약) 재활성의 선행조건** — 게이트만 풀면 "패널은 떴는데 못 누른다"가 된다 |
+| UX-009 | S3 | open | 진영 셰브런 2개가 턴 진행 바를 덮는다 | `PlayerTurnMarker` anchor (0.42, 0.93) → 상단에서 75.6px, 34×34을 45° 회전 → 세로 반지름 24px → 51.6~99.6px 점유 (`GameFeelVfx.cs:839-840`). `TurnProgressBackground`는 상단 −78px, 높이 10 → 73~83px (`GameFeelVfx.cs:815-816`). **바 전체가 셰브런 세로 범위 안에 들어간다.** 가로도 겹침: 셰브런 x 782~830, 바 x 640~1260 | 셰브런을 y 0.93 → 0.955로 올리거나 바를 −78 → −92로 내려라. 둘 다 상시 표시 신호라 어느 하나가 잠깐 사라지는 문제가 아니다 |
+| UX-010 | S3 | open | KEEP CORE 배지 좌하단 모서리가 배치 토글 버튼 우상단과 겹친다 (28.4 × 9.2px) | 배지 anchor (0.18, 0.84), size 260×44 (`GameFeelVfx.cs:833`, `:1062`) → x 215.6~475.6, 상단에서 150.8~194.8px. 토글 anchor (0,1) pivot (0,1) pos (18, −134) size 226×26 (`DeploymentController.cs:634-638`) → x 18~244, 상단 134~160px. 교집합 x 215.6~244, y 150.8~160. 육안: `ux-3-player-turn.png` 좌상단 `배치 모드` 회색 바와 `KEEP CORE 150/150` 배지 | 배지를 x 0.18 → 0.20으로 밀거나 토글 폭을 226 → 195로 줄여라 |
+| UX-011 | S3 | open | 플로우 스트립과 타이머가 **간격 0px**로 맞닿아 있다. 폰트·줄높이가 조금만 커지면 즉시 겹친다 | 스트립 anchor (0.5, 0.9) pivot (0.5,1) size 700×26 (`SiegeAlarmSystem.cs:95-97`) → 상단 108~**134**px. `timerText` pos (0, −134) pivot (0.5,1) size 100×40 (`GameFeelVfx.cs:827-830`) → 상단 **134**~174px. 경계 정확히 일치 | 스트립을 0.9 → 0.905로 (약 5px 여유). 한국어 문자열이 들어가는 자리라 안전 마진이 필요하다 |
+| UX-012 | S3 | open | 씬에 직렬화된 HUD 텍스트 4종만 **외곽선이 없다.** 밝은 하늘 배경 위 흰 글자라 대비가 낮다 | `SampleScene.unity` 전체에서 `m_outlineWidth` 매치 **0건** → 4종 전부 기본값 0. 런타임 생성 텍스트는 전부 외곽선 보유: `GameFeelVfx.cs:876` (0.18), `SiegeAlarmSystem.cs:93` (0.16), `:141` (0.15), `LaunchManager.cs:286` (0.18), `GameManager.cs:1308` (0.16). `TurnText`는 24pt (`SampleScene.unity:1016`). 육안: `ux-3-player-turn.png` 상단 `YOUR SIEGE TURN`이 구름에 묻힘 | 4종에 `outlineWidth 0.16` 적용. 나머지 HUD가 전부 쓰는 값이라 새 규칙이 아니라 누락 보충이다 |
+| UX-013 | S4 | open | `LaunchStatsText`·`ControlGuideText`가 `MobileSafeArea` 콘텐츠 루트를 거치지 않고 Canvas에 직접 붙는다 — 노치 영역 침범 가능 | `LaunchManager.cs:260`, `:282` `SetParent(canvas.transform, false)`. 대조군은 전부 `MobileSafeArea.GetContentRoot(canvas)` 사용: `GameFeelVfx.cs:795`, `SiegeAlarmSystem.cs:79`·`:86`, `BrickPlacementController.cs:286`, `DeploymentController` 계열 | 두 줄을 콘텐츠 루트로 교체. `ControlGuideText`는 anchorMin y 0.02로 화면 최하단이라 홈 인디케이터와 충돌 위험이 실제로 있다 |
 
 ---
 
 ## 3. 피드백 공백
 
-| ID | 심각도 | 증상 | 근거 | 제안 |
-|---|---|---|---|---|
-| UX-014 | **S1** | **적 턴 109.7초 동안 활성 버튼 0개, 유효 입력 0개.** 화면이 보여주는 것은 상태 5종(턴 라벨·정지한 타이머·정지한 바·셰브런·감광된 크로스헤어) + 거짓 지시 2종 + 이벤트 발생 시 알람 줄뿐이다 | 버튼 소유자 전부 차단: `DeploymentController.cs:153-157` (배치 HUD), `BrickPlacementController.cs:80` (벽돌 패널), `GameManager.cs:1164` (Last Stand는 위기 시에만). 입력 3중 차단은 `qa/idle-time-measurement.md:31-76`에 확정. 시간 근거 `:275` | §4의 자리에 적 턴 전용 인터랙션을 놓아라. 이 34.1%가 지금 완전한 공백이다 |
-| UX-015 | S2 | **적 턴 화면의 시각 증거가 존재하지 않는다.** 캡처 하네스 주석은 `"...and the AI turn the player cannot act during"`이라고 명시하는데(`VisualEvidenceCapture.cs:239-240`) **본문은 그 상태를 찍지 않는다** | 캡처 호출 3건뿐: `:249` `ux-1-title`, `:258` `ux-2-match-start`, `:262` `ux-3-player-turn`. `AITurn` 대기·캡처 코드 없음. 결과 파일도 3블록: `ux-measurements.txt:1-11` | 경기의 34.1%를 차지하는 상태에 스크린샷이 없다. 이 문서의 §0이 코드 추적으로만 작성된 이유다. `ux-4-enemy-turn` 캡처 추가 필요 |
-| UX-016 | S3 | **타이머 위젯의 의미가 상태마다 뒤집히고, 적 턴엔 얼어붙는다.** 내 턴엔 "지금 행동하라", 적 턴엔 "기다려라" — 같은 숫자가 반대 뜻이다. 게다가 적 턴 값은 거의 움직이지 않는다 | `GameManager.cs:1720` `if (isResolvingTurn) return;`이 `:1726`의 `timerText` 갱신보다 **앞선다**. AI는 0.9초 만에 발사하고(`GameManager.cs:2159` 0.4s + `SimpleAI.cs:30` 0.5s) 발사 즉시 `isResolvingTurn = true`(`GameManager.cs:2051`) → 타이머는 15 → **14.1에서 정지**. 남은 약 4.2초의 꼬리 구간(`qa/idle-time-measurement.md:249`) 내내 같은 숫자. 진행 바도 동일 소스(`GameFeelVfx.cs:934`)라 6% 줄고 멈춤 | 적 턴엔 카운트다운을 숨기고 다른 표현을 써라. 지금은 "멈춘 것처럼 보임"을 플로우 스트립의 애니메이션 점(`SiegeAlarmSystem.cs:224`, `:230`)만으로 방어하고 있는데, 정작 가장 큰 숫자 위젯이 얼어 있어 반대 신호를 낸다 |
-| UX-017 | S3 | 벽돌 예약 힌트가 **월드 좌표 (0, 4.5) 고정 1회성 라벨**로 설계돼 있다. 전장 한복판에 2.2초 떴다 사라진다 | `BrickPlacementController.cs:112-114` `SpawnFeedbackLabel(new Vector3(0f, 4.5f, 0f), ...)`, 수명 2.2s, `hintShownThisTurn` 가드(`:109-111`). 단 `:76-82` 조기 반환이 앞서므로 **출하 설정에선 실행되지 않는 죽은 경로** | D3 재활성 시 이 힌트는 재설계 대상이다. 전장 중앙은 성 두 채 사이 궤적이 지나는 자리다 |
+| ID | 심각도 | 상태 | 증상 | 근거 | 제안 |
+|---|---|---|---|---|---|
+| UX-014 | **S1** | **open** | **적 턴 109.7초 동안 활성 버튼 0개, 유효 입력 0개.** 화면이 보여주는 것은 상태 5종(턴 라벨·정지한 타이머·정지한 바·셰브런·감광된 크로스헤어) + 거짓 지시 2종 + 이벤트 발생 시 알람 줄뿐이다 | 버튼 소유자 전부 차단: `DeploymentController.cs:153-157` (배치 HUD), `BrickPlacementController.cs:80` (벽돌 패널), `GameManager.cs:1164` (Last Stand는 위기 시에만). 입력 3중 차단은 `qa/idle-time-measurement.md:31-76`에 확정. 시간 근거 `:275` | §4의 자리에 적 턴 전용 인터랙션을 놓아라. 이 34.1%가 지금 완전한 공백이다 |
+| UX-015 | S2 | open | **적 턴 화면의 시각 증거가 존재하지 않는다.** 캡처 하네스 주석은 `"...and the AI turn the player cannot act during"`이라고 명시하는데(`VisualEvidenceCapture.cs:239-240`) **본문은 그 상태를 찍지 않는다** | 캡처 호출 3건뿐: `:249` `ux-1-title`, `:258` `ux-2-match-start`, `:262` `ux-3-player-turn`. `AITurn` 대기·캡처 코드 없음. 결과 파일도 3블록: `ux-measurements.txt:1-11` | 경기의 34.1%를 차지하는 상태에 스크린샷이 없다. 이 문서의 §0이 코드 추적으로만 작성된 이유다. `ux-4-enemy-turn` 캡처 추가 필요 |
+| UX-016 | S3 | open | **타이머 위젯의 의미가 상태마다 뒤집히고, 적 턴엔 얼어붙는다.** 내 턴엔 "지금 행동하라", 적 턴엔 "기다려라" — 같은 숫자가 반대 뜻이다. 게다가 적 턴 값은 거의 움직이지 않는다 | `GameManager.cs:1720` `if (isResolvingTurn) return;`이 `:1726`의 `timerText` 갱신보다 **앞선다**. AI는 0.9초 만에 발사하고(`GameManager.cs:2159` 0.4s + `SimpleAI.cs:30` 0.5s) 발사 즉시 `isResolvingTurn = true`(`GameManager.cs:2051`) → 타이머는 15 → **14.1에서 정지**. 남은 약 4.2초의 꼬리 구간(`qa/idle-time-measurement.md:249`) 내내 같은 숫자. 진행 바도 동일 소스(`GameFeelVfx.cs:934`)라 6% 줄고 멈춤 | 적 턴엔 카운트다운을 숨기고 다른 표현을 써라. 지금은 "멈춘 것처럼 보임"을 플로우 스트립의 애니메이션 점(`SiegeAlarmSystem.cs:224`, `:230`)만으로 방어하고 있는데, 정작 가장 큰 숫자 위젯이 얼어 있어 반대 신호를 낸다 |
+| UX-017 | S3 | open | 벽돌 예약 힌트가 **월드 좌표 (0, 4.5) 고정 1회성 라벨**로 설계돼 있다. 전장 한복판에 2.2초 떴다 사라진다 | `BrickPlacementController.cs:112-114` `SpawnFeedbackLabel(new Vector3(0f, 4.5f, 0f), ...)`, 수명 2.2s, `hintShownThisTurn` 가드(`:109-111`). 단 `:76-82` 조기 반환이 앞서므로 **출하 설정에선 실행되지 않는 죽은 경로** | D3 재활성 시 이 힌트는 재설계 대상이다. 전장 중앙은 성 두 채 사이 궤적이 지나는 자리다 |
 
 ---
 
@@ -200,7 +204,7 @@
 ## 5. 심각도별 집계
 
 | 심각도 | 건수 | ID |
-|---|---|---|
+|---|---|---|---|
 | S1 (치명) | 4 | UX-001, UX-002, UX-003, UX-014 |
 | S2 (중대) | 5 | UX-004, UX-005, UX-007, UX-008, UX-015 |
 | S3 (경미) | 6 | UX-009, UX-010, UX-011, UX-012, UX-016, UX-017 |

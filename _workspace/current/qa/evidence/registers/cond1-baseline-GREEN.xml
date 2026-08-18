@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="4" result="Passed" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.0850651">
+  <test-suite type="TestSuite" id="1000" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="553" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.085065" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1624" name="CastleBusters.EditModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.EditModeTests.dll" runstate="Runnable" testcasecount="324" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.076033" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="43420" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1625" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="324" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.074570" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1626" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="324" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.056927" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1300" name="DefectRegisterGateTests" fullname="CastleBusters.Tests.DefectRegisterGateTests" classname="CastleBusters.Tests.DefectRegisterGateTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.052956" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1304" name="EveryRegisterFile_DeclaresWhetherItIsAuthoritative" fullname="CastleBusters.Tests.DefectRegisterGateTests.EveryRegisterFile_DeclaresWhetherItIsAuthoritative" methodname="EveryRegisterFile_DeclaresWhetherItIsAuthoritative" classname="CastleBusters.Tests.DefectRegisterGateTests" runstate="Runnable" seed="483850610" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.013102" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1301" name="EverySeverityTable_CanExpressStatus" fullname="CastleBusters.Tests.DefectRegisterGateTests.EverySeverityTable_CanExpressStatus" methodname="EverySeverityTable_CanExpressStatus" classname="CastleBusters.Tests.DefectRegisterGateTests" runstate="Runnable" seed="1618982874" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.006532" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1302" name="NoSeverityRow_LeavesItsStatusBlank" fullname="CastleBusters.Tests.DefectRegisterGateTests.NoSeverityRow_LeavesItsStatusBlank" methodname="NoSeverityRow_LeavesItsStatusBlank" classname="CastleBusters.Tests.DefectRegisterGateTests" runstate="Runnable" seed="1565859920" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.003551" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1303" name="WhileAnyS1IsOpen_NoGateReviewClaimsPass" fullname="CastleBusters.Tests.DefectRegisterGateTests.WhileAnyS1IsOpen_NoGateReviewClaimsPass" methodname="WhileAnyS1IsOpen_NoGateReviewClaimsPass" classname="CastleBusters.Tests.DefectRegisterGateTests" runstate="Runnable" seed="724201584" result="Passed" start-time="2026-08-18 07:48:28Z" end-time="2026-08-18 07:48:28Z" duration="0.011088" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<color=#ff6b6b>fail:</color> [16:48:28:9414] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
