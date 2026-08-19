@@ -1,13 +1,15 @@
 {
-  "generated_at": "2026-08-19T05:29:44.229928+00:00",
-  "tool": "Pillow procedural concept pass by jeo",
+  "generated_at": "2026-08-19T13:30:06.089435+00:00",
+  "tool": "Pillow procedural pass by jeo",
   "source_document": "_workspace/current/design/art-production-order.md",
   "source_order": "B-3",
-  "concept_only": true,
-  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
-  "prompt": "64x16 horizontal repeating dash texture: 24px filled, 8px clear, bright center fades vertically.",
+  "concept_only": false,
+  "promotion_required": "Promoted: this file IS the runtime asset (Sprite importer, wrapU Repeat).",
+  "prompt": "64x16 horizontal repeating DOT texture: four soft round dots on a 16px period (7px dot, 9px clear, 44% duty), peak alpha 0.55, white core fading to cyan rim; gap pixels keep the rim colour so bilinear filtering cannot smear dark into the fade.",
   "saturation_contract": "self-colored white/cyan",
-  "sha256": "12bbf8300478b068524dde3c0e56c45e323e030e7934b206da840990077e3378",
-  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/trajectory_dash.png",
-  "intended_runtime_path": "Assets/Resources/Effects/trajectory_dash.png"
+  "sha256": "d5d4fc1f3b31c147d6b2c9a2522e48a02da1605b1387fd3e61b686969cade1bd",
+  "output": "Assets/Resources/Effects/trajectory_dash.png",
+  "intended_runtime_path": "Assets/Resources/Effects/trajectory_dash.png",
+  "supersedes": "24px filled / 8px clear dash at flat alpha 0.5 — a 75% duty cycle that read as a translucent BAR rather than a dotted path.",
+  "tiling_contract": "Seamless at 16px period: dot centres land at 8,24,40,56 and the wrap keeps spacing exactly 16px across the tile seam. wrapU must stay Repeat (meta wrapU: 0); Clamp smears the last column and restores a solid line."
 }

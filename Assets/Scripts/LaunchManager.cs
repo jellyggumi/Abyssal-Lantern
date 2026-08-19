@@ -106,7 +106,7 @@ namespace CastleBusters
         /// perfectly good third existed, and it lands within 0.03 of the Barrel tint
         /// (1, 0.65, 0.12) at :496 — a self-hit would have read as a barrel shot.
         /// </summary>
-        private static readonly Color SelfHitTrajectoryColor = new Color(0.45f, 0.85f, 1f, 0.95f);
+        private static readonly Color SelfHitTrajectoryColor = new Color(0.45f, 0.85f, 1f, 0.85f);
 
         // The line's authored colours, captured once at setup so the self-hit tint can be undone
         // without hardcoding a guess at what the designer set.
@@ -332,15 +332,13 @@ namespace CastleBusters
                 rubberBandLine.sortingOrder = 11;
             }
 
-            // Capture whatever the trajectory line was authored with, so the self-hit tint is a
-            // reversible overlay rather than a hardcoded pair. Guarded on the line existing because
-            // a scene without one is a valid configuration (DrawTrajectory early-outs).
-            if (trajectoryLine != null && !authoredTrajectoryColorsCaptured)
-            {
-                authoredTrajectoryStart = trajectoryLine.startColor;
-                authoredTrajectoryEnd = trajectoryLine.endColor;
-                authoredTrajectoryColorsCaptured = true;
-            }
+            // (The authored-colour capture used to sit here. It ran BEFORE Start() assigned the
+            //  trajectory's colours, so it snapshotted the scene's serialized gradient — opaque
+            //  white, no fade — and DrawTrajectory's non-self-hit branch then "restored" that over
+            //  the authored pair on every draw. While dragging, the Update() hue animation
+            //  overwrote it in the same frame and hid the defect; the keyboard aim path does not
+            //  animate (it returns early on !isDragging), so arrow-key aiming rendered a flat
+            //  opaque arc. The capture now happens after Start() authors the colours.)
 
             if (launchStatsText == null)
             {
@@ -573,7 +571,7 @@ namespace CastleBusters
                     trajectoryLine.sharedMaterial = new Material(Shader.Find("Sprites/Default"));
                 }
                 // A solid line does not read as a predicted path — it reads as a drawn object. The
-                // dash texture tiles along the arc, which is the convention every comparable title
+                // dot texture tiles along the arc, which is the convention every comparable title
                 // in the survey uses. Tiling needs the texture to repeat along the line: the
                 // importer sets `wrapU: 0` for exactly this. The default the meta shipped with was
                 // `wrapU: 1` (Clamp), which smears the last pixel column down the whole tail — and
@@ -584,8 +582,24 @@ namespace CastleBusters
                     trajectoryLine.sharedMaterial.mainTexture = dash.texture;
                     trajectoryLine.textureMode = LineTextureMode.Tile;
                 }
-                trajectoryLine.startColor = new Color(1f, 1f, 1f, 0.9f);
-                trajectoryLine.endColor = new Color(0.5f, 0.8f, 1f, 0.25f);
+                // Translucency now lives in the TEXTURE (peak alpha 0.55, 44% duty cycle), so these
+                // vertex colours only shape the near-to-far falloff on top of it. The tail alpha is
+                // deliberately far higher than the 0.25 it replaced: alpha multiplies, and 0.25 over
+                // a dotted texture left the far half of the arc at 0.14 — invisible over bright
+                // terrain. That was survivable when the texture was a 75%-duty near-solid bar; with
+                // real gaps it is not, and a preview that fades out before the impact is the same
+                // "arc ends in the sky" defect the resolution comment above describes.
+                trajectoryLine.startColor = new Color(1f, 1f, 1f, 0.85f);
+                trajectoryLine.endColor = new Color(0.5f, 0.8f, 1f, 0.55f);
+
+                // Capture the pair authored immediately above, so the self-hit tint stays a
+                // reversible overlay. This must run AFTER the assignment: it used to live in
+                // SetupDefaultVisuals(), which Start() calls first, so it snapshotted the scene's
+                // serialized gradient instead — opaque white, no fade — and DrawTrajectory then
+                // restored THAT over these colours on every non-self-hit draw.
+                authoredTrajectoryStart = trajectoryLine.startColor;
+                authoredTrajectoryEnd = trajectoryLine.endColor;
+                authoredTrajectoryColorsCaptured = true;
             }
         }
 
@@ -700,12 +714,15 @@ namespace CastleBusters
                 && gameManager.IsPlayerTurn;
             if (canAim && selectedUnitPrefab != null && !deployArmed) HandleInput();
 
-            // Cycle 13: Animate trajectory line color over time to make it feel alive
+            // The hue drift makes the arc feel live. Its ALPHAS must stay equal to the authored
+            // pair set in Start(): this runs every frame of the draw and overwrites them, so any
+            // disagreement here silently wins and the dotted line snaps back to near-opaque the
+            // instant the player pulls — which is precisely the appearance this replaced.
             if (isDragging && trajectoryLine != null && trajectoryLine.positionCount > 0)
             {
                 float offset = Time.time * 2.5f;
-                Color startCol = Color.Lerp(new Color(1f, 1f, 1f, 0.95f), new Color(0.35f, 0.85f, 1f, 0.95f), Mathf.Sin(offset) * 0.5f + 0.5f);
-                Color endCol = new Color(startCol.r, startCol.g, startCol.b, 0.15f);
+                Color startCol = Color.Lerp(new Color(1f, 1f, 1f, 0.85f), new Color(0.35f, 0.85f, 1f, 0.85f), Mathf.Sin(offset) * 0.5f + 0.5f);
+                Color endCol = new Color(startCol.r, startCol.g, startCol.b, 0.55f);
                 trajectoryLine.startColor = startCol;
                 trajectoryLine.endColor = endCol;
             }
@@ -1176,7 +1193,7 @@ namespace CastleBusters
             {
                 trajectoryLine.startColor = SelfHitTrajectoryColor;
                 trajectoryLine.endColor = new Color(
-                    SelfHitTrajectoryColor.r, SelfHitTrajectoryColor.g, SelfHitTrajectoryColor.b, 0.45f);
+                    SelfHitTrajectoryColor.r, SelfHitTrajectoryColor.g, SelfHitTrajectoryColor.b, 0.55f);
             }
             else if (authoredTrajectoryColorsCaptured)
             {

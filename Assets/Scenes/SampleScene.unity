@@ -557,7 +557,7 @@ MonoBehaviour:
   maxLaunchVelocity: 17.5
   minLaunchVelocity: 3
   trajectoryLine: {fileID: 83740686}
-  trajectoryResolution: 150
+  trajectoryResolution: 300
   timeStep: 0.02
   impactMarkerPrefab: {fileID: 0}
   launchPointIndicatorPrefab: {fileID: 0}
