@@ -1,16 +1,20 @@
 ## ux-1-title
 state=Intro playerTurn=False turn=0
 onscreen text=18 buttons=9
+outline HowTo=0.16 Label=0.00 Label=0.00 Label=0.16 Label=0.16 Label=0.16 Prompt=0.00 ScoreText=0.18 StageLabel=0.14 Tagline=0.18 Text=0.16 Text=0.16 Text=0.16 Text=0.16 TimerText=0.18 Title=0.22 TurnText=0.18 WindText=0.18
 
 ## ux-2-match-start
 state=PlayerTurn playerTurn=True turn=0
 onscreen text=10 buttons=1
+outline ControlGuideText=0.18 DeployToggleLabel=0.18 Label=0.18 Label=0.18 ScoreText=0.18 SupplyText=0.18 TimerText=0.18 TurnText=0.18 TurnToastText=0.18 WindText=0.18
 
 ## ux-3-player-turn
 state=PlayerTurn playerTurn=True turn=0
 onscreen text=9 buttons=1
+outline ControlGuideText=0.18 DeployToggleLabel=0.18 Label=0.18 Label=0.18 ScoreText=0.18 SupplyText=0.18 TimerText=0.18 TurnText=0.18 WindText=0.18
 
 ## ux-4-enemy-turn
 state=AITurn playerTurn=False turn=1
 onscreen text=9 buttons=0
+outline AlarmLine=0.15 FlowStateStrip=0.16 Label=0.18 Label=0.18 ScoreText=0.18 TimerText=0.18 TurnText=0.18 TurnToastText=0.18 WindText=0.18
 

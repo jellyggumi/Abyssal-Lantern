@@ -1295,6 +1295,11 @@ namespace CastleBusters
                 label.alignment = TextAlignmentOptions.Center;
                 label.color = Color.white;
                 label.raycastTarget = false;
+                // Measured 0.00 on 2026-08-19 while every other HUD label carried 0.18. UX-012
+                // claimed "런타임 생성 텍스트는 전부 외곽선 보유" and that was wrong — this badge and
+                // the deploy toggle were the exceptions. White bold text on a bright sky is the
+                // number the comment above calls "the number a player reads before every shot".
+                HudCanvas.TryApplyOutline(label, 0.18f, new Color(0.06f, 0.07f, 0.10f, 1f));
                 var textRt = textGo.GetComponent<RectTransform>();
                 textRt.anchorMin = Vector2.zero;
                 textRt.anchorMax = Vector2.one;

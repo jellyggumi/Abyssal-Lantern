@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -494,6 +495,20 @@ namespace CastleBusters.Tests
             }
             measurements.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "onscreen text={0} buttons={1}", texts, buttons));
+
+            // Outline width per label, because "the text looks washed out" is not measurable by
+            // squinting at a PNG. UX-012 is exactly this: the scene-authored labels carry 0 while
+            // every code-built one carries 0.15-0.18, and a fix that silently fails to apply looks
+            // identical to no fix at all.
+            var outlines = new List<string>();
+            foreach (var t in Object.FindObjectsByType<TMPro.TextMeshProUGUI>(FindObjectsSortMode.None))
+            {
+                if (!t.isActiveAndEnabled || string.IsNullOrWhiteSpace(t.text)) continue;
+                outlines.Add(string.Format(CultureInfo.InvariantCulture,
+                    "{0}={1:F2}", t.name, t.outlineWidth));
+            }
+            outlines.Sort();
+            measurements.AppendLine("outline " + string.Join(" ", outlines));
             measurements.AppendLine();
         }
     }

@@ -1177,6 +1177,17 @@ namespace CastleBusters
             HudCanvas.Adopt(scoreText);
             HudCanvas.Adopt(timerText);
 
+            // The four scene-authored labels were the only HUD text with no outline at all —
+            // `SampleScene.unity` has zero `m_outlineWidth` matches, so white glyphs sat on a bright
+            // sky while every code-built label carried 0.15-0.18. The 2026-08-19 enemy-turn capture
+            // shows the cost: `WIND` reads as `IND` where its W crosses a cloud. Same width and dark
+            // colour the code path uses, applied through the guard that survives an unresolved font.
+            var outline = new Color(0.06f, 0.07f, 0.10f, 1f);
+            HudCanvas.TryApplyOutline(turnText, 0.18f, outline);
+            HudCanvas.TryApplyOutline(timerText, 0.18f, outline);
+            HudCanvas.TryApplyOutline(windText, 0.18f, outline);
+            HudCanvas.TryApplyOutline(scoreText, 0.18f, outline);
+
             knightButton?.onClick.AddListener(() => SelectUnit(0));
             archerButton?.onClick.AddListener(() => SelectUnit(1));
             cannonButton?.onClick.AddListener(() => SelectUnit(2));

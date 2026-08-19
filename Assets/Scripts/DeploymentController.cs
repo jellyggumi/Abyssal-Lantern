@@ -673,6 +673,9 @@ namespace CastleBusters
             deployToggleLabel.enableWordWrapping = false;
             deployToggleLabel.overflowMode = TextOverflowModes.Overflow;
             deployToggleLabel.color = new Color(0.85f, 0.95f, 1f, 1f);
+            // Measured 0.00 on 2026-08-19; the other HUD labels carry 0.18. Pale blue on a bright
+            // sky is the worst case for a label with no outline, and this one sits over the board.
+            HudCanvas.TryApplyOutline(deployToggleLabel, 0.18f, new Color(0.06f, 0.07f, 0.10f, 1f));
             var labelRt = labelGo.GetComponent<RectTransform>();
             labelRt.anchorMin = Vector2.zero;
             labelRt.anchorMax = Vector2.one;
