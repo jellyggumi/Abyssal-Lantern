@@ -297,7 +297,22 @@ namespace CastleBusters
             {
                 var go = new GameObject("DefaultImpactMarker");
                 var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = CreateCircleSprite(0.22f, new Color(1f, 0.25f, 0.15f, 0.9f));
+                // Authored art is greyscale so the tint below is the only thing colouring it. The
+                // procedural circle baked amber into its pixels, which meant the self-hit path
+                // multiplied amber by blue and got mud — the one moment the marker matters most.
+                var art = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.ImpactMarker);
+                if (art != null)
+                {
+                    sr.sprite = art;
+                    sr.color = new Color(1f, 0.25f, 0.15f, 0.9f);
+                    // 128px art at 0.44 world units matches the procedural 0.22 radius it replaces.
+                    float native = Mathf.Max(0.0001f, art.bounds.size.x);
+                    go.transform.localScale = Vector3.one * (0.44f / native);
+                }
+                else
+                {
+                    sr.sprite = CreateCircleSprite(0.22f, new Color(1f, 0.25f, 0.15f, 0.9f));
+                }
                 sr.sortingOrder = 12;
                 go.SetActive(false);
                 impactMarkerInstance = go;
@@ -548,9 +563,26 @@ namespace CastleBusters
                 trajectoryLine.endWidth = 0.08f;
                 trajectoryLine.sortingLayerName = "Default";
                 trajectoryLine.sortingOrder = 10;
+                // Everything here goes through `sharedMaterial`. Reading `.material` instantiates a
+                // per-renderer copy the moment it is READ, not written — in EditMode that logs a
+                // material-leak error and fails every test that did not expect it, which is how
+                // this was caught. The pre-existing line assigned through `.material`, which was
+                // harmless only because it never read it.
                 if (trajectoryLine.sharedMaterial == null)
                 {
-                    trajectoryLine.material = new Material(Shader.Find("Sprites/Default"));
+                    trajectoryLine.sharedMaterial = new Material(Shader.Find("Sprites/Default"));
+                }
+                // A solid line does not read as a predicted path — it reads as a drawn object. The
+                // dash texture tiles along the arc, which is the convention every comparable title
+                // in the survey uses. Tiling needs the texture to repeat along the line: the
+                // importer sets `wrapU: 0` for exactly this. The default the meta shipped with was
+                // `wrapU: 1` (Clamp), which smears the last pixel column down the whole tail — and
+                // that failure looks like a solid line, i.e. exactly what this replaces.
+                var dash = Resources.Load<Sprite>("Effects/trajectory_dash");
+                if (dash != null && trajectoryLine.sharedMaterial != null)
+                {
+                    trajectoryLine.sharedMaterial.mainTexture = dash.texture;
+                    trajectoryLine.textureMode = LineTextureMode.Tile;
                 }
                 trajectoryLine.startColor = new Color(1f, 1f, 1f, 0.9f);
                 trajectoryLine.endColor = new Color(0.5f, 0.8f, 1f, 0.25f);

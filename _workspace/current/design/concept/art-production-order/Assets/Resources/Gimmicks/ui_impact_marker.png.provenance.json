@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "B-2",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "128x128 transparent impact preview marker: grayscale concentric targeting rings plus center cross and corner brackets.",
+  "saturation_contract": "grayscale tint-source",
+  "sha256": "e077dd99fb356fdbfdee1131586e4923207766321999ed1fb26ecf668a857ce3",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Gimmicks/ui_impact_marker.png",
+  "intended_runtime_path": "Assets/Resources/Gimmicks/ui_impact_marker.png"
+}

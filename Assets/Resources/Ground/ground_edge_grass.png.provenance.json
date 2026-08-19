@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "G-4",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "128x128 grass-to-dirt organic edge tile: non-straight transition with grass roots dropping into dirt.",
+  "saturation_contract": "self-colored >=0.30",
+  "sha256": "d18d07a5ae367ce8bbd4f5a75c00576d4a2507ee257ade88a435cd0b6b3999a8",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Ground/ground_edge_grass.png",
+  "intended_runtime_path": "Assets/Resources/Ground/ground_edge_grass.png"
+}

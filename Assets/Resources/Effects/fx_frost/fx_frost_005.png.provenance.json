@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "A1.5",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "256x256 frost burst frame sequence: hex ice shards radiate outward, blue outline, fading alpha over six frames.",
+  "saturation_contract": "self-colored blue >=0.35",
+  "sha256": "c207946b92bad319f519c6334f3b6dba202a52e89e898714902c161fb1f2d999",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/fx_frost/fx_frost_005.png",
+  "intended_runtime_path": "Assets/Resources/Effects/fx_frost/fx_frost_005.png"
+}

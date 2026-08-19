@@ -1,0 +1,14 @@
+{
+  "file": "ui_deploy_ghost.png",
+  "prompt": "128x128 transparent 2D game UI placement ghost, grayscale tint-source, 9-sliceable deployment slot frame with 12px corners, soft antialiased bracket corners, translucent center wash, subtle diagonal hatch, no text, no letters, no background.",
+  "tool": "Pillow procedural art pass by jeo",
+  "model": "deterministic procedural geometry, no external image model",
+  "generatedAt": "2026-08-19T05:36:33.365232Z",
+  "checksumSha256": "a58a9f527cd1944a79fd9f31623957c0bd728ff1ac91730e277a847577f61caa",
+  "runtimeEligible": true,
+  "source": "_workspace/current/design/art-gap-inventory.md#B-3 and user request 2026-08-19",
+  "width": 128,
+  "height": 128,
+  "saturationContract": "grayscale tint-source; DeploymentController.UpdateGhost applies green/red status tint",
+  "notes": "Promoted directly to Assets/Resources/Gimmicks because the user explicitly requested game application after the concept-order pass. Unity importer meta is Sprite, single mode, alpha transparency, PPU 100, border 12/12/12/12."
+}

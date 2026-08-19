@@ -229,6 +229,37 @@ namespace CastleBusters.Tests
                 "The deployed Cannon must not translate or rotate under combat impulses.");
         }
 
+        [Test]
+        public void DeploymentController_EnsureGhost_UsesDedicatedDeployGhostResourceWithCenteredPivot()
+        {
+            var expectedSprite = Resources.Load<Sprite>("Gimmicks/ui_deploy_ghost");
+            Assert.That(expectedSprite, Is.Not.Null,
+                "The shipped deploy ghost art must load through the same Resources path production uses. "
+                + "If this is null, the player sees the procedural white-square fallback instead of the authored placement silhouette.");
+            Assert.That(expectedSprite.rect.width, Is.EqualTo(128f),
+                "ui_deploy_ghost.png is the dedicated 128x128 placement silhouette; a different size means the runtime is not using the shipped art contract.");
+            Assert.That(expectedSprite.rect.height, Is.EqualTo(128f),
+                "ui_deploy_ghost.png is the dedicated 128x128 placement silhouette; a different size means the runtime is not using the shipped art contract.");
+
+            var deployment = CreateObject("DeployGhostArtRegressionDeployment").AddComponent<DeploymentController>();
+
+            InvokePrivate<object>(deployment, "EnsureGhost");
+            var ghost = GetPrivateField<GameObject>(deployment, "ghost");
+            Assert.That(ghost, Is.Not.Null, "EnsureGhost must materialize the preview object.");
+            createdObjects.Add(ghost);
+
+            var ghostRenderer = GetPrivateField<SpriteRenderer>(deployment, "ghostRenderer");
+            Assert.That(ghostRenderer, Is.Not.Null, "EnsureGhost must attach the renderer used by UpdateGhost's green/red tinting.");
+            Assert.That(ghostRenderer.sprite, Is.SameAs(expectedSprite),
+                "The placement preview must use the authored Resources/Gimmicks/ui_deploy_ghost.png sprite. "
+                + "A procedurally-created sprite can still draw, but it regresses the deploy ghost back to the white-square fallback.");
+            Assert.That(ghostRenderer.sprite.pivot.x / ghostRenderer.sprite.rect.width, Is.EqualTo(0.5f).Within(0.001f),
+                "The deploy ghost sprite must keep a centered X pivot so placement aligns to the selected world point.");
+            Assert.That(ghostRenderer.sprite.pivot.y / ghostRenderer.sprite.rect.height, Is.EqualTo(0.5f).Within(0.001f),
+                "The deploy ghost sprite must keep a centered Y pivot so placement aligns to the selected world point.");
+        }
+
+
         private LaunchManager CreateActiveAim(
             string prefix,
             out GameManager gameManager,
@@ -310,6 +341,13 @@ namespace CastleBusters.Tests
             field.SetValue(target, value);
         }
 
+
+        private static TResult GetPrivateField<TResult>(object target, string fieldName)
+        {
+            var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null, $"Expected private field {target.GetType().Name}.{fieldName}.");
+            return (TResult)field.GetValue(target);
+        }
         private static TResult InvokePrivate<TResult>(object target, string methodName, params object[] arguments)
         {
             var method = target.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);

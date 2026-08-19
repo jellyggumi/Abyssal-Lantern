@@ -80,11 +80,16 @@ namespace CastleBusters
             float sx = Mathf.Max(0.05f, castle.blockSizeX);
             float sy = Mathf.Max(0.05f, castle.blockSizeY);
 
+            // Terrain is excluded from the bounds too, not just from skinning. Role assignment is
+            // positional — Edge is "the leftmost/rightmost column", Face is "inside" — so leaving
+            // the 41-column ground strip in this box computed every wall block's role against a
+            // span four times the castle's own width, and the quoined edge column landed on
+            // terrain instead of on the wall's silhouette.
             int minX = int.MaxValue, maxX = int.MinValue, minY = int.MaxValue, maxY = int.MinValue;
             for (int i = 0; i < blocks.Count; i++)
             {
                 var b = blocks[i];
-                if (b == null) continue;
+                if (b == null || b.IsTerrainTile) continue;
                 int gx = Mathf.RoundToInt(b.transform.position.x / sx);
                 int gy = Mathf.RoundToInt(b.transform.position.y / sy);
                 if (gx < minX) minX = gx;
@@ -100,6 +105,10 @@ namespace CastleBusters
                 if (b == null) continue;
                 // The core is the win-condition landmark — its bespoke look stays.
                 if (b is CastleCoreGimmick) continue;
+                // Terrain carries its own ground-atlas slice, assigned tile by tile so neighbours
+                // read as one continuous map. Re-skinning it with wall masonry threw that away and
+                // made the strip look like a low course of bricks lying on the field.
+                if (b.IsTerrainTile) continue;
 
                 int gx = Mathf.RoundToInt(b.transform.position.x / sx);
                 int gy = Mathf.RoundToInt(b.transform.position.y / sy);

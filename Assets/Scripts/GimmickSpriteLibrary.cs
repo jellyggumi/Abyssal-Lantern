@@ -41,6 +41,15 @@ namespace CastleBusters
         public const string Stage3FrostVent = "gimmick_stage3_frost_vent";
         /// <summary>Wordless drag-back gesture cue (first-play coach, drag-from-anywhere).</summary>
         public const string DragGesture = "ui_drag_gesture";
+        /// <summary>Placement preview frame for deploy-only cards; tinted by placement legality.</summary>
+        public const string DeployGhost = "ui_deploy_ghost";
+        /// <summary>
+        /// Aim-preview landing reticle. Greyscale on purpose: <see cref="LaunchManager"/> tints it
+        /// amber normally and blue when the arc ends on your own keep, and a pre-coloured sprite
+        /// would multiply the two. Not the post-impact badge — that one was deleted on survey
+        /// evidence (`dbcfed78f`) and is a different question from previewing where a shot will land.
+        /// </summary>
+        public const string ImpactMarker = "ui_impact_marker";
 
         private static readonly Dictionary<string, Sprite> cache = new Dictionary<string, Sprite>();
 

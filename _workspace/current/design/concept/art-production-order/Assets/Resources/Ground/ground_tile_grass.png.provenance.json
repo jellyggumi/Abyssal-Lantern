@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "G-1",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "128x128 seamless grass tile: short varied grass blades, tiny stones/flowers, no large motif, matches Stage1 green.",
+  "saturation_contract": "self-colored >=0.30",
+  "sha256": "f91c80223c7606f32ee3f54384956bb49fbe6bab41ab0a63aa7de64f3b0754fd",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Ground/ground_tile_grass.png",
+  "intended_runtime_path": "Assets/Resources/Ground/ground_tile_grass.png"
+}

@@ -1552,7 +1552,11 @@ namespace CastleBusters
             int blockRes = Mathf.Clamp(maxAtlasWidth / Mathf.Max(1, groundColumnCount), 16, 160);
             int texWidth = groundColumnCount * blockRes;
             int texHeight = groundRowCount * blockRes;
-            Texture2D groundTex = GenerateGroundTexture(texWidth, texHeight);
+            // Authored tiles first, procedural bands as the fallback. The fallback stays because
+            // `GenerateGroundTexture`'s docstring earns it: a texture is presentation, and
+            // presentation failing must not be able to delete the board.
+            Texture2D groundTex = BuildGroundAtlasFromArt(texWidth, texHeight, blockRes, groundRowCount, groundColumnCount)
+                                  ?? GenerateGroundTexture(texWidth, texHeight);
 
             for (int yIndex = 0; yIndex < groundRowCount; yIndex++)
             {
@@ -1574,6 +1578,10 @@ namespace CastleBusters
                         else selectedData = stoneData;
 
                         block.ApplyBlockData(selectedData);
+                        // Declares this a terrain tile before the parenting below hands it to the
+                        // castle — and therefore to CastleFacadeDirector, which would otherwise
+                        // re-skin it with wall masonry and discard the atlas slice assigned here.
+                        block.MarkAsTerrainTile();
                         // Anchors: the outer flanks (castle foundations) and the bottom two rows.
                         // The visible top rows (yIndex 0-2) stay breakable so the wood bridge can
                         // still be severed and dropped, but a cascade can never disintegrate the
@@ -1740,6 +1748,117 @@ namespace CastleBusters
             return tex;
 
         }
+
+        /// <summary>
+        /// Builds the ground atlas from authored tile art, or returns null when the art is absent so
+        /// <see cref="GenerateGroundTexture"/> falls back to its procedural bands.
+        ///
+        /// The bands were three flat colours plus per-pixel noise of ±10, sliced into 205 tiles —
+        /// the largest surface on screen. Their own comment promised "organic sine-wave boundaries"
+        /// while both boundary arrays took the same constant for every column, and `git log -S` shows
+        /// they have been constant since the import commit: never implemented rather than regressed.
+        ///
+        /// Row assignment top-down: grass, the grass→dirt transition, then dirt, then stone. The
+        /// transition row is why the board read as flat — a straight colour boundary across 41
+        /// columns. Grass rows draw from four interchangeable tiles so 41 columns of the same image
+        /// do not repeat visibly.
+        ///
+        /// Sampled nearest-neighbour rather than blitted: `blockRes` is derived from the atlas budget
+        /// (16..160) and the art is authored at 128, so they agree only by accident. Scaling here
+        /// keeps the tile filling exactly one cell, which the collider geometry assumes.
+        /// </summary>
+        private static Texture2D BuildGroundAtlasFromArt(int width, int height, int blockRes, int rows, int columns)
+        {
+            var grass = new[]
+            {
+                Resources.Load<Sprite>("Ground/ground_tile_grass"),
+                Resources.Load<Sprite>("Ground/ground_variant_a"),
+                Resources.Load<Sprite>("Ground/ground_variant_b"),
+                Resources.Load<Sprite>("Ground/ground_variant_c"),
+            };
+            var edge = Resources.Load<Sprite>("Ground/ground_edge_grass");
+            var dirt = Resources.Load<Sprite>("Ground/ground_tile_dirt");
+            var stone = Resources.Load<Sprite>("Ground/ground_tile_stone");
+
+            // All-or-nothing: a partial set would tile authored grass above procedural dirt, which
+            // looks like a rendering fault rather than missing art.
+            if (grass[0] == null || edge == null || dirt == null || stone == null) return null;
+            for (int i = 1; i < grass.Length; i++) if (grass[i] == null) grass[i] = grass[0];
+
+            Texture2D atlas;
+            try
+            {
+                atlas = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[GameManager] ground art atlas {width}x{height} refused "
+                                 + $"({e.GetType().Name}: {e.Message}); falling back to procedural bands.");
+                return null;
+            }
+            atlas.filterMode = FilterMode.Trilinear;
+            atlas.wrapMode = TextureWrapMode.Clamp;
+            atlas.anisoLevel = 4;
+
+            var pixels = new Color32[width * height];
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < columns; col++)
+                {
+                    // Row 0 is the BOTTOM of the texture (Unity's origin), so depth counts down.
+                    int fromTop = rows - 1 - row;
+                    Sprite tile = fromTop == 0 ? grass[(col + row) % grass.Length]
+                                : fromTop == 1 ? edge
+                                : fromTop == 2 ? dirt
+                                : stone;
+
+                    CopyTileInto(pixels, width, col * blockRes, row * blockRes, blockRes, tile);
+                }
+            }
+
+            atlas.SetPixels32(pixels);
+            atlas.Apply(true, false);
+            return atlas;
+        }
+
+        /// <summary>
+        /// Samples one sprite into a cell of the atlas buffer, scaling by nearest neighbour.
+        ///
+        /// Reads through the sprite's own `textureRect` so an atlased or sub-rect sprite lands
+        /// correctly rather than sampling whatever else shares its texture.
+        /// </summary>
+        private static void CopyTileInto(Color32[] dst, int dstWidth, int originX, int originY, int size, Sprite tile)
+        {
+            var tex = tile.texture;
+            if (tex == null) return;
+            var rect = tile.textureRect;
+            int sw = Mathf.Max(1, (int)rect.width);
+            int sh = Mathf.Max(1, (int)rect.height);
+
+            Color32[] src;
+            try
+            {
+                src = tex.GetPixels32();
+            }
+            catch (UnityException)
+            {
+                // Not readable (Read/Write disabled): a cosmetic loss, not a reason to lose the board.
+                return;
+            }
+
+            for (int y = 0; y < size; y++)
+            {
+                int sy = (int)rect.y + Mathf.Min(sh - 1, y * sh / size);
+                int dstRow = (originY + y) * dstWidth;
+                int srcRow = sy * tex.width;
+                for (int x = 0; x < size; x++)
+                {
+                    int sx = (int)rect.x + Mathf.Min(sw - 1, x * sw / size);
+                    dst[dstRow + originX + x] = src[srcRow + sx];
+                }
+            }
+        }
+
 
         private Sprite CreateCrackedSlice(Texture2D groundTex, int pixelX, int pixelY, Sprite crackSprite, int res)
         {

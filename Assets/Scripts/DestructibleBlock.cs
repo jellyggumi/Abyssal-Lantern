@@ -39,6 +39,25 @@ namespace CastleBusters
         // Castle-wide presentation wear floor (CastleFacadeDirector milestone ratchet): raises the
         // *displayed* damage band without ever touching HP. 0 = own band only.
         private int displayWearFloor;
+        /// <summary>
+        /// True for the 41x5 terrain strip <c>GameManager.CreateGround</c> builds, false for wall
+        /// courses. Terrain blocks are parented to a castle so structural-integrity and collapse
+        /// treat them as its foundation, and that parenting also handed them to
+        /// <see cref="CastleFacadeDirector"/>, which re-skinned all 205 of them with masonry.
+        ///
+        /// Everything the ground pipeline computes — the atlas, 205 slices, per-tile lazy crack
+        /// bakes — was therefore assigned and then immediately discarded on the next line, since
+        /// <c>CreateGround</c> ends by calling <c>RefreshBlockList()</c>. Nothing reported it: the
+        /// facade produced a valid-looking board, and its own comment still described itself as a
+        /// "no-op until the generated CastleSkin tiles exist", which was true when it was written.
+        ///
+        /// Not a serialized field: terrain is created in code, and exposing this in the Inspector
+        /// would invite a scene-authored wall block to claim it is terrain.
+        /// </summary>
+        public bool IsTerrainTile { get; private set; }
+
+        /// <summary>Marks this block as part of the terrain strip. Called only by CreateGround.</summary>
+        public void MarkAsTerrainTile() => IsTerrainTile = true;
 
         public bool IsFalling => isFalling;
 

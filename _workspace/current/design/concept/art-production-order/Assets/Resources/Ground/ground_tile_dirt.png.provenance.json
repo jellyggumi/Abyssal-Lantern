@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "G-2",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "128x128 seamless dry dirt tile with small pebbles and subtle horizontal strata.",
+  "saturation_contract": "self-colored >=0.30",
+  "sha256": "e8d53ade4a3045b0f3121c7643d4cf856bf47ffd74cd707a1b160184b266d596",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Ground/ground_tile_dirt.png",
+  "intended_runtime_path": "Assets/Resources/Ground/ground_tile_dirt.png"
+}

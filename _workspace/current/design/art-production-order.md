@@ -30,16 +30,20 @@
 
 ### Q2. "게임성 확장에 이미지 필요 없나?" → **대부분 필요합니다. 준비된 것은 3장뿐입니다.**
 
-`Gimmicks` 34장 소비처를 전수했고 **선언됐는데 호출되지 않는 것이 3장**입니다:
+`Gimmicks` 34장 소비처를 전수했고 **선언됐는데 호출되지 않는 것이 3장**입니다.
 
-| 자산 | 키 | 지금 무엇이 없는가 |
-|---|---|---|
-| `gimmick_muzzle_flash` | `MuzzleFlash` | 대포 발사 섬광 — 아트 있고 호출 0건 |
-| `gimmick_shell` | `Shell` | 포탄 스프라이트 — 아트 있고 호출 0건 |
-| `gimmick_wall_brick_cracked` | `WallBrickCracked` | 균열 벽돌 — 아트 있고 호출 0건 |
+> **2026-08-19 정정 — 3장 모두 발주 취소.** 배선을 시도하면서 전부 **다른 아트가 이미
+> 그 기능을 담당하고 있음**을 확인했습니다. 아래 표는 취소 사유와 함께 남깁니다.
 
-**나머지는 다 쓰이고 있습니다.** 그러므로 게임성을 늘리려면 **아트가 필요합니다** — 아래
-§2가 그 목록이고, §4가 코드도 함께 필요한 것들입니다.
+| 자산 | 키 | 발주 시 주장 | 실제 |
+|---|---|---|---|
+| `gimmick_muzzle_flash` | `MuzzleFlash` | 대포 발사 섬광 없음 | **`fx_muzzle` 프레임이 이미 포신 끝에서 재생**(`CannonController`), EditMode가 고정 |
+| `gimmick_shell` | `Shell` | 포탄 스프라이트 없음 | **대포가 발사체 자체입니다** — 앵그리버드형이라 별도 포탄이 없습니다. 대포는 `GeneratedUnitFrames/Bomber`를 공유합니다 |
+| `gimmick_wall_brick_cracked` | `WallBrickCracked` | 벽 파괴 단계 없음 | **`block_normal`/`block_cracked`/`block_heavily_cracked` 3단계가 이미 동작**(`StoneBlockData`), `UpdateVisuals:296-323`이 밴드별로 교체 |
+
+**오류의 공통 원인**: 세 건 모두 *"키가 안 쓰이나"* 를 물었고 *"기능이 이미 다른 아트로
+충족되나"* 를 묻지 않았습니다. 미소비 키는 결핍의 증거가 아니라 **중복의 증거**일 수
+있습니다.
 
 > **제 집계가 두 번 틀렸습니다.** 처음 9장이라 셌고(상수만 검색해 `ArtKeys`의 문자열
 > 리터럴을 놓쳤습니다), 6장으로 줄었고(아이템 3종은 배선돼 있었습니다), 최종 3장입니다
@@ -105,10 +109,23 @@ fx_spark_003.png   256×256
 
 ---
 
-## 2. 우선순위 1 — 지면 5장 (화면 최대 면적)
+## 2. 우선순위 1 — 지면 5장
 
 `GameManager.GenerateGroundTexture()`가 **평면 3색 + 픽셀당 ±10 노이즈**를 그리고
-41×5 = **205타일**로 슬라이스합니다. 화면에서 가장 넓은 면적입니다.
+41×5 = **205타일**로 슬라이스합니다.
+
+> **2026-08-19 정정 — 제목이 "화면 최대 면적"이었고 틀렸습니다.** 지면 블록은 world
+> y −0.5 ~ −4.5, 카메라(y=3, orthographicSize 11.2) 기준 **화면 y 456~617의 161px 띠**
+> 입니다. 그 아래로 보이는 넓은 풀·자갈·길은 지면 타일이 아니라 배경
+> `Background_Stage1.png`이고, 이미 풍부한 픽셀 아트입니다.
+>
+> 더 중요한 것: 1 world unit = 720/22.4 = **32.14 화면 픽셀**이므로 128px 타일이
+> **32px로 렌더**됩니다. 타일 내부 디테일의 대부분은 화면에 도달하지 못합니다.
+> 발주서를 쓸 때 이 축소비를 계산하지 않았습니다.
+>
+> 발주는 유지합니다 — 그 161px 띠는 유닛이 서고 성벽이 얹히는 면이고, 적용 후 지면 띠
+> 픽셀의 36.9%가 바뀌었습니다(`qa/art-apply-record.md`). 다만 **"최대 면적"은
+> 근거가 아니었습니다.**
 
 **공통 사양**: 128×128, **이음 없는 타일링(seamless)**, `textureType: 8`,
 `spriteMode: 1`, 채도 **≥0.30**(지면 슬라이스는 자기 색을 씁니다 —
@@ -152,6 +169,21 @@ fx_spark_003.png   256×256
 조준하는 내내 화면에 있고, 지금은 코드가 찍는 하드 엣지 도형입니다.
 
 ### B-1 · `Gimmicks/ui_launch_origin.png` — 발사점
+
+> **2026-08-19 발주 취소 — 배선하지 않았습니다.** 이 발주는 `LaunchManager.cs:231`의
+> 절차적 청색 원을 "현재 상태"로 인용했지만, 그 원은 **폴백입니다**. 실제로 발사점에는
+> `GimmickAnimLibrary.SlingshotAnim` 새총 애니메이션이 1.6u로 서 있고(`:241-260`)
+> 머리 위에 `▼ 발사 준비 ▼` 힌트 라벨이 붙습니다(`:278-288`). 원이 그려지는 것은
+> 새총 아트가 없는 빌드뿐입니다.
+>
+> 그리고 그 원은 **의도적으로 대체된 것**입니다 — `:236-240`의 주석이
+> *"고리는 왜 뒤로 당기면 앞으로 날아가는지 설명하지 못했다"* 며 새총으로 바꾼 이유를
+> 남겼습니다. 작업 #48은 같은 근거로 `LaunchReadyMarker`(맥동 다이아+십자)를
+> 삭제했습니다 - *"이미 어포던스가 있는 위에 덧그려진 추상 기호"*.
+>
+> 이 발주는 그 기호를 6일 뒤에 다시 요구한 것입니다. 조사(`.survey/siege-visibility-and-telegraph/`)가
+> 기록한 실패 경로 - *"플레이테스터가 놓칠 때마다 아이콘을 더해 18개월간 icon mess를
+> 만들었다"* - 와 같은 종류입니다. 파일은 디스크에 남기고 배선은 하지 않습니다.
 
 | 항목 | 값 |
 |---|---|
@@ -197,7 +229,16 @@ fx_spark_003.png   256×256
 |---|---|
 | 크기 | 각 64×64 |
 | 채도 | **무채색** — `DebrisSystem`이 블록 색으로 틴트합니다 |
-| 현재 | `DebrisSystem.cs:117` 원형 알파 감쇠 — **원이라 벽돌로 안 읽힙니다** |
+| 현재 | `DebrisSystem.cs:133` **4~6각 랜덤 볼록 다각형** + 1.5px 안티에일리어싱 |
+
+> **2026-08-19 정정.** 이 칸은 원래 *"`:117` 원형 알파 감쇠 — 원이라 벽돌로 안 읽힙니다"*
+> 라고 적었고 **틀렸습니다**. `GenerateFragmentTexture:133`은 4~6개 정점의 랜덤 볼록
+> 다각형을 만듭니다. 발주서를 쓸 때 그 함수를 읽지 않았습니다.
+>
+> 발주 자체는 유효하지만 **이유가 다릅니다**: 절차적 파편은 내부가 순백이라 틴트가
+> 균일하게 칠하므로 **종이 오린 실루엣**으로 읽힙니다. 저작 아트가 주는 것은 형태가
+> 아니라 **명암면** — 그래서 조각이 앞면·뒷면을 가진 석재로 읽힙니다. 아래 그림 설명의
+> "밝기 차로 입체를 준다"가 실제 발주 사유입니다.
 
 **그림 설명**: **불규칙 다각형** 4종. 벽돌이 깨진 조각이므로 직각 모서리 2~3개와 깨진 면
 1~2개가 섞입니다. 크기는 서로 다르게(가장 큰 것이 48px, 작은 것이 20px). 무채색이지만
@@ -211,16 +252,22 @@ fx_spark_003.png   256×256
 사용자 질문 2의 정확한 답: **아래는 코드가 먼저이고, 아트는 그 다음입니다.** 아트를 먼저
 만들면 쓸 곳이 없습니다.
 
-| # | 확장 | 필요한 코드 | 필요한 아트 |
-|---|---|---|---|
-| D-1 | 성벽 파괴 4단계 | `DestructibleBlock` 상태 확장 (현재 균열 2단계) | 단계별 벽돌 2장 — **`gimmick_wall_brick_cracked`가 이미 있고 호출 0건** |
-| D-2 | 진영 실루엣 분리 | 없음 (틴트 값만) | 적 진영 성채 실루엣 변형 — **지금 양 진영이 같은 `CastleSkin` 12장을 공유**해 틴트로만 갈립니다 |
-| D-3 | 대포 발사 연출 | `CannonController`에 섬광·포탄 호출 추가 | **`gimmick_muzzle_flash`·`gimmick_shell` 이미 있고 호출 0건** |
-| D-4 | 결과 화면 일러스트 | `resultText` 주변 레이아웃 | 승리/패배 전면 아트 2장 |
-| D-5 | 스테이지 전환 연출 | `StageInterlude` 전환 코드 | **`ui_stage1~3_card` 이미 있음** |
+| # | 확장 | 필요한 코드 | 발주 시 주장 | **2026-08-19 실측 결과** |
+|---|---|---|---|---|
+| D-1 | 성벽 파괴 4단계 | `DestructibleBlock` 상태 확장 | `gimmick_wall_brick_cracked` 있고 호출 0건 | **취소** — `block_normal`/`block_cracked`/`block_heavily_cracked` 3단계가 이미 동작(`UpdateVisuals:296-323`) |
+| D-2 | 진영 실루엣 분리 | 없음 (틴트 값만) | 적 성채 실루엣 변형 12장 | **거부** — 납품 12장이 아군과 실루엣차 0.0000~0.0027, 패턴차 0.001~0.042. 판정선 0.08을 **0장이 넘음** |
+| D-3 | 대포 발사 연출 | `CannonController`에 호출 추가 | 섬광·포탄 아트 있고 호출 0건 | **취소** — `fx_muzzle`이 이미 포신에서 재생. 대포는 발사체 자체라 포탄 없음 |
+| D-4 | 결과 화면 일러스트 | `resultText` 주변 레이아웃 | 승리/패배 전면 아트 2장 | **적용** — `ResultsScreenController`, `Dim`(α 0.88) 위. 명도 0.088로 5개 텍스트 밴드 전부 안전 |
+| D-5 | 스테이지 전환 연출 | `StageInterlude` 전환 코드 | `ui_stage1~3_card` 이미 있음 | 미착수 (코드 작업) |
 
-**D-1·D-3·D-5는 아트가 이미 있습니다** — 배선만 하면 게임성이 늘어납니다. **D-2·D-4만
-신규 아트가 필요합니다.**
+**발주 5건 중 4건이 잘못됐습니다.** D-1·D-3은 기능이 이미 다른 아트로 충족돼 있었고,
+D-2는 아트로 도달할 수 없는 것을 요구했고(§D-2 아래 참조), D-4만 유효했습니다.
+
+**D-2가 구조적으로 불가능한 이유**: 이 타일들은 블록에 입혀지는 **풀블리드 텍스처**이고
+알파가 전면 불투명이므로 **실루엣이라는 개념이 없습니다** — 형태는 블록 격자가 정합니다.
+게다가 무채색 틴트 소스라 `blockColor`가 칠하므로 두 진영이 같은 타일을 받습니다.
+진영 구분은 **블록 격자(성 형상)나 `blockColor`**로 해야 하고, 타일 아트로는
+도달할 수 없습니다.
 
 ### D-2 · 적 진영 성채 (신규 12장 또는 틴트 규칙)
 
@@ -280,9 +327,45 @@ provenance에 스타일 계약이 남아 있습니다.
 **신규 자산은 provenance를 함께 남겨야 합니다** — 웹툰 11장이 그 형식의 선례입니다
 (도구·모델·스타일 계약·후처리·sha256·감사 기록).
 
+
 ---
 
-## 7. 이 발주서가 하지 않는 것
+## 7. 2026-08-19 생성 산출물 — concept lane 초안
+
+이 발주서를 따라 **프로덕션 승격 전 디자인 초안 36장 + 접촉 시트 1장**을 만들었습니다.
+아직 `Assets/Resources/`에 승격하지 않았습니다. 이유: 이 저장소 계약상 신규 생성물은
+`_workspace/current/design/concept/`에서 먼저 보고, provenance와 감사 기록을 확인한 뒤에만
+런타임 리소스로 들어갑니다.
+
+| 묶음 | 장수 | 출력 위치 |
+|---|---:|---|
+| A1 `fx_frost` 6프레임 | 6 | `_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/fx_frost/` |
+| A2 `CollapseDust` 교체안 | 1 | `_workspace/current/design/concept/art-production-order/Assets/Resources/Higgsfield/VFX/CollapseDust.png` |
+| A4 `fx_spark_000` 치수 교정안 | 1 | `_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/fx_spark/fx_spark_000.png` |
+| G-1~G-5 지면 타일 | 7 | `_workspace/current/design/concept/art-production-order/Assets/Resources/Ground/` |
+| B-1~B-4 조준·궤적·파편 | 7 | `_workspace/current/design/concept/art-production-order/Assets/Resources/{Gimmicks,Effects}/` |
+| D-2 적 진영 성채 실루엣 | 12 | `_workspace/current/design/concept/art-production-order/Assets/Resources/CastleSkinEnemy/` |
+| D-4 승리/패배 결과 일러스트 | 2 | `_workspace/current/design/concept/art-production-order/Assets/Resources/Result/` |
+| 전체 미리보기 | 1 | `_workspace/current/design/concept/art-production-order/contact-sheet.png` |
+
+모든 PNG에는 같은 경로의 `.provenance.json`이 붙어 있습니다. 생성 방식은 **Pillow 절차적
+concept pass**입니다. Codex/Higgsfield 최종 렌더가 아니라, 크기·투명도·틴트 계약·실루엣
+방향을 검토하기 위한 디자인 시안입니다.
+
+승격 전 확인할 것:
+
+1. `contact-sheet.png`로 톤과 형태 승인.
+2. 채도 계약 재확인 — 지면·냉기·먼지는 자기 색, 탄착 마커·파편·적 성채는 틴트 소스.
+3. 승인된 PNG만 `Assets/Resources/`로 복사하고 Unity Sprite `.meta`를 붙임.
+4. `ResourceSpriteImportTests`와 해당 화면 캡처로 로드·크기·가독성 확인.
+
+추가 주의: 이 초안은 `art-gap-inventory.md`의 **B-3 `ui_deploy_ghost`**를 만들지 않았습니다.
+최종 발주서 본문과 틴트 판정표에서 빠져 있기 때문입니다. 필요하면 그 문서 §3의 보류 항목으로
+다시 올려야 합니다. 이 발주서의 **B-3은 `trajectory_dash`**입니다.
+
+---
+
+## 8. 이 발주서가 하지 않는 것
 
 - **24장을 재제작하라고 하지 않습니다.** 정상이고, 라이브가 낡은 것이 원인입니다.
 - **"지금 못생겼다"고 판정하지 않습니다.** 채도와 절차 여부는 측정값이고 미적 판정은

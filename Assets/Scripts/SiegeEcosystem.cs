@@ -157,6 +157,24 @@ namespace CastleBusters
             var dim = CreateChild<Image>("Dim", fullBleedRoot);
             Stretch(dim.rectTransform);
             dim.color = new Color(0.03f, 0.02f, 0.05f, 0.88f);
+
+            // Outcome backdrop, above the dim and below every readout. The dim sits at 0.88 alpha,
+            // so the frozen diorama it covers was already only 12% visible — this fills a surface
+            // that was near-black rather than hiding a view the player had.
+            //
+            // Safe to draw text over without a scrim: both images measure 0.088 mean luminance
+            // across all five bands the card writes into (banner, seal, stats, ladder, buttons).
+            // If either is ever redrawn brighter, that measurement is what stops being true, and
+            // the banner's 0.22 outline is the only thing left protecting legibility.
+            var outcomeArt = Resources.Load<Sprite>(victory ? "Result/victory_hero" : "Result/defeat_keep");
+            if (outcomeArt != null)
+            {
+                var backdrop = CreateChild<Image>("OutcomeBackdrop", fullBleedRoot);
+                Stretch(backdrop.rectTransform);
+                backdrop.sprite = outcomeArt;
+                backdrop.preserveAspect = true;
+                backdrop.raycastTarget = false;
+            }
             MobileSafeArea.ConfigureCanvas(canvas);
             contentRoot = MobileSafeArea.GetContentRoot(canvas);
             rootGroup = gameObject.AddComponent<CanvasGroup>();

@@ -39,6 +39,7 @@ namespace CastleBusters
         private float aiThinkTimer;
         private bool hintShown;
         private const float HudRefreshInterval = 0.1f;
+        private const float DeployGhostWorldSize = 1f;
         private float hudRefreshTimer;
 
         private void Awake()
@@ -548,6 +549,15 @@ namespace CastleBusters
             ghostRenderer = ghost.AddComponent<SpriteRenderer>();
             ghostRenderer.sortingOrder = 10;
 
+            Sprite artSprite = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.DeployGhost);
+            if (artSprite != null)
+            {
+                ghostRenderer.sprite = artSprite;
+                ghostRenderer.drawMode = SpriteDrawMode.Sliced;
+                ghostRenderer.size = new Vector2(DeployGhostWorldSize, DeployGhostWorldSize);
+                return;
+            }
+
             var tex = new Texture2D(24, 24);
             tex.filterMode = FilterMode.Point;
             for (int y = 0; y < 24; y++)
@@ -560,6 +570,7 @@ namespace CastleBusters
             }
             tex.Apply();
             ghostRenderer.sprite = Sprite.Create(tex, new Rect(0, 0, 24, 24), new Vector2(0.5f, 0.5f), 24f);
+            ghostRenderer.drawMode = SpriteDrawMode.Simple;
         }
 
         /// <summary>Draws the legal player band so "where can I place" needs no tooltip.</summary>

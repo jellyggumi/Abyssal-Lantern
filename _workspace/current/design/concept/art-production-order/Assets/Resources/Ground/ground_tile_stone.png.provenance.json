@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "G-3",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "128x128 seamless gray bedrock tile: irregular interlocking polygon slabs and cracks.",
+  "saturation_contract": "self-colored >=0.30 except gray stone intentional",
+  "sha256": "942e32f6c037371fc8ee3732784303ccbca91a7aa34cc56619d3fd37780fd57e",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Ground/ground_tile_stone.png",
+  "intended_runtime_path": "Assets/Resources/Ground/ground_tile_stone.png"
+}
