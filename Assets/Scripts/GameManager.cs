@@ -2033,6 +2033,9 @@ namespace CastleBusters
             if (advancedAi != aiLastStand)
             {
                 aiLastStand = advancedAi;
+                // AdvanceAuto goes straight to Active, so this transition IS the activation — there
+                // is no separate spend step to hook like the player's.
+                if (advancedAi == LastStand.Phase.Active) RecordComebackActivation(byPlayer: false);
                 if (!aiDangerNotified)
                 {
                     aiDangerNotified = true;
@@ -2050,6 +2053,22 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>
+        /// Sends one comeback activation to telemetry, with both cores and both maxima.
+        ///
+        /// Guarded on the cores existing rather than assumed: a comeback can advance during scene
+        /// teardown, and a half-recorded event would be worse than a missing one — the G5 aggregate
+        /// divides by the count, so a zero-filled row would drag the rate toward "always reversible".
+        /// </summary>
+        private void RecordComebackActivation(bool byPlayer)
+        {
+            var own = byPlayer ? playerCore : enemyCore;
+            var foe = byPlayer ? enemyCore : playerCore;
+            if (own == null || foe == null) return;
+
+            TelemetrySink.Comeback(byPlayer, own.currentHP, own.maxHP, foe.currentHP, foe.maxHP);
+        }
+
         public void ActivatePlayerLastStand()
         {
             if (!CanActivatePlayerLastStand())
@@ -2061,6 +2080,12 @@ namespace CastleBusters
             playerLastStand = LastStand.Phase.Active;
             RefreshLastStandButton();
             GameplayUxDirector.NotifyLastStandActive();
+
+            // G5 needs the instant-reversal rate, and it is a fact about BOTH cores at this instant:
+            // activation is gated on ours, but whether the buffed shot can finish the match depends
+            // on how damaged theirs already is. The cap (140 against 150) only rules out erasing a
+            // pristine core, so nothing short of this pair answers the threshold.
+            RecordComebackActivation(byPlayer: true);
             var lm = LaunchManagerRef;
             if (lm != null)
             {

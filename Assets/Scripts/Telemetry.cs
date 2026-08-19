@@ -34,7 +34,14 @@ namespace CastleBusters
             Volley,
             Collapse,
             MatchEnd,
-            Session
+            Session,
+            // Appended, deliberately last. The names are the wire format, so inserting anywhere
+            // above would renumber nothing (these serialize by name) but reordering invites the
+            // mistake. G5 asks for the comeback's instant-reversal rate and neither route to it
+            // existed: the simulator has no LastStand at all, and this enum had no event for it,
+            // so the threshold sat unmeasurable while the cap was mistaken for a bound on it.
+            // The cap only protects a PRISTINE core (140 against 150).
+            Comeback
         }
 
         /// <summary>
@@ -46,11 +53,11 @@ namespace CastleBusters
         public struct Event
         {
             public string kind;
-            public string label;   // stage id / unit name / winner
-            public float a;        // power        | blocks     | turns
-            public float b;        // angle        | chainDepth | coreHpDelta
-            public float c;        // wind         | —          | stagesCleared
-            public float d;        // —            | —          | retryCount
+            public string label;   // stage id / unit name / winner / comeback side
+            public float a;        // power        | blocks     | turns        | ownCoreHp
+            public float b;        // angle        | chainDepth | coreHpDelta  | foeCoreHp
+            public float c;        // wind         | —          | stagesCleared| ownCoreMax
+            public float d;        // —            | —          | retryCount   | foeCoreMax
 
             public EventKind Kind => (EventKind)Enum.Parse(typeof(EventKind), kind);
         }
@@ -111,6 +118,30 @@ namespace CastleBusters
         public static void Session(int stagesCleared, int retryCount) =>
             Push(new Event { kind = nameof(EventKind.Session), label = string.Empty, a = 0f, b = 0f, c = stagesCleared, d = retryCount });
 
+        /// <summary>
+        /// One comeback activation, recorded at the moment the phase becomes Active.
+        ///
+        /// Both cores go in, and both maxima, because the question G5 asks cannot be answered by
+        /// either alone: the instant-reversal rate is the share of activations where the buffed shot
+        /// could finish the opponent, and that is a comparison between the cap and the FOE's
+        /// remaining core — while the activation condition is about the OWN core. Storing the maxima
+        /// too means a later stage-height or core-HP retune does not silently reinterpret old dumps.
+        ///
+        /// `label` is the activating side, not a unit: the player holds the comeback and times it,
+        /// the AI spends it immediately (`LastStand.Advance` vs `AdvanceAuto`), so the two are
+        /// different populations and averaging them would hide that.
+        /// </summary>
+        public static void Comeback(bool byPlayer, float ownCoreHp, float ownCoreMax, float foeCoreHp, float foeCoreMax) =>
+            Push(new Event
+            {
+                kind = nameof(EventKind.Comeback),
+                label = byPlayer ? "player" : "ai",
+                a = ownCoreHp,
+                b = foeCoreHp,
+                c = ownCoreMax,
+                d = foeCoreMax,
+            });
+
         // ---- Aggregates ------------------------------------------------------------------
         // These are what a gate reads. Kept here rather than in the QA harness so the same
         // arithmetic serves the in-game dump and the automated measurement — two implementations
@@ -144,6 +175,48 @@ namespace CastleBusters
                 total++;
             }
             return total == 0 ? -1f : sum / total;
+        }
+
+        /// <summary>
+        /// G5. Share of comeback activations where the buffed shot could finish the opponent
+        /// outright, or -1 when nothing is recorded.
+        ///
+        /// "Instant reversal" is read as: at activation, the foe's remaining core is inside what one
+        /// capped buffed hit can remove. That is the only form of the question the cap can be
+        /// compared against — <see cref="LastStand.SingleHitDamageCap"/> is 140 against a 150 core,
+        /// so a PRISTINE core always survives and the threshold is entirely about how damaged the
+        /// foe already is when the comeback lands.
+        ///
+        /// Negative for "no data", never 0, for the same reason <see cref="PlayerWinRate"/> is:
+        /// a gate must not read a silent instrumentation failure as a perfect score.
+        /// </summary>
+        public static float ComebackReversalRate()
+        {
+            int reversals = 0, total = 0;
+            foreach (var e in buffer)
+            {
+                if (e.kind != nameof(EventKind.Comeback)) continue;
+                total++;
+                if (e.b <= LastStand.SingleHitDamageCap) reversals++;
+            }
+            return total == 0 ? -1f : (float)reversals / total;
+        }
+
+        /// <summary>
+        /// G5 companion: how many activations each side made. The player holds the comeback and the
+        /// AI spends it on sight, so a single pooled rate would average two different behaviours —
+        /// and `ComebackAsymmetryTests.ThePlayerHoldsTheComebackAndTheAiSpendsItImmediately` pins
+        /// that they are different by design.
+        /// </summary>
+        public static (int player, int ai) ComebackActivations()
+        {
+            int p = 0, a = 0;
+            foreach (var e in buffer)
+            {
+                if (e.kind != nameof(EventKind.Comeback)) continue;
+                if (e.label == "player") p++; else a++;
+            }
+            return (p, a);
         }
 
         /// <summary>G7 proxy. Share of sessions in which the player voluntarily re-entered the

@@ -110,6 +110,17 @@ namespace CastleBusters
             Telemetry.Volley(unit, power, angle, wind);
         }
 
+        /// <summary>
+        /// One comeback activation. Emitted immediately rather than accumulated to a turn boundary,
+        /// unlike <see cref="BlockDestroyed"/>: the values that matter are both cores AT the instant
+        /// of activation, and the buffed shot that follows changes one of them.
+        /// </summary>
+        public static void Comeback(bool byPlayer, float ownCoreHp, float ownCoreMax, float foeCoreHp, float foeCoreMax)
+        {
+            if (!Enabled) return;
+            Telemetry.Comeback(byPlayer, ownCoreHp, ownCoreMax, foeCoreHp, foeCoreMax);
+        }
+
         /// <summary>Called by <see cref="DestructibleBlock"/> as blocks fall. Accumulates only;
         /// the event is emitted at the turn boundary by <see cref="TurnResolved"/>.</summary>
         public static void BlockDestroyed(int chainDepth)

@@ -106,3 +106,52 @@ PM 주장 → 디자이너 독립 재현 → 디렉터 채택.
   (`AtTheShippedShot_...`) 그 캡이 다른 요구를 만족시키므로 조정은 별개 결정이다.
 - **결제 흐름을 검증하지 않았다.** 에디터에서 `Unavailable`로 조기 반환하므로
   (`MobileStorefront.cs:133`) 실기기 검증이 남는다.
+
+---
+
+## 6. FIX 1회차 결과 (2026-08-19, 같은 날)
+
+**계측이 들어갔다. G5는 여전히 PASS가 아니고, 이유가 바뀌었다.**
+
+| 전 | 후 |
+|---|---|
+| 계측이 없어 확률을 낼 수 없다 | **계측이 있고 경기 데이터가 없다** |
+
+### 들어간 것
+
+| 항목 | 위치 |
+|---|---|
+| `Telemetry.EventKind.Comeback` | 열거 **끝에** 추가 — 이름이 와이어 포맷이라 기존 덤프가 깨지지 않는다 |
+| `Telemetry.Comeback(byPlayer, ownHp, ownMax, foeHp, foeMax)` | 발동 순간의 **양쪽 코어 + 양쪽 최대** |
+| `Telemetry.ComebackReversalRate()` | 캡 이하 상대 코어의 비율. **데이터 없음 = −1** |
+| `Telemetry.ComebackActivations()` | 측별 발동 수 — 플레이어는 쥐고 있고 AI는 즉시 쓴다 |
+| 배선 | `GameManager.RecordComebackActivation` ← 플레이어 `ActivatePlayerLastStand`, AI `AdvanceAuto`가 Active로 갈 때 |
+
+**최대값을 함께 저장하는 이유**: 코어 HP나 스테이지 높이가 재조정되면 옛 덤프의 의미가
+조용히 바뀐다. 최대값이 있으면 그 덤프가 어느 스케일에서 찍혔는지 읽을 수 있다.
+
+**양측을 분리하는 이유**: `ThePlayerHoldsTheComebackAndTheAiSpendsItImmediately`가 둘이 설계상
+다르다는 것을 고정한다. 합친 비율은 **타이밍 결정과 반사를 평균**한다.
+
+### 고정 — `ComebackReversalRateTests` 5건
+
+가장 중요한 것은 `WithNoActivations_TheRateIsNegativeRatherThanZero`다. 계측 실패가 **0%로
+읽히면 그것은 ≤30% 임계값에서 만점**이고, 아무도 통과한 게이트를 의심하지 않는다.
+
+**뮤테이션 증명**: `ComebackReversalRate`의 경계 비교를 `<=` → `<`로 바꾸니 **5 중 2가
+빨강**이 됐다(`AFoeAtExactlyTheCapCounts`, `AReversalIsDecidedByTheFoesCore...`).
+바이트 동일 원복 확인(`shasum` 2파일 1해시 `54662287…`).
+
+### 남은 것 — 경기 데이터
+
+`ComebackReversalRate()`가 지금 **−1**을 반환한다. 발동이 기록된 경기가 없다.
+
+**필요한 것**: 컴백이 발동하는 경기를 N회 돌린다. AI 미러가 자동 발동하므로
+(`AdvanceAuto`) 자동 플레이만으로 표본이 쌓인다 — `AutoPlayTest` 계열이 그 자리다.
+
+**표본 크기를 지금 정하지 않는다.** ≤30%를 판정하려면 신뢰구간이 30%를 가르는 크기가
+필요하고, 그것은 관측된 비율에 따라 달라진다. 첫 실행이 대략의 비율을 주면 그때 계산한다 —
+이 사이클이 M2에서 *"조건당 26경기"* 를 그렇게 유도했다.
+
+**따라서 FIX 2회차는 측정 실행이고 코드가 아니다.** 계약이 허용하는 FIX 루프 2회 중 1회를
+썼다.
