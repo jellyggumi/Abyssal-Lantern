@@ -381,7 +381,10 @@ namespace CastleBusters
             if (spawned == null) return false;
 
             Color team = isPlayer ? new Color(0.55f, 0.9f, 1f, 1f) : new Color(1f, 0.55f, 0.4f, 1f);
-            FrameAnimEffect.Spawn("fx_spawn", position, 1.6f, new Color(1f, 0.96f, 0.9f, 0.95f), 14f, 40);
+            // Same rule as the brick burst: measured off what actually arrived.
+            FrameAnimEffect.Spawn("fx_spawn", position,
+                FrameAnimEffect.ArrivalBurstSize(spawned, 1.3f),
+                new Color(1f, 0.96f, 0.9f, 0.95f), 14f, 40);
             GameFeelVfx.SpawnShockwaveRing(position, team, 1.15f, 0.3f);
             GameFeelVfx.SpawnFeedbackLabel(position + Vector2.up * 0.7f,
                 $"{DeploymentRules.DisplayName(card)} 배치!", team, 1.9f, 0.5f);

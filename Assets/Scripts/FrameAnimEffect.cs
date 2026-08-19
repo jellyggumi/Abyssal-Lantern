@@ -93,6 +93,39 @@ namespace CastleBusters
         private float targetWorldSize;
 
 
+        /// <summary>
+        /// How large an arrival burst may be relative to the thing that just arrived.
+        ///
+        /// The burst annotates an object, so it must not outsize it. One shipped call site was
+        /// doing exactly that: a placed brick is 1.00 world units (CastleController.blockSizeX/Y)
+        /// and its fx_spawn burst was 1.80 - 1.8x its own subject. The field-piece call sites are
+        /// the counter-example that fixes the intended relationship: a vent is 2.40 units
+        /// (EruptionVentGimmick.targetWorldSize) under a 2.10 burst, i.e. 0.875x. Measured against
+        /// its siblings the brick case was off by roughly 2x, which is why it read as "the stone
+        /// is too big" rather than as dust.
+        ///
+        /// 1.15 keeps a visible skirt of debris past the silhouette while leaving the object the
+        /// largest thing at its own arrival.
+        /// </summary>
+        public const float ArrivalBurstRatio = 1.15f;
+
+        /// <summary>Pure ratio math, separated so EditMode can assert it without a scene.</summary>
+        public static float ArrivalBurstSizeFor(float subjectWorldSize, float fallbackWorldSize)
+            => subjectWorldSize > 0.0001f ? subjectWorldSize * ArrivalBurstRatio : fallbackWorldSize;
+
+        /// <summary>
+        /// Arrival-burst world size for <paramref name="subject"/>, measured from what it actually
+        /// renders rather than from a constant beside the call. A hand-written size cannot notice
+        /// that the art it accompanies was rescaled; this can.
+        /// </summary>
+        public static float ArrivalBurstSize(GameObject subject, float fallbackWorldSize)
+        {
+            if (subject == null) return fallbackWorldSize;
+            var sr = subject.GetComponentInChildren<SpriteRenderer>();
+            if (sr == null || sr.sprite == null) return fallbackWorldSize;
+            return ArrivalBurstSizeFor(Mathf.Max(sr.bounds.size.x, sr.bounds.size.y), fallbackWorldSize);
+        }
+
         public static FrameAnimEffect Spawn(string effectKey, Vector3 position, float worldSize, Color tint,
             float fps = 18f, int sortingOrder = 36)
         {

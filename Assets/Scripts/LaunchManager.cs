@@ -108,6 +108,15 @@ namespace CastleBusters
         /// </summary>
         private static readonly Color SelfHitTrajectoryColor = new Color(0.45f, 0.85f, 1f, 0.85f);
 
+        /// <summary>
+        /// The red dot on the end of the preview arc. Named rather than inlined because it is a
+        /// stated requirement ("붉은 점"), and an unnamed literal in two construction branches is
+        /// how a requirement quietly becomes whatever the art happened to ship with.
+        /// The self-hit branch still overrides it - a shot about to land on your own keep is the
+        /// one case where the destination means something other than "here is your target".
+        /// </summary>
+        private static readonly Color PredictedDestinationColor = new Color(1f, 0.25f, 0.15f, 0.9f);
+
         // The line's authored colours, captured once at setup so the self-hit tint can be undone
         // without hardcoding a guess at what the designer set.
         private Color authoredTrajectoryStart;
@@ -304,14 +313,14 @@ namespace CastleBusters
                 if (art != null)
                 {
                     sr.sprite = art;
-                    sr.color = new Color(1f, 0.25f, 0.15f, 0.9f);
+                    sr.color = PredictedDestinationColor;
                     // 128px art at 0.44 world units matches the procedural 0.22 radius it replaces.
                     float native = Mathf.Max(0.0001f, art.bounds.size.x);
                     go.transform.localScale = Vector3.one * (0.44f / native);
                 }
                 else
                 {
-                    sr.sprite = CreateCircleSprite(0.22f, new Color(1f, 0.25f, 0.15f, 0.9f));
+                    sr.sprite = CreateCircleSprite(0.22f, PredictedDestinationColor);
                 }
                 sr.sortingOrder = 12;
                 go.SetActive(false);
@@ -1207,7 +1216,16 @@ namespace CastleBusters
                 trajectoryLine.endColor = authoredTrajectoryEnd;
             }
 
-            UpdateImpactMarker(hitDetected, hitPoint, hitOwnKeep);
+            // The dot marks where the previewed arc ENDS, not only where it is stopped. Before
+            // this it was bound to hitDetected, so a shot that cleared everything - the common
+            // case while ranging in - previewed an arc with no destination on it at all.
+            bool hasDestination = hitDetected || trajectoryPoints.Count > 1;
+            Vector2 destination = hitDetected
+                ? hitPoint
+                : trajectoryPoints.Count > 0
+                    ? (Vector2)trajectoryPoints[trajectoryPoints.Count - 1]
+                    : hitPoint;
+            UpdateImpactMarker(hasDestination, destination, hitOwnKeep);
         }
 
         private void LaunchUnit()

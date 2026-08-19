@@ -76,6 +76,25 @@ namespace CastleBusters
         /// </summary>
         private static readonly Color CasingColor = new Color(0.03f, 0.028f, 0.05f, 0.85f);
 
+        /// <summary>
+        /// Vertex alpha of a spent arc's coloured core - deliberately NOT the knob that makes it
+        /// translucent.
+        ///
+        /// Translucency lives in the dash texture, whose measured peak alpha is 0.549. Multiplying
+        /// a reduced vertex alpha on top of that compounds: 0.72 would have composited to 0.40 and
+        /// taken the dark casing down with it, and the casing is the only reason these arcs are
+        /// legible at all (6.4:1 sky, 7.3:1 grass - see CasingColor). Alpha at 0.5 was already
+        /// measured once and reverted for exactly that reason.
+        ///
+        /// So this stays near-opaque and the texture supplies the fade: 0.549 x 0.95 = 0.52
+        /// effective, which is translucent without spending the contrast margin twice.
+        /// </summary>
+        public const float SpentAlpha = 0.95f;
+
+        /// <summary>Measured peak alpha of the shared dash art, asserted in SpentArcDashTests so
+        /// this composition cannot drift if the art is redrawn.</summary>
+        public const float DashPeakAlpha = 0.549f;
+
         private const int TraceSortingOrder = 2;   // matches the live trail
         private const int CoreSortingOrder = 3;    // above its own casing
 
@@ -291,11 +310,15 @@ namespace CastleBusters
         /// </summary>
         private static void Draw(Trace t, bool byPlayer, List<Vector2> points)
         {
-            // Team tint at near-full alpha. The previous 0.5 was chosen to keep a spent shot
-            // subordinate to the live trail, and measurement showed it bought nothing: alpha is
-            // not what made these arcs hard to see (see CasingColor). Subordination is carried by
-            // width instead — the core is 0.075 against the live trail's 0.09-0.14.
-            Color tint = byPlayer ? new Color(0.45f, 0.85f, 1f, 0.95f) : new Color(1f, 0.35f, 0.25f, 0.95f);
+            // A spent shot is now a translucent dotted arc: requested so the memory of the last
+            // shot reads as memory, not as a second live trail.
+            //
+            // Alpha alone was tried before and rejected on measurement - it is not what made these
+            // arcs hard to see (see CasingColor), and dropping it far enough to feel "faded" cost
+            // the contrast the casing exists to provide. The dash is what carries the fade here:
+            // it removes ~43% of the ink outright, so the alpha only has to soften what remains.
+            // Hence a moderate SpentAlpha rather than the 0.5 that was measured and reverted.
+            Color tint = byPlayer ? new Color(0.45f, 0.85f, 1f, SpentAlpha) : new Color(1f, 0.35f, 0.25f, SpentAlpha);
 
             if (t.Root == null)
             {
@@ -329,9 +352,75 @@ namespace CastleBusters
         {
             line.useWorldSpace = true;
             line.material = new Material(Shader.Find("Sprites/Default"));
+            var dash = DashTexture();
+            if (dash != null)
+            {
+                line.material.mainTexture = dash;
+                // Tile, not Stretch: this is what actually punches holes in the strip. The geometry
+                // approach that used to live at the bottom of this file could not - a LineRenderer
+                // is one continuous strip, so dropping vertices draws a chord across the gap, and
+                // the vertex-count assertion still passed while the arc rendered solid.
+                line.textureMode = LineTextureMode.Tile;
+                line.textureScale = new Vector2(DashStretch, 1f);
+            }
             line.sortingOrder = sortingOrder;
-            line.numCapVertices = 2;
-            line.textureMode = LineTextureMode.Stretch;
+            // A round cap bridges the gaps the texture just cut.
+            line.numCapVertices = 0;
+        }
+
+        /// <summary>
+        /// U stretch for the tiled dash, taken from the preview arc's MEASURED value rather than
+        /// derived here.
+        ///
+        /// LaunchManager's dotted preview shipped at textureScale 1 and a capture of the deployed
+        /// build showed it was not dotted at all: 939 contiguous arc columns, ZERO gaps, 30%
+        /// brightness modulation, autocorrelation period 7.0px - soft dot edges below ~7px pitch
+        /// blur into a faintly ribbed line. Stretching U to 0.35 targets a ~20px period, where the
+        /// gaps survive.
+        ///
+        /// A larger number here means MORE repeats and a SHORTER period, i.e. the wrong direction.
+        /// This started at 1.6 on a tiling model rather than a measurement, which would have
+        /// reproduced exactly the solid line that capture already caught once.
+        /// </summary>
+        private const float DashStretch = 0.35f;
+
+        /// <summary>Mark fraction of the PROCEDURAL fallback cell only. The authored asset carries
+        /// its own duty cycle (44%, with peak alpha 0.55) and is preferred.</summary>
+        public const float DashDutyCycle = 0.57f;
+
+        private static Texture2D dashTexture;
+
+        /// <summary>
+        /// The same dash art the preview arc uses. Shared deliberately: two independently authored
+        /// dash patterns in one game is how the two lines drift apart, and this one has a capture
+        /// behind its dimensions. Falls back to a procedural mark/gap ramp only if the asset is
+        /// missing, so a stripped Resources folder degrades to a plain line instead of throwing.
+        /// </summary>
+        public static Texture2D DashTexture()
+        {
+            if (dashTexture != null) return dashTexture;
+            var authored = Resources.Load<Sprite>("Effects/trajectory_dash");
+            if (authored != null && authored.texture != null)
+            {
+                dashTexture = authored.texture;
+                return dashTexture;
+            }
+
+            const int width = 32;
+            var tex = new Texture2D(width, 1, TextureFormat.RGBA32, false)
+            {
+                wrapMode = TextureWrapMode.Repeat,
+                filterMode = FilterMode.Bilinear,
+                name = "ShotTraceDashFallback"
+            };
+            int mark = Mathf.Clamp(Mathf.RoundToInt(width * DashDutyCycle), 1, width - 1);
+            for (int x = 0; x < width; x++)
+            {
+                tex.SetPixel(x, 0, x < mark ? Color.white : new Color(1f, 1f, 1f, 0f));
+            }
+            tex.Apply();
+            dashTexture = tex;
+            return dashTexture;
         }
 
         private static void Apply(LineRenderer line, List<Vector2> points, float width, Color start, Color end)
@@ -347,6 +436,8 @@ namespace CastleBusters
 
         // (A geometry-based Dash() used to live here. It could not work: a LineRenderer is one
         //  continuous strip, so dropping vertices draws a straight chord across the intended gap
-        //  instead of a hole. Width replaces it — see PlayerCoreWidth.)
+        //  instead of a hole. The dash is now cut by a tiled mark/gap texture instead - see
+        //  DashTexture() - which is the approach the original note named as workable. Width stays
+        //  as the player/enemy channel; the dash is shared by both arcs and separates neither.)
     }
 }

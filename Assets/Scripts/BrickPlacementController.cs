@@ -259,7 +259,12 @@ namespace CastleBusters
                 // is now a real stone/rubble sprite sequence (god-tibo-imagen art pass), so
                 // the tint stays near-white/warm to let the baked texture colors show through
                 // instead of washing them back out with a strong blue multiply.
-                FrameAnimEffect.Spawn("fx_spawn", pos, 1.8f, new Color(1f, 0.96f, 0.88f, 0.95f), 14f, 40);
+                // Sized from the brick, not from a constant. At 1.8 this burst was 1.8x the
+                // 1.00-unit block it announces, so the dust read as a boulder dropping rather than
+                // as a brick settling - reported as "the stone at the drop is too big".
+                FrameAnimEffect.Spawn("fx_spawn", pos,
+                    FrameAnimEffect.ArrivalBurstSize(brick, 1.15f),
+                    new Color(1f, 0.96f, 0.88f, 0.95f), 14f, 40);
 
                 GameFeelVfx.SpawnShockwaveRing(pos, new Color(0.55f, 0.85f, 1f, 0.5f), 1.3f, 0.35f);
             }
