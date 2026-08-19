@@ -521,17 +521,45 @@ namespace CastleBusters
             return false;
         }
 
+        /// <summary>
+        /// The shared particle material, configured for alpha blending.
+        ///
+        /// `new Material(urpParticlesUnlit)` is OPAQUE. The shader's own defaults are
+        /// `_SrcBlend = One`, `_DstBlend = Zero`, `_ZWrite = 1`, `RenderType = Opaque`
+        /// (ParticlesUnlit.shader :28-32, :66), and the pass honours them at :82-83. Nothing here
+        /// ever set them, so every particle this game has drawn - impact bursts, embers, smoke,
+        /// wind, the explosion - rendered as a hard opaque shape and every tuned alpha in every
+        /// `startColor` was discarded. That is why the white explosion read as a white BLOCK rather
+        /// than a flash: the alpha meant to soften it was never applied.
+        ///
+        /// Setting the surface type needs all four of the blend factors, the ZWrite flag, the
+        /// keyword, and the render queue - URP reads the properties, the shader branches on the
+        /// keyword, and the queue decides draw order against the sprites.
+        /// </summary>
         public static Material GetParticleMaterial(Texture2D customTexture = null)
         {
             Texture2D texture = customTexture != null ? customTexture : GetDefaultParticleTexture();
             if (cachedParticleMaterials.TryGetValue(texture, out Material material)) return material;
 
             Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            bool isUrp = shader != null;
             if (shader == null) shader = Shader.Find("Sprites/Default");
             if (shader == null) return null;
 
             material = new Material(shader);
             material.mainTexture = texture;
+            if (isUrp)
+            {
+                material.SetFloat("_Surface", 1f);                       // 0 opaque, 1 transparent
+                material.SetFloat("_Blend", 0f);                         // alpha blend
+                material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetFloat("_SrcBlendAlpha", (float)UnityEngine.Rendering.BlendMode.One);
+                material.SetFloat("_DstBlendAlpha", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetFloat("_ZWrite", 0f);
+                material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            }
             cachedParticleMaterials.Add(texture, material);
             return material;
         }
@@ -1267,6 +1295,11 @@ namespace CastleBusters
                 label.alignment = TextAlignmentOptions.Center;
                 label.color = Color.white;
                 label.raycastTarget = false;
+                // Measured 0.00 on 2026-08-19 while every other HUD label carried 0.18. UX-012
+                // claimed "런타임 생성 텍스트는 전부 외곽선 보유" and that was wrong — this badge and
+                // the deploy toggle were the exceptions. White bold text on a bright sky is the
+                // number the comment above calls "the number a player reads before every shot".
+                HudCanvas.TryApplyOutline(label, 0.18f, new Color(0.06f, 0.07f, 0.10f, 1f));
                 var textRt = textGo.GetComponent<RectTransform>();
                 textRt.anchorMin = Vector2.zero;
                 textRt.anchorMax = Vector2.one;

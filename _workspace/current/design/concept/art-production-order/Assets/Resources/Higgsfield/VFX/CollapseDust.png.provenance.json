@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "A2",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "512x512 transparent brown collapse dust: ochre cloud puffs, darker base, small stone silhouettes, alpha fades at edges.",
+  "saturation_contract": "self-colored earth >=0.35",
+  "sha256": "e128b30e7af7878698ecb75d44c013fc5ee7274d1f4c911b8918d9103fbc17b3",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Higgsfield/VFX/CollapseDust.png",
+  "intended_runtime_path": "Assets/Resources/Higgsfield/VFX/CollapseDust.png"
+}

@@ -251,12 +251,17 @@ namespace CastleBusters
 
         private void SpawnColumnFrameFx()
         {
-            string key = style == EruptionStyle.Magma
-                ? EffectSpriteLibrary.Eruption
-                : EffectSpriteLibrary.Petals;
-            // Frost reuses the petal frame strip (no dedicated Frost frame art yet); the
-            // ice-blue tint below is what reads it as frost instead of petals.
-            Color columnFxTint = style == EruptionStyle.Frost
+            // Frost had no frame strip of its own, so it borrowed the petal one and leaned on an
+            // ice-blue tint to read as ice rather than blossoms. Six frost frames now exist, so it
+            // takes them. The tint stays only for the borrowed path: if the frost art fails to load
+            // for any reason, petals-plus-blue is still better than nothing erupting.
+            bool frost = style == EruptionStyle.Frost;
+            bool frostArt = frost && (EffectSpriteLibrary.LoadFrames(EffectSpriteLibrary.Frost)?.Length ?? 0) > 0;
+            string key = style == EruptionStyle.Magma ? EffectSpriteLibrary.Eruption
+                       : frostArt ? EffectSpriteLibrary.Frost
+                       : EffectSpriteLibrary.Petals;
+            // Authored frost art carries its own colour; tinting it again would double the blue.
+            Color columnFxTint = frost && !frostArt
                 ? new Color(0.75f, 0.92f, 1f, 0.95f)
                 : Color.white;
             // Column strips are portrait art: FrameAnimEffect scales the tallest dimension

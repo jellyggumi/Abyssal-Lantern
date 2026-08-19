@@ -41,6 +41,15 @@ namespace CastleBusters
         public const string Stage3FrostVent = "gimmick_stage3_frost_vent";
         /// <summary>Wordless drag-back gesture cue (first-play coach, drag-from-anywhere).</summary>
         public const string DragGesture = "ui_drag_gesture";
+        /// <summary>Placement preview frame for deploy-only cards; tinted by placement legality.</summary>
+        public const string DeployGhost = "ui_deploy_ghost";
+        /// <summary>
+        /// Aim-preview landing reticle. Greyscale on purpose: <see cref="LaunchManager"/> tints it
+        /// amber normally and blue when the arc ends on your own keep, and a pre-coloured sprite
+        /// would multiply the two. Not the post-impact badge — that one was deleted on survey
+        /// evidence (`dbcfed78f`) and is a different question from previewing where a shot will land.
+        /// </summary>
+        public const string ImpactMarker = "ui_impact_marker";
 
         private static readonly Dictionary<string, Sprite> cache = new Dictionary<string, Sprite>();
 
@@ -51,31 +60,21 @@ namespace CastleBusters
 
             var sprite = Resources.Load<Sprite>($"Gimmicks/{key}");
 #if UNITY_EDITOR
+            // Read-only Editor convenience: an unimported asset still shows up while authoring.
+            //
+            // What used to be here also WROTE. On a miss it set `importer.textureType = Sprite` and
+            // called `SaveAndReimport()`, rewriting the tracked `.meta` on disk. That turned the
+            // EditMode suite into a repair tool: a run would silently fix four `Gimmicks` metas, go
+            // green, and - if the working-tree change was never committed - ship a build that still
+            // rendered nothing. A test that repairs its subject cannot fail, and that false pass is
+            // why `fx_muzzle`, `fx_arcane`, and the white explosion each survived a green suite.
+            //
+            // The load stays (authoring convenience is real); the write is gone. A broken importer
+            // is now visible as a broken importer, and `ResourceSpriteImportTests` fails on it.
             if (sprite == null)
             {
                 string path = $"Assets/Resources/Gimmicks/{key}.png";
                 sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
-                if (sprite == null)
-                {
-                    var importer = UnityEditor.AssetImporter.GetAtPath(path) as UnityEditor.TextureImporter;
-                    if (importer != null)
-                    {
-                        if (importer.textureType != UnityEditor.TextureImporterType.Sprite)
-                        {
-                            importer.textureType = UnityEditor.TextureImporterType.Sprite;
-                            importer.SaveAndReimport();
-                            sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
-                        }
-                    }
-                    if (sprite == null)
-                    {
-                        var tex = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-                        if (tex != null)
-                        {
-                            sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-                        }
-                    }
-                }
             }
 #endif
             cache[key] = sprite;

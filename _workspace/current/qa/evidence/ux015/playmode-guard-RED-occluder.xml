@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.7319341">
+  <test-suite type="TestSuite" id="1144" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.731934" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1138" name="CastleBusters.PlayModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.PlayModeTests.dll" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.725964" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="10221" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1139" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.724162" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1140" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="109" result="Failed" site="Child" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.722653" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1135" name="VisualEvidenceCapture" fullname="CastleBusters.Tests.VisualEvidenceCapture" classname="CastleBusters.Tests.VisualEvidenceCapture" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.720296" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1137" name="InGameUx_StatesCaptured" fullname="CastleBusters.Tests.VisualEvidenceCapture.InGameUx_StatesCaptured" methodname="InGameUx_StatesCaptured" classname="CastleBusters.Tests.VisualEvidenceCapture" runstate="Runnable" seed="1826133208" result="Failed" start-time="2026-08-19 01:23:25Z" end-time="2026-08-19 01:23:40Z" duration="14.712587" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Timeout" value="180000" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[After 12s the board is still covered by 'Frame', so every frame this run captured would show that instead of the game. The prologue may have grown longer, or something new is drawing full-screen. Capturing anyway would produce images whose labels disagree with their pixels.]]></message>
+                <stack-trace><![CDATA[at CastleBusters.Tests.VisualEvidenceCapture+<WaitForBoardVisible>d__15.MoveNext () [0x00077] in /Users/seokcmin/Desktop/castle-war/Assets/Tests/PlayMode/VisualEvidenceCapture.cs:155
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@1405238725ab/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[
+IgnoreFailingMessages:true
+
+IgnoreFailingMessages:false
+<color=#ff6b6b>fail:</color> [10:23:40:1666] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

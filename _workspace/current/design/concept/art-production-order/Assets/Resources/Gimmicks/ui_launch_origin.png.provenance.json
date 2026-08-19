@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "B-1",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "128x128 transparent launch origin: empty double cyan ring, four short cardinal ticks, soft antialiased falloff.",
+  "saturation_contract": "self-colored cyan",
+  "sha256": "ba1cdcc07fbc9af28b371028f5649d8fb105d08b94e6b2975cb4375431d1d6b3",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Gimmicks/ui_launch_origin.png",
+  "intended_runtime_path": "Assets/Resources/Gimmicks/ui_launch_origin.png"
+}

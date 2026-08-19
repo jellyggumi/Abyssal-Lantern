@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "B-3",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "64x16 horizontal repeating dash texture: 24px filled, 8px clear, bright center fades vertically.",
+  "saturation_contract": "self-colored white/cyan",
+  "sha256": "12bbf8300478b068524dde3c0e56c45e323e030e7934b206da840990077e3378",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/trajectory_dash.png",
+  "intended_runtime_path": "Assets/Resources/Effects/trajectory_dash.png"
+}

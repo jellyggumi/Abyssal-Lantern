@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "D-4",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "1600x900 dark pixel-art result illustration: defeat interior view through broken castle wall.",
+  "saturation_contract": "self-colored full illustration",
+  "sha256": "cc9e087ce7e209d99cab401921bb80e804060dbadb0b03066c45d3544b218609",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Result/defeat_keep.png",
+  "intended_runtime_path": "Assets/Resources/Result/defeat_keep.png"
+}

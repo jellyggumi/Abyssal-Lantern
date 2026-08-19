@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "D-4",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "1600x900 dark pixel-art result illustration: victory knight with blue flag over ruined enemy keep.",
+  "saturation_contract": "self-colored full illustration",
+  "sha256": "eabee5d30fc9c3e6760465c5d59eb3bcfb20eaf52f006f33ff6e41eb88c4d7b1",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Result/victory_hero.png",
+  "intended_runtime_path": "Assets/Resources/Result/victory_hero.png"
+}

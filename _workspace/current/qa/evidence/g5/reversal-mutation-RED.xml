@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Failed(Child)" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.0698982">
+  <test-suite type="TestSuite" id="1000" name="castle-war" fullname="castle-war" runstate="Runnable" testcasecount="558" result="Failed" site="Child" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.069898" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1630" name="CastleBusters.EditModeTests.dll" fullname="/Users/seokcmin/Desktop/castle-war/Library/ScriptAssemblies/CastleBusters.EditModeTests.dll" runstate="Runnable" testcasecount="329" result="Failed" site="Child" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.052922" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="64997" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1631" name="CastleBusters" fullname="CastleBusters" runstate="Runnable" testcasecount="329" result="Failed" site="Child" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.048705" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1632" name="Tests" fullname="CastleBusters.Tests" runstate="Runnable" testcasecount="329" result="Failed" site="Child" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.044903" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1290" name="ComebackReversalRateTests" fullname="CastleBusters.Tests.ComebackReversalRateTests" classname="CastleBusters.Tests.ComebackReversalRateTests" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.033835" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1293" name="AFoeAtExactlyTheCapCounts" fullname="CastleBusters.Tests.ComebackReversalRateTests.AFoeAtExactlyTheCapCounts" methodname="AFoeAtExactlyTheCapCounts" classname="CastleBusters.Tests.ComebackReversalRateTests" runstate="Runnable" seed="688800050" result="Failed" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.018968" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  a foe at exactly 140 is removable by one capped hit
+  Expected: 1.0d +/- 9.9999997473787516E-05d
+  But was:  0.0d
+]]></message>
+                <stack-trace><![CDATA[at CastleBusters.Tests.ComebackReversalRateTests.AFoeAtExactlyTheCapCounts () [0x0001a] in /Users/seokcmin/Desktop/castle-war/Assets/Tests/EditMode/ComebackReversalRateTests.cs:78
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1292" name="AReversalIsDecidedByTheFoesCoreAgainstTheCapNotByOurOwn" fullname="CastleBusters.Tests.ComebackReversalRateTests.AReversalIsDecidedByTheFoesCoreAgainstTheCapNotByOurOwn" methodname="AReversalIsDecidedByTheFoesCoreAgainstTheCapNotByOurOwn" classname="CastleBusters.Tests.ComebackReversalRateTests" runstate="Runnable" seed="110225092" result="Failed" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.000498" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  one of two activations could finish the foe, so the rate is 50% — and the own-core value was identical in both, which is the point: the cap is compared against the FOE's remaining core, not against the activation condition
+  Expected: 0.5d +/- 9.9999997473787516E-05d
+  But was:  0.0d
+]]></message>
+                <stack-trace><![CDATA[at CastleBusters.Tests.ComebackReversalRateTests.AReversalIsDecidedByTheFoesCoreAgainstTheCapNotByOurOwn () [0x0006c] in /Users/seokcmin/Desktop/castle-war/Assets/Tests/EditMode/ComebackReversalRateTests.cs:62
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1295" name="BothMaximaSurviveTheRecordSoOldDumpsStayInterpretable" fullname="CastleBusters.Tests.ComebackReversalRateTests.BothMaximaSurviveTheRecordSoOldDumpsStayInterpretable" methodname="BothMaximaSurviveTheRecordSoOldDumpsStayInterpretable" classname="CastleBusters.Tests.ComebackReversalRateTests" runstate="Runnable" seed="1800632499" result="Passed" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.002010" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1294" name="EachSideIsCountedSeparatelyBecauseTheySpendItDifferently" fullname="CastleBusters.Tests.ComebackReversalRateTests.EachSideIsCountedSeparatelyBecauseTheySpendItDifferently" methodname="EachSideIsCountedSeparatelyBecauseTheySpendItDifferently" classname="CastleBusters.Tests.ComebackReversalRateTests" runstate="Runnable" seed="1303416245" result="Passed" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.000299" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1291" name="WithNoActivations_TheRateIsNegativeRatherThanZero" fullname="CastleBusters.Tests.ComebackReversalRateTests.WithNoActivations_TheRateIsNegativeRatherThanZero" methodname="WithNoActivations_TheRateIsNegativeRatherThanZero" classname="CastleBusters.Tests.ComebackReversalRateTests" runstate="Runnable" seed="1079841322" result="Passed" start-time="2026-08-19 02:59:08Z" end-time="2026-08-19 02:59:08Z" duration="0.000144" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<color=#ff6b6b>fail:</color> [11:59:08:0833] <color=#B4FF32>[AI]</color> <color=#58D68D><b>TestResultCollector</b></color> Test run finished, but the pending MCP request id was missing. The test results cannot be delivered to the client.
+Saving results to: /Users/seokcmin/Library/Application Support/DefaultCompany/castle-war/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

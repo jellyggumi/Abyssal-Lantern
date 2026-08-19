@@ -96,6 +96,37 @@ namespace CastleBusters
         public static void Forget() => cached = null;
 
         /// <summary>
+        /// Applies a text outline only when TMP can actually build the material instance.
+        ///
+        /// `outlineWidth` internally does `new Material(fontSharedMaterial)`, which throws
+        /// ArgumentNullException when the font asset has not resolved yet — reachable in batchmode
+        /// and on the very first frame after a scene load, before TMP's default font is bound. Text
+        /// without an outline is cosmetically poorer; a throw takes the caller down with it, and it
+        /// once aborted a PlayMode run when selecting the Cannon card posted an alarm during scene
+        /// setup.
+        ///
+        /// Lives here rather than in one caller because the HUD has two kinds of label — built in
+        /// code and authored in the scene — and both need the same treatment. The scene ones had no
+        /// outline at all (UX-012: zero `m_outlineWidth` matches in `SampleScene.unity`), so white
+        /// text sat on a bright sky while every code-built label carried 0.15-0.18.
+        /// </summary>
+        public static void TryApplyOutline(TMPro.TMP_Text text, float width, Color color)
+        {
+            if (text == null) return;
+            if (text.font == null || text.fontSharedMaterial == null) return;
+            try
+            {
+                text.outlineWidth = width;
+                text.outlineColor = color;
+            }
+            catch (System.ArgumentNullException)
+            {
+                // TMP resolved a font but not its material; readable text without an outline is
+                // strictly better than no text at all.
+            }
+        }
+
+        /// <summary>
         /// Moves a scene-authored HUD element onto the HUD canvas, keeping its layout.
         ///
         /// Labels placed in the scene sit on the scene's own canvas, which is ConstantPixelSize:

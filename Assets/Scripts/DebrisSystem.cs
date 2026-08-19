@@ -105,6 +105,28 @@ namespace CastleBusters
 
         private void GenerateFragmentSprites()
         {
+            // Four authored chunks with lit and shadowed faces, falling back to the procedural
+            // shards below. The procedural path was never circles — it builds a random 4-6 vertex
+            // convex polygon with an anti-aliased edge — but every pixel inside it is pure white,
+            // so a chunk reads as a flat silhouette that the tint colours uniformly. The authored
+            // art carries its own internal shading, which is what makes a fragment read as a piece
+            // of masonry with a near and far face instead of a paper cut-out.
+            //
+            // Kept at 8 sprites: the pool indexes into this list and 8 shared textures was already
+            // the measured memory decision. Four authored chunks fill it twice.
+            var authored = new List<Sprite>();
+            for (int i = 1; i <= 4; i++)
+            {
+                var chunk = Resources.Load<Sprite>($"Effects/debris_chunk_{i:00}");
+                if (chunk != null) authored.Add(chunk);
+            }
+
+            if (authored.Count > 0)
+            {
+                for (int i = 0; i < 8; i++) fragmentSprites.Add(authored[i % authored.Count]);
+                return;
+            }
+
             // Anti-aliased debris shards spawned on every hit/collapse/break - i.e. the actual visible
             // "breaking apart" effect during an explosion. Bumped from 128px (no mipmaps) to 192px with
             // mipmaps + trilinear filtering: fragments shrink to ~15-35% scale and fade out over their

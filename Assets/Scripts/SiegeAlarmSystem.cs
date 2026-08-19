@@ -92,29 +92,13 @@ namespace CastleBusters
         }
 
         /// <summary>
-        /// Applies a text outline only when TMP can actually build the material instance.
-        /// `outlineWidth` internally does `new Material(fontSharedMaterial)`, which throws
-        /// ArgumentNullException when the font asset has not resolved yet — reachable in
-        /// batchmode and on the very first frame after a scene load, before TMP's default
-        /// font is bound. An alarm that cannot draw an outline is cosmetically poorer; an
-        /// alarm that throws takes the caller down with it (this aborted a PlayMode run when
-        /// selecting the Cannon card posted an alarm during scene setup).
+        /// Delegates to <see cref="HudCanvas.TryApplyOutline"/>, which carries the guard and the
+        /// reason for it. Kept as a local name because the call sites below read better with it, and
+        /// because moving the implementation rather than copying it means the guard cannot drift
+        /// between the code-built labels and the scene-authored ones.
         /// </summary>
         private static void TryApplyOutline(TextMeshProUGUI text, float width, Color color)
-        {
-            if (text == null) return;
-            if (text.font == null || text.fontSharedMaterial == null) return;
-            try
-            {
-                text.outlineWidth = width;
-                text.outlineColor = color;
-            }
-            catch (System.ArgumentNullException)
-            {
-                // TMP resolved a font but not its material; readable text without an outline
-                // is strictly better than no text at all.
-            }
-        }
+            => HudCanvas.TryApplyOutline(text, width, color);
 
         private void PostInternal(string message, Color color)
         {

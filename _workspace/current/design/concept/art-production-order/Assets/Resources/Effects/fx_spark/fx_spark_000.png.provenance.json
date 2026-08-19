@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "A4",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "256x256 first spark frame: small bright warm burst matching existing fx_spark siblings, corrected canvas size.",
+  "saturation_contract": "self-colored warm >=0.35",
+  "sha256": "b51650944c53a10da72e1dfea5b3900607550866a12aeef6fe1800981650f57b",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/fx_spark/fx_spark_000.png",
+  "intended_runtime_path": "Assets/Resources/Effects/fx_spark/fx_spark_000.png"
+}

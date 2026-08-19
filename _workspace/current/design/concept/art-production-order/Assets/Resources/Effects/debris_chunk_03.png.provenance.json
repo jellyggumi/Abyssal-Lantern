@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "B-4.3",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "64x64 transparent irregular grayscale brick debris chunk; angular corners, shaded top/bottom, tint source.",
+  "saturation_contract": "grayscale tint-source",
+  "sha256": "b4bce31d361455703a62d2ec12ec4b143c8fd3e01fa671980df31abdce60fa90",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/debris_chunk_03.png",
+  "intended_runtime_path": "Assets/Resources/Effects/debris_chunk_03.png"
+}

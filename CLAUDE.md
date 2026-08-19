@@ -148,12 +148,19 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   Report both, and judge on the window; at a clamp or `min()` kink use one-sided
   limits, never a central difference, and take the worse side — smoothing a kink
   biases structurally toward the safe-looking answer.
-- **PlayMode probes: `-nographics`, and run them TWICE.** The domain-reload hang is
-  the MCP plugin's `OnBeforeAssemblyReload` → `DisposeLogCollector` →
-  `BufferedFileLogStorage.cs:52`. It fires when the run has to reload assemblies, so
-  the reliable pattern is: run once (it may hang), change no scripts, run again — the
-  second pass has nothing to recompile and completes. Cycle 2 lost five consecutive
-  attempts to this before the pattern was found; the sixth finished in 128s.
+- **PlayMode probes: `-nographics`, run them TWICE, and filter to ONE test.** The
+  domain-reload hang is the MCP plugin's `OnBeforeAssemblyReload` →
+  `DisposeLogCollector` → `BufferedFileLogStorage.cs:52`. It fires when the run has to
+  reload assemblies, so the first pattern found was: run once (it may hang), change no
+  scripts, run again — the second pass has nothing to recompile and completes. Cycle 2
+  lost five consecutive attempts before finding that; the sixth finished in 128s.
+  **The run-twice rule is probabilistic and has now failed three times.** Cycle 3 lost
+  both passes on `-testFilter "HudCanvasContractTests"` (a whole class, 689 and 637 log
+  lines, zero scene markers), then ran the same two tests one at a time and each
+  finished in **36 seconds**. So narrowing the filter to a single test method is the
+  stronger lever: fewer fixtures to set up means fewer reload boundaries to hang on.
+  Filter per test, not per class, and treat run-twice as the fallback rather than the
+  first move.
   Symptom of the bad case: the log stops with no scene markers, which means the run
   never reached the scene and any "zero errors" reading from it proves nothing.
   `-nographics` also avoids it in most cases, but `cam.Render()` segfaults without a
@@ -207,6 +214,86 @@ This repo doubles as an llm-wiki vault (`index.md`, `log.md`, `wiki/`, `raw/`).
   contains four), so that constant models a HUMAN's hand. Raising it moves what the
   gate reports and nothing a player experiences. Before writing "the knob already
   exists", grep for reads from gameplay code.
+- **A test that repairs its subject cannot fail.** `GimmickSpriteLibrary.Load` had an
+  `#if UNITY_EDITOR` self-heal that, on a load miss, set `textureType = Sprite` and
+  called `SaveAndReimport()` — rewriting the tracked `.meta` on disk. So an EditMode
+  run silently fixed four assets, went green, and if the working-tree change was never
+  committed the build still rendered nothing. That false pass through the filesystem is
+  why `fx_muzzle`, `fx_arcane`, and the white explosion each survived a green suite for
+  three cycles. Editor convenience may READ around a broken asset; it must never WRITE.
+  When a suite goes green and `git status` shows assets you did not touch, the suite
+  edited them.
+- **A test that walks a declared list cannot see what is missing from the list — and a
+  filter that skips the failure state is the same defect wearing a green badge.**
+  `SiegeArtResourceTests` iterated the library's declared keys, so an asset on disk with
+  no key was outside every check — permanently. Three defects lived there. The fix is to
+  walk the DISK and assert against a folder-type table the test owns, where an unlisted
+  folder fails rather than defaults to pass. `> 0` is not enough either: `Gimmicks/` held
+  30 correct sprites beside 4 broken ones and passed a non-empty check for cycles.
+  Five layers of the same shape are now on record, and the last two were written BY
+  sessions that had just documented the first three:
+  (1) declared asset keys, above;
+  (2) a runtime sample filter — `if (canvas == null) continue;` in five HUD tests, whose
+  own comment named the defect it was skipping, so deleting `HudCanvas.Adopt(windText)`
+  left the suite green while the wind strength drew on nothing;
+  (3) a governance predicate — `ux-defect-list.md` assigned sixteen severities with no
+  status column, so "any open S1 blocks every gate" was unevaluable, and an unevaluable
+  blocker reads as no blocker;
+  (4) a list the investigator invents mid-investigation — a lane enumerated "lines with an
+  explicit `yield break`" and missed a fourth escape path that had none;
+  (5) a prose blacklist inside the very gate written to fix (3) — `\bPASS\b` plus excused
+  phrases, which would mis-read `PASS 조건` and `## G4 PASS` the moment a real review
+  existed. Replaced by reading a `verdict:` key: structure has no blacklist.
+  Detection that depends on formatting belongs here too — a rollup row escaped that gate
+  because its cell read `S1 (치명)` rather than `S1`, so tidying the cell would have turned
+  the gate red on a table that was always shaped that way.
+- **A line's presence in a file is not evidence it runs in the state you are describing.**
+  The intake cited `SiegeAlarmSystem.cs:234` as the enemy-turn readback. It is the third
+  branch of an `if/else-if` chain whose second branch is `else if (!gm.IsPlayerTurn)`, so
+  it is structurally unreachable on the enemy turn — and the comment one line below says
+  so in words. Seventeen lines up was the whole answer. In a branch chain the citable unit
+  is the CHAIN, not the line; quoting a line number is a claim about control flow and has
+  to be checked as one.
+- **Absence is not read in the project's favour.** The contract already chose this once —
+  "Missing evidence path = FAIL regardless of claimed value" — and then failed to apply it
+  to the predicate beside it, so sixteen severities with no status column read as no
+  blocker rather than as sixteen unknowns. Wherever a gate depends on a field, decide what
+  a MISSING field means before the first row is written, and make the missing case the
+  unfavourable one.
+- **`0 hits` is a claim, not a measurement — and a bash `grep -c` count is worse than a
+  claim.** Bash `grep` returns silently empty in this repository on patterns the `grep`
+  tool resolves to five files, with no difference in exit code. Three lanes built findings
+  on a bash `0건` in one cycle, including the document that corrected another lane for
+  exactly that. The counting form is more dangerous: `grep -c` returned **16 for both** the
+  HEAD blob (true count 0) and the index blob (true count 3) of the same file — two
+  provably different inputs, one number. An empty result invites suspicion; a plausible
+  number becomes a conclusion, and a peer nearly dismissed a correct refutation with it.
+  The only signal was the RELATION, not the value: different inputs cannot yield the same
+  count. Re-check every absence with the `grep` tool, state it as "0 via <tool>" and never
+  as a bare zero, and count with a script — bash `grep -c` is not a measuring instrument
+  here.
+- **A mutation on a shared worktree is an exclusive operation.** A 617-second mutation run
+  had a peer read the tree mid-window and report a restore failure; the file really was
+  mutated at that instant, and both observations were true at different times. Atomic
+  restore inside one shell call is not enough when other lanes read the same disk —
+  announce start and end, or expect a defect report about your own probe.
+- **A default that depends on another constant needs a test tying them together.**
+  `aimPower = 0.55` was correct when written and became a defect when task #60 lowered
+  `MaxSpeed` 25.2 → 17.5, because nothing connected them. The shipped default then fired
+  into the player's OWN keep. Staleness is not a coding error and review does not catch
+  it; only an executable tie does.
+- **A value inside a valid band can still be one step from breaking.** The designer
+  asked for the aim default that strikes the outpost, and it reached — 0.63 key presses
+  from not reaching. The band was 2.12 `powerStep` presses wide, which nobody had
+  measured, and the only value with a press of room on both sides landed elsewhere. When
+  a tuned value sits in a range, assert the MARGIN in the units the player actually
+  moves it by, not just membership.
+- **`new Material(shader)` is not "the shader's intent".** Every particle this game drew
+  was opaque: URP's `ParticlesUnlit` defaults to `_SrcBlend = One`, `_DstBlend = Zero`,
+  `_ZWrite = 1`, `RenderType = Opaque` (:28-32, honoured at :82-83), and nothing set them.
+  Every carefully tuned alpha in every `startColor` was discarded, which is why a white
+  explosion read as a white BLOCK. A material constructed in code has the shader's
+  DEFAULTS, and for transparency those are the wrong ones.
 - **Fixing something invalidates decisions that cited it — go back and check.** The
   opening-volley damping landed at 22:51 and erased a 38%p first-turn gap. The
   arbitration that blocked all seven gimmicks on that gap was last touched at 13:11,

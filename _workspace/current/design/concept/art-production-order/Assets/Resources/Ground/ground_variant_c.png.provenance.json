@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "G-5",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "Grass variant tile matching ground_tile_grass but with different blade layout and micro props.",
+  "saturation_contract": "self-colored >=0.30",
+  "sha256": "dd4fa87791d6950e9eabfb545d9034d766700da29ee42cfcd3a1e1f2f7a27b34",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Ground/ground_variant_c.png",
+  "intended_runtime_path": "Assets/Resources/Ground/ground_variant_c.png"
+}

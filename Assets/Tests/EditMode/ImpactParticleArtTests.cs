@@ -98,9 +98,13 @@ namespace CastleBusters.Tests
             // fx_arcane joined this list only after its importer was repaired — it was declared,
             // present on disk, and imported as textureType Default, so it loaded as zero sprites
             // and its mismatch was invisible. Fixing one defect exposed another.
+            //
+            // fx_spark LEFT the list on 2026-08-19: its odd first frame was redrawn at 256x256 to
+            // match its three siblings, so the strip no longer jumps on frame one. This test is the
+            // only reason that repair is provable rather than asserted — it failed on the redraw and
+            // named the effect that had changed.
             var knownOffenders = new[]
             {
-                EffectSpriteLibrary.Spark,      // 182x182 then 256x256 x3
                 EffectSpriteLibrary.Dust,       // 190x190 then 256x256 x3
                 EffectSpriteLibrary.Sparkle,    // 77x77 then 256x256 x3 — the worst jump
                 EffectSpriteLibrary.Eruption,   // 545x639 vs 443x640
@@ -163,8 +167,11 @@ namespace CastleBusters.Tests
                 (EffectSpriteLibrary.MuzzleBlast, "cannon muzzle"),
             };
 
-            // The one effect with no art at all. Everything else must load.
-            var knownGaps = new[] { EffectSpriteLibrary.Frost };
+            // Every declared effect must load. This array was `{ Frost }` while fx_frost was a key
+            // with no files; the six frames landed 2026-08-19 and EruptionVentGimmick now spawns
+            // them, so the gap is closed and the array is empty. Emptying it is the point: a new
+            // entry here would mean art regressed to absent, and the assertion below catches that.
+            var knownGaps = new string[0];
 
             var missing = declared
                 .Where(d => (EffectSpriteLibrary.LoadFrames(d.key)?.Length ?? 0) == 0)

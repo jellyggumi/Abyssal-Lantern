@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-19T05:29:44.229928+00:00",
+  "tool": "Pillow procedural concept pass by jeo",
+  "source_document": "_workspace/current/design/art-production-order.md",
+  "source_order": "D-2.crown.s0",
+  "concept_only": true,
+  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
+  "prompt": "Enemy castle silhouette variant derived from CastleSkin: same footprint, sharper battlements/horns/angular cracks, grayscale tint source.",
+  "saturation_contract": "grayscale tint-source <=0.15 desired",
+  "sha256": "7504820ca4157ff441885fbe60b257e9e96fba31b770f7f1c2ab1b3bd3b61147",
+  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/CastleSkinEnemy/crown_s0.png",
+  "intended_runtime_path": "Assets/Resources/CastleSkinEnemy/crown_s0.png"
+}

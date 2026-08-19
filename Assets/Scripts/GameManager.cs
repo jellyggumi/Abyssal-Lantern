@@ -948,14 +948,20 @@ namespace CastleBusters
             return root;
         }
 
-        /// <summary>Director entry (§6): balance-event gates reuse the tuned gate recipe.</summary>
+        /// <summary>
+        /// Director entry (§6): balance-event gates reuse the tuned gate recipe.
+        ///
+        /// The sprite comes through <see cref="GimmickSpriteLibrary"/>, not
+        /// `AssetDatabase.LoadAssetAtPath`. The old path was inside `#if UNITY_EDITOR`, so a build
+        /// got a null sprite while `EventGateGimmick` still applied its effect: an INVISIBLE gate
+        /// multiplying the volley by 2.25x. The Editor looked correct, which is why it survived.
+        /// `Assets/Sprites/block_normal.png` is not under `Resources`, so there was no runtime route
+        /// to it at all - the fix is a key that is, and `gimmick_wall_brick` is the wall material
+        /// this gate is cut from.
+        /// </summary>
         public GameObject SpawnBalanceGate(string gateName, Vector3 position, EventGateEffectType effectType)
         {
-            Sprite origSprite = null;
-#if UNITY_EDITOR
-            origSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/block_normal.png");
-#endif
-            return CreateEventGate(gateName, position, effectType, origSprite);
+            return CreateEventGate(gateName, position, effectType, GimmickSpriteLibrary.Load(GimmickSpriteLibrary.WallBrick));
         }
 
         private GameObject CreateEventGate(string gateName, Vector3 position, EventGateEffectType effectType, Sprite sprite)
@@ -1170,6 +1176,17 @@ namespace CastleBusters
             HudCanvas.Adopt(windText);
             HudCanvas.Adopt(scoreText);
             HudCanvas.Adopt(timerText);
+
+            // The four scene-authored labels were the only HUD text with no outline at all —
+            // `SampleScene.unity` has zero `m_outlineWidth` matches, so white glyphs sat on a bright
+            // sky while every code-built label carried 0.15-0.18. The 2026-08-19 enemy-turn capture
+            // shows the cost: `WIND` reads as `IND` where its W crosses a cloud. Same width and dark
+            // colour the code path uses, applied through the guard that survives an unresolved font.
+            var outline = new Color(0.06f, 0.07f, 0.10f, 1f);
+            HudCanvas.TryApplyOutline(turnText, 0.18f, outline);
+            HudCanvas.TryApplyOutline(timerText, 0.18f, outline);
+            HudCanvas.TryApplyOutline(windText, 0.18f, outline);
+            HudCanvas.TryApplyOutline(scoreText, 0.18f, outline);
 
             knightButton?.onClick.AddListener(() => SelectUnit(0));
             archerButton?.onClick.AddListener(() => SelectUnit(1));
@@ -1535,7 +1552,11 @@ namespace CastleBusters
             int blockRes = Mathf.Clamp(maxAtlasWidth / Mathf.Max(1, groundColumnCount), 16, 160);
             int texWidth = groundColumnCount * blockRes;
             int texHeight = groundRowCount * blockRes;
-            Texture2D groundTex = GenerateGroundTexture(texWidth, texHeight);
+            // Authored tiles first, procedural bands as the fallback. The fallback stays because
+            // `GenerateGroundTexture`'s docstring earns it: a texture is presentation, and
+            // presentation failing must not be able to delete the board.
+            Texture2D groundTex = BuildGroundAtlasFromArt(texWidth, texHeight, blockRes, groundRowCount, groundColumnCount)
+                                  ?? GenerateGroundTexture(texWidth, texHeight);
 
             for (int yIndex = 0; yIndex < groundRowCount; yIndex++)
             {
@@ -1557,6 +1578,10 @@ namespace CastleBusters
                         else selectedData = stoneData;
 
                         block.ApplyBlockData(selectedData);
+                        // Declares this a terrain tile before the parenting below hands it to the
+                        // castle — and therefore to CastleFacadeDirector, which would otherwise
+                        // re-skin it with wall masonry and discard the atlas slice assigned here.
+                        block.MarkAsTerrainTile();
                         // Anchors: the outer flanks (castle foundations) and the bottom two rows.
                         // The visible top rows (yIndex 0-2) stay breakable so the wood bridge can
                         // still be severed and dropped, but a cascade can never disintegrate the
@@ -1723,6 +1748,181 @@ namespace CastleBusters
             return tex;
 
         }
+
+        /// <summary>
+        /// Builds the ground atlas from authored tile art, or returns null when the art is absent so
+        /// <see cref="GenerateGroundTexture"/> falls back to its procedural bands.
+        ///
+        /// The bands were three flat colours plus per-pixel noise of ±10, sliced into 205 tiles —
+        /// the largest surface on screen. Their own comment promised "organic sine-wave boundaries"
+        /// while both boundary arrays took the same constant for every column, and `git log -S` shows
+        /// they have been constant since the import commit: never implemented rather than regressed.
+        ///
+        /// Row assignment top-down: grass, the grass→dirt transition, then dirt, then stone. The
+        /// transition row is why the board read as flat — a straight colour boundary across 41
+        /// columns. Grass rows draw from four interchangeable tiles so 41 columns of the same image
+        /// do not repeat visibly.
+        ///
+        /// Sampled nearest-neighbour rather than blitted: `blockRes` is derived from the atlas budget
+        /// (16..160) and the art is authored at 128, so they agree only by accident. Scaling here
+        /// keeps the tile filling exactly one cell, which the collider geometry assumes.
+        /// </summary>
+        private static Texture2D BuildGroundAtlasFromArt(int width, int height, int blockRes, int rows, int columns)
+        {
+            var grass = new[]
+            {
+                Resources.Load<Sprite>("Ground/ground_tile_grass"),
+                Resources.Load<Sprite>("Ground/ground_variant_a"),
+                Resources.Load<Sprite>("Ground/ground_variant_b"),
+                Resources.Load<Sprite>("Ground/ground_variant_c"),
+            };
+            var edge = Resources.Load<Sprite>("Ground/ground_edge_grass");
+            var dirt = Resources.Load<Sprite>("Ground/ground_tile_dirt");
+            var stone = Resources.Load<Sprite>("Ground/ground_tile_stone");
+
+            // All-or-nothing: a partial set would tile authored grass above procedural dirt, which
+            // looks like a rendering fault rather than missing art.
+            if (grass[0] == null || edge == null || dirt == null || stone == null) return null;
+            for (int i = 1; i < grass.Length; i++) if (grass[i] == null) grass[i] = grass[0];
+
+            Texture2D atlas;
+            try
+            {
+                atlas = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[GameManager] ground art atlas {width}x{height} refused "
+                                 + $"({e.GetType().Name}: {e.Message}); falling back to procedural bands.");
+                return null;
+            }
+            atlas.filterMode = FilterMode.Trilinear;
+            atlas.wrapMode = TextureWrapMode.Clamp;
+            atlas.anisoLevel = 4;
+
+            var pixels = new Color32[width * height];
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < columns; col++)
+                {
+                    // Row 0 is the BOTTOM of the texture (Unity's origin), so depth counts down.
+                    int fromTop = rows - 1 - row;
+                    Sprite tile = fromTop == 0 ? grass[(col + row) % grass.Length]
+                                : fromTop == 1 ? edge
+                                : fromTop == 2 ? dirt
+                                : stone;
+
+                    CopyTileInto(pixels, width, col * blockRes, row * blockRes, blockRes, tile);
+                }
+            }
+
+            // Drop the source reads. Beyond the memory, a Dictionary keyed on Texture2D outliving
+            // this call would hold references to textures a stage change can unload, and a
+            // destroyed key hashes fine while its value is garbage.
+            tilePixelCache.Clear();
+
+            atlas.SetPixels32(pixels);
+            atlas.Apply(true, false);
+            return atlas;
+        }
+
+        /// <summary>
+        /// Samples one sprite into a cell of the atlas buffer, area-averaging over the source
+        /// footprint of each destination pixel.
+        ///
+        /// Nearest-neighbour was wrong here in a way that is easy to miss. The art is authored at
+        /// 128 and the cell is <c>4096 / columns</c> — 87 for Stage1's 47 columns — so each
+        /// destination pixel covers about 1.47 source pixels. Point-sampling keeps one of them and
+        /// discards the rest, which drops roughly a third of the authored pixels and aliases the
+        /// remainder: fine stipple and grass blades turn into irregular clumps rather than getting
+        /// smaller.
+        ///
+        /// The second reduction, 87 down to the ~32 screen pixels a 1-unit tile occupies, was never
+        /// the problem — <c>Apply(true, …)</c> builds mipmaps and the trilinear filter uses them.
+        /// Only this CPU step threw data away, and it threw it away before the mips were built, so
+        /// no amount of GPU filtering could recover it.
+        ///
+        /// Averaging is alpha-weighted: a transparent source pixel carries an arbitrary RGB, and
+        /// letting it into an unweighted mean drags the colour toward whatever that happens to be.
+        ///
+        /// Reads through the sprite's own <c>textureRect</c> so an atlased or sub-rect sprite lands
+        /// correctly rather than sampling whatever else shares its texture.
+        /// </summary>
+        private static void CopyTileInto(Color32[] dst, int dstWidth, int originX, int originY, int size, Sprite tile)
+        {
+            var tex = tile.texture;
+            if (tex == null) return;
+            var rect = tile.textureRect;
+            int sw = Mathf.Max(1, (int)rect.width);
+            int sh = Mathf.Max(1, (int)rect.height);
+            int rx = (int)rect.x, ry = (int)rect.y;
+
+            var src = ReadTilePixels(tex);
+            // Unreadable (Read/Write disabled): a cosmetic loss, not a reason to lose the board.
+            if (src == null) return;
+
+            for (int y = 0; y < size; y++)
+            {
+                // Half-open source span for this destination row. Rounding both edges from the same
+                // expression means spans tile exactly: no seam, no doubled row.
+                int sy0 = ry + y * sh / size;
+                int sy1 = ry + (y + 1) * sh / size;
+                if (sy1 <= sy0) sy1 = sy0 + 1;
+                if (sy1 > ry + sh) sy1 = ry + sh;
+
+                int dstRow = (originY + y) * dstWidth;
+                for (int x = 0; x < size; x++)
+                {
+                    int sx0 = rx + x * sw / size;
+                    int sx1 = rx + (x + 1) * sw / size;
+                    if (sx1 <= sx0) sx1 = sx0 + 1;
+                    if (sx1 > rx + sw) sx1 = rx + sw;
+
+                    int r = 0, g = 0, b = 0, a = 0, weight = 0;
+                    for (int sy = sy0; sy < sy1; sy++)
+                    {
+                        int srcRow = sy * tex.width;
+                        for (int sx = sx0; sx < sx1; sx++)
+                        {
+                            var c = src[srcRow + sx];
+                            r += c.r * c.a; g += c.g * c.a; b += c.b * c.a;
+                            a += c.a; weight += c.a;
+                        }
+                    }
+
+                    int span = (sy1 - sy0) * (sx1 - sx0);
+                    dst[dstRow + originX + x] = weight == 0
+                        // Fully transparent footprint: keep it transparent rather than inventing a
+                        // colour for it.
+                        ? new Color32(0, 0, 0, 0)
+                        : new Color32((byte)(r / weight), (byte)(g / weight), (byte)(b / weight),
+                                      (byte)(a / span));
+                }
+            }
+        }
+
+        // One pixel read per source texture rather than per tile. Seven tiles fill 235 cells, so the
+        // uncached version issued 235 GetPixels32 calls for seven distinct 128x128 images — 3.8M
+        // Color32 copies to place 1.8M. Cleared after the atlas is built; holding seven 64KB arrays
+        // for the rest of the session buys nothing, since the ground is built once per stage.
+        private static readonly Dictionary<Texture2D, Color32[]> tilePixelCache =
+            new Dictionary<Texture2D, Color32[]>();
+
+        private static Color32[] ReadTilePixels(Texture2D tex)
+        {
+            if (tilePixelCache.TryGetValue(tex, out var cached)) return cached;
+            try
+            {
+                cached = tex.GetPixels32();
+            }
+            catch (UnityException)
+            {
+                cached = null;
+            }
+            tilePixelCache[tex] = cached;
+            return cached;
+        }
+
 
         private Sprite CreateCrackedSlice(Texture2D groundTex, int pixelX, int pixelY, Sprite crackSprite, int res)
         {
@@ -2021,6 +2221,9 @@ namespace CastleBusters
             if (advancedAi != aiLastStand)
             {
                 aiLastStand = advancedAi;
+                // AdvanceAuto goes straight to Active, so this transition IS the activation — there
+                // is no separate spend step to hook like the player's.
+                if (advancedAi == LastStand.Phase.Active) RecordComebackActivation(byPlayer: false);
                 if (!aiDangerNotified)
                 {
                     aiDangerNotified = true;
@@ -2038,6 +2241,22 @@ namespace CastleBusters
             }
         }
 
+        /// <summary>
+        /// Sends one comeback activation to telemetry, with both cores and both maxima.
+        ///
+        /// Guarded on the cores existing rather than assumed: a comeback can advance during scene
+        /// teardown, and a half-recorded event would be worse than a missing one — the G5 aggregate
+        /// divides by the count, so a zero-filled row would drag the rate toward "always reversible".
+        /// </summary>
+        private void RecordComebackActivation(bool byPlayer)
+        {
+            var own = byPlayer ? playerCore : enemyCore;
+            var foe = byPlayer ? enemyCore : playerCore;
+            if (own == null || foe == null) return;
+
+            TelemetrySink.Comeback(byPlayer, own.currentHP, own.maxHP, foe.currentHP, foe.maxHP);
+        }
+
         public void ActivatePlayerLastStand()
         {
             if (!CanActivatePlayerLastStand())
@@ -2049,6 +2268,12 @@ namespace CastleBusters
             playerLastStand = LastStand.Phase.Active;
             RefreshLastStandButton();
             GameplayUxDirector.NotifyLastStandActive();
+
+            // G5 needs the instant-reversal rate, and it is a fact about BOTH cores at this instant:
+            // activation is gated on ours, but whether the buffed shot can finish the match depends
+            // on how damaged theirs already is. The cap (140 against 150) only rules out erasing a
+            // pristine core, so nothing short of this pair answers the threshold.
+            RecordComebackActivation(byPlayer: true);
             var lm = LaunchManagerRef;
             if (lm != null)
             {

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -119,6 +120,87 @@ namespace CastleBusters.Tests
                 GameManager.PendingStage = StageId.Stage1;
                 SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
             });
+
+            // Skip the cold-open VIDEO the way a player does. `ReloadArena`'s fixed 1.5s wait was a
+            // bet that the cutscene would be gone by then, and on 2026-08-19 the bet lost: a faster
+            // boot left the video's full-screen `Frame` covering the board, and the harness wrote
+            // four prologue stills labelled as gameplay states. `Skip()` settles it as a keypress
+            // would, so what follows is reached deliberately instead of hopefully.
+            //
+            // The title screen is NOT skipped here and the board is NOT waited for: `ux-1-title`
+            // exists to photograph the title, which legitimately covers the whole screen. The wait
+            // belongs after `BeginSiege()`, where the board is what the label claims.
+            NarrativeVideoIntro.Active?.Skip();
+            yield return null;
+        }
+
+        /// <summary>
+        /// Waits until the gameplay board is what the camera would photograph.
+        ///
+        /// `ReloadArena` waits a fixed 1.5 realtime seconds, and that turned out to be a bet on how
+        /// long the cold-open prologue takes. On 2026-08-19 the bet lost: quieting the editor's MCP
+        /// plugin made boot faster, the prologue was still covering the screen, and the harness
+        /// wrote four frames of webtoon art labelled `ux-1-title` through `ux-4-enemy-turn` — with
+        /// `ux-measurements.txt` correctly reporting `state=AITurn playerTurn=False buttons=0`
+        /// beside a picture of a prologue panel. The measurements read the model; the pixels came
+        /// from whatever was on top. A capture whose label and image disagree is worse than no
+        /// capture, because it gets cited: `ux-3-player-turn.png` is the evidence three UX defects
+        /// point at for "this label is absent from screen".
+        ///
+        /// So the wait is on the CONDITION, not the clock. A prologue panel is a full-screen
+        /// graphic; the HUD is not. Poll until nothing is covering the board and fail loudly rather
+        /// than photograph the cover.
+        /// </summary>
+        private static IEnumerator WaitForBoardVisible(float timeoutSeconds = 12f)
+        {
+            float waited = 0f;
+            string blocker = null;
+
+            while (waited < timeoutSeconds)
+            {
+                blocker = FullScreenOccluder();
+                if (blocker == null) yield break;
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            Assert.Fail(
+                $"After {timeoutSeconds:F0}s the board is still covered by '{blocker}', so every "
+                + "frame this run captured would show that instead of the game. The prologue may "
+                + "have grown longer, or something new is drawing full-screen. Capturing anyway "
+                + "would produce images whose labels disagree with their pixels.");
+        }
+
+        /// <summary>
+        /// The name of an active graphic covering most of the screen, or null when the board is
+        /// clear. Measured from the rect rather than by looking for known prologue class names — a
+        /// list of those goes stale the moment a new cutscene ships, and this repository has paid
+        /// for list-walking checks five times over (CLAUDE.md §5).
+        /// </summary>
+        private static string FullScreenOccluder()
+        {
+            float screenArea = Screen.width * (float)Screen.height;
+            if (screenArea <= 0f) return null;
+
+            foreach (var g in Object.FindObjectsByType<UnityEngine.UI.Graphic>(FindObjectsSortMode.None))
+            {
+                if (!g.isActiveAndEnabled) continue;
+                if (g.canvas == null) continue;
+                if (g.color.a < 0.5f) continue;              // a faded-out panel occludes nothing
+                if (g is TMPro.TextMeshProUGUI) continue;     // text never covers the board
+
+                var corners = new Vector3[4];
+                g.rectTransform.GetWorldCorners(corners);
+                var cam = g.canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : g.canvas.worldCamera;
+                var a = RectTransformUtility.WorldToScreenPoint(cam, corners[0]);
+                var b = RectTransformUtility.WorldToScreenPoint(cam, corners[2]);
+                float area = Mathf.Abs(b.x - a.x) * Mathf.Abs(b.y - a.y);
+
+                // 80%: the prologue panels are full-bleed, while the widest HUD element measured in
+                // this repo is the 700x26 flow strip - three orders of magnitude below this.
+                if (area >= screenArea * 0.8f) return g.name;
+            }
+            return null;
         }
 
         /// <summary>
@@ -304,7 +386,24 @@ namespace CastleBusters.Tests
         [Timeout(180000)]
         public IEnumerator InGameUx_StatesCaptured()
         {
+            // This is a capture harness: its job is to photograph states, not to police the
+            // editor's MCP plugin. That plugin logs a version-handshake failure on its own
+            // schedule, and an unhandled error log fails whichever test is running when it
+            // fires — this run died after writing ux-1-title.png and before reaching the
+            // enemy turn, which is the frame the whole test exists for. Same seam as
+            // `AimErrorConversionProbe` :53 and `CastleMaterialCensusProbe` :32.
+            //
+            // The frames are still verified: `Shoot` returns false without a live camera and
+            // every call site asserts on it, so a missing capture fails on its own terms.
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
             yield return BootArena();
+
+            // Set again: `BootArena` loads a scene, and the load resets this static. Without the
+            // second assignment the flag is on for the boot and off for every capture after it,
+            // which is why a run could photograph all four frames correctly and still fail.
+            LogAssert.ignoreFailingMessages = true;
 
             Assert.IsTrue(Shoot("ux-1-title"), "A title frame needs a live camera");
             RecordUx("ux-1-title");
@@ -315,6 +414,10 @@ namespace CastleBusters.Tests
             yield return null;
             yield return new WaitForSecondsRealtime(1.0f);
 
+            // From here the labels claim gameplay, so the board has to actually be what the camera
+            // sees. The 1.0s above is presentation settle, not a guarantee — this is the guarantee.
+            yield return WaitForBoardVisible();
+
             Assert.IsTrue(Shoot("ux-2-match-start"), "A match-start frame needs a live camera");
             RecordUx("ux-2-match-start");
 
@@ -322,7 +425,53 @@ namespace CastleBusters.Tests
             Assert.IsTrue(Shoot("ux-3-player-turn"), "A player-turn frame needs a live camera");
             RecordUx("ux-3-player-turn");
 
+            // The enemy turn, which is 34.1% of a match and had never been photographed. The
+            // docstring above has claimed this frame since the test was written; the body took
+            // three and stopped, so every argument about that state cited a screenshot that did
+            // not exist. UX-015, and it blocks UX-014 in both directions - there is no way to
+            // verify a fix to the enemy turn, and no way to justify re-grading it, without a
+            // picture of it.
+            //
+            // Reached by firing rather than by waiting out the clock: the player's shot ends the
+            // turn, so this is the same boundary the game uses. Aim is the tuned default the
+            // player would fire with, read off the component instead of invented here.
+            var lm = Object.FindObjectOfType<LaunchManager>();
+            Assert.IsNotNull(lm, "The arena must have a LaunchManager to fire with");
+            lm.SimulateLaunch(lm.GetSeparatedAimVelocity());
+
+            // Wait for the turn to actually flip. A fixed sleep would photograph whatever frame it
+            // landed on and call it the enemy turn - which is how a capture harness ends up with a
+            // label that does not match its pixels.
+            float waited = 0f;
+            while (gm.IsPlayerTurn && waited < 12f)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            Assert.IsFalse(gm.IsPlayerTurn,
+                $"The enemy turn never began within {waited:F1}s of the player's shot, so there is "
+                + "no enemy-turn frame to take. Either the shot did not commit or the turn did not "
+                + "hand over.");
+
+            // Past the volley resolution, into the dead air the defect is actually about. UX-014
+            // measured 109.7s of zero inputs; this frame is what the player looks at during it.
+            waited = 0f;
+            while (gm.IsResolvingTurn && waited < 12f)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            yield return new WaitForSecondsRealtime(0.6f);
+
+            Assert.IsTrue(Shoot("ux-4-enemy-turn"), "An enemy-turn frame needs a live camera");
+            RecordUx("ux-4-enemy-turn");
+
             Flush("ux-measurements.txt");
+            }
+            finally
+            {
+                LogAssert.ignoreFailingMessages = false;
+            }
         }
 
         private void RecordUx(string label)
@@ -346,6 +495,20 @@ namespace CastleBusters.Tests
             }
             measurements.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "onscreen text={0} buttons={1}", texts, buttons));
+
+            // Outline width per label, because "the text looks washed out" is not measurable by
+            // squinting at a PNG. UX-012 is exactly this: the scene-authored labels carry 0 while
+            // every code-built one carries 0.15-0.18, and a fix that silently fails to apply looks
+            // identical to no fix at all.
+            var outlines = new List<string>();
+            foreach (var t in Object.FindObjectsByType<TMPro.TextMeshProUGUI>(FindObjectsSortMode.None))
+            {
+                if (!t.isActiveAndEnabled || string.IsNullOrWhiteSpace(t.text)) continue;
+                outlines.Add(string.Format(CultureInfo.InvariantCulture,
+                    "{0}={1:F2}", t.name, t.outlineWidth));
+            }
+            outlines.Sort();
+            measurements.AppendLine("outline " + string.Join(" ", outlines));
             measurements.AppendLine();
         }
     }

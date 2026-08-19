@@ -39,6 +39,7 @@ namespace CastleBusters
         private float aiThinkTimer;
         private bool hintShown;
         private const float HudRefreshInterval = 0.1f;
+        private const float DeployGhostWorldSize = 1f;
         private float hudRefreshTimer;
 
         private void Awake()
@@ -548,6 +549,15 @@ namespace CastleBusters
             ghostRenderer = ghost.AddComponent<SpriteRenderer>();
             ghostRenderer.sortingOrder = 10;
 
+            Sprite artSprite = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.DeployGhost);
+            if (artSprite != null)
+            {
+                ghostRenderer.sprite = artSprite;
+                ghostRenderer.drawMode = SpriteDrawMode.Sliced;
+                ghostRenderer.size = new Vector2(DeployGhostWorldSize, DeployGhostWorldSize);
+                return;
+            }
+
             var tex = new Texture2D(24, 24);
             tex.filterMode = FilterMode.Point;
             for (int y = 0; y < 24; y++)
@@ -560,6 +570,7 @@ namespace CastleBusters
             }
             tex.Apply();
             ghostRenderer.sprite = Sprite.Create(tex, new Rect(0, 0, 24, 24), new Vector2(0.5f, 0.5f), 24f);
+            ghostRenderer.drawMode = SpriteDrawMode.Simple;
         }
 
         /// <summary>Draws the legal player band so "where can I place" needs no tooltip.</summary>
@@ -673,6 +684,9 @@ namespace CastleBusters
             deployToggleLabel.enableWordWrapping = false;
             deployToggleLabel.overflowMode = TextOverflowModes.Overflow;
             deployToggleLabel.color = new Color(0.85f, 0.95f, 1f, 1f);
+            // Measured 0.00 on 2026-08-19; the other HUD labels carry 0.18. Pale blue on a bright
+            // sky is the worst case for a label with no outline, and this one sits over the board.
+            HudCanvas.TryApplyOutline(deployToggleLabel, 0.18f, new Color(0.06f, 0.07f, 0.10f, 1f));
             var labelRt = labelGo.GetComponent<RectTransform>();
             labelRt.anchorMin = Vector2.zero;
             labelRt.anchorMax = Vector2.one;

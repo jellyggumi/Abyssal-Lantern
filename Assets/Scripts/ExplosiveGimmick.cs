@@ -277,12 +277,31 @@ namespace CastleBusters
         private void SpawnExplosionVisual()
         {
             if (!Application.isPlaying) return;
-            if (explosionEffectPrefab == null)
-            {
-#if UNITY_EDITOR
-                explosionEffectPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ExplosionEffect.prefab");
-#endif
-            }
+
+            // WHY THE EXPLOSION WAS WHITE, corrected twice during the meeting that found it.
+            //
+            // Not a wiring defect. `ExplosiveBarrel.prefab:176` SERIALISES a reference to
+            // ExplosionEffect.prefab, and a serialised reference is a build dependency even outside
+            // Resources — so the prefab loads, `ExplosionEffectConfigurator.Awake()` runs, and this
+            // happens in the editor and in a build alike. The first two diagnoses (mine: "the
+            // editor-only AssetDatabase load leaves it null in a build"; then "the fallback's
+            // particles go white") were both wrong, and QA's serialisation check is what settled it.
+            //
+            // The real cause was the IMPORTER. The six frames in
+            // Assets/Resources/GeneratedExplosionFrames shipped as `textureType: 0` (Default) with
+            // `spriteMode: 0`, so `Resources.LoadAll<Sprite>` returned an EMPTY array — the art is
+            // colourful (saturation 0.31-0.95, under 1% near-white) and simply was not a Sprite.
+            // The configurator then took its null-texture branch, landing on
+            // `GetParticleMaterial(null)` -> `GetDefaultParticleTexture()`: a pure white radial
+            // blob, with `main.startColor = Color.white` on top of it.
+            //
+            // Third instance of that defect class here (fx_muzzle and fx_arcane were the first two),
+            // and it survived because the regression test walks the keys `EffectSpriteLibrary`
+            // declares and this folder is not among them. Fixed by the importer metas plus a test
+            // that walks the FOLDER.
+            //
+            // The fallback below now loads the same frames, so a missing prefab is cosmetic rather
+            // than a white flash.
             if (explosionEffectPrefab != null)
             {
                 var effect = Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
@@ -298,13 +317,16 @@ namespace CastleBusters
                     localScale = Vector3.one * 0.75f
                 }
             };
+
+            var frames = ExplosionFrames.Load();
             var sr = fallback.AddComponent<SpriteRenderer>();
-            Sprite origSprite = null;
-#if UNITY_EDITOR
-            origSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/explosion.png");
-#endif
-            sr.sprite = SpriteAtlasPacker.Instance != null ? SpriteAtlasPacker.Instance.GetPackedSprite(origSprite) : origSprite;
-            sr.color = new Color(1f, 0.5f, 0f, 0.8f);
+            if (frames.Length > 0)
+            {
+                // Frame 1 rather than 0: measured saturation 0.95 against frame 0's 0.31, so the
+                // single static frame behind the particles is the one that reads as fire.
+                sr.sprite = frames[Mathf.Min(1, frames.Length - 1)];
+                sr.color = Color.white;   // real art, so tinting would only mute it
+            }
             sr.sortingOrder = 30;
 
             var particles = fallback.AddComponent<ParticleSystem>();

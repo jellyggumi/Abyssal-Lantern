@@ -102,11 +102,18 @@ namespace CastleBusters
     /// <summary>Pure stage table + lookup. EditMode-pinned (StageDefinitionsTests).</summary>
     public static class StageDefinitions
     {
-        // Stage1 numbers mirror the frozen constants exactly (GameManager.LaunchApronAbsX=14.5,
-        // groundHalfWidth=20, anchor band |x|>=10, gates at +-15, windCapEnd=6.5,
-        // desiredWorldWidth=39, maxHalfHeight=11.2, 4 kegs at the original bridge-hugging
-        // spots, 2-high walls, 6-cap/3-turn-mutate field, white tint) — selecting Stage1
-        // must be a total no-op. This is the fixed baseline Stage2/Stage3 are judged against.
+        // Stage1 is the fixed baseline Stage2/Stage3 are judged against: selecting it must be a
+        // total no-op relative to GameManager's own field initialisers.
+        //
+        // This comment used to enumerate those numbers ("LaunchApronAbsX=14.5, groundHalfWidth=20,
+        // gates at +-15, desiredWorldWidth=39") and went stale when the board was widened on
+        // 2026-08-13. It stayed wrong long enough to mislead: a session read groundHalfWidth=20
+        // here, computed 41 ground columns, and hard-coded 41 into two tests — which then measured
+        // an atlas four columns narrower than the one the game builds, and passed, because the
+        // builder is self-consistent at any width.
+        //
+        // The numbers are not restated. They are the arguments immediately below, and a list that
+        // has to be maintained alongside them is a list that will disagree with them again.
         public static readonly StageLayout Stage1 = new StageLayout(
             StageId.Stage1, "SIEGE PLAINS / 공성 평원",
             launchApronAbsX: 17.0f,
