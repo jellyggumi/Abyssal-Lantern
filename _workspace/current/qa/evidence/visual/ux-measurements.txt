@@ -10,3 +10,7 @@ onscreen text=10 buttons=1
 state=PlayerTurn playerTurn=True turn=0
 onscreen text=9 buttons=1
 
+## ux-4-enemy-turn
+state=AITurn playerTurn=False turn=1
+onscreen text=9 buttons=0
+
