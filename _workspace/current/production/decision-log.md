@@ -798,3 +798,71 @@ UX-001/002:  status=closed | regression-guard=미커밋 | shipped=있음
 | 적 턴 실화면 | — | UX-015. **캡처가 존재하지 않는다** — 이것이 W-1을 막는 것이다 |
 | `HudCanvasContractTests` 실행 결과 | 부모 레인 | 부모가 `CLAUDE.md` §7로 파일 소유권을 선언했고 Unity 실행은 부모 몫이다. **나는 통과를 주장하지 않는다** |
 | 부모 뮤테이션의 바이트 동일 원복 | QaRegisterAudit | QA가 `Adopt` 4건 복귀·diff 없음을 확인했다고 보고. 내가 마지막으로 본 트리는 3건 상태였다 |
+
+---
+
+## D-2026-08-19-A — G5 무료 경로 패리티: **면제 발행**
+
+**결정**: G5의 *"free-path parity within stated 10–20 session band"* 를 **면제한다.**
+면제 종류는 **해당 없음(not applicable)** 이며 만료일은 **첫 게임플레이 영향 유료 지점이
+추가되는 시점**이다.
+
+**이유 — 비교 대상이 한쪽 없는 패리티는 정의되지 않는다.**
+
+측정은 명확하다(`pm/reward-bands.md` §3):
+
+```
+SiegePrototypeEconomy:12   SeriesVictoryMarks    = 12
+SiegePrototypeEconomy:13   BattleBannerSealPrice = 12
+→ 시리즈 승리 1회로 유일한 구매 항목이 열린다 (1 ≪ 10)
+```
+
+밴드 밖이다. 그런데 10~20 세션 밴드가 재는 것은 **유료 경로와 무료 경로의 도달 시간 차이**다.
+그리고 유료 경로가 없다 — 마크는 구매할 수 없고(`SiegePrototypeEconomy:7-8` *"no price, IAP
+catalog, receipt, advertisement, random reward"*) 시리즈 승리로만 얻는다. [OBSERVED]
+
+유일한 IAP(R-1 Chronicle Pack)는 마크를 주지 않는다. 소비처 전수 결과 프롤로그 리플레이
+버튼 하나뿐이다(`pm/negotiation-record.md` §2). 즉 **두 경로가 만나는 지점이 없고**, 그러므로
+"1 세션"은 위반이 아니라 **분모가 없는 값**이다.
+
+**왜 위반으로 기록하지 않는가**: 위반으로 남기면 다음 세션이 그것을 고치려 할 것이고, 고치는
+방법은 (가) 무료 경로를 10~20 세션으로 늘리거나 (나) 유료 경로를 만드는 것이다. (가)는
+게임플레이 중립 장식 하나를 10배 멀리 두는 것이고, (나)는 **G5가 막으려는 바로 그것**이다.
+임계값을 만족시키려 밸런스에 유료 우위를 도입하는 것은 계약의 목적을 뒤집는다.
+
+**만료 조건 (날짜가 아니라 사건)**: 게임플레이에 영향하는 유료 지점이 하나라도 추가되면 이
+면제는 **즉시 만료**된다. 그 시점에 두 경로가 생기므로 패리티가 정의되고, 밴드가 실제 요구가
+된다. `pm/negotiation-record.md`가 매출 지점 추가 시 항목을 요구하므로 그 파일이 트리거다.
+
+**날짜 만료를 쓰지 않는 이유**: 계약은 만료일을 요구하는데, 이 면제의 유효성은 시간이 아니라
+**상품 구성**에 달려 있다. 날짜를 적으면 그 날 아무것도 바뀌지 않았는데 면제가 풀리고,
+아무 일도 없이 갱신하는 관례가 생긴다. 사건 만료가 더 강한 조건이며 **이 선택 자체를 결정으로
+기록한다** — 다음 디렉터가 날짜를 요구할 근거가 되도록.
+
+**근거**: `pm/reward-bands.md` §3, `pm/negotiation-record.md` §4,
+`Assets/Scripts/SiegePrototypeEconomy.cs:7-13`, `Assets/Scripts/MobileStorefront.cs:57-75`
+
+---
+
+## D-2026-08-19-B — G5 컴백 확률: **면제 거절, 계측 요구**
+
+**결정**: *"comeback instant-reversal probability ≤30% per activation"* 에 대해 면제를
+**발행하지 않는다.** 미측정으로 기록하고 계측을 요구한다.
+
+**이유**: 이것은 §A와 다르다. §A는 측정이 정의되지 않는 경우이고, 이것은 **측정이 정의되지만
+계측이 없는 경우**다. 정의되는 것을 면제하면 그것은 "재지 않기로 한다"이고 계약의 
+*"Missing evidence path = FAIL"* 과 같은 방향으로 읽어야 한다.
+
+**막힌 두 경로** [OBSERVED]:
+- `SiegeDuelSimulation`에 `LastStand` 참조 **0건**
+- `Telemetry.EventKind`가 `MatchStart / Volley / Collapse / MatchEnd / Session` — 컴백 없음
+
+**캡이 대신하지 못하는 이유**: `SingleHitDamageCap = 140` < 코어 150이므로 **만피 코어는**
+한 방에 안 지워진다. 그러나 10 이상 손상된 코어는 지워질 수 있고, 역전 확률은 발동 시점의
+상대 코어 HP 분포에 달려 있다. **캡은 상한의 일부만 보장한다.**
+
+**요구**: `Telemetry`에 컴백 발동 이벤트(발동 측 · 자기 코어 HP · 상대 코어 HP · 결과)를
+추가하고 기존 시뮬/프로브로 분포를 낸다. 그때까지 **G5는 PASS 불가**다.
+
+**근거**: `pm/reward-bands.md` §2, `Assets/Scripts/DynamicBattlefield.cs:712-726`,
+`Assets/Tests/EditMode/ComebackAsymmetryTests.cs:115-121`
