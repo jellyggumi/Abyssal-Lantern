@@ -581,6 +581,12 @@ namespace CastleBusters
                 {
                     trajectoryLine.sharedMaterial.mainTexture = dash.texture;
                     trajectoryLine.textureMode = LineTextureMode.Tile;
+                    // Measured on the deployed build at textureScale 1: the arc ran 939 contiguous
+                    // columns with zero gaps and only 30% brightness modulation — a period of 7.0px
+                    // (autocorrelation of the arc's brightness profile), which is below what soft
+                    // dot edges survive, so the dots merged into a faintly ribbed line. Stretching
+                    // U by this factor targets a ~20px period, where the gaps read as gaps.
+                    trajectoryLine.textureScale = new Vector2(0.35f, 1f);
                 }
                 // Translucency now lives in the TEXTURE (peak alpha 0.55, 44% duty cycle), so these
                 // vertex colours only shape the near-to-far falloff on top of it. The tail alpha is
