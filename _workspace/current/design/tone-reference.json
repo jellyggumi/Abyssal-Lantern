@@ -1,0 +1,275 @@
+{
+  "Assets/Resources": {
+    "files": 2,
+    "lum": 0.2988,
+    "sat": 0.3121,
+    "hue": 146.9,
+    "opaque": 0.6452
+  },
+  "Backgrounds": {
+    "files": 3,
+    "lum": 0.4245,
+    "sat": 0.5871,
+    "hue": 178.1,
+    "opaque": 1.0
+  },
+  "CastleSkin": {
+    "files": 12,
+    "lum": 0.2893,
+    "sat": 0.1725,
+    "hue": 41.7,
+    "opaque": 0.3627
+  },
+  "Effects/fx_arcane": {
+    "files": 4,
+    "lum": 0.6798,
+    "sat": 0.469,
+    "hue": 206.4,
+    "opaque": 0.2262
+  },
+  "Effects/fx_dust": {
+    "files": 4,
+    "lum": 0.4027,
+    "sat": 0.3452,
+    "hue": 98.7,
+    "opaque": 0.3077
+  },
+  "Effects/fx_eruption": {
+    "files": 5,
+    "lum": 0.4498,
+    "sat": 0.5562,
+    "hue": 46.4,
+    "opaque": 0.419
+  },
+  "Effects/fx_muzzle": {
+    "files": 6,
+    "lum": 0.5337,
+    "sat": 0.6062,
+    "hue": 56.4,
+    "opaque": 0.1498
+  },
+  "Effects/fx_petals": {
+    "files": 4,
+    "lum": 0.6463,
+    "sat": 0.3221,
+    "hue": 310.2,
+    "opaque": 0.3002
+  },
+  "Effects/fx_shatter": {
+    "files": 6,
+    "lum": 0.4054,
+    "sat": 0.152,
+    "hue": 227.4,
+    "opaque": 0.3268
+  },
+  "Effects/fx_spark": {
+    "files": 3,
+    "lum": 0.8847,
+    "sat": 0.6114,
+    "hue": 58.0,
+    "opaque": 0.1302
+  },
+  "Effects/fx_sparkle": {
+    "files": 4,
+    "lum": 0.6812,
+    "sat": 0.5283,
+    "hue": 213.0,
+    "opaque": 0.2547
+  },
+  "Effects/fx_spawn": {
+    "files": 4,
+    "lum": 0.5335,
+    "sat": 0.3124,
+    "hue": 82.1,
+    "opaque": 0.2619
+  },
+  "Effects/particles": {
+    "files": 3,
+    "lum": 0.627,
+    "sat": 0.4353,
+    "hue": 123.3,
+    "opaque": 0.5477
+  },
+  "GeneratedExplosionFrames": {
+    "files": 6,
+    "lum": 0.3627,
+    "sat": 0.5529,
+    "hue": 39.9,
+    "opaque": 0.5017
+  },
+  "GeneratedUnitFrames/Archer/Attack": {
+    "files": 5,
+    "lum": 0.2255,
+    "sat": 0.7037,
+    "hue": 74.6,
+    "opaque": 0.2248
+  },
+  "GeneratedUnitFrames/Archer/Idle": {
+    "files": 4,
+    "lum": 0.2254,
+    "sat": 0.7103,
+    "hue": 44.1,
+    "opaque": 0.2009
+  },
+  "GeneratedUnitFrames/Archer/Launch": {
+    "files": 5,
+    "lum": 0.2447,
+    "sat": 0.6647,
+    "hue": 53.5,
+    "opaque": 0.3911
+  },
+  "GeneratedUnitFrames/Archer/Walk": {
+    "files": 6,
+    "lum": 0.2361,
+    "sat": 0.6731,
+    "hue": 40.4,
+    "opaque": 0.203
+  },
+  "GeneratedUnitFrames/Bomber/Attack": {
+    "files": 5,
+    "lum": 0.2249,
+    "sat": 0.6172,
+    "hue": 35.1,
+    "opaque": 0.2414
+  },
+  "GeneratedUnitFrames/Bomber/Idle": {
+    "files": 4,
+    "lum": 0.2103,
+    "sat": 0.6245,
+    "hue": 35.8,
+    "opaque": 0.2392
+  },
+  "GeneratedUnitFrames/Bomber/Launch": {
+    "files": 5,
+    "lum": 0.2147,
+    "sat": 0.5524,
+    "hue": 42.7,
+    "opaque": 0.3542
+  },
+  "GeneratedUnitFrames/Bomber/Walk": {
+    "files": 6,
+    "lum": 0.2416,
+    "sat": 0.6204,
+    "hue": 34.8,
+    "opaque": 0.2153
+  },
+  "GeneratedUnitFrames/Knight/Attack": {
+    "files": 5,
+    "lum": 0.3923,
+    "sat": 0.2711,
+    "hue": 126.0,
+    "opaque": 0.2617
+  },
+  "GeneratedUnitFrames/Knight/Idle": {
+    "files": 4,
+    "lum": 0.3964,
+    "sat": 0.2936,
+    "hue": 107.7,
+    "opaque": 0.2838
+  },
+  "GeneratedUnitFrames/Knight/Launch": {
+    "files": 5,
+    "lum": 0.3953,
+    "sat": 0.3039,
+    "hue": 145.9,
+    "opaque": 0.3321
+  },
+  "GeneratedUnitFrames/Knight/Walk": {
+    "files": 6,
+    "lum": 0.4081,
+    "sat": 0.2876,
+    "hue": 128.3,
+    "opaque": 0.2704
+  },
+  "GeneratedUnitFrames/KnightPrologue/Idle": {
+    "files": 4,
+    "lum": 0.3185,
+    "sat": 0.3482,
+    "hue": 206.5,
+    "opaque": 0.234
+  },
+  "Gimmicks": {
+    "files": 23,
+    "lum": 0.3984,
+    "sat": 0.5007,
+    "hue": 100.1,
+    "opaque": 0.6131
+  },
+  "Gimmicks/barrel_anim": {
+    "files": 4,
+    "lum": 0.2609,
+    "sat": 0.6264,
+    "hue": 38.9,
+    "opaque": 0.5612
+  },
+  "Gimmicks/core_anim": {
+    "files": 4,
+    "lum": 0.3916,
+    "sat": 0.4747,
+    "hue": 218.1,
+    "opaque": 0.4543
+  },
+  "Gimmicks/flying_beast_anim": {
+    "files": 6,
+    "lum": 0.1723,
+    "sat": 0.5558,
+    "hue": 84.4,
+    "opaque": 0.2197
+  },
+  "Gimmicks/gate_anim": {
+    "files": 4,
+    "lum": 0.4006,
+    "sat": 0.4069,
+    "hue": 106.2,
+    "opaque": 0.5613
+  },
+  "Gimmicks/hex_rune_anim": {
+    "files": 4,
+    "lum": 0.1055,
+    "sat": 0.9068,
+    "hue": 266.5,
+    "opaque": 0.5417
+  },
+  "Gimmicks/launch_gate_anim": {
+    "files": 6,
+    "lum": 0.375,
+    "sat": 0.453,
+    "hue": 173.6,
+    "opaque": 0.3929
+  },
+  "Gimmicks/rally_rune_anim": {
+    "files": 4,
+    "lum": 0.5596,
+    "sat": 0.7853,
+    "hue": 128.9,
+    "opaque": 0.6135
+  },
+  "Gimmicks/stage1_barrel_anim": {
+    "files": 4,
+    "lum": 0.2686,
+    "sat": 0.6119,
+    "hue": 40.5,
+    "opaque": 0.3989
+  },
+  "Higgsfield/UI": {
+    "files": 6,
+    "lum": 0.7242,
+    "sat": 0.3687,
+    "hue": 89.0,
+    "opaque": 0.3019
+  },
+  "Higgsfield/VFX": {
+    "files": 3,
+    "lum": 0.7254,
+    "sat": 0.5296,
+    "hue": 86.2,
+    "opaque": 0.1884
+  },
+  "IntroAnim": {
+    "files": 6,
+    "lum": 0.3545,
+    "sat": 0.8175,
+    "hue": 36.6,
+    "opaque": 0.2588
+  }
+}

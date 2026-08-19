@@ -59,8 +59,8 @@ namespace CastleBusters.Tests
             Assert.That(missing, Is.Empty,
                 "grass variants missing: " + string.Join(", ", missing)
                 + ". These are not required for the ground to draw — the builder substitutes the base "
-                + "grass tile — but without them 41 columns draw the same image and the top row reads "
-                + "as wallpaper rather than terrain.");
+                + "grass tile — but without them every column draws the same image and the top row "
+                + "reads as wallpaper rather than terrain.");
         }
 
         [Test]
@@ -108,14 +108,31 @@ namespace CastleBusters.Tests
             }
         }
 
+        /// <summary>
+        /// The atlas dimensions CreateGround derives for Stage1, computed the same way it does.
+        ///
+        /// Both call sites hard-coded 41 columns before 2026-08-19, read out of a stale comment in
+        /// StageDefinitions that still listed the pre-widening `groundHalfWidth=20`. Stage1 is 23,
+        /// so the real strip is 47 columns and `blockRes` is 87 rather than 99 — and every assertion
+        /// below passed anyway, because the builder is self-consistent at whatever width it is
+        /// handed. The tests were measuring an atlas the game never builds.
+        ///
+        /// Reading the layout keeps that from recurring: a stage that changes width changes this.
+        /// </summary>
+        private static (int columns, int rows, int blockRes) Stage1AtlasShape()
+        {
+            // Mirrors GameManager: groundColumnCount => groundHalfWidth * 2 + 1, five rows, and a
+            // resolution clamped so the atlas stays inside the 4096 budget that Stage3 blew past.
+            int columns = Mathf.RoundToInt(StageDefinitions.Stage1.groundHalfWidth) * 2 + 1;
+            const int rows = 5;
+            int blockRes = Mathf.Clamp(4096 / columns, 16, 160);
+            return (columns, rows, blockRes);
+        }
+
         [Test]
         public void TheAtlasBuilderReturnsArtRatherThanFallingBackSilently()
         {
-            // Exactly the arguments CreateGround passes for Stage1: 41 columns, 5 rows, and the
-            // blockRes it derives from the 4096 atlas budget.
-            const int columns = 41;
-            const int rows = 5;
-            int blockRes = Mathf.Clamp(4096 / columns, 16, 160);
+            var (columns, rows, blockRes) = Stage1AtlasShape();
 
             var builder = typeof(GameManager).GetMethod(
                 "BuildGroundAtlasFromArt",
@@ -150,9 +167,7 @@ namespace CastleBusters.Tests
         [Test]
         public void TheAtlasRowsRunGrassDownToStoneTopToBottom()
         {
-            const int columns = 41;
-            const int rows = 5;
-            int blockRes = Mathf.Clamp(4096 / columns, 16, 160);
+            var (columns, rows, blockRes) = Stage1AtlasShape();
 
             var builder = typeof(GameManager).GetMethod(
                 "BuildGroundAtlasFromArt",
@@ -195,6 +210,77 @@ namespace CastleBusters.Tests
                     + "of the texture is the top; when they disagree the board renders its depth ramp "
                     + "upside down, and both halves look individually correct while doing it.");
             }
+        }
+
+        [Test]
+        public void CellsAreAreaAveragedRatherThanPointSampled()
+        {
+            var (columns, rows, blockRes) = Stage1AtlasShape();
+
+            var tile = Resources.Load<Sprite>("Ground/ground_tile_stone");
+            if (tile == null || !tile.texture.isReadable) Assert.Ignore("stone tile unavailable");
+
+            var builder = typeof(GameManager).GetMethod(
+                "BuildGroundAtlasFromArt",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            var atlas = (Texture2D)builder.Invoke(null,
+                new object[] { columns * blockRes, rows * blockRes, blockRes, rows, columns });
+            if (atlas == null) Assert.Ignore("builder returned null; the fallback test owns that");
+
+            // Bottom row is stone. Compare each cell pixel against both candidate reductions of the
+            // source tile and see which the atlas actually matches.
+            var src = tile.texture.GetPixels32();
+            int tw = tile.texture.width;
+            int sw = (int)tile.textureRect.width, sh = (int)tile.textureRect.height;
+            int rx = (int)tile.textureRect.x, ry = (int)tile.textureRect.y;
+
+            double errNearest = 0, errArea = 0;
+            int samples = 0;
+
+            // Interior only: cell edges neighbour a different tile, and this is about the filter,
+            // not about seams.
+            for (int y = 2; y < blockRes - 2; y += 3)
+            {
+                for (int x = 2; x < blockRes - 2; x += 3)
+                {
+                    var got = atlas.GetPixel(x, y);
+
+                    // Point sample: the single source pixel nearest-neighbour would have picked.
+                    int px = rx + Mathf.Min(sw - 1, x * sw / blockRes);
+                    int py = ry + Mathf.Min(sh - 1, y * sh / blockRes);
+                    var point = src[py * tw + px];
+
+                    // Area average over the same footprint the builder covers.
+                    int x0 = rx + x * sw / blockRes, x1 = Mathf.Max(x0 + 1, rx + (x + 1) * sw / blockRes);
+                    int y0 = ry + y * sh / blockRes, y1 = Mathf.Max(y0 + 1, ry + (y + 1) * sh / blockRes);
+                    long ar = 0, ag = 0, ab = 0; int n = 0;
+                    for (int sy = y0; sy < y1; sy++)
+                        for (int sx = x0; sx < x1; sx++)
+                        {
+                            var c = src[sy * tw + sx];
+                            ar += c.r; ag += c.g; ab += c.b; n++;
+                        }
+
+                    errNearest += Diff(got, point.r / 255f, point.g / 255f, point.b / 255f);
+                    errArea += Diff(got, ar / 255f / n, ag / 255f / n, ab / 255f / n);
+                    samples++;
+                }
+            }
+
+            Assert.That(samples, Is.GreaterThan(50), "not enough interior samples to judge");
+            Assert.That(errArea, Is.LessThan(errNearest),
+                $"the atlas matches point-sampling (error {errNearest / samples:F4}) more closely than "
+                + $"area-averaging (error {errArea / samples:F4}), so CopyTileInto is dropping source "
+                + "pixels instead of averaging them. At 128 source into an "
+                + $"{blockRes}px cell each destination pixel covers ~{128f / blockRes:F2} source pixels; "
+                + "keeping one and discarding the rest measurably invents high-frequency detail the "
+                + "art does not have — round-trip RMSE was 17.7% worse across all seven tiles.");
+        }
+
+        private static double Diff(Color got, double r, double g, double b)
+        {
+            double dr = got.r - r, dg = got.g - g, db = got.b - b;
+            return dr * dr + dg * dg + db * db;
         }
 
         private static Color RowMean(Texture2D atlas, int y, int step)

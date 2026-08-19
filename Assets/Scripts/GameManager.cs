@@ -1816,15 +1816,36 @@ namespace CastleBusters
                 }
             }
 
+            // Drop the source reads. Beyond the memory, a Dictionary keyed on Texture2D outliving
+            // this call would hold references to textures a stage change can unload, and a
+            // destroyed key hashes fine while its value is garbage.
+            tilePixelCache.Clear();
+
             atlas.SetPixels32(pixels);
             atlas.Apply(true, false);
             return atlas;
         }
 
         /// <summary>
-        /// Samples one sprite into a cell of the atlas buffer, scaling by nearest neighbour.
+        /// Samples one sprite into a cell of the atlas buffer, area-averaging over the source
+        /// footprint of each destination pixel.
         ///
-        /// Reads through the sprite's own `textureRect` so an atlased or sub-rect sprite lands
+        /// Nearest-neighbour was wrong here in a way that is easy to miss. The art is authored at
+        /// 128 and the cell is <c>4096 / columns</c> — 87 for Stage1's 47 columns — so each
+        /// destination pixel covers about 1.47 source pixels. Point-sampling keeps one of them and
+        /// discards the rest, which drops roughly a third of the authored pixels and aliases the
+        /// remainder: fine stipple and grass blades turn into irregular clumps rather than getting
+        /// smaller.
+        ///
+        /// The second reduction, 87 down to the ~32 screen pixels a 1-unit tile occupies, was never
+        /// the problem — <c>Apply(true, …)</c> builds mipmaps and the trilinear filter uses them.
+        /// Only this CPU step threw data away, and it threw it away before the mips were built, so
+        /// no amount of GPU filtering could recover it.
+        ///
+        /// Averaging is alpha-weighted: a transparent source pixel carries an arbitrary RGB, and
+        /// letting it into an unweighted mean drags the colour toward whatever that happens to be.
+        ///
+        /// Reads through the sprite's own <c>textureRect</c> so an atlased or sub-rect sprite lands
         /// correctly rather than sampling whatever else shares its texture.
         /// </summary>
         private static void CopyTileInto(Color32[] dst, int dstWidth, int originX, int originY, int size, Sprite tile)
@@ -1834,29 +1855,72 @@ namespace CastleBusters
             var rect = tile.textureRect;
             int sw = Mathf.Max(1, (int)rect.width);
             int sh = Mathf.Max(1, (int)rect.height);
+            int rx = (int)rect.x, ry = (int)rect.y;
 
-            Color32[] src;
-            try
-            {
-                src = tex.GetPixels32();
-            }
-            catch (UnityException)
-            {
-                // Not readable (Read/Write disabled): a cosmetic loss, not a reason to lose the board.
-                return;
-            }
+            var src = ReadTilePixels(tex);
+            // Unreadable (Read/Write disabled): a cosmetic loss, not a reason to lose the board.
+            if (src == null) return;
 
             for (int y = 0; y < size; y++)
             {
-                int sy = (int)rect.y + Mathf.Min(sh - 1, y * sh / size);
+                // Half-open source span for this destination row. Rounding both edges from the same
+                // expression means spans tile exactly: no seam, no doubled row.
+                int sy0 = ry + y * sh / size;
+                int sy1 = ry + (y + 1) * sh / size;
+                if (sy1 <= sy0) sy1 = sy0 + 1;
+                if (sy1 > ry + sh) sy1 = ry + sh;
+
                 int dstRow = (originY + y) * dstWidth;
-                int srcRow = sy * tex.width;
                 for (int x = 0; x < size; x++)
                 {
-                    int sx = (int)rect.x + Mathf.Min(sw - 1, x * sw / size);
-                    dst[dstRow + originX + x] = src[srcRow + sx];
+                    int sx0 = rx + x * sw / size;
+                    int sx1 = rx + (x + 1) * sw / size;
+                    if (sx1 <= sx0) sx1 = sx0 + 1;
+                    if (sx1 > rx + sw) sx1 = rx + sw;
+
+                    int r = 0, g = 0, b = 0, a = 0, weight = 0;
+                    for (int sy = sy0; sy < sy1; sy++)
+                    {
+                        int srcRow = sy * tex.width;
+                        for (int sx = sx0; sx < sx1; sx++)
+                        {
+                            var c = src[srcRow + sx];
+                            r += c.r * c.a; g += c.g * c.a; b += c.b * c.a;
+                            a += c.a; weight += c.a;
+                        }
+                    }
+
+                    int span = (sy1 - sy0) * (sx1 - sx0);
+                    dst[dstRow + originX + x] = weight == 0
+                        // Fully transparent footprint: keep it transparent rather than inventing a
+                        // colour for it.
+                        ? new Color32(0, 0, 0, 0)
+                        : new Color32((byte)(r / weight), (byte)(g / weight), (byte)(b / weight),
+                                      (byte)(a / span));
                 }
             }
+        }
+
+        // One pixel read per source texture rather than per tile. Seven tiles fill 235 cells, so the
+        // uncached version issued 235 GetPixels32 calls for seven distinct 128x128 images — 3.8M
+        // Color32 copies to place 1.8M. Cleared after the atlas is built; holding seven 64KB arrays
+        // for the rest of the session buys nothing, since the ground is built once per stage.
+        private static readonly Dictionary<Texture2D, Color32[]> tilePixelCache =
+            new Dictionary<Texture2D, Color32[]>();
+
+        private static Color32[] ReadTilePixels(Texture2D tex)
+        {
+            if (tilePixelCache.TryGetValue(tex, out var cached)) return cached;
+            try
+            {
+                cached = tex.GetPixels32();
+            }
+            catch (UnityException)
+            {
+                cached = null;
+            }
+            tilePixelCache[tex] = cached;
+            return cached;
         }
 
 
