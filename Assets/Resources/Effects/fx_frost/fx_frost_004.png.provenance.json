@@ -1,13 +1,10 @@
 {
-  "generated_at": "2026-08-19T05:29:44.229928+00:00",
-  "tool": "Pillow procedural concept pass by jeo",
-  "source_document": "_workspace/current/design/art-production-order.md",
-  "source_order": "A1.4",
-  "concept_only": true,
-  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
-  "prompt": "256x256 frost burst frame sequence: hex ice shards radiate outward, blue outline, fading alpha over six frames.",
-  "saturation_contract": "self-colored blue >=0.35",
-  "sha256": "9f0799097ea23b5616d8605e9c35eb8125e458c7e97c0cab811dad719d333f5b",
-  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Effects/fx_frost/fx_frost_004.png",
-  "intended_runtime_path": "Assets/Resources/Effects/fx_frost/fx_frost_004.png"
+  "generated_at": "2026-08-20T15:34:30.482913+00:00",
+  "tool": "higgsfield-cli gpt_image_2 + PIL slice/key by jeo",
+  "prompt": "Higgsfield gpt_image_2 3x2 sprite sheet: ice eruption frame animation (crystals burst, shard column rises, full glowing column, cracking apart, falling shards, dissipating mist), pale ice-blue, pure black background; sliced per cell, black keyed to alpha (alpha=max(RGB), colour un-premultiplied), resized 256x256 by jeo.",
+  "sha256": "7b3aaba3da265e9bf5e3b89c10f1539bbb8941f3dd89a912d8521a85b866f488",
+  "output": "Assets/Resources/Effects/fx_frost/fx_frost_004.png",
+  "sheet_url_job": "hf_20260820_151929_e13ac04a",
+  "frame": 4,
+  "supersedes": "grey line-diagram placeholder frames (2-10KB near-empty canvases)"
 }

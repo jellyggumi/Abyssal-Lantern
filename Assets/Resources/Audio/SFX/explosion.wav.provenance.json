@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-08-20T15:34:30.488128+00:00",
+  "tool": "higgsfield-cli seed_audio + ffmpeg trim/normalize by jeo",
+  "prompt": "single powder keg explosion: deep sub-bass boom with wooden debris crackle, tight punchy transient, short tail",
+  "sha256": "016b025f80c8f055f4ddf3385f13a61726076861c33054ac824040cf9c9ba1b9",
+  "output": "Assets/Resources/Audio/SFX/explosion.wav",
+  "post": "silenceremove -45dB, peak normalized to -1dBFS, 0.12s fade-out, 24kHz mono s16"
+}

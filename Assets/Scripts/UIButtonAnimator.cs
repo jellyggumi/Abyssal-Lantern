@@ -42,6 +42,9 @@ namespace CastleBusters
             if (button != null && !button.interactable) return;
             // Snappy squash animation for pixel-art feel
             transform.localScale = originalScale * 0.9f;
+            // Press confirmation: the 0.9x squash is easy to miss under a finger on mobile,
+            // and gameplay is loud while every menu was dead silent.
+            GameFeelVfx.PlayUiClickSfx();
         }
 
         public void OnPointerUp(PointerEventData eventData)

@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-08-20T15:34:30.489498+00:00",
+  "tool": "higgsfield-cli seed_audio + ffmpeg trim/normalize by jeo",
+  "prompt": "bright reward pickup chime: two quick ascending bell notes, sparkly and positive",
+  "sha256": "e153d2cf6a57d97b561a1b18be6a29431e59f38bb851683876de9c69e549d6b3",
+  "output": "Assets/Resources/Audio/SFX/pickup.wav",
+  "post": "silenceremove -45dB, peak normalized to -1dBFS, 0.12s fade-out, 24kHz mono s16"
+}

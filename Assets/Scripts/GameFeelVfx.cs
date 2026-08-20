@@ -9,31 +9,70 @@ namespace CastleBusters
     {
         private static Sprite cachedRingSprite;
         private static AudioSource presentationAudioSource;
+        // Round-robin pool for pitch-varied one-shots. AudioSource.pitch is a SOURCE property:
+        // PlayOneShot shots inherit the source's CURRENT pitch, so re-pitching one shared
+        // source re-pitches every clip still playing on it — an audible warble exactly in the
+        // multi-event volleys the variance exists for. Each varied shot takes the next pool
+        // source; its pitch then stays fixed for that clip's lifetime.
+        private static readonly AudioSource[] variedSources = new AudioSource[4];
+        private static int nextVariedSource;
         private static GameObject presentationAudioHost;
         private static AudioClip impactSfx;
         private static AudioClip launchSfx;
         private static AudioClip comboSfx;
+        private static AudioClip explosionSfx;
+        private static AudioClip breakSfx;
+        private static AudioClip uiClickSfx;
+        private static AudioClip pickupSfx;
         private const string impactSfxPath = "Audio/SFX/impact";
         private const string launchSfxPath = "Audio/SFX/launch";
         private const string comboSfxPath = "Audio/SFX/combo";
+        private const string explosionSfxPath = "Audio/SFX/explosion";
+        private const string breakSfxPath = "Audio/SFX/break";
+        private const string uiClickSfxPath = "Audio/SFX/ui-click";
+        private const string pickupSfxPath = "Audio/SFX/pickup";
+        // Audio-only randomness. Deliberately NOT UnityEngine.Random: PlayMode tests pin
+        // Random.state around gameplay, and a pitch draw mid-volley would shift every
+        // subsequent gameplay roll in the test.
+        private static readonly System.Random sfxJitter = new System.Random(9137);
 
         private static AudioSource GetPresentationAudioSource()
         {
             if (!Application.isPlaying) return null;
 
             if (presentationAudioSource != null) return presentationAudioSource;
+            EnsureAudioHost();
+            presentationAudioSource = NewPresentationSource();
+            return presentationAudioSource;
+        }
+
+        private static void EnsureAudioHost()
+        {
             if (presentationAudioHost == null)
             {
                 presentationAudioHost = new GameObject("GameFeelVfxAudio");
                 Object.DontDestroyOnLoad(presentationAudioHost);
             }
+        }
 
-            presentationAudioSource = presentationAudioHost.AddComponent<AudioSource>();
-            presentationAudioSource.playOnAwake = false;
-            presentationAudioSource.spatialBlend = 0f;
-            presentationAudioSource.pitch = 1f;
-            presentationAudioSource.loop = false;
-            return presentationAudioSource;
+        private static AudioSource NewPresentationSource()
+        {
+            var source = presentationAudioHost.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.pitch = 1f;
+            source.loop = false;
+            return source;
+        }
+
+        private static AudioSource GetVariedSource()
+        {
+            if (!Application.isPlaying) return null;
+            EnsureAudioHost();
+            int i = nextVariedSource;
+            nextVariedSource = (nextVariedSource + 1) % variedSources.Length;
+            if (variedSources[i] == null) variedSources[i] = NewPresentationSource();
+            return variedSources[i];
         }
 
         private static AudioClip LoadImpactClip()
@@ -54,14 +93,18 @@ namespace CastleBusters
             return comboSfx;
         }
 
-        private static void PlayOneShotPresentationSfx(AudioClip clip, float volume)
+        private static void PlayOneShotPresentationSfx(AudioClip clip, float volume, bool varyPitch = true)
         {
             if (!Application.isPlaying || clip == null) return;
 
-            var source = GetPresentationAudioSource();
+            // ±8% pitch variance de-repeats the machine-gun effect of one clip serving
+            // several event types in a single volley (arrow + splash + debris). Varied shots
+            // use the round-robin pool so a new shot's pitch never bends clips mid-flight;
+            // fixed-pitch shots (UI) keep the dedicated source.
+            var source = varyPitch ? GetVariedSource() : GetPresentationAudioSource();
             if (source == null) return;
 
-            source.pitch = 1f;
+            source.pitch = varyPitch ? 0.92f + 0.16f * (float)sfxJitter.NextDouble() : 1f;
             source.PlayOneShot(clip, Mathf.Clamp01(volume));
         }
 
@@ -88,6 +131,42 @@ namespace CastleBusters
             float comboScale = Mathf.Clamp01((comboCount - 1f) / 6f);
             float volume = Mathf.Lerp(0.2f, 0.4f, comboScale);
             PlayOneShotPresentationSfx(clip, volume);
+        }
+
+        /// <summary>Keg/bomb detonation. The loudest gameplay beat: pairs with the hit-stop
+        /// and the biggest screen shake, which used to fire in total silence.</summary>
+        public static void PlayExplosionSfx(float radius)
+        {
+            if (!Application.isPlaying) return;
+            if (explosionSfx == null) explosionSfx = Resources.Load<AudioClip>(explosionSfxPath);
+            float volume = Mathf.Lerp(0.55f, 0.9f, Mathf.Clamp01(radius / 3f));
+            PlayOneShotPresentationSfx(explosionSfx, volume);
+        }
+
+        /// <summary>Structure break — the win-condition payoff. Core breaks play louder.</summary>
+        public static void PlayBreakSfx(bool isCore)
+        {
+            if (!Application.isPlaying) return;
+            if (breakSfx == null) breakSfx = Resources.Load<AudioClip>(breakSfxPath);
+            PlayOneShotPresentationSfx(breakSfx, isCore ? 0.85f : 0.5f);
+        }
+
+        /// <summary>Button press confirmation. Fixed pitch: UI feedback should be identical
+        /// every time, unlike battlefield sounds where repetition reads as fatigue.</summary>
+        public static void PlayUiClickSfx()
+        {
+            if (!Application.isPlaying) return;
+            if (uiClickSfx == null) uiClickSfx = Resources.Load<AudioClip>(uiClickSfxPath);
+            PlayOneShotPresentationSfx(uiClickSfx, 0.5f, varyPitch: false);
+        }
+
+        /// <summary>Loot pickup reward chime. Replaces the damage thud that used to play here —
+        /// the one moment that must NOT sound like getting hit.</summary>
+        public static void PlayPickupSfx()
+        {
+            if (!Application.isPlaying) return;
+            if (pickupSfx == null) pickupSfx = Resources.Load<AudioClip>(pickupSfxPath);
+            PlayOneShotPresentationSfx(pickupSfx, 0.55f);
         }
 
         public static void SpawnDamageNumber(Vector3 position, float amount, Color color)
@@ -422,11 +501,14 @@ namespace CastleBusters
             const float innerRadius = 17f;
             var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
             {
-                filterMode = FilterMode.Point,
+                // Bilinear + a feathered edge: the point-filtered hard annulus rendered as a
+                // stair-stepped band at 1.25+ world units, visibly a generation older than the
+                // 512px authored accents it composites with on every BREAK.
+                filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp
             };
 
-            var clear = new Color(1f, 1f, 1f, 0f);
+            const float feather = 1.5f;
             for (int y = 0; y < size; y++)
             {
                 for (int x = 0; x < size; x++)
@@ -434,7 +516,10 @@ namespace CastleBusters
                     float dx = x + 0.5f - size * 0.5f;
                     float dy = y + 0.5f - size * 0.5f;
                     float d = Mathf.Sqrt(dx * dx + dy * dy);
-                    texture.SetPixel(x, y, d <= outerRadius && d >= innerRadius ? Color.white : clear);
+                    // 1 inside the band, ramping to 0 across `feather` px on both edges.
+                    float a = Mathf.Clamp01((outerRadius - d) / feather)
+                            * Mathf.Clamp01((d - innerRadius) / feather);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, a));
                 }
             }
 

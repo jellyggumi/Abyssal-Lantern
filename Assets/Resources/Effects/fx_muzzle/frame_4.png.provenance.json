@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-08-20T15:34:30.485983+00:00",
+  "tool": "higgsfield-cli gpt_image_2 + PIL slice/key by jeo",
+  "prompt": "Higgsfield gpt_image_2 3x2 sprite sheet: cannon muzzle flash pointing right (white-hot punch, flame cone with sparks, full bloom, breakup, smoke ring, smoke wisps), pure black background; generated barrel cropped out (uniform cut x=100/682-cell), residual grey ring masked by saturation<0.35 & brightness<200 in left 18%, black keyed to alpha, 256x256 by jeo.",
+  "sha256": "52bc3b47223489fd21889b9de5d8bbb49a3e21c9d1be42e6d1a12dc79d046a95",
+  "output": "Assets/Resources/Effects/fx_muzzle/frame_4.png",
+  "sheet_url_job": "hf_20260820_152144_d4a2aa4b",
+  "frame": 4,
+  "supersedes": "scale/alpha ramp of one drawing (same flame at growing scale)"
+}

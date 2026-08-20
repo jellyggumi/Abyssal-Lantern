@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-08-20T15:34:30.488607+00:00",
+  "tool": "higgsfield-cli seed_audio + ffmpeg trim/normalize by jeo",
+  "prompt": "stone castle wall block crumbling and breaking apart: sharp rock crack then rubble tumble, dry and punchy",
+  "sha256": "3f57f5688b6e811faeb44240978e142e1c70ec23834cae7fc0f726bcdb170fde",
+  "output": "Assets/Resources/Audio/SFX/break.wav",
+  "post": "silenceremove -45dB, peak normalized to -1dBFS, 0.12s fade-out, 24kHz mono s16"
+}

@@ -232,6 +232,10 @@ namespace CastleBusters
 
             SpawnExplosionVisual();
 
+            // The loudest beat in the loop: hit-stop + the biggest screen shake fired in
+            // total silence, which read as a dropped frame rather than a detonation.
+            GameFeelVfx.PlayExplosionSfx(explosionRadius);
+
             if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.075f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.45f, 0.2f);
 

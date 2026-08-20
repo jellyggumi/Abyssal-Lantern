@@ -203,7 +203,10 @@ namespace CastleBusters
                 unit.isPlayerUnit ? new Color(0.55f, 0.95f, 1f, 1f) : new Color(1f, 0.5f, 0.4f, 1f));
             GameFeelVfx.SpawnFeedbackLabel(transform.position + Vector3.up * 0.5f,
                 $"{HeroGrowth.KoreanName(type)} +1", new Color(1f, 0.9f, 0.4f, 1f), 2.0f, 0.6f);
-            GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.9f, 0.4f, 0.8f), 0.5f);
+            // playAudio:false — the reward moment must not play the damage thud players have
+            // learned from hundreds of impacts; the chime is the loot's own voice.
+            GameFeelVfx.SpawnImpactBurst(transform.position, new Color(1f, 0.9f, 0.4f, 0.8f), 0.5f, null, playAudio: false);
+            GameFeelVfx.PlayPickupSfx();
             Destroy(gameObject);
         }
     }

@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-20T15:34:30.487566+00:00",
+  "tool": "higgsfield-cli nano_banana_2 + PIL key by jeo",
+  "prompt": "Birth frame of the existing fx_sparkle ring-burst, generated with fx_sparkle_001.png as the style reference: compact pixel-art cyan-white energy core igniting, black keyed to alpha, 256x256.",
+  "sha256": "9b31e8b5d04c63291ec31be10d54e8a7ef7dd0194c336da4c24e615ba7690122",
+  "output": "Assets/Resources/Effects/fx_sparkle/fx_sparkle_000.png",
+  "job": "hf_20260820_152402_4fea6c6a",
+  "supersedes": "77x77 JPEG-artifacted plus-shape (the 3.3x frame-size jump pinned by ImpactParticleArtTests)"
+}

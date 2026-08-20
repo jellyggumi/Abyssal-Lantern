@@ -103,10 +103,12 @@ namespace CastleBusters.Tests
             // match its three siblings, so the strip no longer jumps on frame one. This test is the
             // only reason that repair is provable rather than asserted — it failed on the redraw and
             // named the effect that had changed.
+            // fx_sparkle LEFT the list on 2026-08-20: its 77x77 JPEG-artifacted first frame was
+            // regenerated at 256x256 (nano_banana_2, styled on fx_sparkle_001) to match its three
+            // siblings, so the strip no longer jumps 3.3x on frame one.
             var knownOffenders = new[]
             {
                 EffectSpriteLibrary.Dust,       // 190x190 then 256x256 x3
-                EffectSpriteLibrary.Sparkle,    // 77x77 then 256x256 x3 — the worst jump
                 EffectSpriteLibrary.Eruption,   // 545x639 vs 443x640
                 EffectSpriteLibrary.Petals,     // 368x640 vs siblings
                 EffectSpriteLibrary.Arcane,     // surfaced by the importer repair

@@ -427,6 +427,10 @@ namespace CastleBusters
                     this is CastleCoreGimmick ? 2.6f : 1.7f, Color.white, 14f, 34);
                 GameFeelVfx.SpawnShockwaveRing(transform.position, new Color(1f, 0.62f, 0.18f, 0.6f), 1.25f, 0.36f);
                 GameFeelVfx.SpawnFeedbackLabel(transform.position, "BREAK!", new Color(1f, 0.72f, 0.18f, 1f), 2.2f, 0.6f);
+                // The win-condition payoff had no sound of its own: a clean single break —
+                // including the CORE break that ends the match — relied on combo.wav, which
+                // only fires at combo x2+.
+                GameFeelVfx.PlayBreakSfx(this is CastleCoreGimmick);
                 GameplayUxDirector.NotifyBreak(transform.position, this is CastleCoreGimmick);
 
                 if (DebrisPool.Instance != null)
