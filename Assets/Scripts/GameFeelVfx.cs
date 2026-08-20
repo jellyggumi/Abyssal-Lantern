@@ -1357,10 +1357,36 @@ namespace CastleBusters
         private SpriteRenderer spriteRenderer;
         private float elapsed;
 
+        /// <summary>
+        /// Converts <see cref="finalRadius"/> from world units into a localScale factor for THIS
+        /// sprite. 1 for a sprite already 1 unit across; 1/5.12 for the Higgsfield VFX art.
+        ///
+        /// Without it the field meant two different things depending on who spawned the pulse.
+        /// <c>SpawnShockwaveRing</c> builds its ring procedurally as
+        /// <c>Sprite.Create(tex, rect, pivot, pixelsPerUnit: 48)</c> at 48px, i.e. exactly 1 unit
+        /// native — so assigning localScale = finalRadius gave finalRadius world units, and the
+        /// field's name was true. <c>SpawnHiggsfieldAccent</c> hands over authored art at 512px
+        /// and 100 ppu, i.e. 5.12 units native, where the same assignment gave 5.12x what the
+        /// caller asked for.
+        ///
+        /// Measured on a live board: a collapse accent asked for 0.71 (SpawnCollapseDust clamps to
+        /// 0.4-0.85) and rendered at 3.64 units. 0.71 x 5.12 = 3.63. Those are the translucent
+        /// overlapping quads that were reported as huge rectangles over the board.
+        /// </summary>
+        private float nativeToWorld = 1f;
+
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
             transform.localScale = Vector3.zero;
+
+            if (spriteRenderer != null && spriteRenderer.sprite != null)
+            {
+                // bounds is the sprite's own size in world units at scale 1.
+                Vector2 native = spriteRenderer.sprite.bounds.size;
+                float largest = Mathf.Max(native.x, native.y);
+                if (largest > 0.0001f) nativeToWorld = 1f / largest;
+            }
         }
 
         private void Update()
@@ -1368,7 +1394,7 @@ namespace CastleBusters
             elapsed += Time.deltaTime;
             float t = lifetime <= 0f ? 1f : Mathf.Clamp01(elapsed / lifetime);
             float eased = 1f - Mathf.Pow(1f - t, 2f);
-            transform.localScale = Vector3.one * Mathf.Lerp(0.05f, finalRadius, eased);
+            transform.localScale = Vector3.one * (Mathf.Lerp(0.05f, finalRadius, eased) * nativeToWorld);
 
             if (spriteRenderer != null)
             {

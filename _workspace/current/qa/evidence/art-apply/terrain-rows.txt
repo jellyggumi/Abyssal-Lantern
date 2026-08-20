@@ -1,5 +1,5 @@
 row 0 y=-0.5 sprite=base_s0                      skin=True
 row 1 y=-1.5 sprite=face_s0                      skin=True
 row 2 y=-2.5 sprite=face_s0                      skin=True
-row 3 y=-3.5 sprite=edge_s0                      skin=True
+row 3 y=-3.5 sprite=face_s0                      skin=True
 row 4 y=-4.5 sprite=face_s0                      skin=True
