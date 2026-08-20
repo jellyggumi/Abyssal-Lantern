@@ -1,5 +1,5 @@
-row 0 y=-0.5 sprite=GroundSlice_20_0_Normal      got=(0.30,0.61,0.16) want ground_tile_grass (0.30,0.61,0.16) dist=0.001
-row 1 y=-1.5 sprite=GroundSlice_-6_1_Normal      got=(0.44,0.45,0.16) want ground_edge_grass (0.44,0.45,0.16) dist=0.003
-row 2 y=-2.5 sprite=GroundSlice_1_2_Normal       got=(0.55,0.36,0.18) want ground_tile_dirt (0.55,0.36,0.18) dist=0.001
-row 3 y=-3.5 sprite=GroundSlice_19_3_Normal      got=(0.35,0.35,0.35) want ground_tile_stone (0.35,0.35,0.35) dist=0.007
-row 4 y=-4.5 sprite=GroundSlice_17_4_Normal      got=(0.35,0.35,0.35) want ground_tile_stone (0.35,0.35,0.35) dist=0.007
+row 0 y=-0.5 sprite=base_s0                      skin=True
+row 1 y=-1.5 sprite=face_s0                      skin=True
+row 2 y=-2.5 sprite=face_s0                      skin=True
+row 3 y=-3.5 sprite=edge_s0                      skin=True
+row 4 y=-4.5 sprite=face_s0                      skin=True

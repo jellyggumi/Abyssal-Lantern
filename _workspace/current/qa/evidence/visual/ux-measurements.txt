@@ -5,16 +5,16 @@ outline HowTo=0.16 Label=0.00 Label=0.00 Label=0.16 Label=0.16 Label=0.16 Prompt
 
 ## ux-2-match-start
 state=PlayerTurn playerTurn=True turn=0
-onscreen text=10 buttons=1
-outline ControlGuideText=0.18 DeployToggleLabel=0.18 Label=0.18 Label=0.18 ScoreText=0.18 SupplyText=0.18 TimerText=0.18 TurnText=0.18 TurnToastText=0.18 WindText=0.18
+onscreen text=11 buttons=1
+outline ControlGuideText=0.18 DeployToggleLabel=0.18 Label=0.18 Label=0.18 ScoreText=0.18 SiegeForecastStrip=0.16 SupplyText=0.18 TimerText=0.18 TurnText=0.18 TurnToastText=0.18 WindText=0.18
 
 ## ux-3-player-turn
 state=PlayerTurn playerTurn=True turn=0
-onscreen text=9 buttons=1
-outline ControlGuideText=0.18 DeployToggleLabel=0.18 Label=0.18 Label=0.18 ScoreText=0.18 SupplyText=0.18 TimerText=0.18 TurnText=0.18 WindText=0.18
+onscreen text=10 buttons=1
+outline ControlGuideText=0.18 DeployToggleLabel=0.18 Label=0.18 Label=0.18 ScoreText=0.18 SiegeForecastStrip=0.16 SupplyText=0.18 TimerText=0.18 TurnText=0.18 WindText=0.18
 
 ## ux-4-enemy-turn
 state=AITurn playerTurn=False turn=1
-onscreen text=9 buttons=0
-outline AlarmLine=0.15 FlowStateStrip=0.16 Label=0.18 Label=0.18 ScoreText=0.18 TimerText=0.18 TurnText=0.18 TurnToastText=0.18 WindText=0.18
+onscreen text=10 buttons=0
+outline AlarmLine=0.15 FlowStateStrip=0.16 Label=0.18 Label=0.18 ScoreText=0.18 SiegeForecastStrip=0.16 TimerText=0.18 TurnText=0.18 TurnToastText=0.18 WindText=0.18
 

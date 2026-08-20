@@ -46,6 +46,28 @@ namespace CastleBusters
         public TMP_Text launchStatsText;
         public TMP_Text controlGuideText;
         public LineRenderer rubberBandLine;
+        /// <summary>
+        /// A wider, darker line drawn one sorting order BEHIND <see cref="trajectoryLine"/>, so the
+        /// arc keeps a dark rim whatever it crosses.
+        ///
+        /// Measured, not guessed. Against this board's two surfaces — sky (0.43,0.65,0.72) and grass
+        /// (0.40,0.54,0.43) — the arc's own colours score 2.70:1 at the head and **1.54:1** at the
+        /// tail, where 3:1 is the floor for a non-text graphic. Every brighter candidate scores
+        /// WORSE, because both surfaces sit at mid luminance: cyan 1.78, royal blue 1.93, amber 1.37.
+        /// Saturation cannot fix a luminance collision, and no single colour clears 3:1 on both.
+        ///
+        /// Two layers can. White core against this halo is 17.23:1, and the halo against grass is
+        /// 4.39:1 — so whichever surface the arc crosses, one of the two edges is legible. It is the
+        /// same fix the HUD labels got when contrast there stopped being judged by eye.
+        ///
+        /// Created in code rather than exposed: it must mirror the arc exactly, and an Inspector
+        /// slot invites a scene to wire a line with different widths or a different sorting order.
+        /// </summary>
+        private LineRenderer trajectoryHalo;
+
+        /// <summary>Halo colour: the dark end of the player's blue, not a neutral black. A black rim
+        /// would read as a shadow; this reads as the same arc, outlined.</summary>
+        private static readonly Color TrajectoryHaloColor = new Color(0.03f, 0.08f, 0.30f, 1f);
 
         private readonly List<Vector3> trajectoryPoints = new List<Vector3>(310);
         private readonly RaycastHit2D[] trajectoryHits = new RaycastHit2D[16];
@@ -306,22 +328,19 @@ namespace CastleBusters
             {
                 var go = new GameObject("DefaultImpactMarker");
                 var sr = go.AddComponent<SpriteRenderer>();
-                // Authored art is greyscale so the tint below is the only thing colouring it. The
-                // procedural circle baked amber into its pixels, which meant the self-hit path
-                // multiplied amber by blue and got mud — the one moment the marker matters most.
-                var art = GimmickSpriteLibrary.Load(GimmickSpriteLibrary.ImpactMarker);
-                if (art != null)
-                {
-                    sr.sprite = art;
-                    sr.color = PredictedDestinationColor;
-                    // 128px art at 0.44 world units matches the procedural 0.22 radius it replaces.
-                    float native = Mathf.Max(0.0001f, art.bounds.size.x);
-                    go.transform.localScale = Vector3.one * (0.44f / native);
-                }
-                else
-                {
-                    sr.sprite = CreateCircleSprite(0.22f, PredictedDestinationColor);
-                }
+                // A FILLED disc, drawn white so the renderer tint is the only thing colouring it.
+                //
+                // Both halves of that are corrections. The original baked amber into the pixels, so
+                // the self-hit path multiplied amber by blue and got mud. Replacing it with
+                // `ui_impact_marker` fixed the tint and broke the marker: that art is a thin
+                // outline, 8.8% of its pixels opaque, and at 0.44 world units — about 14 screen
+                // pixels — an 8.8% outline is not visible. The red dot is a stated requirement
+                // (see <see cref="PredictedDestinationColor"/>), and it disappeared.
+                //
+                // White pixels keep the tint clean without costing the fill. The authored outline
+                // stays on disk unused; it is the wrong shape for a dot, not the wrong colour.
+                sr.sprite = CreateCircleSprite(0.22f, Color.white);
+                sr.color = PredictedDestinationColor;
                 sr.sortingOrder = 12;
                 go.SetActive(false);
                 impactMarkerInstance = go;
@@ -558,6 +577,9 @@ namespace CastleBusters
             if (launchStatsText != null && launchStatsText.gameObject.name == "LaunchStatsText") Destroy(launchStatsText.gameObject);
             if (launchAlertText != null && launchAlertText.gameObject.name == "LaunchAlertText") Destroy(launchAlertText.gameObject);
             if (selectedUnitPortrait != null) Destroy(selectedUnitPortrait.gameObject);
+            // Code-created like the others above, so it is this component's to destroy. Left alone
+            // it survives the LaunchManager and keeps drawing the last arc it mirrored.
+            if (trajectoryHalo != null) Destroy(trajectoryHalo.gameObject);
         }
 
         private void Start()
@@ -604,8 +626,12 @@ namespace CastleBusters
                 // terrain. That was survivable when the texture was a 75%-duty near-solid bar; with
                 // real gaps it is not, and a preview that fades out before the impact is the same
                 // "arc ends in the sky" defect the resolution comment above describes.
-                trajectoryLine.startColor = new Color(1f, 1f, 1f, 0.85f);
-                trajectoryLine.endColor = new Color(0.5f, 0.8f, 1f, 0.55f);
+                // Head stays white. The tail no longer fades toward the background: pale blue at
+                // 0.55 measured 1.54:1 against this board's grass, and the fade was being read as
+                // the arc disappearing rather than receding. Holding near-full alpha and letting
+                // the HALO carry depth keeps the far half legible without inventing a new colour.
+                trajectoryLine.startColor = new Color(1f, 1f, 1f, 0.92f);
+                trajectoryLine.endColor = new Color(0.62f, 0.88f, 1f, 0.88f);
 
                 // Capture the pair authored immediately above, so the self-hit tint stays a
                 // reversible overlay. This must run AFTER the assignment: it used to live in
@@ -615,6 +641,84 @@ namespace CastleBusters
                 authoredTrajectoryStart = trajectoryLine.startColor;
                 authoredTrajectoryEnd = trajectoryLine.endColor;
                 authoredTrajectoryColorsCaptured = true;
+
+                EnsureTrajectoryHalo();
+            }
+        }
+
+        /// <summary>
+        /// Builds the halo line: same material family, wider, one sorting order behind.
+        /// </summary>
+        private void EnsureTrajectoryHalo()
+        {
+            if (trajectoryHalo != null || trajectoryLine == null) return;
+
+            var go = new GameObject("TrajectoryHalo");
+            go.transform.SetParent(trajectoryLine.transform.parent, false);
+            trajectoryHalo = go.AddComponent<LineRenderer>();
+
+            // 2.8x the arc's width. 1.9x was tried first and measured: median contrast 2.30:1,
+            // still under the 3:1 floor, because most arc pixels were core blended with the
+            // background rather than rim. A wider rim moves that ratio without touching the core's
+            // colour, which is the part that has to stay recognisably the player's blue.
+            // Constant width: the taper is a depth cue belonging to the arc, and a rim whose job is
+            // legibility has no reason to thin out.
+            //
+            // It was changed here to fix the arc's worst decile, on the theory that the tail's
+            // thinner rim was the weak stretch. That theory was wrong — measured, the decile moved
+            // 2.69 to 2.63, i.e. not at all — so the low decile is somewhere other than the tail.
+            // The constant width stays because it is right on its own terms, not because it fixed
+            // anything.
+            float rim = trajectoryLine.startWidth * 2.8f;
+            trajectoryHalo.startWidth = rim;
+            trajectoryHalo.endWidth = rim;
+            trajectoryHalo.numCapVertices = 2;
+            trajectoryHalo.sortingLayerName = trajectoryLine.sortingLayerName;
+            trajectoryHalo.sortingOrder = trajectoryLine.sortingOrder - 1;
+            trajectoryHalo.startColor = TrajectoryHaloColor;
+            trajectoryHalo.endColor = TrajectoryHaloColor;
+            trajectoryHalo.positionCount = 0;
+
+            // Untextured on purpose. The arc's dash texture makes gaps; a halo that shares them
+            // would leave the gaps unrimmed, which is where a thin line loses its edge. A solid
+            // rim under a dashed core reads as dashes on a dark ribbon — still dashes, still read
+            // as a prediction, and legible in the gaps too.
+            trajectoryHalo.material = new Material(Shader.Find("Sprites/Default"));
+        }
+
+        /// <summary>
+        /// Copies the arc's geometry onto the halo. Runs in LateUpdate because five separate sites
+        /// write <c>trajectoryLine.positionCount</c> — draw, clear-on-select, clear-on-release,
+        /// cancel, and the drag start — and mirroring at each of them is five chances to drift. This
+        /// runs after all of them and asks only what the arc currently is.
+        /// </summary>
+        private void LateUpdate()
+        {
+            if (trajectoryLine == null) return;
+            if (trajectoryHalo == null)
+            {
+                EnsureTrajectoryHalo();
+                if (trajectoryHalo == null) return;
+            }
+
+            int count = trajectoryLine.positionCount;
+            if (count == 0)
+            {
+                if (trajectoryHalo.positionCount != 0) trajectoryHalo.positionCount = 0;
+                return;
+            }
+
+            // Widths are re-read every frame rather than once at construction: the self-hit path and
+            // the tension preview both retint the arc, and a future change to its width would
+            // otherwise leave the rim the wrong size with nothing to catch it.
+            float rim = trajectoryLine.startWidth * 2.8f;
+            trajectoryHalo.startWidth = rim;
+            trajectoryHalo.endWidth = rim;
+
+            if (trajectoryHalo.positionCount != count) trajectoryHalo.positionCount = count;
+            for (int i = 0; i < count; i++)
+            {
+                trajectoryHalo.SetPosition(i, trajectoryLine.GetPosition(i));
             }
         }
 

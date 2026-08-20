@@ -1,0 +1,6 @@
+arc pixels: 4109
+median contrast: 4.14
+10th percentile (best edge within 2px): 2.65
+per-pixel min: 1.00
+per-pixel max: 8.61
+weak decile: 411 px, centroid (490,368), x range 181..1168

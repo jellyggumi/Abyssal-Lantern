@@ -102,9 +102,21 @@ namespace CastleBusters.Tests
         {
             var source = System.IO.File.ReadAllText("Assets/Scripts/GameManager.cs");
 
-            StringAssert.Contains("if (groundTex == null) continue;", source,
-                "the per-tile loop must skip slicing when there is no atlas, rather than calling "
-                + "Sprite.Create on null and throwing out of Start");
+            // The guard was `if (groundTex == null) continue;` until 2026-08-20, when that `continue`
+            // turned out to skip the PARENTING below it too. Harmless while a null atlas was a rare
+            // failure; wrong once CreateGround began skipping the atlas deliberately, because
+            // unparented terrain never joins a castle's block list — so it is never skinned, and
+            // never counted by the structural-integrity walk that decides what collapses.
+            //
+            // Pinned as the positive form, which cannot skip anything but the slice.
+            StringAssert.Contains("if (groundTex != null)", source,
+                "the per-tile loop must skip only the SLICING when there is no atlas — not the "
+                + "parenting that follows it, and not by calling Sprite.Create on null and throwing "
+                + "out of Start");
+
+            StringAssert.DoesNotContain("if (groundTex == null) continue;", source,
+                "this form skips the parenting at the end of the loop body as well as the slice. "
+                + "Terrain that is never parented is never skinned and never load-bearing.");
 
             StringAssert.Contains("return null;", source,
                 "GenerateGroundTexture must return null on a refused request instead of letting the "

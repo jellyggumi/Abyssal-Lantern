@@ -1552,11 +1552,21 @@ namespace CastleBusters
             int blockRes = Mathf.Clamp(maxAtlasWidth / Mathf.Max(1, groundColumnCount), 16, 160);
             int texWidth = groundColumnCount * blockRes;
             int texHeight = groundRowCount * blockRes;
-            // Authored tiles first, procedural bands as the fallback. The fallback stays because
-            // `GenerateGroundTexture`'s docstring earns it: a texture is presentation, and
-            // presentation failing must not be able to delete the board.
-            Texture2D groundTex = BuildGroundAtlasFromArt(texWidth, texHeight, blockRes, groundRowCount, groundColumnCount)
-                                  ?? GenerateGroundTexture(texWidth, texHeight);
+            // Skipped entirely when CastleSkin art exists, because terrain is parented to a castle
+            // below and CastleFacadeDirector then re-skins every tile — the atlas, its 235 slices
+            // and the per-tile lazy crack bakes would be built and discarded within one Awake.
+            //
+            // That waste is why terrain was excluded from the facade on 2026-08-19. Excluding it was
+            // the wrong end to fix: the skin is 47-82% opaque masonry that the background reads
+            // through, the ground tiles are 100% opaque, and the board became one enormous slab.
+            // The skin wins on looks, so the atlas goes rather than the look.
+            //
+            // The fallback survives for the art-less case, where nothing overwrites it.
+            bool skinWillCover = CastleSkinLibrary.TryGetSkin(CastleSkinRole.Face, out _, out _, out _);
+            Texture2D groundTex = skinWillCover
+                ? null
+                : (BuildGroundAtlasFromArt(texWidth, texHeight, blockRes, groundRowCount, groundColumnCount)
+                   ?? GenerateGroundTexture(texWidth, texHeight));
 
             for (int yIndex = 0; yIndex < groundRowCount; yIndex++)
             {
@@ -1595,29 +1605,35 @@ namespace CastleBusters
                         // replacing the sprite with this already-1u-native texture slice used to render
                         // the tile at a fraction of its collider size - the exact "floating collision box"
                         // mismatch between visuals and physics that made the ground feel disconnected.
-                        int pixelX = gridX * blockRes;
-                        int pixelY = gridY * blockRes;
                         // No atlas is a cosmetic outcome, not a structural one: the tile keeps the
                         // material's own sprite and colour and the board finishes building. Before
                         // this, a refused atlas threw out of Start and Stage3 had no keep at all.
-                        if (groundTex == null) continue;
-                        Sprite normalSlice = Sprite.Create(groundTex, new Rect(pixelX, pixelY, blockRes, blockRes), new Vector2(0.5f, 0.5f), blockRes);
-                        normalSlice.name = $"GroundSlice_{x}_{yIndex}_Normal";
-                        // Reset tint to white: the sliced ground texture already carries its own
-                        // natural colors, so blockData.blockColor (applied by ApplyBlockData above for
-                        // the non-ground case) must not be left multiplying it.
-                        block.SetPresentationSprite(normalSlice, Color.white);
+                        //
+                        // This branch used `continue`, which also skipped the parenting below — fine
+                        // while a null atlas was a rare failure, wrong the moment CreateGround
+                        // started skipping the atlas deliberately. Unparented terrain never reaches
+                        // a castle's block list, so it is never skinned AND never counted by the
+                        // structural-integrity walk that decides what collapses.
+                        if (groundTex != null)
+                        {
+                            int pixelX = gridX * blockRes;
+                            int pixelY = gridY * blockRes;
+                            Sprite normalSlice = Sprite.Create(groundTex, new Rect(pixelX, pixelY, blockRes, blockRes), new Vector2(0.5f, 0.5f), blockRes);
+                            normalSlice.name = $"GroundSlice_{x}_{yIndex}_Normal";
+                            // Reset tint to white: the sliced ground texture already carries its own
+                            // natural colors, so blockData.blockColor (applied by ApplyBlockData above
+                            // for the non-ground case) must not be left multiplying it.
+                            block.SetPresentationSprite(normalSlice, Color.white);
 
-
-                        // Cracked/heavily-cracked slices are expensive to bake (per-pixel blend of the
-                        // ground art against the crack pattern) and most ground tiles never visibly crack
-                        // in a given match. Defer the bake until the tile's HP actually drops into that
-                        // band instead of doing it for every one of the groundRowCount*columnCount tiles
-                        // up front.
-                        BlockData capturedData = selectedData;
-                        block.SetLazyCrackedSprites(
-                            () => CreateCrackedSlice(groundTex, pixelX, pixelY, capturedData.crackedSprite, blockRes),
-                            () => CreateCrackedSlice(groundTex, pixelX, pixelY, capturedData.heavilyCrackedSprite, blockRes));
+                            // Cracked/heavily-cracked slices are expensive to bake (per-pixel blend of
+                            // the ground art against the crack pattern) and most ground tiles never
+                            // visibly crack in a given match. Defer the bake until the tile's HP
+                            // actually drops into that band instead of doing it for every tile up front.
+                            BlockData capturedData = selectedData;
+                            block.SetLazyCrackedSprites(
+                                () => CreateCrackedSlice(groundTex, pixelX, pixelY, capturedData.crackedSprite, blockRes),
+                                () => CreateCrackedSlice(groundTex, pixelX, pixelY, capturedData.heavilyCrackedSprite, blockRes));
+                        }
                     }
                     if (x < 0 && playerCastle != null) go.transform.SetParent(playerCastle.transform);
                     else if (x >= 0 && enemyCastle != null) go.transform.SetParent(enemyCastle.transform);

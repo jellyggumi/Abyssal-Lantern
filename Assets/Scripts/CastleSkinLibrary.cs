@@ -105,10 +105,17 @@ namespace CastleBusters
                 if (b == null) continue;
                 // The core is the win-condition landmark — its bespoke look stays.
                 if (b is CastleCoreGimmick) continue;
-                // Terrain carries its own ground-atlas slice, assigned tile by tile so neighbours
-                // read as one continuous map. Re-skinning it with wall masonry threw that away and
-                // made the strip look like a low course of bricks lying on the field.
-                if (b.IsTerrainTile) continue;
+                // Terrain IS skinned, deliberately. Excluding it (2026-08-19) so the ground atlas
+                // would survive turned the board into a slab: CastleSkin tiles are 47-82% opaque
+                // masonry and the background's own grass and path read through them, while the
+                // ground tiles are 100% opaque and cover it. A 47x5 opaque rectangle across the
+                // middle of the screen reads as one enormous wall, which is exactly how it was
+                // reported.
+                //
+                // Terrain is outside the bounds computed above, so AssignRole returns Face for all
+                // of it — the interior masonry, uniform across the strip, which is what it looked
+                // like before and what it should look like. The bounds exclusion stays: that fixed
+                // a separate defect where the ground's 47 columns decided every WALL block's role.
 
                 int gx = Mathf.RoundToInt(b.transform.position.x / sx);
                 int gy = Mathf.RoundToInt(b.transform.position.y / sy);
