@@ -1,0 +1,3 @@
+saw arc while shot open: True
+peak positions: 36
+first seen at: 1.5s

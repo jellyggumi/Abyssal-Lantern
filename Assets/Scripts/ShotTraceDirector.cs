@@ -132,6 +132,15 @@ namespace CastleBusters
         /// <summary>Samples retained for the in-flight shot. Exposed for tests and diagnostics.</summary>
         public static int SampleCount => samples.Count;
 
+        /// <summary>
+        /// True while a shot is airborne and its arc is still growing.
+        ///
+        /// Exposed for the same reason as <see cref="SampleCount"/>: the arc is now drawn DURING
+        /// flight, and a test that checks it after the turn resolves cannot tell a live arc from the
+        /// spent one that replaces it. This is the window's own name.
+        /// </summary>
+        public static bool ShotOpen => shotOpen;
+
         // Domain-init guard for fast-enter-playmode (domain reload disabled), mirroring CastleRuinFx.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => ResetForNewMatch();
@@ -192,12 +201,36 @@ namespace CastleBusters
             coreDamageThisShot = 0f;
         }
 
-        /// <summary>Offers a flight position. Distance-gated so the arc is frame-rate independent
-        /// (see <see cref="ShotTracePath.ShouldSample"/>).</summary>
+        /// <summary>
+        /// Offers a flight position, and draws what has accumulated so far.
+        ///
+        /// Distance-gated so the arc is frame-rate independent (see
+        /// <see cref="ShotTracePath.ShouldSample"/>).
+        ///
+        /// The drawing is the part that was missing. Until now this method only accumulated, and the
+        /// arc first appeared in <see cref="Seal"/> — at turn resolution, after the projectile had
+        /// already landed. So the flight itself was untraced: the player watched an unadorned sprite
+        /// travel and only learned its path once the path no longer mattered. Requested directly
+        /// ("아군이 발사체를 놓았을 때는 날아가는게 보이게, 그때 궤도가 점선으로").
+        ///
+        /// Nothing new is drawn WITH: the dash texture, the dark casing, the tile mode and the
+        /// widths are the same layers the spent arc already used, so a live arc and a remembered one
+        /// are the same object at two moments rather than two things to keep consistent.
+        ///
+        /// Redrawing the whole strip per sample is O(n) each time, and the gate makes n small: 0.35
+        /// world units between points, capped at MaxSamples. A full-power lob is on the order of a
+        /// hundred points, and only when it has moved far enough to add one.
+        /// </summary>
         public static void Sample(Vector2 position)
         {
             if (!shotOpen) return;
-            if (ShotTracePath.ShouldSample(samples, position)) samples.Add(position);
+            if (!ShotTracePath.ShouldSample(samples, position)) return;
+            samples.Add(position);
+
+            if (Application.isPlaying && ShotTracePath.IsDrawable(samples))
+            {
+                Draw(shotByPlayer ? playerTrace : enemyTrace, shotByPlayer, samples);
+            }
         }
 
         /// <summary>
