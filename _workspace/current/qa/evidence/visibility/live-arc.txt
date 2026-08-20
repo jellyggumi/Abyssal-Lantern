@@ -1,3 +1,3 @@
 saw arc while shot open: True
-peak positions: 37
-first seen at: 2.0s
+peak positions: 50
+first seen at: 2.4s

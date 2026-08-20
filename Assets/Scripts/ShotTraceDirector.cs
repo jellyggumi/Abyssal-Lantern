@@ -398,6 +398,24 @@ namespace CastleBusters
             float coreWidth = byPlayer ? PlayerCoreWidth : EnemyCoreWidth;
             float casingWidth = byPlayer ? PlayerCasingWidth : EnemyCasingWidth;
 
+            // A live arc's casing is a RIM, not a band.
+            //
+            // Reported twice as too dark, and darkening the colour was not the whole of it: at the
+            // spent width the casing is 6.8px against a 32px projectile, so 21% of the thing being
+            // watched is covered by the dark layer meant to outline it. Contrast comes from the
+            // EDGE, not from the area — a 1px rim holds the white core at 12.33:1 against it,
+            // identical to a 1.7px one, because the ratio is between two colours and not between
+            // two areas.
+            //
+            // 1.6x core rather than 2x: 1.0px of rim either side at this camera. Below about 1.35x
+            // the rim falls under half a pixel and antialiasing eats it, which is how a rim stops
+            // being a rim without ever being removed.
+            //
+            // A spent arc keeps the wider casing. It is read at rest, across a board that may have
+            // changed under it, and it has no projectile to avoid covering.
+            const float LiveCasingToCore = 1.6f;
+            if (shotOpen) casingWidth = coreWidth * LiveCasingToCore;
+
             // A shot still in the air gets OPAQUE dots; a spent one keeps the translucent ones.
             //
             // Reported as "the arc after firing is still too dark", and measuring it explained why
