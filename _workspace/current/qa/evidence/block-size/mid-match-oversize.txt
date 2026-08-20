@@ -1,0 +1,18 @@
+threshold: 3.00u   turns walked: 9
+
+turn 0 (start): 0 oversized
+turn 0: 0 oversized, 0 new
+turn 1: 0 oversized, 0 new
+turn 1: 0 oversized, 0 new
+turn 2: 0 oversized, 0 new
+turn 2: 0 oversized, 0 new
+turn 3: 0 oversized, 0 new
+turn 4: 0 oversized, 0 new
+turn 4: 0 oversized, 0 new
+turn 5: 0 oversized, 0 new
+
+cannon pass: playerTurn=True resolving=False supply=18.9 waited=0.5s
+TryDeploy(Cannon) -> None
+after deploy: 0 oversized, 0 new
+brick controller present: yes
+after brick check: 0 oversized, 0 new
