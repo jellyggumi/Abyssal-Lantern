@@ -1347,6 +1347,25 @@ namespace CastleBusters
 
             var firstUnit = SpawnAndLaunchOne(launchVelocity);
 
+            // The aim preview's job ended the instant the unit left the sling. Clearing it here is
+            // what was missing: `LaunchUnit` never did, and `HandleKeyboardFineTune` redraws the
+            // preview every frame while `keyboardAimTouchedThisTurn` holds — so the predicted arc
+            // stayed on screen through the whole flight, on top of the live trace that replaced it.
+            //
+            // It went unnoticed while the preview was a thin translucent line. Adding the dark halo
+            // turned the same leftover into a 10.8px navy ribbon from the launcher to the impact
+            // point, which is what got reported as "the arc is too thick to see the projectile" —
+            // and it was never the in-flight trace at all. Four attempts were spent thinning and
+            // lightening the wrong renderer.
+            //
+            // `keyboardAimTouchedThisTurn` is reset too, or the next arrow key is not what summons
+            // the preview back: it would already be armed and reappear on its own.
+            if (trajectoryLine != null) trajectoryLine.positionCount = 0;
+            if (trajectoryHalo != null) trajectoryHalo.positionCount = 0;
+            keyboardAimTouchedThisTurn = false;
+            UpdateImpactMarker(false);
+            HideLaunchStats();
+
             // Set wind effect origin and radius for this launch
             if (GameManager.Instance != null)
             {

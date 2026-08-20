@@ -46,6 +46,28 @@ namespace CastleBusters.Tests
                 "a player arc exists before anything has been fired; this probe cannot tell a live "
                 + "arc from a leftover one if the board opens with one already drawn.");
 
+            // Arm the aim preview the way a player does, BEFORE launching.
+            //
+            // Without this the probe proves nothing about the reported case: `SimulateLaunch` alone
+            // leaves `keyboardAimTouchedThisTurn` false, so `HandleKeyboardFineTune` never draws the
+            // preview and "the preview is gone during flight" is true because it was never there.
+            // A mutation test caught exactly that — removing the clear in `LaunchUnit` left the
+            // probe passing.
+            var touched = typeof(LaunchManager).GetField(
+                "keyboardAimTouchedThisTurn",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.That(touched, Is.Not.Null, "keyboardAimTouchedThisTurn is gone or renamed");
+            touched.SetValue(lm, true);
+
+            var draw = typeof(LaunchManager).GetMethod(
+                "DrawTrajectory",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.That(draw, Is.Not.Null, "DrawTrajectory is gone or renamed");
+            draw.Invoke(lm, new object[] { lm.GetSeparatedAimVelocity() });
+
+            Assert.That(lm.trajectoryLine.positionCount, Is.GreaterThan(1),
+                "the aim preview must actually be up before launching, or this measures nothing");
+
             lm.SimulateLaunch(lm.GetSeparatedAimVelocity());
 
             // Poll while the shot is airborne. The sample gate is 0.35 world units, so two points
@@ -55,6 +77,8 @@ namespace CastleBusters.Tests
             float peakAt = -1f;
             bool sawWhileOpen = false;
             float elapsed = 0f;
+            bool aimVisibleDuringFlight = false;
+            int aimPeak = 0;
 
             while (elapsed < 2.5f)
             {
@@ -69,6 +93,14 @@ namespace CastleBusters.Tests
                 if (arc != null && arc.positionCount >= 2 && ShotTraceDirector.ShotOpen)
                 {
                     sawWhileOpen = true;
+                }
+
+                // Same loop, second question: is the AIM arc still up?
+                if (ShotTraceDirector.ShotOpen)
+                {
+                    int aimCount = lm.trajectoryLine != null ? lm.trajectoryLine.positionCount : 0;
+                    if (aimCount > aimPeak) aimPeak = aimCount;
+                    if (aimCount > 1) aimVisibleDuringFlight = true;
                 }
 
                 yield return new WaitForSecondsRealtime(0.1f);
@@ -107,14 +139,27 @@ namespace CastleBusters.Tests
             Directory.CreateDirectory(dir);
             File.WriteAllText(Path.Combine(dir, "live-arc.txt"), string.Format(
                 CultureInfo.InvariantCulture,
-                "saw arc while shot open: {0}\npeak positions: {1}\nfirst seen at: {2:F1}s\n",
-                sawWhileOpen, peakPositions, peakAt));
+                "saw arc while shot open: {0}\npeak positions: {1}\nfirst seen at: {2:F1}s\n"
+                + "aim preview visible during flight: {3}\naim peak positions: {4}\n",
+                sawWhileOpen, peakPositions, peakAt, aimVisibleDuringFlight, aimPeak));
 
             Assert.That(sawWhileOpen, Is.True,
                 $"the arc never had two or more points while the shot was still open. Peak was "
                 + $"{peakPositions} positions at {peakAt:F1}s. `Sample` must draw what it has "
                 + "accumulated; accumulating silently and drawing in `Seal` puts the arc on screen "
                 + "only after the projectile has landed, which is the defect this pins.");
+
+            // The AIM preview must be gone while the shot flies. It is a different renderer from the
+            // trace — LaunchManager's `trajectoryLine` plus the dark halo behind it — and nothing
+            // cleared it on launch, so the predicted arc stayed drawn over the whole flight. While
+            // it was a thin translucent line nobody noticed; with the halo it became a 10.8px navy
+            // ribbon from launcher to impact, and four rounds of fixes went into the wrong renderer
+            // chasing it.
+            Assert.That(aimVisibleDuringFlight, Is.False,
+                $"the aim preview was still drawn during flight (peak {aimPeak} positions). Its job "
+                + "ends when the unit leaves the sling, and the in-flight trace is what describes the "
+                + "shot from then on. Two arcs over one projectile is the defect, whatever either "
+                + "one's colour is.");
 
             Assert.That(peakPositions, Is.GreaterThan(3),
                 $"the live arc peaked at {peakPositions} positions. The sample gate is 0.35 world "

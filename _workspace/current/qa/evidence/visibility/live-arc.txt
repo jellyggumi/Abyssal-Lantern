@@ -1,3 +1,5 @@
 saw arc while shot open: True
-peak positions: 50
-first seen at: 2.4s
+peak positions: 43
+first seen at: 1.8s
+aim preview visible during flight: True
+aim peak positions: 78
