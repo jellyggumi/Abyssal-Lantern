@@ -1,0 +1,14 @@
+blocks: 284
+atlas packer present: True
+  normal   disk 1254px -> packed 396px | world 12.54u -> 3.96u | same object: False
+  cracked  disk 1254px -> packed 396px | world 12.54u -> 3.96u | same object: False
+  heavy    disk 1254px -> packed 396px | world 12.54u -> 3.96u | same object: False
+
+renderers over 2.5u at match start: 1
+    81.50u  Background                 sprite=                       [SpriteRenderer]
+
+renderers over 2.5u after one shot: 1
+    80.75u  Background                 sprite=                       [SpriteRenderer]
+
+measurements: 849
+offenders: 0
