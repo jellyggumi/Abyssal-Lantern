@@ -349,6 +349,23 @@ namespace CastleBusters
                 Color baseColor = blockData.blockColor;
                 spriteRenderer.color = Color.Lerp(baseColor * 0.5f, baseColor, ratio);
             }
+
+            // Rescale for whatever sprite just landed. Every other assignment site does this —
+            // ApplyBlockData, SetPresentationSprite, SetSkinSprites — and this one did not, which
+            // made it the hole the whole class of "block renders at native size" falls through.
+            //
+            // Two ways it bites. ApplyPresentationScale returns early when the renderer has no
+            // sprite yet, so a block that reaches Awake with a null sprite keeps localScale 1 and
+            // then renders whatever the first band assigns at its authored size: block_normal is
+            // 1254px at 100 ppu, i.e. 12.54 world units against a 1-unit grid. That is the reported
+            // symptom — a translucent masonry rectangle roughly 13 units wide sitting over the
+            // board. And separately, damage-state art is not guaranteed to share a native size with
+            // the normal sprite; today's three do, so a size difference introduced later would
+            // otherwise appear as blocks jumping when they crack.
+            //
+            // Idempotent: the scale is derived from the sprite's own bounds against
+            // targetWorldSize, so calling it per swap costs the division and nothing else.
+            ApplyPresentationScale();
         }
 
         public void MakeFall()
