@@ -73,8 +73,15 @@ namespace CastleBusters
         /// (6.4:1 sky, 7.3:1 grass, 8.8:1 cloud); on dark ground the casing washes out (1.8:1 on
         /// dirt) and the bright core takes over there instead (3.2:1 enemy, 6.2:1 player). Every
         /// background the arc crosses is covered by at least one of the two layers.
+        ///
+        /// Dark navy rather than the near-black it was, on report: the arc "looks too dark" and the
+        /// projectile was hard to pick out of it. Measured, the change costs little and buys the
+        /// complaint — (0.05,0.09,0.28) contrasts 5.01:1 against sky and 3.67:1 against grass where
+        /// near-black managed 6.18 and 4.45, so both stay well clear of the 3:1 floor, and the white
+        /// core still separates from it at 12.33:1. What it stops being is a black band on a bright
+        /// sky, which is what the capture showed and what "연하게" asked to soften.
         /// </summary>
-        private static readonly Color CasingColor = new Color(0.03f, 0.028f, 0.05f, 0.85f);
+        private static readonly Color CasingColor = new Color(0.05f, 0.09f, 0.28f, 0.85f);
 
         /// <summary>
         /// Vertex alpha of a spent arc's coloured core - deliberately NOT the knob that makes it
@@ -416,22 +423,28 @@ namespace CastleBusters
                 if (dash != null) t.Line.material.mainTexture = dash;
             }
 
-            // 1.9 at the head. The projectile is the last vertex, so the strip is widest exactly
-            // where the thing being followed is — and it narrows behind it, which reads as direction
-            // without an arrowhead. Both layers taper together so the casing keeps backing the core
-            // along the whole length instead of letting it spill past the rim at the head.
-            const float LiveHeadTaper = 1.9f;
-            float taper = live ? LiveHeadTaper : 1f;
-
-            Apply(t.Casing, points, casingWidth, CasingColor, CasingColor, taper);
+            // No taper. Widening the head was tried and it did the opposite of its purpose.
+            //
+            // At 1.9x the casing reached 0.399 units — 13px at this camera, against a projectile
+            // that is about 32px. So a near-black band 40% of the projectile's width ran straight
+            // through the point the player was trying to watch, and the 6px core inside it read as
+            // a thin highlight on a dark ribbon rather than as dots.
+            //
+            // It also destroyed the dash. `LineTextureMode.Tile` repeats relative to the line's
+            // WIDTH, so 1.9x width stretched the dash period 1.9x with it, and the marks ran long
+            // enough to meet. The screenshot showed one continuous navy ribbon, which is exactly
+            // what a dashed line becomes when its gaps close.
+            //
+            // The head marker was my idea rather than a request, and the request it was meant to
+            // serve — "make the projectile visible" — is better served by not drawing over it.
+            Apply(t.Casing, points, casingWidth, CasingColor, CasingColor);
             Apply(t.Line, points, coreWidth,
                 // Live: full alpha at both ends. The muzzle-ward fade is a memory cue, and a shot
                 // that has not landed yet has nothing to remember — fading its tail hides the part
                 // of the path the player is checking against the wind.
                 live ? new Color(tint.r, tint.g, tint.b, 1f)
                      : new Color(tint.r, tint.g, tint.b, tint.a * 0.55f),
-                live ? new Color(tint.r, tint.g, tint.b, 1f) : tint,
-                taper);
+                live ? new Color(tint.r, tint.g, tint.b, 1f) : tint);
         }
 
         private static void ConfigureLine(LineRenderer line, int sortingOrder)
@@ -569,24 +582,12 @@ namespace CastleBusters
             return opaqueDashTexture;
         }
 
-        /// <summary>
-        /// Writes a polyline onto a LineRenderer.
-        ///
-        /// <paramref name="endWidthMult"/> widens the strip toward its LAST vertex. For a shot in
-        /// flight that vertex is the projectile's current position, so a taper marks the projectile
-        /// itself — the second half of the request ("날라가는 물체가 잘 보이게") — without a second
-        /// renderer to keep in step with the arc, and without a marker that outlives the shot.
-        ///
-        /// 1 for a spent arc: it has no head to mark, and tapering a memory would imply the last
-        /// sample matters more than the rest of the path, which is the opposite of what a spent arc
-        /// is for.
-        /// </summary>
         private static void Apply(LineRenderer line, List<Vector2> points, float width,
-                                  Color start, Color end, float endWidthMult = 1f)
+                                  Color start, Color end)
         {
             if (line == null) return;
             line.startWidth = width;
-            line.endWidth = width * endWidthMult;
+            line.endWidth = width;
             line.startColor = start;
             line.endColor = end;
             line.positionCount = points.Count;
