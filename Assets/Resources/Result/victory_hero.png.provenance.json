@@ -1,13 +1,10 @@
 {
-  "generated_at": "2026-08-19T05:29:44.229928+00:00",
-  "tool": "Pillow procedural concept pass by jeo",
-  "source_document": "_workspace/current/design/art-production-order.md",
-  "source_order": "D-4",
-  "concept_only": true,
-  "promotion_required": "Audit before copying into Assets/Resources; add Unity .meta Sprite importer on promotion.",
-  "prompt": "1600x900 dark pixel-art result illustration: victory knight with blue flag over ruined enemy keep.",
-  "saturation_contract": "self-colored full illustration",
-  "sha256": "eabee5d30fc9c3e6760465c5d59eb3bcfb20eaf52f006f33ff6e41eb88c4d7b1",
-  "output": "_workspace/current/design/concept/art-production-order/Assets/Resources/Result/victory_hero.png",
-  "intended_runtime_path": "Assets/Resources/Result/victory_hero.png"
+  "generated_at": "2026-08-20T16:16:58.183762+00:00",
+  "tool": "higgsfield-cli gpt_image_2 + PIL tone-map by jeo",
+  "prompt": "night scene: lone knight silhouette on a conquered castle rampart raising a tattered war banner, warm ember glow, deep navy sky, painterly, extremely low-key; gamma 1.15 gain 0.92, 1600x900",
+  "sha256": "6eb4c6fa413433952500dc49bd1887df1b85ad864becd499cc5e720745e493d8",
+  "output": "Assets/Resources/Result/victory_hero.png",
+  "job": "hf_20260820_161107_33daba66",
+  "supersedes": "flat-shape placeholder mock",
+  "luminance_contract": "Text bands (banner 0.80-0.92, seal/stats 0.55-0.70, ladder 0.28-0.42, buttons 0.04-0.16 of height) tone-mapped to <=0.10 mean luminance so the results card stays legible without a scrim - the contract documented in ResultsScreenController.Build."
 }

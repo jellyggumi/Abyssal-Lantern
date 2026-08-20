@@ -89,7 +89,17 @@ namespace CastleBusters
             velocity.space = ParticleSystemSimulationSpace.World;
             // Sideways drift: a slant sells wind on rain, a wander sells weightlessness on
             // snow and ash.
+            //
+            // ALL THREE axes must use the same curve mode. Only x was set (TwoConstants),
+            // leaving y/z in their default single-constant mode — Unity's renderer rejects
+            // the mix with "Particle Velocity curves must all be in the same mode", EVERY
+            // frame, on the one system that runs continuously across the whole match. On
+            // WebGL each of those errors crosses the WASM->JS console bridge with a full
+            // stack trace: measured 975 in a single boot-and-two-turns session, which is
+            // frame-time spent printing, i.e. the stutter this fixes.
             velocity.x = new ParticleSystem.MinMaxCurve(isRain ? -2.2f : -0.8f, isRain ? -1.2f : 0.8f);
+            velocity.y = new ParticleSystem.MinMaxCurve(0f, 0f);
+            velocity.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
             var renderer = system.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;

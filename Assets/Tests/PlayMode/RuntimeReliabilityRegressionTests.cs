@@ -835,7 +835,13 @@ namespace CastleBusters.Tests
             // 기사, not "Knight": display naming moved to the DeploymentRules Korean
             // vocabulary (task 48). Telemetry keeps its own English key, so this rename
             // cannot fork per-unit analytics.
-            Assert.AreEqual("CLEAN SIEGE ARC: 기사  52% / 0°", toastText.text,
+            //
+            // 55%: the buffed report under live constants — 10 m/s aimed × 1.30 LAST STAND
+            // = 13.0, and DrawForSpeed(13, 17.5) = (13/17.5)^2 = 0.552. The pre-buff report
+            // would read 33% ((10/17.5)^2), so the pin still discriminates buffed from
+            // unbuffed. The previous pinned 52% dated from an older reporting path and was
+            // already failing on a clean checkout before this change (inherited, not caused).
+            Assert.AreEqual("CLEAN SIEGE ARC: 기사  55% / 0°", toastText.text,
                 "Launch reporting must use the actual 1.30x LAST STAND velocity, not the pre-buff aimed velocity.");
             Assert.AreEqual(LastStand.Phase.Consumed, gameManager.playerLastStand,
                 "The launch whose buffed power was reported must consume the active one-shot phase.");

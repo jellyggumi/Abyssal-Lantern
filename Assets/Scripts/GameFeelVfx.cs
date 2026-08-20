@@ -338,53 +338,52 @@ namespace CastleBusters
             }
         }
 
-        private static void SpawnImpactBurstCore(Vector3 position, Color color, float intensity, Sprite sprite)
-        {
-            if (!Application.isPlaying) return;
+        // One persistent ParticleSystem per particle texture, emitted into via Emit(count).
+        // Every impact used to allocate a fresh GameObject + ParticleSystem + burst array and
+        // Destroy it 1.2s later; a collapse cascade fires one per block in a single frame, and
+        // on WebGL (no incremental GC) that allocation spike lands exactly when hit-stop and
+        // screen shake are selling the moment — the hitch was maximally visible. Emit() on a
+        // pooled system samples the SAME shape/main modules Play() did, so the ember spray
+        // reads identically; particle randomization uses the system's own RNG (autoRandomSeed),
+        // never UnityEngine.Random, so test determinism is untouched.
+        private static readonly Dictionary<Texture2D, ParticleSystem> pooledBurstSystems = new Dictionary<Texture2D, ParticleSystem>();
+        private static GameObject pooledBurstHost;
 
-            // Dedicated ember-shard art replaces the plain radial-gradient dot. Callers may hand
-            // in their own sprite for themed bursts (petals, smoke) — but NOT any sprite they
-            // happen to be rendering, which is what DestructibleBlock was doing.
-            //
-            // Measured: striking a wall produced a cluster of pale grey (210,209,207) squares and
-            // zero near-white-but-that-was-the-point pixels, because the block handed over its own
-            // `face_s0` — a 512x512 brick-mortar OVERLAY that is almost entirely white with thin
-            // dark lines. Shrunk to a 2-12px particle, an overlay of white with hairlines is a
-            // white smudge. It reads as a broken image, which is exactly how it was reported.
-            //
-            // The sprite is vetted rather than trusted, so a caller cannot reintroduce this by
-            // passing whatever it is drawing.
-            if (!IsUsableParticleSprite(sprite))
+        private static ParticleSystem GetPooledBurstSystem(Sprite sprite)
+        {
+            Texture2D key = sprite != null ? sprite.texture : null;
+            if (pooledBurstSystems.TryGetValue(key ?? (Texture2D)Texture2D.whiteTexture, out var cached) && cached != null)
             {
-                sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleEmber);
+                return cached;
             }
 
-            var go = new GameObject("ImpactBurst");
-            go.transform.position = position;
-            var ps = go.AddComponent<ParticleSystem>();
+            if (pooledBurstHost == null)
+            {
+                pooledBurstHost = new GameObject("GameFeelVfxBurstPool");
+                Object.DontDestroyOnLoad(pooledBurstHost);
+            }
 
-            // Stop the particle system before configuring to avoid "Setting duration while playing" warnings
+            var go = new GameObject(sprite != null ? $"Burst_{sprite.name}" : "Burst_default");
+            go.transform.SetParent(pooledBurstHost.transform, false);
+            var ps = go.AddComponent<ParticleSystem>();
             ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             var main = ps.main;
-            main.duration = 0.35f;
-            main.loop = false;
+            main.duration = 1f;
+            main.loop = true;                 // stays alive; Emit() injects, emission stays 0
+            main.playOnAwake = false;
+            main.maxParticles = 400;
             main.startLifetime = new ParticleSystem.MinMaxCurve(0.18f, 0.55f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1.5f * intensity, 4.5f * intensity);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.08f * intensity, 0.22f * intensity);
-            main.startColor = color;
             main.gravityModifier = 0.35f;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
 
             var emission = ps.emission;
             emission.rateOverTime = 0f;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)Mathf.Clamp(Mathf.RoundToInt(12f * intensity), 6, 40)) });
 
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Circle;
-            shape.radius = 0.25f * intensity;
 
-            main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
             if (sprite != null)
             {
                 var textureSheet = ps.textureSheetAnimation;
@@ -395,12 +394,40 @@ namespace CastleBusters
 
             var renderer = ps.GetComponent<ParticleSystemRenderer>();
             renderer.sortingOrder = 35;
-            renderer.sharedMaterial = GetParticleMaterial(sprite != null ? sprite.texture : null);
+            renderer.sharedMaterial = GetParticleMaterial(key);
 
-            // Play now that configuration is complete
             ps.Play();
+            pooledBurstSystems[key ?? (Texture2D)Texture2D.whiteTexture] = ps;
+            return ps;
+        }
 
-            Object.Destroy(go, 1.2f);
+        private static void SpawnImpactBurstCore(Vector3 position, Color color, float intensity, Sprite sprite)
+        {
+            if (!Application.isPlaying) return;
+
+            // Dedicated ember-shard art replaces the plain radial-gradient dot. Callers may hand
+            // in their own sprite for themed bursts (petals, smoke) — but NOT any sprite they
+            // happen to be rendering (a 512px brick-mortar overlay shrunk to a 12px particle is
+            // a white smudge; see IsUsableParticleSprite).
+            if (!IsUsableParticleSprite(sprite))
+            {
+                sprite = EffectSpriteLibrary.LoadParticleSprite(EffectSpriteLibrary.ParticleEmber);
+            }
+
+            var ps = GetPooledBurstSystem(sprite);
+            if (ps == null) return;
+
+            // Per-burst knobs on the shared system. Emit() snapshots these at call time, so
+            // several bursts with different colours/intensities in one frame stay distinct.
+            ps.transform.position = position;
+            var main = ps.main;
+            main.startColor = color;
+            main.startSpeed = new ParticleSystem.MinMaxCurve(1.5f * intensity, 4.5f * intensity);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.08f * intensity, 0.22f * intensity);
+            var shape = ps.shape;
+            shape.radius = 0.25f * intensity;
+
+            ps.Emit(Mathf.Clamp(Mathf.RoundToInt(12f * intensity), 6, 40));
         }
 
 
