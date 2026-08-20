@@ -158,6 +158,22 @@ namespace CastleBusters
             LatestLineByPlayer = false;
             Discard(playerTrace);
             Discard(enemyTrace);
+
+            // Both dash caches go too. `dashTexture` may hold the authored asset's texture, which a
+            // scene load can unload, and `opaqueDashTexture` is a Texture2D this class created and
+            // therefore owns. A destroyed Texture2D still passes a null check against its C#
+            // wrapper, so the stale reference would be handed to a material as a live texture.
+            dashTexture = null;
+            if (opaqueDashTexture != null && opaqueDashTexture.name == "ShotTraceDashOpaque")
+            {
+                // DestroyImmediate outside play mode: `Destroy` is deferred to the next frame, and
+                // EditMode has no next frame — it logs an error instead, which fails whichever test
+                // happens to be running. Caught by ConsecutiveShots_DoNotInheritEachOthersTally,
+                // which calls this in SetUp.
+                if (Application.isPlaying) Object.Destroy(opaqueDashTexture);
+                else Object.DestroyImmediate(opaqueDashTexture);
+            }
+            opaqueDashTexture = null;
         }
 
         private static void Discard(Trace t)
@@ -375,10 +391,47 @@ namespace CastleBusters
             float coreWidth = byPlayer ? PlayerCoreWidth : EnemyCoreWidth;
             float casingWidth = byPlayer ? PlayerCasingWidth : EnemyCasingWidth;
 
-            Apply(t.Casing, points, casingWidth, CasingColor, CasingColor);
+            // A shot still in the air gets OPAQUE dots; a spent one keeps the translucent ones.
+            //
+            // Reported as "the arc after firing is still too dark", and measuring it explained why
+            // brightening the colour had not helped and could not. The core is drawn through a dash
+            // asset whose marks peak at alpha 0.549, over a casing that is nearly black — so a white
+            // dot composites to 0.536 grey, DARKER than this board's sky (0.72). Against sky that
+            // grey measures 1.14:1, against grass 1.25:1, where 3:1 is the floor. Every brighter
+            // colour measured worse still: opaque white reaches 2.44 and amber 1.58, because both
+            // board surfaces sit at mid luminance and a pale line on pale sky has nowhere to go.
+            //
+            // Opacity is the lever, not hue. An opaque white dot against the dark casing measures
+            // 15.11:1, and the casing against the board is 6.18 (sky) and 4.45 (grass) — so every
+            // edge the eye uses clears the floor by a wide margin. The two-layer structure was
+            // already here; the dash's alpha cap was stopping the bright layer from being bright.
+            //
+            // Spent arcs are deliberately left alone: their translucency is what makes the last
+            // shot read as memory rather than as a second live trail, and the request was explicit
+            // that only the in-flight case needed to change.
+            bool live = shotOpen;
+            if (t.Line != null && t.Line.material != null)
+            {
+                var dash = live ? OpaqueDashTexture() : DashTexture();
+                if (dash != null) t.Line.material.mainTexture = dash;
+            }
+
+            // 1.9 at the head. The projectile is the last vertex, so the strip is widest exactly
+            // where the thing being followed is — and it narrows behind it, which reads as direction
+            // without an arrowhead. Both layers taper together so the casing keeps backing the core
+            // along the whole length instead of letting it spill past the rim at the head.
+            const float LiveHeadTaper = 1.9f;
+            float taper = live ? LiveHeadTaper : 1f;
+
+            Apply(t.Casing, points, casingWidth, CasingColor, CasingColor, taper);
             Apply(t.Line, points, coreWidth,
-                new Color(tint.r, tint.g, tint.b, tint.a * 0.55f), // fades toward the muzzle
-                tint);                                             // full at the impact
+                // Live: full alpha at both ends. The muzzle-ward fade is a memory cue, and a shot
+                // that has not landed yet has nothing to remember — fading its tail hides the part
+                // of the path the player is checking against the wind.
+                live ? new Color(tint.r, tint.g, tint.b, 1f)
+                     : new Color(tint.r, tint.g, tint.b, tint.a * 0.55f),
+                live ? new Color(tint.r, tint.g, tint.b, 1f) : tint,
+                taper);
         }
 
         private static void ConfigureLine(LineRenderer line, int sortingOrder)
@@ -456,11 +509,84 @@ namespace CastleBusters
             return dashTexture;
         }
 
-        private static void Apply(LineRenderer line, List<Vector2> points, float width, Color start, Color end)
+        private static Texture2D opaqueDashTexture;
+
+        /// <summary>
+        /// The same dash pattern with its alpha lifted so the marks reach 1.0.
+        ///
+        /// Derived from <see cref="DashTexture"/> rather than authored separately, because the point
+        /// is that the live and spent arcs share one dash SHAPE and differ only in opacity. A second
+        /// hand-drawn asset is how the period, duty cycle and phase drift apart, and the shared one
+        /// has a capture behind its dimensions.
+        ///
+        /// The lift is proportional, not a threshold: every pixel's alpha is divided by the strip's
+        /// peak. A soft-edged dot stays soft-edged, so the marks do not gain the hard stair-steps
+        /// that a cutoff would produce at this size (~3px of core width at a 45-unit board).
+        ///
+        /// Read/Write may be disabled on the authored asset, in which case GetPixels32 throws and
+        /// this returns the translucent original — the arc is then dim rather than absent, which is
+        /// the same trade every other art path here makes.
+        /// </summary>
+        public static Texture2D OpaqueDashTexture()
+        {
+            if (opaqueDashTexture != null) return opaqueDashTexture;
+
+            var src = DashTexture();
+            if (src == null) return null;
+
+            Color32[] pixels;
+            try
+            {
+                pixels = src.GetPixels32();
+            }
+            catch (UnityException)
+            {
+                opaqueDashTexture = src;
+                return opaqueDashTexture;
+            }
+
+            byte peak = 0;
+            for (int i = 0; i < pixels.Length; i++) if (pixels[i].a > peak) peak = pixels[i].a;
+            if (peak == 0) { opaqueDashTexture = src; return opaqueDashTexture; }
+
+            float lift = 255f / peak;
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i].a = (byte)Mathf.Min(255f, pixels[i].a * lift);
+            }
+
+            var tex = new Texture2D(src.width, src.height, TextureFormat.RGBA32, false)
+            {
+                // Repeat, matching the source: LineTextureMode.Tile relies on it, and clamping
+                // smears the last column down the whole tail instead of dashing it.
+                wrapMode = TextureWrapMode.Repeat,
+                filterMode = src.filterMode,
+                name = "ShotTraceDashOpaque"
+            };
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            opaqueDashTexture = tex;
+            return opaqueDashTexture;
+        }
+
+        /// <summary>
+        /// Writes a polyline onto a LineRenderer.
+        ///
+        /// <paramref name="endWidthMult"/> widens the strip toward its LAST vertex. For a shot in
+        /// flight that vertex is the projectile's current position, so a taper marks the projectile
+        /// itself — the second half of the request ("날라가는 물체가 잘 보이게") — without a second
+        /// renderer to keep in step with the arc, and without a marker that outlives the shot.
+        ///
+        /// 1 for a spent arc: it has no head to mark, and tapering a memory would imply the last
+        /// sample matters more than the rest of the path, which is the opposite of what a spent arc
+        /// is for.
+        /// </summary>
+        private static void Apply(LineRenderer line, List<Vector2> points, float width,
+                                  Color start, Color end, float endWidthMult = 1f)
         {
             if (line == null) return;
             line.startWidth = width;
-            line.endWidth = width;
+            line.endWidth = width * endWidthMult;
             line.startColor = start;
             line.endColor = end;
             line.positionCount = points.Count;

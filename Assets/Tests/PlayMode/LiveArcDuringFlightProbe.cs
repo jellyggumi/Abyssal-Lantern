@@ -75,6 +75,34 @@ namespace CastleBusters.Tests
                 elapsed += 0.1f;
             }
 
+            // A mid-flight still, because "the arc is too dark" is a claim about what the screen
+            // shows and every number here is a claim about the renderer. One is checkable by eye.
+            var shotDir = Path.Combine("_workspace", "current", "qa", "evidence", "visibility");
+            Directory.CreateDirectory(shotDir);
+            lm.SimulateLaunch(lm.GetSeparatedAimVelocity());
+            yield return new WaitForSecondsRealtime(0.8f);
+            if (ShotTraceDirector.ShotOpen)
+            {
+                var cam = Camera.main;
+                if (cam != null)
+                {
+                    var rt = new RenderTexture(1280, 720, 24);
+                    var prevTarget = cam.targetTexture;
+                    var prevActive = RenderTexture.active;
+                    cam.targetTexture = rt;
+                    cam.Render();
+                    RenderTexture.active = rt;
+                    var shot = new Texture2D(1280, 720, TextureFormat.RGB24, false);
+                    shot.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+                    shot.Apply();
+                    cam.targetTexture = prevTarget;
+                    RenderTexture.active = prevActive;
+                    File.WriteAllBytes(Path.Combine(shotDir, "live-arc-inflight.png"), shot.EncodeToPNG());
+                    Object.DestroyImmediate(shot);
+                    Object.DestroyImmediate(rt);
+                }
+            }
+
             var dir = Path.Combine("_workspace", "current", "qa", "evidence", "visibility");
             Directory.CreateDirectory(dir);
             File.WriteAllText(Path.Combine(dir, "live-arc.txt"), string.Format(
