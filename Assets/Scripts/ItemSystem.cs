@@ -176,6 +176,16 @@ namespace CastleBusters
 
         private void Update()
         {
+            // Magnetize toward the nearest living, non-launched unit within range. Loot used
+            // to sit still and expire unclaimed unless a unit happened to wander into its
+            // trigger — the game's only mid-match progression read as random noise, not reward.
+            // The pull is symmetric (either side's survivor can claim), preserving fairness.
+            var nearest = NearestClaimant(3.0f);
+            if (nearest != null)
+            {
+                basePos = Vector3.MoveTowards(basePos, nearest.transform.position, 2.6f * Time.deltaTime);
+            }
+
             // Bob + shimmer so the loot reads as interactive.
             transform.position = basePos + new Vector3(0f, Mathf.Sin(Time.time * 3.2f) * 0.18f, 0f);
             if (sr != null)
@@ -190,6 +200,21 @@ namespace CastleBusters
                 GameFeelVfx.SpawnCollapseDust(transform.position, 0.2f);
                 Destroy(gameObject);
             }
+        }
+
+        private UnitController NearestClaimant(float radius)
+        {
+            UnitController best = null;
+            float bestSq = radius * radius;
+            var units = UnitController.ActiveOrScene;
+            for (int i = 0; i < units.Count; i++)
+            {
+                var u = units[i];
+                if (u == null || u.CurrentState == UnitState.Dead || u.CurrentState == UnitState.Launched) continue;
+                float sq = ((Vector2)u.transform.position - (Vector2)basePos).sqrMagnitude;
+                if (sq < bestSq) { bestSq = sq; best = u; }
+            }
+            return best;
         }
 
         private void OnTriggerEnter2D(Collider2D other)

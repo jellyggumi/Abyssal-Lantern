@@ -169,6 +169,29 @@ namespace CastleBusters
             PlayOneShotPresentationSfx(pickupSfx, 0.55f);
         }
 
+        private static AudioClip turnHornSfx;
+        private static AudioClip deployReadySfx;
+
+        /// <summary>War-horn call when the PLAYER's turn opens. Audio reaches processing in
+        /// 8-10ms vs 20-40ms visual (the same argument the enemy-launch cue already cites), so
+        /// the player looking away from the toast still catches their window opening.
+        /// Fixed pitch: it is a signal, not battlefield texture.</summary>
+        public static void PlayTurnHornSfx()
+        {
+            if (!Application.isPlaying) return;
+            if (turnHornSfx == null) turnHornSfx = Resources.Load<AudioClip>("Audio/SFX/turn-horn");
+            PlayOneShotPresentationSfx(turnHornSfx, 0.42f, varyPitch: false);
+        }
+
+        /// <summary>Cannon-affordable sting: supply just crossed the deploy price the player
+        /// has been watching the gauge climb toward during the enemy turn.</summary>
+        public static void PlayDeployReadySfx()
+        {
+            if (!Application.isPlaying) return;
+            if (deployReadySfx == null) deployReadySfx = Resources.Load<AudioClip>("Audio/SFX/deploy-ready");
+            PlayOneShotPresentationSfx(deployReadySfx, 0.5f, varyPitch: false);
+        }
+
         public static void SpawnDamageNumber(Vector3 position, float amount, Color color)
         {
             if (!Application.isPlaying || amount <= 0f) return;
@@ -923,6 +946,9 @@ namespace CastleBusters
 
         public static void NotifyTurnChanged(bool isPlayerTurn)
         {
+            // The horn announces the PLAYER's window only — the enemy turn already announces
+            // itself with the launch cue, and two horns per turn-pair would wear the signal out.
+            if (isPlayerTurn) GameFeelVfx.PlayTurnHornSfx();
             Instance?.ShowToast(isPlayerTurn ? "내 턴" : "적 턴", isPlayerTurn ? new Color(0.55f, 0.9f, 1f, 1f) : new Color(1f, 0.45f, 0.28f, 1f), 1.7f);
         }
 

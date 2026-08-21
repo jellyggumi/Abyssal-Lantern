@@ -27,6 +27,12 @@ namespace CastleBusters
         public const float AimShiftWeight = 0.34f;
         public const float AimEasePerSecond = 3.2f;
 
+        /// <summary>How far the view tightens while tracking a launched shot (multiplier &lt; 1
+        /// = zoom IN). Composes with the fit, player zoom and aim zoom as one product, so the
+        /// aim-framing guarantees are untouched: while drawing, follow weight is forced to 0.</summary>
+        public const float FollowZoomIn = 0.82f;
+        public const float FollowEasePerSecond = 3.2f;
+
         /// <summary>
         /// Zoom clamped to the legal band.
         ///
@@ -60,6 +66,32 @@ namespace CastleBusters
             float target = aiming ? 1f : 0f;
             float t = 1f - Mathf.Exp(-AimEasePerSecond * Mathf.Max(0f, deltaTime));
             return Mathf.Lerp(current, target, Mathf.Clamp01(t));
+        }
+
+        /// <summary>
+        /// Eases the follow-zoom weight toward tracking (1) or overview (0). Same
+        /// frame-rate-independent exp pattern as <see cref="EaseAimWeight"/>.
+        /// </summary>
+        public static float EaseFollowWeight(float current, bool tracking, float deltaTime)
+        {
+            float target = tracking ? 1f : 0f;
+            float t = 1f - Mathf.Exp(-FollowEasePerSecond * Mathf.Max(0f, deltaTime));
+            return Mathf.Lerp(current, target, Mathf.Clamp01(t));
+        }
+
+        /// <summary>Zoom multiplier contributed by shot tracking at the given weight.</summary>
+        public static float FollowZoomMultiplier(float followWeight) =>
+            Mathf.Lerp(1f, FollowZoomIn, Mathf.Clamp01(followWeight));
+
+        /// <summary>
+        /// How far the camera centre may travel from the board centre without revealing void
+        /// past the board edge: half the authored board width minus the visible half width.
+        /// At the fitted zoom (everything visible) this is 0 — travel only opens up when the
+        /// follow zoom tightens the frame, which is exactly when travel is needed.
+        /// </summary>
+        public static float MaxFocusTravel(float boardHalfWidth, float orthographicSize, float aspect)
+        {
+            return Mathf.Max(0f, boardHalfWidth - orthographicSize * Mathf.Max(0.0001f, aspect));
         }
 
         /// <summary>Zoom multiplier contributed by aim framing at the given weight.</summary>

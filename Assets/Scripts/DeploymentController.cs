@@ -66,6 +66,20 @@ namespace CastleBusters
             (isPlayer ? playerCooldowns : enemyCooldowns)[(int)card];
 
         /// <summary>
+        /// Spend player supply on a non-deploy purchase (the projectile swap). Same
+        /// SupplyRules.TrySpend the deploy path uses, so affordability semantics cannot
+        /// fork; refreshes the HUD immediately because a purchase is exactly the moment
+        /// the gauge must not lie.
+        /// </summary>
+        public bool TrySpendPlayerSupply(float cost)
+        {
+            if (!SupplyRules.TrySpend(PlayerSupply, cost, out float remaining)) return false;
+            PlayerSupply = remaining;
+            UpdateHud();
+            return true;
+        }
+
+        /// <summary>
         /// Live population of the card's cap group on the given side. Counts EVERY live body
         /// of that group — launched or deployed — so the two creation verbs share one army
         /// ceiling instead of doubling it.
@@ -135,6 +149,20 @@ namespace CastleBusters
             else EnemySupply = SupplyRules.Credit(EnemySupply, amount);
         }
 
+        /// <summary>
+        /// One audible beat when supply crosses the cannon price — the reward for watching
+        /// the gauge fill during the enemy turn. Threshold-crossing only (not level-held),
+        /// so it fires once per climb and re-arms only after a spend drops supply below cost.
+        /// </summary>
+        private void NotifyIfCannonJustAffordable(float before, float after)
+        {
+            float cost = DeploymentRules.CostOf(DeployCard.Cannon);
+            if (before < cost && after >= cost)
+            {
+                GameFeelVfx.PlayDeployReadySfx();
+            }
+        }
+
         private void Update()
         {
             var gm = GameManager.Instance;
@@ -147,30 +175,53 @@ namespace CastleBusters
                 SelectedCard = DeployCard.Cannon;
                 bool playerCanAct = gm.currentState == GameState.PlayerTurn
                     && gm.IsPlayerTurn && !gm.IsResolvingTurn;
+                bool battleRunning = gm.currentState == GameState.PlayerTurn
+                    || gm.currentState == GameState.AITurn;
 
                 EnsureHud();
-                SetHudVisible(playerCanAct);
-                if (!playerCanAct)
+                // The HUD and the supply economy stay alive through the ENEMY turn. They used
+                // to freeze and hide behind the playerCanAct gate, which made half of every
+                // match dead air with zero player verbs — while the design contract explicitly
+                // sells "deploy runs during both turns, so the enemy turn stops being dead
+                // air". The player now watches the gauge fill toward the 12-supply cannon
+                // while the AI shoots. COMMITTING a placement stays the player turn's
+                // exclusive verb because the ONLY path to TryDeploy(player) is
+                // HandlePlayerInput's click, which runs strictly behind playerCanAct below
+                // (TryCommitTurnShot itself has no turn-ownership check — the AI's launcher
+                // calls it too — so the input gate here IS the enforcement).
+                SetHudVisible(battleRunning);
+                if (battleRunning)
                 {
-                    DisarmDeployMode();
-                    return;
+                    float oneShotDt = Time.deltaTime;
+                    float before = PlayerSupply;
+                    PlayerSupply = SupplyRules.Regen(PlayerSupply, oneShotDt);
+                    NotifyIfCannonJustAffordable(before, PlayerSupply);
+                    for (int i = 0; i < playerCooldowns.Length; i++)
+                    {
+                        playerCooldowns[i] = Mathf.Max(0f, playerCooldowns[i] - oneShotDt);
+                    }
+                    hudRefreshTimer -= Time.unscaledDeltaTime;
+                    if (hudRefreshTimer <= 0f)
+                    {
+                        hudRefreshTimer = HudRefreshInterval;
+                        UpdateHud();
+                    }
                 }
 
-                float oneShotDt = Time.deltaTime;
-                PlayerSupply = SupplyRules.Regen(PlayerSupply, oneShotDt);
-                for (int i = 0; i < playerCooldowns.Length; i++)
+                if (!playerCanAct)
                 {
-                    playerCooldowns[i] = Mathf.Max(0f, playerCooldowns[i] - oneShotDt);
+                    // Pre-aim stays alive during the enemy turn: arm (D), cancel (Esc), and
+                    // move the ghost — so the placement click can land the instant the turn
+                    // flips. Only the COMMIT is turn-gated: HandlePlayerInput's click path is
+                    // skipped here, and TryDeploy would consume the one-shot gate anyway.
+                    if (Input.GetKeyDown(KeyCode.D)) ToggleDeployMode();
+                    if (Input.GetKeyDown(KeyCode.Escape) && DeployModeArmed) DisarmDeployMode();
+                    if (battleRunning) UpdateGhost();
+                    return;
                 }
 
                 HandlePlayerInput();
                 UpdateGhost();
-                hudRefreshTimer -= Time.unscaledDeltaTime;
-                if (hudRefreshTimer <= 0f)
-                {
-                    hudRefreshTimer = HudRefreshInterval;
-                    UpdateHud();
-                }
                 // No AI deployment in the one-shot loop: the enemy turn is its shot.
                 return;
             }

@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-21T15:06:01.967945+00:00",
+  "tool": "higgsfield-cli seed_audio + ffmpeg trim/normalize by jeo",
+  "prompt": "heavy iron cannon loaded and locked, metallic clunk with wooden creak",
+  "sha256": "35dac3dbd8fb2096abff419c30aa9ca8a9480e07cede324fdcc4c38517f3ff8c",
+  "output": "Assets/Resources/Audio/SFX/deploy-ready.wav",
+  "post": "silenceremove -45dB, peak -1dBFS, 0.12s fade, 0.7s, 24kHz mono s16",
+  "note": "ElevenLabs requested but no ELEVENLABS_API_KEY exists on this machine; seed_audio used instead"
+}

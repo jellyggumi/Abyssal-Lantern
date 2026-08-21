@@ -238,6 +238,8 @@ namespace CastleBusters
 
             if (HitStopManager.Instance != null) HitStopManager.Instance.TriggerHitStop(0.075f);
             if (ScreenShakeManager.Instance != null) ScreenShakeManager.Instance.TriggerShake(0.45f, 0.2f);
+            // Chained detonations each re-centre the held impact frame on the newest blast.
+            GamePresentationDirector.Instance?.RefreshLinger(transform.position);
 
             float outgoingDamage = OneShotSiegeRules.ApplyDamageMultiplier(explosionDamage, sourceMultiplier);
 

@@ -2403,13 +2403,57 @@ namespace CastleBusters
             deployment?.DisarmDeployMode();
             SetSelectionControlsVisible(false);
 
-            var projectile = OneShotSiegeRules.ProjectileForTurn(turnCount);
+            var projectile = CurrentTurnProjectile;
             // Keep the underlying card state coherent for existing launch plumbing, without
             // exposing a card as a player choice or entering deployment mode.
             deployment?.SetSelectedCard(ToDeployCard(projectile));
             deployment?.DisarmDeployMode();
             selectedUnitPrefab = AutomaticProjectilePrefab;
             LaunchManagerRef?.SetSelectedUnit(selectedUnitPrefab);
+        }
+
+        /// <summary>Turn index the last paid swap applies to. A swap is bought FOR one turn;
+        /// storing the turn instead of a bool means it expires by itself when turnCount moves
+        /// and never leaks into the AI's read of AutomaticProjectilePrefab next turn.</summary>
+        private int projectileSwapTurn = -1;
+
+        public bool HasSwappedThisTurn => projectileSwapTurn == turnCount;
+
+        /// <summary>This turn's projectile after any paid swap. Every current-turn reader
+        /// (launch plumbing, forecast strip, AI prefab pick) goes through here so a swap
+        /// cannot desync what fires from what the HUD promised.</summary>
+        public OneShotSiegeRules.Projectile CurrentTurnProjectile
+            => HasSwappedThisTurn
+                ? OneShotSiegeRules.SwappedProjectileForTurn(turnCount)
+                : OneShotSiegeRules.ProjectileForTurn(turnCount);
+
+        /// <summary>
+        /// Player-only priced swap: spend supply, advance THIS turn's projectile one cycle
+        /// step. Once per turn, player's actionable window only, shot not yet committed.
+        /// The forced cycle stays the default; this is the exception it sells (G8 N-2).
+        /// </summary>
+        public bool TryPurchaseProjectileSwap()
+        {
+            if (!enforceOneShotTurns) return false;
+            if (currentState != GameState.PlayerTurn || !IsPlayerTurn || isResolvingTurn) return false;
+            if (HasSwappedThisTurn) return false;
+            if (oneShotTurnGate.ShotCommitted) return false;
+
+            var deployment = DeploymentController.Instance;
+            if (deployment == null) return false;
+            if (!deployment.TrySpendPlayerSupply(OneShotSiegeRules.SwapCost)) return false;
+
+            projectileSwapTurn = turnCount;
+            selectedUnitPrefab = AutomaticProjectilePrefab;
+            LaunchManagerRef?.SetSelectedUnit(selectedUnitPrefab);
+            deployment.SetSelectedCard(ToDeployCard(CurrentTurnProjectile));
+            deployment.DisarmDeployMode();
+
+            GameFeelVfx.PlayDeployReadySfx();
+            SiegeAlarmSystem.Post(
+                $"교체! 이번 턴 {OneShotSiegeRules.DisplayName(CurrentTurnProjectile)} 발사",
+                new Color(1f, 0.84f, 0.3f, 1f));
+            return true;
         }
 
         private static DeployCard ToDeployCard(OneShotSiegeRules.Projectile projectile)
@@ -2422,12 +2466,15 @@ namespace CastleBusters
             }
         }
 
-        /// <summary>The deterministic projectile selected by the current round's rules.</summary>
+        /// <summary>The projectile the current turn actually loads — the round's deterministic
+        /// pick, or the swapped one when this turn's swap was purchased. The AI reads this too:
+        /// a swap belongs to the turn, and only the player's turn can buy one, so the AI's own
+        /// turns always see the plain cycle.</summary>
         public GameObject AutomaticProjectilePrefab
         {
             get
             {
-                switch (OneShotSiegeRules.ProjectileForTurn(turnCount))
+                switch (CurrentTurnProjectile)
                 {
                     case OneShotSiegeRules.Projectile.Archer:
                         return archerPrefab;

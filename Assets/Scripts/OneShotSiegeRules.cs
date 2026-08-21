@@ -60,6 +60,22 @@ namespace CastleBusters
             => ProjectileForTurn(Mathf.Max(0, completedTurns) + 1);
 
         /// <summary>
+        /// Supply price of swapping THIS turn's projectile one cycle step forward. The forced
+        /// cycle stays the default identity (G8 novelty N-2 pins that); the swap is a priced
+        /// exception, never a free roster. 6 supply = three volley-kills or ~10s of regen —
+        /// expensive enough that spamming it starves the 12-supply cannon.
+        /// </summary>
+        public const float SwapCost = 6f;
+
+        /// <summary>
+        /// The projectile a paid swap loads instead: one cycle step ahead (a round is two
+        /// turns, so +2 turns = next cycle entry). Pure — the caller owns whether the swap
+        /// was actually purchased this turn.
+        /// </summary>
+        public static Projectile SwappedProjectileForTurn(int completedTurns)
+            => ProjectileForTurn(Mathf.Max(0, completedTurns) + 2);
+
+        /// <summary>
         /// Pure apply boundary: multiplies damage by an already-captured multiplier. Never
         /// reads GameManager or any other mutable state — callers must capture the multiplier
         /// once (GameManager.CaptureDamageMultiplier) at action/projectile creation and carry

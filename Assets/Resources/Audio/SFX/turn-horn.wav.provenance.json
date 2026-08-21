@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-21T15:06:01.967585+00:00",
+  "tool": "higgsfield-cli seed_audio + ffmpeg trim/normalize by jeo",
+  "prompt": "medieval war horn short call announcing your turn, bright brass, rallying",
+  "sha256": "258fbc9b16436a4d5d00503c63314bd1a80afa378cddbef7f838d44b122ac172",
+  "output": "Assets/Resources/Audio/SFX/turn-horn.wav",
+  "post": "silenceremove -45dB, peak -1dBFS, 0.12s fade, 0.9s, 24kHz mono s16",
+  "note": "ElevenLabs requested but no ELEVENLABS_API_KEY exists on this machine; seed_audio used instead"
+}

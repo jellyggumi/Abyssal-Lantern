@@ -79,16 +79,35 @@ namespace CastleBusters
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
             if (spriteRenderer == null) return;
 
-            // Dedicated stone-arch portal art, tinted per effect type; the old translucent
-            // block tint stays as fallback when the asset is missing.
-            if (!GimmickSpriteLibrary.TryApply(spriteRenderer, GimmickSpriteLibrary.Gate, GetGateArtTint(effectType)))
+            // Per-type portal art. Tinting one shared cyan vortex could not re-hue it (a
+            // near-white multiplicative tint over saturated cyan stays cyan), so every gate
+            // read as the same portal and the mid-flight choice the gates exist to create was
+            // spent blind. The variants are saturation-gated hue rotations of the same art,
+            // so composition and footprint are identical by construction: gold = PowerUp,
+            // magenta = Reduce (matches the HEX SLOW text colour), cyan twin = Multiply.
+            string still = GimmickSpriteLibrary.Gate;
+            string anim = GimmickAnimLibrary.GateAnim;
+            switch (effectType)
+            {
+                case EventGateEffectType.PowerUp:
+                    still = GimmickSpriteLibrary.GatePower;
+                    anim = GimmickAnimLibrary.GatePowerAnim;
+                    break;
+                case EventGateEffectType.Reduce:
+                case EventGateEffectType.PowerDown:
+                    still = GimmickSpriteLibrary.GateReduce;
+                    anim = GimmickAnimLibrary.GateReduceAnim;
+                    break;
+            }
+
+            if (!GimmickSpriteLibrary.TryApply(spriteRenderer, still, GetGateArtTint(effectType)))
             {
                 spriteRenderer.color = GetGateColor(effectType);
             }
 
             ApplyPresentationScale();
             // Animated portal swirl (4-frame loop); tint set above survives the frame swap.
-            GimmickFrameAnimator.TryAttach(gameObject, GimmickAnimLibrary.GateAnim, 7f);
+            GimmickFrameAnimator.TryAttach(gameObject, anim, 7f);
             baseScale = transform.localScale;
         }
 

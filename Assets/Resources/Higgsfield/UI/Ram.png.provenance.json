@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-21T15:06:01.952398+00:00",
+  "tool": "higgsfield-cli gpt_image_2 + PIL chroma-key by jeo",
+  "prompt": "Higgsfield gpt_image_2 3x2 emblem sheet on uniform magenta, chroma-keyed (magness=min(R,B)-G, de-spilled), sliced, 512x512 by jeo. Painterly pixel art, dark-brown outlines, warm siege palette.",
+  "sha256": "ab45f1128e79c238a34e513ad824176eb514cd51f7e3770480606f89a9f37b92",
+  "output": "Assets/Resources/Higgsfield/UI/Ram.png",
+  "job": "hf_20260821_150135_8d1d0d16",
+  "supersedes": "off-tone watercolor icon with eroded alpha"
+}

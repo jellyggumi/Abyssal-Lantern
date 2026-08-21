@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-21T15:06:01.951140+00:00",
+  "tool": "higgsfield-cli gpt_image_2 + PIL chroma-key by jeo",
+  "prompt": "Higgsfield gpt_image_2 3x2 emblem sheet on uniform magenta, chroma-keyed (magness=min(R,B)-G, de-spilled), sliced, 512x512 by jeo. Painterly pixel art, dark-brown outlines, warm siege palette.",
+  "sha256": "64d335949aaf88d382f966f82daa8011ba54b0ecfe285c2e7901dcaf2cafe62e",
+  "output": "Assets/Resources/Higgsfield/UI/Cannon.png",
+  "job": "hf_20260821_150135_8d1d0d16",
+  "supersedes": "off-tone watercolor icon with eroded alpha"
+}

@@ -27,10 +27,12 @@ namespace CastleBusters.Tests
     /// </summary>
     public class ArtProvenanceGuardTests
     {
-        // Measured 2026-08-19: 272 images, 68 documented, 204 not. This is a ceiling, not a target —
-        // lowering it is the point, and the second test below fails if it drifts too far above the
-        // real number, so a batch of deletions cannot quietly buy headroom for new undocumented art.
-        private const int UndocumentedCeiling = 204;
+        // Measured 2026-08-19: 272 images, 68 documented, 204 not. Re-measured 2026-08-21 after the
+        // fun-cycle art pass (portraits, gate variants, hex rune, gate anim documented on creation):
+        // 282 images, 96 documented, 186 not. This is a ceiling, not a target — lowering it is the
+        // point, and the second test below fails if it drifts too far above the real number, so a
+        // batch of deletions cannot quietly buy headroom for new undocumented art.
+        private const int UndocumentedCeiling = 186;
 
         private static string[] AllArt()
         {

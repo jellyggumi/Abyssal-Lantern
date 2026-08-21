@@ -24,7 +24,16 @@ namespace CastleBusters
         public bool allowPlayerZoom = true;
         private float playerZoom = CameraFraming.MinZoom;
         private float aimWeight;
+        private float followWeight;
         private float fittedSize = 1f;
+
+        [Header("Watch The Shot")]
+        // Impact linger: after a tracked shot settles or dies, hold the frame on the impact
+        // for a beat before easing home. Cancelled instantly by a new Focus, the player
+        // starting to draw, or game over.
+        public float lingerSeconds = 0.8f;
+        private float lingerRemaining;
+        private Vector3 lingerWorldPosition;
 
         [Header("Presentation")]
         public bool pixelSnapCamera = true;
@@ -32,9 +41,12 @@ namespace CastleBusters
 
         private Camera mainCamera;
         private Vector3 baseCameraPosition;
+        // The follow lerp runs on this unshaken rig position; shake is added after, as a
+        // pure offset, so a mid-flight shake can never freeze the lerp or restore a stale
+        // frame (the old ScreenShakeManager absolute-write bug).
+        private Vector3 smoothedPosition;
         private Transform focusTarget;
         private SpriteRenderer backgroundRenderer;
-        private const float MaxFocusHorizontalPosition = 7.5f;
 
         private void Awake()
         {
@@ -61,6 +73,7 @@ namespace CastleBusters
             baseCameraPosition = new Vector3(boardCenter.x, boardCenter.y, mainCamera.transform.position.z);
             FitCameraToAspect();
             mainCamera.transform.position = baseCameraPosition;
+            smoothedPosition = baseCameraPosition;
 
             var background = GameObject.Find("Background");
             if (background != null) backgroundRenderer = background.GetComponent<SpriteRenderer>();
@@ -75,14 +88,33 @@ namespace CastleBusters
             bool aiming = IsPlayerDrawing();
             aimWeight = CameraFraming.EaseAimWeight(aimWeight, aiming, Time.unscaledDeltaTime);
 
+            // Priority: Aiming > Tracking > Linger > Overview. The player taking the sling
+            // (or the results card) cancels a held impact frame outright — aim framing is
+            // the one camera rule that must never be preempted.
+            var gm = GameManager.Instance;
+            if (aiming || (gm != null && gm.currentState == GameState.GameOver)) lingerRemaining = 0f;
+
+            bool tracking = focusTarget != null && !aiming;
+            bool lingering = !tracking && lingerRemaining > 0f;
+            if (lingering) lingerRemaining -= Time.deltaTime;
+
+            // While lingering the frame freezes: the follow zoom holds at its released value
+            // so position and zoom ease home together only after the beat has landed.
+            if (!lingering)
+            {
+                followWeight = CameraFraming.EaseFollowWeight(followWeight, tracking, Time.unscaledDeltaTime);
+            }
+
             FitCameraToAspect();
 
             Vector3 targetPosition = baseCameraPosition;
-            if (focusTarget != null)
+            if (tracking)
             {
-                float clampedX = Mathf.Clamp(focusTarget.position.x, -MaxFocusHorizontalPosition, MaxFocusHorizontalPosition);
-                float clampedY = Mathf.Clamp(focusTarget.position.y + focusExtraHeight, -0.25f, 5.2f);
-                targetPosition = new Vector3(clampedX, clampedY, baseCameraPosition.z);
+                targetPosition = ClampedFocusPosition(focusTarget.position);
+            }
+            else if (lingering)
+            {
+                targetPosition = ClampedFocusPosition(lingerWorldPosition);
             }
             else if (aimWeight > 0.001f)
             {
@@ -95,17 +127,18 @@ namespace CastleBusters
                     baseCameraPosition.z);
             }
 
-            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, targetPosition, 1f - Mathf.Exp(-followLerp * Time.deltaTime));
+            smoothedPosition = Vector3.Lerp(smoothedPosition, targetPosition, 1f - Mathf.Exp(-followLerp * Time.deltaTime));
 
+            Vector3 rendered = smoothedPosition;
+            if (ScreenShakeManager.Instance != null) rendered += ScreenShakeManager.Instance.CurrentOffset;
 
             if (pixelSnapCamera)
             {
-                var p = mainCamera.transform.position;
                 float pixelsPerUnit = 32f;
-                p.x = Mathf.Round(p.x * pixelsPerUnit) / pixelsPerUnit;
-                p.y = Mathf.Round(p.y * pixelsPerUnit) / pixelsPerUnit;
-                mainCamera.transform.position = p;
+                rendered.x = Mathf.Round(rendered.x * pixelsPerUnit) / pixelsPerUnit;
+                rendered.y = Mathf.Round(rendered.y * pixelsPerUnit) / pixelsPerUnit;
             }
+            mainCamera.transform.position = rendered;
 
             if (backgroundRenderer != null)
             {
@@ -116,11 +149,57 @@ namespace CastleBusters
             FitBackgroundToCamera();
         }
 
+        /// <summary>
+        /// Where the camera may sit to watch a world position. Horizontal travel is computed
+        /// from what the tightened frame actually hides — half the authored board width minus
+        /// the visible half width — so the follow zoom can ride a shot all the way to the
+        /// keeps without ever showing void past the board edge. The Y band is the original
+        /// authored clamp, unchanged.
+        /// </summary>
+        private Vector3 ClampedFocusPosition(Vector3 worldPosition)
+        {
+            float travel = CameraFraming.MaxFocusTravel(
+                desiredWorldWidth * 0.5f, mainCamera.orthographicSize, mainCamera.aspect);
+            float clampedX = Mathf.Clamp(worldPosition.x, boardCenter.x - travel, boardCenter.x + travel);
+            float clampedY = Mathf.Clamp(worldPosition.y + focusExtraHeight, -0.25f, 5.2f);
+            return new Vector3(clampedX, clampedY, baseCameraPosition.z);
+        }
+
         public void Focus(Transform target)
         {
             focusTarget = target;
+            lingerRemaining = 0f; // a live shot always outranks a held impact frame
         }
 
+        /// <summary>
+        /// Tracked-shot handoff: instead of snapping home the moment the shot settles or
+        /// dies, hold the frame on the impact for <see cref="lingerSeconds"/>, then ease
+        /// back. Same guard as <see cref="ClearFocus"/> — only the transform currently
+        /// being tracked may release it.
+        /// </summary>
+        public void ReleaseFocus(Transform target)
+        {
+            if (target == null || focusTarget != target) return;
+            focusTarget = null;
+            lingerWorldPosition = target.position;
+            lingerRemaining = lingerSeconds;
+        }
+
+        /// <summary>
+        /// Re-centres and restarts the linger on a blast position — chained keg explosions
+        /// each pull the held frame to the newest detonation. Never preempts a live tracked
+        /// shot, the player drawing, or the results screen.
+        /// </summary>
+        public void RefreshLinger(Vector3 position)
+        {
+            if (focusTarget != null || IsPlayerDrawing()) return;
+            var gm = GameManager.Instance;
+            if (gm != null && gm.currentState == GameState.GameOver) return;
+            lingerWorldPosition = position;
+            lingerRemaining = lingerSeconds;
+        }
+
+        /// <summary>Instant cancel — tracking stops with no linger.</summary>
         public void ClearFocus(Transform target)
         {
             if (focusTarget == target) focusTarget = null;
@@ -134,11 +213,15 @@ namespace CastleBusters
 
         private void FitCameraToAspect()
         {
-            // The fitted size is the board-must-fit rule; player zoom and aim framing are
-            // multipliers ON that fit, never replacements for it, so no combination of
-            // scroll and aiming can crop the field below the authored framing.
+            // The fitted size is the board-must-fit rule; player zoom, aim framing and the
+            // shot-follow zoom are multipliers ON that fit, never replacements for it, so no
+            // combination of scroll, aiming and tracking can crop the field below the
+            // authored framing — except the follow zoom's deliberate tighten (< 1), which is
+            // forced back to 1 whenever the player is drawing.
             fittedSize = CalculateOrthographicSize(targetHalfHeight, desiredWorldWidth, mainCamera.aspect);
-            float zoom = CameraFraming.ClampZoom(playerZoom) * CameraFraming.AimZoomMultiplier(aimWeight);
+            float zoom = CameraFraming.ClampZoom(playerZoom)
+                * CameraFraming.AimZoomMultiplier(aimWeight)
+                * CameraFraming.FollowZoomMultiplier(followWeight);
             mainCamera.orthographicSize = fittedSize * zoom;
             baseCameraPosition = new Vector3(boardCenter.x, boardCenter.y, mainCamera.transform.position.z);
         }
@@ -190,7 +273,15 @@ namespace CastleBusters
 
             float cameraHalfHeight = mainCamera.orthographicSize;
             float cameraHalfWidth = cameraHalfHeight * mainCamera.aspect;
-            float maximumParallaxOffset = MaxFocusHorizontalPosition * Mathf.Abs(1f - backgroundParallax);
+            // Worst-case horizontal camera excursion: the follow zoom's tightest frame
+            // (MinZoom * FollowZoomIn) opens the most focus travel, and aim framing slides
+            // at most AimShiftWeight of the way to a sling that sits within the board.
+            float tightestOrthoSize = fittedSize * CameraFraming.MinZoom * CameraFraming.FollowZoomIn;
+            float boardHalfWidth = desiredWorldWidth * 0.5f;
+            float maxCameraTravel = Mathf.Max(
+                CameraFraming.MaxFocusTravel(boardHalfWidth, tightestOrthoSize, mainCamera.aspect),
+                boardHalfWidth * CameraFraming.AimShiftWeight);
+            float maximumParallaxOffset = maxCameraTravel * Mathf.Abs(1f - backgroundParallax);
             float requiredWidth = 2f * (cameraHalfWidth + maximumParallaxOffset);
             float verticalOffset = Mathf.Abs(backgroundRenderer.transform.position.y - mainCamera.transform.position.y);
             float requiredHeight = 2f * (cameraHalfHeight + verticalOffset);

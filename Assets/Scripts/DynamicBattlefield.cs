@@ -142,6 +142,8 @@ namespace CastleBusters
         public const string BarrelAnim = "barrel_anim";
         public const string Stage1BarrelAnim = "stage1_barrel_anim";
         public const string GateAnim = "gate_anim";
+        public const string GatePowerAnim = "gate_power_anim";
+        public const string GateReduceAnim = "gate_reduce_anim";
         public const string RallyRuneAnim = "rally_rune_anim";
         public const string HexRuneAnim = "hex_rune_anim";
         public const string CoreAnim = "core_anim";
@@ -505,6 +507,20 @@ namespace CastleBusters
         // an empty invisible root must not hold a capacity slot (review P2 #7).
         private void PruneDeadEntries()
         {
+            // Emptied towers pay loot before the slot is released. ItemDropper's contract
+            // ("break gimmicks to get items") only fired for kegs and the war beast — 1 kind
+            // in 8 turns — so the game's sole mid-match progression was a lottery the player
+            // couldn't pursue. Tower kills are the commonest solid-gimmick kill; the same
+            // 60% chance gate as kegs applies, so drop cadence rises without a new knob.
+            for (int i = alive.Count - 1; i >= 0; i--)
+            {
+                var e = alive[i];
+                if (e.go != null && e.kind == FieldObstacleKind.MiniTower &&
+                    e.go.GetComponentInChildren<DestructibleBlock>() == null)
+                {
+                    ItemDropper.TrySpawn(e.go.transform.position);
+                }
+            }
             alive.RemoveAll(e => e.go == null ||
                 (e.kind == FieldObstacleKind.MiniTower && e.go.GetComponentInChildren<DestructibleBlock>() == null));
         }

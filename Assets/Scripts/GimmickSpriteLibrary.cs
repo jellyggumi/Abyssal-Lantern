@@ -15,6 +15,8 @@ namespace CastleBusters
         public const string RallyRune = "gimmick_rally_rune";
         public const string HexRune = "gimmick_hex_rune";
         public const string Gate = "gimmick_gate";
+        public const string GatePower = "gimmick_gate_power";
+        public const string GateReduce = "gimmick_gate_reduce";
         public const string Ram = "gimmick_ram";
         public const string Barrel = "gimmick_barrel";
         public const string Cannon = "gimmick_cannon";

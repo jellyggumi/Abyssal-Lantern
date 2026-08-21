@@ -671,7 +671,7 @@ namespace CastleBusters
                     rb.angularVelocity = 0f;
                     rb.constraints = RigidbodyConstraints2D.FreezeRotation;
                     if (trailRenderer != null) trailRenderer.emitting = false;
-                    GamePresentationDirector.Instance?.ClearFocus(transform);
+                    GamePresentationDirector.Instance?.ReleaseFocus(transform);
                 }
             }
             else
@@ -1147,7 +1147,7 @@ namespace CastleBusters
         private void Die()
         {
             currentState = UnitState.Dead;
-            GamePresentationDirector.Instance?.ClearFocus(transform);
+            GamePresentationDirector.Instance?.ReleaseFocus(transform);
             if (unitType == UnitType.Barrel)
             {
                 Explode();
@@ -1228,7 +1228,7 @@ namespace CastleBusters
             }
 
             currentState = UnitState.Grounded;
-            GamePresentationDirector.Instance?.ClearFocus(transform);
+            GamePresentationDirector.Instance?.ReleaseFocus(transform);
             if (trailRenderer != null) trailRenderer.emitting = false;
             if (rb != null)
             {
@@ -1248,7 +1248,9 @@ namespace CastleBusters
             if (fuseArmed || currentState == UnitState.Dead) return;
             fuseArmed = true;
             currentState = UnitState.Grounded;
-            GamePresentationDirector.Instance?.ClearFocus(transform);
+            // No focus release here on purpose: the keg's transform stays alive through the
+            // whole fuse, so tracking rides the armed barrel all the way to the blast
+            // (Die → Explode restarts the linger there via RefreshLinger).
             if (trailRenderer != null) trailRenderer.emitting = false;
             if (rb != null)
             {

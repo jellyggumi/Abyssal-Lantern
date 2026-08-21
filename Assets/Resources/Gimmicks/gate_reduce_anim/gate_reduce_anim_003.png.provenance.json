@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-08-21T15:06:01.963457+00:00",
+  "tool": "PIL hue-rotate by jeo",
+  "prompt": "Procedural hue rotation of the existing cyan gate art by jeo (PIL): saturation-gated (sat>0.45 blend) so the vortex re-hues while the desaturated stone arch stays untouched. power=-145deg (gold), reduce=+120deg (magenta). Composition identical to gimmick_gate.png by construction.",
+  "sha256": "0058f05ac4b2dcf32712b838f98087cef0d3e33b2b733ae958a80db50cffd924",
+  "output": "Assets/Resources/Gimmicks/gate_reduce_anim/gate_reduce_anim_003.png",
+  "source": "gate_anim/gate_anim_003.png"
+}

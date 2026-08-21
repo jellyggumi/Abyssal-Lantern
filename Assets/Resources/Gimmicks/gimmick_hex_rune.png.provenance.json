@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-21T15:06:01.964088+00:00",
+  "tool": "higgsfield-cli nano_banana_2 + PIL key by jeo",
+  "prompt": "Higgsfield nano_banana_2 styled on gimmick_rally_rune.png: magenta-pink glyph ring with pale-white outer ring for dark-sky contrast, white-keyed to alpha, 512x512. Anim frames are procedural brightness pulses (gain 0.82/1.0/1.18/1.0) of the still - no frame jump by construction.",
+  "sha256": "2b328985bcc64b73aaee19bc0f035fc7edb07749f1d391bd3db890f3ed16f638",
+  "output": "Assets/Resources/Gimmicks/gimmick_hex_rune.png",
+  "job": "hf_20260821_145822_78bad0a8",
+  "supersedes": "JPEG-fringed purple-on-purple mandala"
+}
